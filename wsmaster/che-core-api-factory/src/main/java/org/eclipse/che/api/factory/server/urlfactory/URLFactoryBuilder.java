@@ -19,6 +19,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +113,15 @@ public class URLFactoryBuilder {
         return Optional.empty();
       }
 
+      // parse
+      // detect version -> get validator and convertor
+      // validate
+      // convert
+
       try {
+        JsonNode parsedDevfile = devfileParser.parseRaw(devfileYamlContent);
+
+
         final FactoryMetaDto factoryDto;
         //TODO: if 1.0
         if (devfileYamlContent.contains("apiVersion: 1.0.0")) {
@@ -136,7 +145,6 @@ public class URLFactoryBuilder {
           LOG.error("eeeh? what's this?");
           throw new DevfileException("Unknown devfile version");
         }
-        // TODO: elif 2.0
         return Optional.of(factoryDto);
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
@@ -195,4 +203,5 @@ public class URLFactoryBuilder {
         .withApiVersion(CURRENT_API_VERSION)
         .withMetadata(newDto(MetadataDto.class).withGenerateName(name));
   }
+
 }

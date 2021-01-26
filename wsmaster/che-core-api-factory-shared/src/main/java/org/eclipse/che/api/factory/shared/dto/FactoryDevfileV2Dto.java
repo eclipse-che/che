@@ -11,6 +11,10 @@ import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface FactoryDevfileV2Dto extends FactoryMetaDto, Hyperlinks {
+  @Override
+  default FactoryMetaDto acceptVisitor(FactoryVisitor visitor) {
+    return visitor.visit(this);
+  }
 
   @Override
   FactoryDevfileV2Dto withV(String v);

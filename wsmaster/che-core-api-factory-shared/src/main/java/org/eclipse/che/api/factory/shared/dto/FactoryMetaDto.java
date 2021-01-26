@@ -9,6 +9,8 @@ import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 
 public interface FactoryMetaDto extends Hyperlinks {
+  FactoryMetaDto acceptVisitor(FactoryVisitor visitor);
+
   @FactoryParameter(obligation = MANDATORY)
   String getV();
 

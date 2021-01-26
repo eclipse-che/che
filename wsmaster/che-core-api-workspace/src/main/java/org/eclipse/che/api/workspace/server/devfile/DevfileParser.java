@@ -96,15 +96,19 @@ public class DevfileParser {
     }
   }
 
+  public JsonNode parseRaw(String yaml) throws DevfileFormatException {
+    try {
+      return yamlMapper.readTree(yaml);
+    } catch (JsonProcessingException jpe) {
+      throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
+    }
+  }
+
   public Map<String, Object> convertYamlToMap(String yaml) throws DevfileFormatException {
     try {
       ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return yamlReader.readValue(yaml, new TypeReference<>() {});
-//      return yamlReader.readValue(yaml, Map.class);
-
-//      ObjectMapper jsonWriter = new ObjectMapper();
-//      return jsonWriter.writeValueAsString(obj);
     } catch (JsonProcessingException jpe) {
       throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
     }

@@ -15,22 +15,22 @@ import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryVisitor;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides Factory Parameters resolver for github repositories.
@@ -40,13 +40,21 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 @Singleton
 public class GithubFactoryParametersResolver extends DefaultFactoryParameterResolver {
 
-  /** Parser which will allow to check validity of URLs and create objects. */
+  private static final Logger LOG = LoggerFactory.getLogger(GithubFactoryParametersResolver.class);
+
+  /**
+   * Parser which will allow to check validity of URLs and create objects.
+   */
   private GithubURLParser githubUrlParser;
 
-  /** Builder allowing to build objects from github URL. */
+  /**
+   * Builder allowing to build objects from github URL.
+   */
   private GithubSourceStorageBuilder githubSourceStorageBuilder;
 
-  /** ProjectDtoMerger */
+  /**
+   * ProjectDtoMerger
+   */
   private ProjectConfigDtoMerger projectConfigDtoMerger;
 
   @Inject
@@ -84,22 +92,35 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
    */
   @Override
   public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException, ServerException {
+      throws BadRequestException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
-    FactoryMetaDto factoryMeta =
-        urlFactoryBuilder
-            .createFactoryFromDevfile(
-                githubUrl,
-                new GithubFileContentProvider(githubUrl, urlFetcher),
-                extractOverrideParams(factoryParameters))
-            .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
+    return urlFactoryBuilder
+        .createFactoryFromDevfile(
+            githubUrl,
+            new GithubFileContentProvider(githubUrl, urlFetcher),
+            extractOverrideParams(factoryParameters))
+        .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
+        .acceptVisitor(new GithubFactoryVisitor(githubUrl));
+  }
 
-    if (factoryMeta instanceof FactoryDto) {
-      FactoryDto factory = (FactoryDto) factoryMeta;
+  /**
+   * Visitor that puts the default devfile and update devfile projects into the Github Factory, if
+   * needed.
+   */
+  private class GithubFactoryVisitor implements FactoryVisitor {
+
+    private final GithubUrl githubUrl;
+
+    private GithubFactoryVisitor(GithubUrl githubUrl) {
+      this.githubUrl = githubUrl;
+    }
+
+    @Override
+    public FactoryDto visit(FactoryDto factory) {
       if (factory.getWorkspace() != null) {
         return projectConfigDtoMerger.merge(
             factory,
@@ -126,9 +147,8 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
             }
           }
       );
+
       return factory;
-    } else {
-      return factoryMeta;
     }
   }
 }

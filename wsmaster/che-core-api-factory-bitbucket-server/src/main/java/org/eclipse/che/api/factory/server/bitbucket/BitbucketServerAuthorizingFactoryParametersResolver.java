@@ -26,6 +26,7 @@ import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryVisitor;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
@@ -91,14 +92,28 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
             bitbucketUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager);
 
     // create factory from the following location if location exists, else create default factory
-    FactoryMetaDto factoryMeta =
-        urlFactoryBuilder
-            .createFactoryFromDevfile(
-                bitbucketUrl, fileContentProvider, extractOverrideParams(factoryParameters))
-            .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
+    return urlFactoryBuilder
+        .createFactoryFromDevfile(
+            bitbucketUrl, fileContentProvider, extractOverrideParams(factoryParameters))
+        .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
+        .acceptVisitor(new BitbucketFactoryVisitor(bitbucketUrl));
+  }
 
-    if (factoryMeta instanceof FactoryDto) {
-      FactoryDto factory = (FactoryDto) factoryMeta;
+  /**
+   * Visitor that puts the default devfile and update devfile projects into the Bitbucket Factory,
+   * if needed.
+   */
+  private class BitbucketFactoryVisitor implements FactoryVisitor {
+
+    private final BitbucketUrl bitbucketUrl;
+
+    private BitbucketFactoryVisitor(
+        BitbucketUrl bitbucketUrl) {
+      this.bitbucketUrl = bitbucketUrl;
+    }
+
+    @Override
+    public FactoryDto visit(FactoryDto factory) {
       if (factory.getDevfile() == null) {
         // initialize default devfile
         factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
@@ -120,8 +135,6 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
       );
 
       return factory;
-    } else {
-      return factoryMeta;
     }
   }
 }

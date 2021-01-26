@@ -111,7 +111,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
   }
 
   protected void handleProjects(FactoryDto factory, Supplier<ProjectDto> projectSupplier, Consumer<ProjectDto> projectModifier) {
-    DevfileDto devfile = (DevfileDto) factory.getDevfile();
+    DevfileDto devfile = factory.getDevfile();
     List<ProjectDto> projects = devfile.getProjects();
     if (projects.isEmpty()) {
       devfile.setProjects(
