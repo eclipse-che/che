@@ -117,7 +117,7 @@ public abstract class OAuthAuthenticator {
                   + USER_ID_PARAM_KEY
                   + "="
                   + userId
-                  + " do not much current user id: "
+                  + " does not match the current user id: "
                   + currentUserId);
         }
       } else {

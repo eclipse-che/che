@@ -30,17 +30,20 @@ public class NoopOAuthAuthenticator extends OAuthAuthenticator {
   @Override
   String getAuthenticateUrl(URL requestUrl, String requestMethod, String signatureMethod)
       throws OAuthAuthenticationException {
-    throw new RuntimeException("Invalid usage of NoopOAuthAuthenticator");
+    throw new RuntimeException(
+        "The fallback noop authenticator cannot be used for authentication. Make sure OAuth is properly configured.");
   }
 
   @Override
   String callback(URL requestUrl) throws OAuthAuthenticationException {
-    throw new RuntimeException("Invalid usage of NoopOAuthAuthenticator");
+    throw new RuntimeException(
+        "The fallback noop authenticator cannot be used for authentication. Make sure OAuth is properly configured.");
   }
 
   @Override
   String computeAuthorizationHeader(String userId, String requestMethod, String requestUrl)
       throws OAuthAuthenticationException {
-    throw new RuntimeException("Invalid usage of NoopOAuthAuthenticator");
+    throw new RuntimeException(
+        "The fallback noop authenticator cannot be used for authentication. Make sure OAuth is properly configured.");
   }
 }

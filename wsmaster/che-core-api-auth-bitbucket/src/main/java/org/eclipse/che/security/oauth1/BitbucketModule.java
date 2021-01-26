@@ -13,14 +13,12 @@ package org.eclipse.che.security.oauth1;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import org.eclipse.che.inject.DynaModule;
 
 /**
  * Setup BitbucketServerOAuthAuthenticator in guice container.
  *
  * @author Sergii Kabashniuk
  */
-@DynaModule
 public class BitbucketModule extends AbstractModule {
   @Override
   protected void configure() {

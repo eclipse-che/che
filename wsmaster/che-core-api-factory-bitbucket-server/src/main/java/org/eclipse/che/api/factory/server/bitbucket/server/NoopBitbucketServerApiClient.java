@@ -32,31 +32,36 @@ public class NoopBitbucketServerApiClient implements BitbucketServerApiClient {
   @Override
   public BitbucketUser getUser(Subject cheUser)
       throws ScmUnauthorizedException, ScmCommunicationException {
-    throw new RuntimeException("Invalid usage of BitbucketServerApi");
+    throw new RuntimeException(
+        "The fallback noop api client cannot be used for real operation. Make sure Bitbucket OAuth1 is properly configured.");
   }
 
   @Override
   public BitbucketUser getUser(String slug)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
-    throw new RuntimeException("Invalid usage of BitbucketServerApi");
+    throw new RuntimeException(
+        "The fallback noop api client cannot be used for real operation. Make sure Bitbucket OAuth1 is properly configured.");
   }
 
   @Override
   public List<BitbucketUser> getUsers()
       throws ScmBadRequestException, ScmUnauthorizedException, ScmCommunicationException {
-    throw new RuntimeException("Invalid usage of BitbucketServerApi");
+    throw new RuntimeException(
+        "The fallback noop api client cannot be used for real operation. Make sure Bitbucket OAuth1 is properly configured.");
   }
 
   @Override
   public List<BitbucketUser> getUsers(String filter)
       throws ScmBadRequestException, ScmUnauthorizedException, ScmCommunicationException {
-    throw new RuntimeException("Invalid usage of BitbucketServerApi");
+    throw new RuntimeException(
+        "The fallback noop api client cannot be used for real operation. Make sure Bitbucket OAuth1 is properly configured.");
   }
 
   @Override
   public void deletePersonalAccessTokens(String userSlug, Long tokenId)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
-    throw new RuntimeException("Invalid usage of BitbucketServerApi");
+    throw new RuntimeException(
+        "The fallback noop api client cannot be used for real operation. Make sure Bitbucket OAuth1 is properly configured.");
   }
 
   @Override
