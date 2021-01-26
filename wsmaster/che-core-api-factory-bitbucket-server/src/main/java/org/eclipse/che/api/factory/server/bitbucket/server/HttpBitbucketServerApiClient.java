@@ -91,6 +91,13 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   public BitbucketUser getUser(Subject cheUser)
       throws ScmUnauthorizedException, ScmCommunicationException {
     try {
+      // Since Bitbucket server API doesn't provide a way to get an account profile currently
+      // authenticated user we will try to find it and by iterating over the list available to the
+      // current user Bitbucket users and attempting to get their personal access tokens. To speed
+      // up this process first of all we will search among users that contain(somewhere in Bitbucket
+      // user
+      // entity) Che's user username. At the second step, we will search against all visible(to the
+      // current Che's user) bitbucket users that are not included in the first list.
       Set<String> usersByName =
           getUsers(cheUser.getUserName())
               .stream()
@@ -251,6 +258,22 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     }
   }
 
+  /**
+   * This method is testing provided collection of user's `slug`s if contains the `slug` of the
+   * currently authenticated user and return it. The major method to test that condition is to get
+   * the list of personal access tokens. Current Che user that is associated with Bitbucket user
+   * should not be able to get someone else list of personal access tokens except his own.
+   *
+   * @param userSlugs set of user's `slug`s to test if it contains currently authenticated user.
+   * @return Bitbucket user from the given set that is associated with the current user. Or
+   *     Optional.empty if the given set doesn't contain that user.
+   * @throws ScmCommunicationException can happen if communication between che server and bitbucket
+   *     server is failed.
+   * @throws ScmUnauthorizedException can happen if currently authenticated che user is not
+   *     associated with bitbucket server.
+   * @throws ScmItemNotFoundException can happen if provided `slug` to test is not associated with
+   *     any user on Bitbucket server
+   */
   private Optional<BitbucketUser> findCurrentUser(Set<String> userSlugs)
       throws ScmCommunicationException, ScmUnauthorizedException, ScmItemNotFoundException {
 
