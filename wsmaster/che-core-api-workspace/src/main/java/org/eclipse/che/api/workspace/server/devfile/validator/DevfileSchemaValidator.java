@@ -37,9 +37,9 @@ import org.leadpony.justify.api.ProblemHandler;
 public class DevfileSchemaValidator {
 
   private final JsonValidationService service = JsonValidationService.newInstance();
-  private ObjectMapper jsonMapper;
-  private Map<String, JsonSchema> schemasByVersion;
-  private ErrorMessageComposer errorMessageComposer;
+  private final ObjectMapper jsonMapper;
+  private final Map<String, JsonSchema> schemasByVersion;
+  private final ErrorMessageComposer errorMessageComposer;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {

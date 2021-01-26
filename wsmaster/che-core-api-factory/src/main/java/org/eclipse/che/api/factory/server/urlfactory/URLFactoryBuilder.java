@@ -36,6 +36,7 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
@@ -113,39 +114,13 @@ public class URLFactoryBuilder {
         return Optional.empty();
       }
 
-      // parse
-      // detect version -> get validator and convertor
       // validate
       // convert
 
       try {
         JsonNode parsedDevfile = devfileParser.parseRaw(devfileYamlContent);
-
-
-        final FactoryMetaDto factoryDto;
-        //TODO: if 1.0
-        if (devfileYamlContent.contains("apiVersion: 1.0.0")) {
-          DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
-          devfileParser.resolveReference(devfile, fileContentProvider);
-          devfile = ensureToUseGenerateName(devfile);
-
-          factoryDto =
-              newDto(FactoryDto.class)
-                  .withV(CURRENT_VERSION)
-                  .withDevfile(DtoConverter.asDto(devfile))
-                  .withSource(location.filename().isPresent() ? location.filename().get() : null);
-
-        } else if (devfileYamlContent.contains("schemaVersion: \"2.0.0\"")) {
-          LOG.debug("aaaah, we've got devfile 2.0");
-          factoryDto = newDto(FactoryDevfileV2Dto.class)
-              .withV(CURRENT_VERSION)
-              .withDevfile(devfileParser.convertYamlToMap(devfileYamlContent))
-              .withSource(location.filename().isPresent() ? location.filename().get() : null);
-        } else {
-          LOG.error("eeeh? what's this?");
-          throw new DevfileException("Unknown devfile version");
-        }
-        return Optional.of(factoryDto);
+        return Optional
+            .of(convertToFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
             "Error occurred during creation a workspace from devfile located at `"
@@ -155,6 +130,31 @@ public class URLFactoryBuilder {
       }
     }
     return Optional.empty();
+  }
+
+  private FactoryMetaDto convertToFactory(JsonNode devfileJson,
+      Map<String, String> overrideProperties,
+      FileContentProvider fileContentProvider,
+      DevfileLocation location)
+      throws OverrideParameterException, DevfileException {
+    if (devfileParser.devfileMajorVersion(devfileJson) == 1) {
+      DevfileImpl devfile = devfileParser.parseJsonNode(devfileJson, overrideProperties);
+      devfileParser.resolveReference(devfile, fileContentProvider);
+      devfile = ensureToUseGenerateName(devfile);
+
+      return newDto(FactoryDto.class)
+          .withV(CURRENT_VERSION)
+          .withDevfile(DtoConverter.asDto(devfile))
+          .withSource(location.filename().isPresent() ? location.filename().get() : null);
+
+    } else if (devfileParser.devfileMajorVersion(devfileJson) == 2) {
+      return newDto(FactoryDevfileV2Dto.class)
+          .withV(CURRENT_VERSION)
+          .withDevfile(devfileParser.convertYamlToMap(devfileJson))
+          .withSource(location.filename().isPresent() ? location.filename().get() : null);
+    } else {
+      throw new DevfileException("Unknown devfile version.");
+    }
   }
 
   /**

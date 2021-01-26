@@ -27,8 +27,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -96,47 +98,46 @@ public class DevfileParser {
     }
   }
 
+  public String devfileVersion(JsonNode devfile) throws DevfileException {
+    final String version;
+    if (devfile.has("apiVersion")) {
+      version = devfile.get("apiVersion").textValue();
+    } else if (devfile.has("schemaVersion")) {
+      version = devfile.get("schemaVersion").textValue();
+    } else {
+      throw new DevfileException(
+          "Neither of `apiVersion` and `schemaVersion` found. This is not a valid devfile.");
+    }
+
+    return version;
+  }
+
+  public int devfileMajorVersion(JsonNode devfile) throws DevfileException {
+    String version = devfileVersion(devfile);
+
+    String majorVersion = version.substring(0, version.indexOf("."));
+    return Integer.parseInt(majorVersion);
+  }
+
   public JsonNode parseRaw(String yaml) throws DevfileFormatException {
     try {
-      return yamlMapper.readTree(yaml);
+      return Optional.ofNullable(yamlMapper.readTree(yaml)).orElseThrow(
+          () -> new DevfileFormatException("Unable to parse Devfile - provided source is empty"));
     } catch (JsonProcessingException jpe) {
       throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
     }
   }
 
-  public Map<String, Object> convertYamlToMap(String yaml) throws DevfileFormatException {
-    try {
-      ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      return yamlReader.readValue(yaml, new TypeReference<>() {});
-    } catch (JsonProcessingException jpe) {
-      throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
-    }
+  public Map<String, Object> convertYamlToMap(JsonNode devfileJson) throws DevfileFormatException {
+    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return yamlReader.convertValue(devfileJson, new TypeReference<>() {
+    });
   }
 
-  /**
-   * Creates {@link DevfileImpl} from given devfile content in YAML and provides possibility to
-   * override its values using key-value map, where key is an json-pointer-like string and value is
-   * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their names, not by index. Examples:
-   *
-   * <ul>
-   *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git // foo is an project name
-   * </ul>
-   *
-   * Performs schema and integrity validation of input data.
-   *
-   * @param devfileContent raw content of devfile
-   * @param overrideProperties map of overridden values
-   * @return Devfile object created from the source content
-   * @throws DevfileFormatException when any of schema or integrity validations fail
-   * @throws DevfileFormatException when any yaml parsing error occurs
-   * @throws OverrideParameterException when override properties is incorrect
-   */
-  public DevfileImpl parseYaml(String devfileContent, Map<String, String> overrideProperties)
-      throws DevfileFormatException, OverrideParameterException {
-    return parse(devfileContent, yamlMapper, overrideProperties);
+  public DevfileImpl parseJsonNode(JsonNode devfile, Map<String, String> overrideProperties)
+      throws OverrideParameterException, DevfileFormatException {
+    return parse(devfile, jsonMapper, overrideProperties);
   }
 
   /**
@@ -155,31 +156,6 @@ public class DevfileParser {
       // should never happen as we send empty overrides map
       throw new RuntimeException(e.getMessage());
     }
-  }
-
-  /**
-   * Creates {@link DevfileImpl} from given devfile content in JSON and provides possibility to
-   * override its values using key-value map, where key is an json-pointer-like string and value is
-   * desired property value. NOTE: unlike json pointers, objects in arrays should be pointed by
-   * their names, not by index. Examples:
-   *
-   * <ul>
-   *   <li>metadata.generateName : python-dev-
-   *   <li>projects.foo.source.type : git // foo is an project name
-   * </ul>
-   *
-   * Performs schema and integrity validation of input data.
-   *
-   * @param devfileContent raw content of devfile
-   * @param overrideProperties map of overridden values
-   * @return Devfile object created from the source content
-   * @throws DevfileFormatException when any of schema or integrity validations fail
-   * @throws DevfileFormatException when any yaml parsing error occurs
-   * @throws OverrideParameterException when override properties is incorrect
-   */
-  public DevfileImpl parseJson(String devfileContent, Map<String, String> overrideProperties)
-      throws DevfileFormatException, OverrideParameterException {
-    return parse(devfileContent, jsonMapper, overrideProperties);
   }
 
   /**
@@ -216,19 +192,23 @@ public class DevfileParser {
   private DevfileImpl parse(
       String content, ObjectMapper mapper, Map<String, String> overrideProperties)
       throws DevfileFormatException, OverrideParameterException {
+    try {
+      return parse(mapper.readTree(content), mapper, overrideProperties);
+    } catch (JsonProcessingException e) {
+      throw new DevfileFormatException(e.getMessage());
+    }
+  }
+
+  private DevfileImpl parse(
+      JsonNode parsed, ObjectMapper mapper, Map<String, String> overrideProperties)
+      throws DevfileFormatException, OverrideParameterException {
     DevfileImpl devfile;
     try {
-      JsonNode parsed = mapper.readTree(content);
-      if (parsed == null) {
-        throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
-      }
       parsed = overridePropertiesApplier.applyPropertiesOverride(parsed, overrideProperties);
       schemaValidator.validate(parsed);
       devfile = mapper.treeToValue(parsed, DevfileImpl.class);
     } catch (JsonProcessingException e) {
       throw new DevfileFormatException(e.getMessage());
-    } catch (IOException e) {
-      throw new DevfileFormatException("Unable to parse Devfile. Error: " + e.getMessage());
     }
     integrityValidator.validateDevfile(devfile);
     return devfile;
