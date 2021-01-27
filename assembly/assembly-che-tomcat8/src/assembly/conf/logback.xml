@@ -30,7 +30,4 @@
     <logger name="org.apache.catalina.loader" level="OFF"/>
     <logger name="org.apache.catalina.session.PersistentManagerBase" level="OFF"/>
     <logger name="org.apache.jasper.servlet.TldScanner" level="OFF"/>
-    <logger name="org.apache.tomcat.websocket.server.WsFrameServer" level="OFF" />
-    <logger name="okhttp3.internal.http2.Http2" level="OFF" />
-    <logger name="sun.net.www.protocol.http.HttpURLConnection" level="OFF" />
 </configuration>

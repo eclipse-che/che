@@ -14,7 +14,6 @@ package org.eclipse.che.api.factory.server;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -39,7 +38,6 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
-import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
 /**
  * Default {@link FactoryParametersResolver} implementation. Tries to resolve factory based on
@@ -110,12 +108,14 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
         .collect(toMap(e -> e.getKey().substring(OVERRIDE_PREFIX.length()), Entry::getValue));
   }
 
-  protected void handleProjects(FactoryDto factory, Supplier<ProjectDto> projectSupplier, Consumer<ProjectDto> projectModifier) {
+  protected void handleProjects(
+      FactoryDto factory,
+      Supplier<ProjectDto> projectSupplier,
+      Consumer<ProjectDto> projectModifier) {
     DevfileDto devfile = factory.getDevfile();
     List<ProjectDto> projects = devfile.getProjects();
     if (projects.isEmpty()) {
-      devfile.setProjects(
-          Collections.singletonList(projectSupplier.get()));
+      devfile.setProjects(Collections.singletonList(projectSupplier.get()));
     } else {
       // update existing project with same repository, set current branch if needed
       projects.forEach(projectModifier);

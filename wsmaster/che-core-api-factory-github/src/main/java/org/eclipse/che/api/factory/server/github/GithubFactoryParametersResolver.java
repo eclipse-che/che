@@ -42,19 +42,13 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
 
   private static final Logger LOG = LoggerFactory.getLogger(GithubFactoryParametersResolver.class);
 
-  /**
-   * Parser which will allow to check validity of URLs and create objects.
-   */
+  /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
 
-  /**
-   * Builder allowing to build objects from github URL.
-   */
+  /** Builder allowing to build objects from github URL. */
   private GithubSourceStorageBuilder githubSourceStorageBuilder;
 
-  /**
-   * ProjectDtoMerger
-   */
+  /** ProjectDtoMerger */
   private ProjectConfigDtoMerger projectConfigDtoMerger;
 
   @Inject
@@ -136,17 +130,19 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
         factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
       }
 
-      handleProjects(factory, () -> newDto(ProjectDto.class)
-              .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
-              .withName(githubUrl.getRepository()),
+      handleProjects(
+          factory,
+          () ->
+              newDto(ProjectDto.class)
+                  .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
+                  .withName(githubUrl.getRepository()),
           project -> {
             final String location = project.getSource().getLocation();
             if (location.equals(githubUrl.repositoryLocation())
                 || location.equals(githubUrl.repositoryLocation() + ".git")) {
               project.getSource().setBranch(githubUrl.getBranch());
             }
-          }
-      );
+          });
 
       return factory;
     }

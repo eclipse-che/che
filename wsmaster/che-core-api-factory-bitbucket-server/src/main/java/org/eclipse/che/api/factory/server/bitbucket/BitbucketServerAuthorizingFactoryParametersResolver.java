@@ -107,8 +107,7 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
 
     private final BitbucketUrl bitbucketUrl;
 
-    private BitbucketFactoryVisitor(
-        BitbucketUrl bitbucketUrl) {
+    private BitbucketFactoryVisitor(BitbucketUrl bitbucketUrl) {
       this.bitbucketUrl = bitbucketUrl;
     }
 
@@ -119,20 +118,22 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
         factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
       }
 
-      handleProjects(factory, () -> newDto(ProjectDto.class)
-              .withSource(
-                  newDto(SourceDto.class)
-                      .withLocation(bitbucketUrl.repositoryLocation())
-                      .withType("git")
-                      .withBranch(bitbucketUrl.getBranch()))
-              .withName(bitbucketUrl.getRepository()),
+      handleProjects(
+          factory,
+          () ->
+              newDto(ProjectDto.class)
+                  .withSource(
+                      newDto(SourceDto.class)
+                          .withLocation(bitbucketUrl.repositoryLocation())
+                          .withType("git")
+                          .withBranch(bitbucketUrl.getBranch()))
+                  .withName(bitbucketUrl.getRepository()),
           project -> {
             final String location = project.getSource().getLocation();
             if (location.equals(bitbucketUrl.repositoryLocation())) {
               project.getSource().setBranch(bitbucketUrl.getBranch());
             }
-          }
-      );
+          });
 
       return factory;
     }

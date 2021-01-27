@@ -27,10 +27,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -112,10 +110,10 @@ public class DevfileParser {
   }
 
   public Map<String, Object> convertYamlToMap(JsonNode devfileJson) {
-    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory())
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return yamlReader.convertValue(devfileJson, new TypeReference<>() {
-    });
+    ObjectMapper yamlReader =
+        new ObjectMapper(new YAMLFactory())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return yamlReader.convertValue(devfileJson, new TypeReference<>() {});
   }
 
   public DevfileImpl parseJsonNode(JsonNode devfile, Map<String, String> overrideProperties)

@@ -45,7 +45,8 @@ public class DevfileSchemaValidator {
   private final DevfileVersion devfileVersionParser;
 
   @Inject
-  public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider, DevfileVersion devfileVersionParser) {
+  public DevfileSchemaValidator(
+      DevfileSchemaProvider schemaProvider, DevfileVersion devfileVersionParser) {
     this.service = JsonValidationService.newInstance();
     this.jsonMapper = new ObjectMapper();
     this.errorMessageComposer = new ErrorMessageComposer();

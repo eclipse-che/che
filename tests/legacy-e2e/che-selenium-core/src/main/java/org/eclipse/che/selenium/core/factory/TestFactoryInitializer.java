@@ -186,8 +186,8 @@ public class TestFactoryInitializer {
     }
 
     @Override
-    public void setDevfile(DevfileDto devfileDto) {
-      factoryDto.setDevfile(devfileDto);
+    public void setDevfile(DevfileDto workspace) {
+      factoryDto.setDevfile(workspace);
     }
 
     @Override

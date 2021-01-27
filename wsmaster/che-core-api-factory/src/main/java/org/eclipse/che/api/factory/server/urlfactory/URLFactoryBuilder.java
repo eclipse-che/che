@@ -29,15 +29,14 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
-import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
 import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
@@ -123,8 +122,8 @@ public class URLFactoryBuilder {
 
       try {
         JsonNode parsedDevfile = devfileParser.parseRaw(devfileYamlContent);
-        return Optional
-            .of(convertToFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
+        return Optional.of(
+            convertToFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
             "Error occurred during creation a workspace from devfile located at `"
@@ -136,7 +135,8 @@ public class URLFactoryBuilder {
     return Optional.empty();
   }
 
-  private FactoryMetaDto convertToFactory(JsonNode devfileJson,
+  private FactoryMetaDto convertToFactory(
+      JsonNode devfileJson,
       Map<String, String> overrideProperties,
       FileContentProvider fileContentProvider,
       DevfileLocation location)
@@ -207,5 +207,4 @@ public class URLFactoryBuilder {
         .withApiVersion(CURRENT_API_VERSION)
         .withMetadata(newDto(MetadataDto.class).withGenerateName(name));
   }
-
 }
