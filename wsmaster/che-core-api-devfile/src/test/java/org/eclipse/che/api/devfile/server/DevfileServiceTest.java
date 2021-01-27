@@ -247,7 +247,6 @@ public class DevfileServiceTest {
     // given
     final UserDevfileDto devfileDto = TestObjectGenerator.createUserDevfileDto();
     final UserDevfileImpl userDevfileImpl = new UserDevfileImpl(devfileDto, TEST_ACCOUNT);
-
     when(userDevfileManager.updateUserDevfile(any(UserDevfile.class))).thenReturn(userDevfileImpl);
 
     // when

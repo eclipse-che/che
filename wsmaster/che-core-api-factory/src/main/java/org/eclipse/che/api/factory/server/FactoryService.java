@@ -103,7 +103,6 @@ public class FactoryService extends Service {
     if (resolvedFactory == null) {
       throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
     }
-
     if (validate) {
       acceptValidator.validateOnAccept(resolvedFactory);
     }

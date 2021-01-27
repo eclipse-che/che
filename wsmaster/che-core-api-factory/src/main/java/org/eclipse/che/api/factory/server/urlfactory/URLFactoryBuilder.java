@@ -117,9 +117,6 @@ public class URLFactoryBuilder {
         return Optional.empty();
       }
 
-      // validate
-      // convert
-
       try {
         JsonNode parsedDevfile = devfileParser.parseRaw(devfileYamlContent);
         return Optional.of(
