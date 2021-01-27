@@ -9,7 +9,8 @@
 #
 # See: https://sipb.mit.edu/doc/safe-shell/
 
-set -e
+base_dir=$(cd "$(dirname "$0")"; pwd)
+. "${base_dir}"/build.include
 
 . ./build.include
 init "$@"
