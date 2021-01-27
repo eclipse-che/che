@@ -10,8 +10,9 @@
 name: build-nightly
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+  - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -44,8 +45,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean install -U -Pintegration
     - name: Build docker images
-      run: |
-        ./dockerfiles/build.sh 
+      run:
+          ./dockerfiles/build.sh
     - name: Push docker images
       run: |
         docker push quay.io/eclipse/endpoint-watcher:nightly
