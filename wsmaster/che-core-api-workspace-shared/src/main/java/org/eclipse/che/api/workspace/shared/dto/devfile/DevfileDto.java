@@ -19,7 +19,6 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author Sergii Leshchenko */
 @DTO
 public interface DevfileDto extends Devfile {
-
   @Override
   String getApiVersion();
 
