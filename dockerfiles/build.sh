@@ -9,6 +9,8 @@
 #
 # See: https://sipb.mit.edu/doc/safe-shell/
 
+set -e
+
 . ./build.include
 init "$@"
 
