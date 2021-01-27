@@ -106,7 +106,7 @@ public class DevfileSchemaValidatorTest {
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          "Version '111.111' of the devfile is not supported. "
+          "Devfile schema validation failed. Error: Version '111.111' of the devfile is not supported. "
               + "Supported versions are '"
               + Constants.SUPPORTED_VERSIONS
               + "'.");
@@ -137,7 +137,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "devfile/devfile_missing_api_version.yaml",
-        "The object must have a property whose name is \"apiVersion\"."
+        "Neither of `apiVersion` or `schemaVersion` found. This is not a valid devfile."
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",

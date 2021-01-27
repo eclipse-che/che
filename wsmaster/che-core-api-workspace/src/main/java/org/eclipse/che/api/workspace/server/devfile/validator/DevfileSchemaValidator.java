@@ -65,15 +65,15 @@ public class DevfileSchemaValidator {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
-      String devfileVerssion = devfileVersionParser.devfileVersion(contentNode);
+      String devfileVersion = devfileVersionParser.devfileVersion(contentNode);
 
-      if (!schemasByVersion.containsKey(devfileVerssion)) {
+      if (!schemasByVersion.containsKey(devfileVersion)) {
         throw new DevfileFormatException(
             String.format(
                 "Version '%s' of the devfile is not supported. Supported versions are '%s'.",
-                devfileVerssion, SUPPORTED_VERSIONS));
+                devfileVersion, SUPPORTED_VERSIONS));
       }
-      JsonSchema schema = schemasByVersion.get(devfileVerssion);
+      JsonSchema schema = schemasByVersion.get(devfileVersion);
       try (JsonReader reader =
           service.createReader(
               new StringReader(jsonMapper.writeValueAsString(contentNode)), schema, handler)) {
@@ -81,10 +81,12 @@ public class DevfileSchemaValidator {
       }
       if (!validationErrors.isEmpty()) {
         String error = errorMessageComposer.extractMessages(validationErrors, new StringBuilder());
-        throw new DevfileFormatException(
-            format("Devfile schema validation failed. Error: %s", error));
+        throw new DevfileFormatException(error);
       }
-    } catch (IOException | DevfileException e) {
+    } catch (DevfileException dfe) {
+      throw new DevfileFormatException(
+          format("Devfile schema validation failed. Error: %s", dfe.getMessage()));
+    } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
   }

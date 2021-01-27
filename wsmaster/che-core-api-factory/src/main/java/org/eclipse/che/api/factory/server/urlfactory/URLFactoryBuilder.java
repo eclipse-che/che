@@ -138,6 +138,7 @@ public class URLFactoryBuilder {
       FileContentProvider fileContentProvider,
       DevfileLocation location)
       throws OverrideParameterException, DevfileException {
+
     if (devfileVersion.devfileMajorVersion(devfileJson) == 1) {
       DevfileImpl devfile = devfileParser.parseJsonNode(devfileJson, overrideProperties);
       devfileParser.resolveReference(devfile, fileContentProvider);
