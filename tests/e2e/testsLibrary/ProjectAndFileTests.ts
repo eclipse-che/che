@@ -18,8 +18,8 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 export function waitWorkspaceReadiness(sampleName : string, folder: string) {
     test('Wait for workspace readiness', async () => {
         await ide.waitAndSwitchToIdeFrame();
-        await ide.waitPreloaderVisible();
-        await ide.waitPreloaderAbsent();
+        // await ide.waitPreloaderVisible();
+        // await ide.waitPreloaderAbsent();
         await ide.waitIde();
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(sampleName, folder);

@@ -150,7 +150,7 @@ export class Ide {
         await this.waitIde(timeout);
     }
 
-    async waitIde(timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT) {
+    async waitIde(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitIde');
 
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
