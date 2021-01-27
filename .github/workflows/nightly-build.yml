@@ -49,7 +49,6 @@ jobs:
           ./dockerfiles/build.sh
     - name: Push docker images
       run: |
-        docker push quay.io/eclipse/endpoint-watcher:nightly
         docker push quay.io/eclipse/che-endpoint-watcher:nightly
         docker push quay.io/eclipse/che-keycloak:nightly
         docker push quay.io/eclipse/che-postgres:nightly
