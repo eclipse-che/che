@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright (c) 2012-2018 Red Hat, Inc.
 // * This program and the accompanying materials are made
 // * available under the terms of the Eclipse Public License 2.0
@@ -9,57 +9,57 @@
 // * Contributors:
 // *   Red Hat, Inc. - initial API and implementation
 // */
-//package org.eclipse.che.api.factory.server.urlfactory;
+// package org.eclipse.che.api.factory.server.urlfactory;
 //
-//import static java.util.Collections.emptyMap;
-//import static java.util.Collections.singletonList;
-//import static java.util.Collections.singletonMap;
-//import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
-//import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
-//import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
-//import static org.eclipse.che.dto.server.DtoFactory.newDto;
-//import static org.mockito.ArgumentMatchers.anyMap;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertNotNull;
-//import static org.testng.Assert.assertNull;
+// import static java.util.Collections.emptyMap;
+// import static java.util.Collections.singletonList;
+// import static java.util.Collections.singletonMap;
+// import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
+// import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
+// import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
+// import static org.eclipse.che.dto.server.DtoFactory.newDto;
+// import static org.mockito.ArgumentMatchers.anyMap;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.when;
+// import static org.testng.Assert.assertEquals;
+// import static org.testng.Assert.assertNotNull;
+// import static org.testng.Assert.assertNull;
 //
-//import java.io.IOException;
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.Optional;
-//import org.eclipse.che.api.core.BadRequestException;
-//import org.eclipse.che.api.core.ServerException;
-//import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
-//import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-//import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-//import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
-//import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-//import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-//import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
-//import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-//import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
-//import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-//import org.mockito.Mock;
-//import org.mockito.testng.MockitoTestNGListener;
-//import org.testng.annotations.BeforeClass;
-//import org.testng.annotations.DataProvider;
-//import org.testng.annotations.Listeners;
-//import org.testng.annotations.Test;
+// import java.io.IOException;
+// import java.util.HashMap;
+// import java.util.Map;
+// import java.util.Optional;
+// import org.eclipse.che.api.core.BadRequestException;
+// import org.eclipse.che.api.core.ServerException;
+// import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
+// import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+// import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
+// import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+// import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+// import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+// import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
+// import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+// import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
+// import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+// import org.mockito.Mock;
+// import org.mockito.testng.MockitoTestNGListener;
+// import org.testng.annotations.BeforeClass;
+// import org.testng.annotations.DataProvider;
+// import org.testng.annotations.Listeners;
+// import org.testng.annotations.Test;
 //
-///**
+/// **
 // * Testing {@link URLFactoryBuilder}
 // *
 // * @author Florent Benoit
 // * @author Max Shaposhnyk
 // */
-//@Listeners(MockitoTestNGListener.class)
-//public class URLFactoryBuilderTest {
+// @Listeners(MockitoTestNGListener.class)
+// public class URLFactoryBuilderTest {
 //
 //  private final String defaultEditor = "eclipse/che-theia/1.0.0";
 //  private final String defaultPlugin = "eclipse/che-machine-exec-plugin/0.0.1";
@@ -173,4 +173,4 @@
 //    assertNull(factory.getDevfile().getMetadata().getName());
 //    assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);
 //  }
-//}
+// }
