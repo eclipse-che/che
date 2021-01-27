@@ -45,10 +45,8 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean install -U -Pintegration
     - name: Build docker images
-      run: |
-        cd dockerfiles
-        ./build.sh 
-        cd ..
+      run:
+          ./dockerfiles/build.sh
     - name: Push docker images
       run: |
         docker push quay.io/eclipse/endpoint-watcher:nightly
