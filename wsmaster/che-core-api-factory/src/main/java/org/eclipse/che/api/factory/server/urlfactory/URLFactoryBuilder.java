@@ -159,13 +159,11 @@ public class URLFactoryBuilder {
           .withDevfile(DtoConverter.asDto(devfile))
           .withSource(location.filename().isPresent() ? location.filename().get() : null);
 
-    } else if (devfileVersion.devfileMajorVersion(devfileJson) == 2) {
+    } else {
       return newDto(FactoryDevfileV2Dto.class)
           .withV(CURRENT_VERSION)
           .withDevfile(devfileParser.convertYamlToMap(devfileJson))
           .withSource(location.filename().isPresent() ? location.filename().get() : null);
-    } else {
-      throw new DevfileException("Unknown devfile version.");
     }
   }
 
