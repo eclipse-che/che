@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
@@ -83,7 +84,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
    */
   @Override
   public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException, ServerException {
+      throws ApiException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));

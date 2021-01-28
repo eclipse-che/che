@@ -32,7 +32,8 @@ public interface BitbucketServerApiClient {
    * @throws ScmUnauthorizedException - in case if {@link Subject} is not linked to any {@link
    *     BitbucketUser}
    */
-  BitbucketUser getUser(Subject cheUser) throws ScmUnauthorizedException, ScmCommunicationException;
+  BitbucketUser getUser(Subject cheUser)
+      throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException;
 
   /**
    * @param slug

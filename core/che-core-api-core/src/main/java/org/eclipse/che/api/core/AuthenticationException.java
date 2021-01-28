@@ -19,12 +19,24 @@ public class AuthenticationException extends ApiException {
    */
   int responseStatus;
 
+  String authenticationURL;
+
   public AuthenticationException() {
     this(400);
   }
 
   public AuthenticationException(String message, Throwable cause) {
     this(400, message, cause);
+  }
+
+  public AuthenticationException(int responseStatus, String message, String authenticationURL) {
+    this(responseStatus, message);
+    this.authenticationURL = authenticationURL;
+  }
+
+  public AuthenticationException(int responseStatus, String message, String authenticationURL ,Throwable cause) {
+    this(responseStatus, message, cause);
+    this.authenticationURL = authenticationURL;
   }
 
   public AuthenticationException(String message) {
@@ -61,5 +73,9 @@ public class AuthenticationException extends ApiException {
 
   public void setResponseStatus(int responseStatus) {
     this.responseStatus = responseStatus;
+  }
+
+  public String getAuthenticationURL() {
+    return authenticationURL;
   }
 }

@@ -12,7 +12,6 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
@@ -26,7 +25,13 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.AuthenticationException;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.factory.server.AuthenticationLocationComposer;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
@@ -58,14 +63,18 @@ public class URLFactoryBuilder {
 
   private final DevfileParser devfileParser;
 
+  private final Map<String, AuthenticationLocationComposer> authenticationLocationComposerProvider;
+
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileParser devfileParser) {
+      DevfileParser devfileParser,
+      Map<String, AuthenticationLocationComposer> authenticationLocationComposerProvider) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.devfileParser = devfileParser;
+    this.authenticationLocationComposerProvider = authenticationLocationComposerProvider;
   }
 
   /**
@@ -87,7 +96,7 @@ public class URLFactoryBuilder {
       RemoteFactoryUrl remoteFactoryUrl,
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
-      throws BadRequestException {
+      throws ApiException {
     String devfileYamlContent;
     for (DevfileLocation location : remoteFactoryUrl.devfileFileLocations()) {
       try {
@@ -101,10 +110,7 @@ public class URLFactoryBuilder {
         continue;
       } catch (DevfileException e) {
         LOG.debug("Unexpected devfile exception: {}", e.getMessage());
-        throw new BadRequestException(
-            format(
-                "There is an error resolving defvile. Error: %s. URL is %s",
-                e.getMessage(), location.location()));
+        throw toApiException(e, location);
       }
       if (isNullOrEmpty(devfileYamlContent)) {
         return Optional.empty();
@@ -120,15 +126,36 @@ public class URLFactoryBuilder {
                 .withDevfile(DtoConverter.asDto(devfile))
                 .withSource(location.filename().isPresent() ? location.filename().get() : null);
         return Optional.of(factoryDto);
-      } catch (DevfileException | OverrideParameterException e) {
+      } catch (OverrideParameterException e) {
         throw new BadRequestException(
-            "Error occurred during creation a workspace from devfile located at `"
-                + location.location()
-                + "`. Cause: "
-                + e.getMessage());
-      }
+            "Error processing override parameter(s): " + e.getMessage());
+      } catch (DevfileException e) {
+          throw toApiException(e, location);
+        }
     }
     return Optional.empty();
+  }
+
+  private ApiException toApiException(DevfileException devfileException,
+      DevfileLocation location) {
+    final Throwable cause = devfileException.getCause();
+    if (cause instanceof ScmUnauthorizedException) {
+      AuthenticationLocationComposer locationComposer = authenticationLocationComposerProvider.get(((ScmUnauthorizedException)cause).getOauthProvider());
+      if (locationComposer != null) {
+        return new AuthenticationException(303, cause.getMessage(),  locationComposer.composeLocation());
+      } else {
+        return new AuthenticationException(cause.getMessage());
+      }
+    } else if (cause instanceof UnknownScmProviderException) {
+      return new ServerException(
+          "Provided location is unknown or misconfigured on the server side. Error message:" + cause
+              .getMessage());
+    }
+    return new BadRequestException(
+        "Error occurred during creation a workspace from devfile located at `"
+            + location.location()
+            + "`. Cause: "
+            + devfileException.getMessage());
   }
 
   /**

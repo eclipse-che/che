@@ -45,7 +45,7 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplier
             subject.getUserName()
                 + " is not authorized in "
                 + authenticator.getOAuthProvider()
-                + " OAuth1 provider");
+                + " OAuth1 provider", authenticator.getOAuthProvider());
       }
       return authorizationHeader;
     } catch (OAuthAuthenticationException e) {

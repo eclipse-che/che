@@ -12,10 +12,13 @@
 package org.eclipse.che.api.factory.server.bitbucket;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.factory.server.AuthenticationLocationComposer;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
 import org.eclipse.che.security.oauth1.BitbucketServerApiProvider;
+import org.eclipse.che.security.oauth1.BitbucketServerAuthenticationLocationComposer;
 
 public class BitbucketServerModule extends AbstractModule {
   @Override
@@ -24,5 +27,10 @@ public class BitbucketServerModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), PersonalAccessTokenFetcher.class);
     tokenFetcherMultibinder.addBinding().to(BitbucketServerPersonalAccessTokenFetcher.class);
     bind(BitbucketServerApiClient.class).toProvider(BitbucketServerApiProvider.class);
+
+
+    MapBinder.newMapBinder(binder(), String.class, AuthenticationLocationComposer.class)
+        .addBinding("bitbucket_server")
+        .to(BitbucketServerAuthenticationLocationComposer.class);
   }
 }
