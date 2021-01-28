@@ -67,26 +67,20 @@ public class URLFactoryBuilderTest {
 
   private final String defaultEditor = "eclipse/che-theia/1.0.0";
   private final String defaultPlugin = "eclipse/che-machine-exec-plugin/0.0.1";
-  /**
-   * Grab content of URLs
-   */
-  @Mock
-  private URLFetcher urlFetcher;
+  /** Grab content of URLs */
+  @Mock private URLFetcher urlFetcher;
 
-  @Mock
-  private DevfileParser devfileParser;
+  @Mock private DevfileParser devfileParser;
 
-  @Mock
-  private DevfileVersion devfileVersion;
+  @Mock private DevfileVersion devfileVersion;
 
-  /**
-   * Tested instance.
-   */
+  /** Tested instance. */
   private URLFactoryBuilder urlFactoryBuilder;
 
   @BeforeClass
   public void setUp() {
-    this.urlFactoryBuilder = new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser, devfileVersion);
+    this.urlFactoryBuilder =
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser, devfileVersion);
   }
 
   @Test
@@ -116,17 +110,19 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileParser.parseYamlRaw("random_content")).thenReturn(new ObjectNode(JsonNodeFactory.instance));
+    when(devfileParser.parseYamlRaw(anyString()))
+        .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
     when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
 
     FactoryDto factory =
-        (FactoryDto) urlFactoryBuilder
-            .createFactoryFromDevfile(
-                new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
-                s -> myLocation + ".list",
-                emptyMap())
-            .get();
+        (FactoryDto)
+            urlFactoryBuilder
+                .createFactoryFromDevfile(
+                    new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
+                    s -> myLocation + ".list",
+                    emptyMap())
+                .get();
 
     assertNotNull(factory);
     assertNull(factory.getSource());
@@ -155,7 +151,7 @@ public class URLFactoryBuilderTest {
     devfileTemplate.setMetadata(metadataTemplate);
     DevfileImpl bothNames = new DevfileImpl(devfileTemplate);
 
-    return new Object[][]{{justName, NAME}, {justGenerateName, GEN_NAME}, {bothNames, GEN_NAME}};
+    return new Object[][] {{justName, NAME}, {justGenerateName, GEN_NAME}, {bothNames, GEN_NAME}};
   }
 
   @Test(dataProvider = "devfiles")
@@ -178,13 +174,15 @@ public class URLFactoryBuilderTest {
                   }
                 }));
     when(fileContentProvider.fetchContent(anyString())).thenReturn("anything");
-    when(devfileParser.parseYamlRaw("anything")).thenReturn(new ObjectNode(JsonNodeFactory.instance));
+    when(devfileParser.parseYamlRaw("anything"))
+        .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
     when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
     FactoryDto factory =
-        (FactoryDto) urlFactoryBuilder
-            .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
-            .get();
+        (FactoryDto)
+            urlFactoryBuilder
+                .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
+                .get();
 
     assertNull(factory.getDevfile().getMetadata().getName());
     assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);
