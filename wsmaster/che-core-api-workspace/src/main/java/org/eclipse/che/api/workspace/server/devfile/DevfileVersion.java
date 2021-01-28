@@ -15,11 +15,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
+/** Class that helps determine devfile versions. */
 @Singleton
 public class DevfileVersion {
+
   private final String DEVFILE_V1_VERSION_FIELD = "apiVersion";
   private final String DEVFILE_V2_VERSION_FIELD = "schemaVersion";
 
+  /**
+   * Gives exact version of the devfile.
+   *
+   * @param devfile to inspect
+   * @return exact version of the devfile
+   * @throws DevfileException when can't find the field with version
+   */
   public String devfileVersion(JsonNode devfile) throws DevfileException {
     final String version;
     if (devfile.has(DEVFILE_V1_VERSION_FIELD)) {
@@ -34,6 +43,20 @@ public class DevfileVersion {
     return version;
   }
 
+  /**
+   * Gives major version of the devfile.
+   *
+   * <pre>
+   *   1.0.0 -> 1
+   *   1.99 -> 1
+   *   2.0.0 -> 2
+   *   2.1 -> 2
+   * </pre>
+   *
+   * @param devfile to inspect
+   * @return major version of the devfile
+   * @throws DevfileException when can't find the field with version
+   */
   public int devfileMajorVersion(JsonNode devfile) throws DevfileException {
     String version = devfileVersion(devfile);
 

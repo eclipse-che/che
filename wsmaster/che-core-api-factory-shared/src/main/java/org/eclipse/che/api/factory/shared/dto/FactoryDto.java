@@ -23,7 +23,9 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Factory of version 4.0
+ * Factory of version 4.0.
+ *
+ * <p>This 'implementation' of {@link FactoryMetaDto} is used for Devfile v1.
  *
  * @author Max Shaposhnik
  */

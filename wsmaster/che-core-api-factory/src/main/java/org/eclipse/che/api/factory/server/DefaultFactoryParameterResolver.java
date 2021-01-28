@@ -32,7 +32,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.urlfactory.DefaultFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
@@ -108,11 +107,18 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
         .collect(toMap(e -> e.getKey().substring(OVERRIDE_PREFIX.length()), Entry::getValue));
   }
 
-  protected void handleProjects(
-      FactoryDto factory,
+  /**
+   * If devfile has no projects, put there one provided by given `projectSupplier`. Otherwise update
+   * all projects with given `projectModifier`.
+   *
+   * @param devfile of the projects to update
+   * @param projectSupplier provides default project
+   * @param projectModifier updates existing projects
+   */
+  protected void updateProjects(
+      DevfileDto devfile,
       Supplier<ProjectDto> projectSupplier,
       Consumer<ProjectDto> projectModifier) {
-    DevfileDto devfile = factory.getDevfile();
     List<ProjectDto> projects = devfile.getProjects();
     if (projects.isEmpty()) {
       devfile.setProjects(Collections.singletonList(projectSupplier.get()));

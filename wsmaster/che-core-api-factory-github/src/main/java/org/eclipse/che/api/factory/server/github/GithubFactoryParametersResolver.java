@@ -98,7 +98,7 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
   }
 
   /**
-   * Visitor that puts the default devfile and update devfile projects into the Github Factory, if
+   * Visitor that puts the default devfile or updates devfile projects into the Github Factory, if
    * needed.
    */
   private class GithubFactoryVisitor implements FactoryVisitor {
@@ -126,8 +126,8 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
         factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
       }
 
-      handleProjects(
-          factory,
+      updateProjects(
+          factory.getDevfile(),
           () ->
               newDto(ProjectDto.class)
                   .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))

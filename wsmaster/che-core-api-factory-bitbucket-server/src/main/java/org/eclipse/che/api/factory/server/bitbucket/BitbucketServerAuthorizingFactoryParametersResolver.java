@@ -100,7 +100,7 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
   }
 
   /**
-   * Visitor that puts the default devfile and update devfile projects into the Bitbucket Factory,
+   * Visitor that puts the default devfile or updates devfile projects into the Bitbucket Factory,
    * if needed.
    */
   private class BitbucketFactoryVisitor implements FactoryVisitor {
@@ -118,8 +118,8 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
         factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(bitbucketUrl.getRepository()));
       }
 
-      handleProjects(
-          factory,
+      updateProjects(
+          factory.getDevfile(),
           () ->
               newDto(ProjectDto.class)
                   .withSource(

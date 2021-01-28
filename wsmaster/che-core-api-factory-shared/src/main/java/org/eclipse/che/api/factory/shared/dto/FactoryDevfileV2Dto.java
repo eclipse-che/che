@@ -20,8 +20,13 @@ import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * Factory DTO for Devfile v2. As che-server don't know the structure of Devfile v2, we're using
+ * just generic {@code Map<String, Object>} here.
+ */
 @DTO
 public interface FactoryDevfileV2Dto extends FactoryMetaDto, Hyperlinks {
+
   @Override
   default FactoryMetaDto acceptVisitor(FactoryVisitor visitor) {
     return visitor.visit(this);

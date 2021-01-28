@@ -20,7 +20,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_C
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -89,14 +88,21 @@ public class DevfileParser {
    */
   public DevfileImpl parseYaml(String devfileContent) throws DevfileFormatException {
     try {
-      return parse(devfileContent, yamlMapper, emptyMap());
+      return parse(parseYamlRaw(devfileContent), yamlMapper, emptyMap());
     } catch (OverrideParameterException e) {
       // should never happen as we send empty overrides map
       throw new RuntimeException(e.getMessage());
     }
   }
 
-  public JsonNode parseRaw(String yaml) throws DevfileFormatException {
+  /**
+   * Tries to parse given `yaml` into {@link JsonNode} and validates it with devfile schema.
+   *
+   * @param yaml to parse
+   * @return parsed yaml
+   * @throws DevfileFormatException if given yaml is empty or is not valid devfile
+   */
+  public JsonNode parseYamlRaw(String yaml) throws DevfileFormatException {
     try {
       JsonNode devfileJson = yamlMapper.readTree(yaml);
       if (devfileJson == null) {
@@ -109,13 +115,25 @@ public class DevfileParser {
     }
   }
 
+  /**
+   * converts given devfile in {@link JsonNode} into {@link Map}.
+   *
+   * @param devfileJson json with devfile content
+   * @return devfile in simple Map structure
+   */
   public Map<String, Object> convertYamlToMap(JsonNode devfileJson) {
-    ObjectMapper yamlReader =
-        new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return yamlReader.convertValue(devfileJson, new TypeReference<>() {});
+    return yamlMapper.convertValue(devfileJson, new TypeReference<>() {});
   }
 
+  /**
+   * Parse given devfile in {@link JsonNode} format into our {@link DevfileImpl}.
+   *
+   * @param devfile given devfile
+   * @param overrideProperties properties to override
+   * @return devfile created from given {@link JsonNode}
+   * @throws OverrideParameterException when any error when overriding parameters
+   * @throws DevfileFormatException when given devfile is not valid devfile
+   */
   public DevfileImpl parseJsonNode(JsonNode devfile, Map<String, String> overrideProperties)
       throws OverrideParameterException, DevfileFormatException {
     return parse(devfile, jsonMapper, overrideProperties);

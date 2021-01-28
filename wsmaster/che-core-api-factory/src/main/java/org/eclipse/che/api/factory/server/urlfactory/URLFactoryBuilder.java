@@ -118,9 +118,9 @@ public class URLFactoryBuilder {
       }
 
       try {
-        JsonNode parsedDevfile = devfileParser.parseRaw(devfileYamlContent);
+        JsonNode parsedDevfile = devfileParser.parseYamlRaw(devfileYamlContent);
         return Optional.of(
-            convertToFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
+            createFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
             "Error occurred during creation a workspace from devfile located at `"
@@ -132,7 +132,17 @@ public class URLFactoryBuilder {
     return Optional.empty();
   }
 
-  private FactoryMetaDto convertToFactory(
+  /**
+   * Converts given devfile json into factory based on the devfile version.
+   *
+   * @param overrideProperties map of overridden properties to apply in devfile
+   * @param fileContentProvider service-specific devfile related file content provider
+   * @param location devfile's location
+   * @return new factory created from the given devfile
+   * @throws OverrideParameterException when any issue when overriding parameters occur
+   * @throws DevfileException when devfile is not valid or we can't work with it
+   */
+  private FactoryMetaDto createFactory(
       JsonNode devfileJson,
       Map<String, String> overrideProperties,
       FileContentProvider fileContentProvider,

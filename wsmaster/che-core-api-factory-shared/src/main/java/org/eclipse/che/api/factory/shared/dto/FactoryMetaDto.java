@@ -19,7 +19,15 @@ import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 
+/** Ancestor for Factory DTOs that does not know about devfile version it will hold. */
 public interface FactoryMetaDto extends Hyperlinks {
+
+  /**
+   * Gives an option to update the factory based on devfile version. See {@link FactoryVisitor}.
+   *
+   * @param visitor visitor that should update the factory
+   * @return updated factory
+   */
   FactoryMetaDto acceptVisitor(FactoryVisitor visitor);
 
   @FactoryParameter(obligation = MANDATORY)
