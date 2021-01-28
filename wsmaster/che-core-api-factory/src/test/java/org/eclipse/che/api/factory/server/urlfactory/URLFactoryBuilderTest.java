@@ -73,8 +73,9 @@ public class URLFactoryBuilderTest {
 
   @BeforeClass
   public void setUp() {
-    this.urlFactoryBuilder = new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser,
-        authenticationLocationComposerProvider);
+    this.urlFactoryBuilder =
+        new URLFactoryBuilder(
+            defaultEditor, defaultPlugin, devfileParser, authenticationLocationComposerProvider);
   }
 
   @Test

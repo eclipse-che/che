@@ -118,8 +118,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
         return currentUser.get();
       }
     } catch (ScmBadRequestException | ScmItemNotFoundException scmException) {
-      throw new ScmCommunicationException(
-          scmException.getMessage(), scmException);
+      throw new ScmCommunicationException(scmException.getMessage(), scmException);
     }
     throw new ScmItemNotFoundException(
         "Current user not found. That is possible only if user are not authorized against "

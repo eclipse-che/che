@@ -28,7 +28,6 @@ public class BitbucketServerModule extends AbstractModule {
     tokenFetcherMultibinder.addBinding().to(BitbucketServerPersonalAccessTokenFetcher.class);
     bind(BitbucketServerApiClient.class).toProvider(BitbucketServerApiProvider.class);
 
-
     MapBinder.newMapBinder(binder(), String.class, AuthenticationLocationComposer.class)
         .addBinding("bitbucket_server")
         .to(BitbucketServerAuthenticationLocationComposer.class);

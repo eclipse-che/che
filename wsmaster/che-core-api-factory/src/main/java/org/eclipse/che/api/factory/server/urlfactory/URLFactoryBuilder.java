@@ -127,29 +127,30 @@ public class URLFactoryBuilder {
                 .withSource(location.filename().isPresent() ? location.filename().get() : null);
         return Optional.of(factoryDto);
       } catch (OverrideParameterException e) {
-        throw new BadRequestException(
-            "Error processing override parameter(s): " + e.getMessage());
+        throw new BadRequestException("Error processing override parameter(s): " + e.getMessage());
       } catch (DevfileException e) {
-          throw toApiException(e, location);
-        }
+        throw toApiException(e, location);
+      }
     }
     return Optional.empty();
   }
 
-  private ApiException toApiException(DevfileException devfileException,
-      DevfileLocation location) {
+  private ApiException toApiException(DevfileException devfileException, DevfileLocation location) {
     final Throwable cause = devfileException.getCause();
     if (cause instanceof ScmUnauthorizedException) {
-      AuthenticationLocationComposer locationComposer = authenticationLocationComposerProvider.get(((ScmUnauthorizedException)cause).getOauthProvider());
+      AuthenticationLocationComposer locationComposer =
+          authenticationLocationComposerProvider.get(
+              ((ScmUnauthorizedException) cause).getOauthProvider());
       if (locationComposer != null) {
-        return new AuthenticationException(303, cause.getMessage(),  locationComposer.composeLocation());
+        return new AuthenticationException(
+            303, cause.getMessage(), locationComposer.composeLocation());
       } else {
         return new AuthenticationException(cause.getMessage());
       }
     } else if (cause instanceof UnknownScmProviderException) {
       return new ServerException(
-          "Provided location is unknown or misconfigured on the server side. Error message:" + cause
-              .getMessage());
+          "Provided location is unknown or misconfigured on the server side. Error message:"
+              + cause.getMessage());
     }
     return new BadRequestException(
         "Error occurred during creation a workspace from devfile located at `"

@@ -23,7 +23,6 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;

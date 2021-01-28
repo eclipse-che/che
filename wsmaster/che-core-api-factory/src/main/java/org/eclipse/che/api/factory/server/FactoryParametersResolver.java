@@ -39,6 +39,5 @@ public interface FactoryParametersResolver {
    * @param factoryParameters map containing factory data parameters provided through URL
    * @throws BadRequestException when data are invalid
    */
-  FactoryDto createFactory(@NotNull Map<String, String> factoryParameters)
-      throws ApiException;
+  FactoryDto createFactory(@NotNull Map<String, String> factoryParameters) throws ApiException;
 }
