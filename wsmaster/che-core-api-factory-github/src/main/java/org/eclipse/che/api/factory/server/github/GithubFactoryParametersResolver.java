@@ -29,8 +29,6 @@ import org.eclipse.che.api.factory.shared.dto.FactoryVisitor;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides Factory Parameters resolver for github repositories.
@@ -39,8 +37,6 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class GithubFactoryParametersResolver extends DefaultFactoryParameterResolver {
-
-  private static final Logger LOG = LoggerFactory.getLogger(GithubFactoryParametersResolver.class);
 
   /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
