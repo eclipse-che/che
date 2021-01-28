@@ -183,6 +183,9 @@ public class DevfileParser {
   private DevfileImpl parse(
       JsonNode parsed, ObjectMapper mapper, Map<String, String> overrideProperties)
       throws DevfileFormatException, OverrideParameterException {
+    if (parsed == null) {
+      throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
+    }
     DevfileImpl devfile;
     try {
       parsed = overridePropertiesApplier.applyPropertiesOverride(parsed, overrideProperties);

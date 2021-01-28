@@ -515,7 +515,7 @@ public class DevfileServiceTest {
                 newDto(DevfileDto.class)
                     .withApiVersion(null)
                     .withMetadata(newDto(MetadataDto.class).withName("name"))),
-        "Devfile schema validation failed. Error: The object must have a property whose name is \"apiVersion\"."
+        "Devfile schema validation failed. Error: Neither of `apiVersion` or `schemaVersion` found. This is not a valid devfile."
       }
     };
   }
