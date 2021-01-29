@@ -19,7 +19,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -111,7 +110,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileParser.parseYamlRaw(anyString(), anyBoolean()))
+    when(devfileParser.parseYamlRaw(anyString()))
         .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
     when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
@@ -175,7 +174,7 @@ public class URLFactoryBuilderTest {
                   }
                 }));
     when(fileContentProvider.fetchContent(anyString())).thenReturn("anything");
-    when(devfileParser.parseYamlRaw("anything", false))
+    when(devfileParser.parseYamlRaw("anything"))
         .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
     when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);

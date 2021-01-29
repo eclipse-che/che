@@ -118,7 +118,7 @@ public class URLFactoryBuilder {
       }
 
       try {
-        JsonNode parsedDevfile = devfileParser.parseYamlRaw(devfileYamlContent, true);
+        JsonNode parsedDevfile = devfileParser.parseYamlRaw(devfileYamlContent);
         return Optional.of(
             createFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
       } catch (DevfileException | OverrideParameterException e) {
