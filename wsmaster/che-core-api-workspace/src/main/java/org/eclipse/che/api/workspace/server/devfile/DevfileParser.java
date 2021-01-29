@@ -88,7 +88,7 @@ public class DevfileParser {
    */
   public DevfileImpl parseYaml(String devfileContent) throws DevfileFormatException {
     try {
-      return parse(parseYamlRaw(devfileContent), yamlMapper, emptyMap());
+      return parse(parseYamlRaw(devfileContent, false), yamlMapper, emptyMap());
     } catch (OverrideParameterException e) {
       // should never happen as we send empty overrides map
       throw new RuntimeException(e.getMessage());
@@ -99,16 +99,19 @@ public class DevfileParser {
    * Tries to parse given `yaml` into {@link JsonNode} and validates it with devfile schema.
    *
    * @param yaml to parse
+   * @param validate if true, parsed yaml will be validated against proper schema
    * @return parsed yaml
    * @throws DevfileFormatException if given yaml is empty or is not valid devfile
    */
-  public JsonNode parseYamlRaw(String yaml) throws DevfileFormatException {
+  public JsonNode parseYamlRaw(String yaml, boolean validate) throws DevfileFormatException {
     try {
       JsonNode devfileJson = yamlMapper.readTree(yaml);
       if (devfileJson == null) {
         throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
       }
-      schemaValidator.validate(devfileJson);
+      if (validate) {
+        schemaValidator.validate(devfileJson);
+      }
       return devfileJson;
     } catch (JsonProcessingException jpe) {
       throw new DevfileFormatException("Can't parse devfile yaml.", jpe);
