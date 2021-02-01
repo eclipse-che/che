@@ -18,16 +18,20 @@ public class ScmUnauthorizedException extends Exception {
   private final String oauthVersion;
   private final String authenticateUrl;
 
-  public ScmUnauthorizedException(String message, String oauthProvider,
-      String oauthVersion, String authenticateUrl) {
+  public ScmUnauthorizedException(
+      String message, String oauthProvider, String oauthVersion, String authenticateUrl) {
     super(message);
     this.oauthProvider = oauthProvider;
     this.oauthVersion = oauthVersion;
     this.authenticateUrl = authenticateUrl;
   }
 
-  public ScmUnauthorizedException(String message, String oauthProvider, Throwable cause,
-      String oauthVersion, String authenticateUrl) {
+  public ScmUnauthorizedException(
+      String message,
+      String oauthProvider,
+      Throwable cause,
+      String oauthVersion,
+      String authenticateUrl) {
     super(message, cause);
     this.oauthProvider = oauthProvider;
     this.oauthVersion = oauthVersion;

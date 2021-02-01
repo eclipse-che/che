@@ -43,7 +43,9 @@ public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
 
   @Override
   public String getLocalAuthenticateUrl() {
-    return apiEndpoint + "/oauth/1.0/authenticate?oauth_provider=" + AUTHENTICATOR_NAME
+    return apiEndpoint
+        + "/oauth/1.0/authenticate?oauth_provider="
+        + AUTHENTICATOR_NAME
         + "&request_method=POST&signature_method=rsa";
   }
 }

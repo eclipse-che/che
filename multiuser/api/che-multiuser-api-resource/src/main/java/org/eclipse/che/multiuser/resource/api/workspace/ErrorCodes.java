@@ -12,8 +12,7 @@
 package org.eclipse.che.multiuser.resource.api.workspace;
 
 /**
- * Defines error codes, defined codes MUST NOT conflict with existing {@link
- * org.eclipse.che.api.core.ErrorCodes}, error codes must be in range <b>10000-14999</b> inclusive.
+ * Defines error codes, defined codes MUST NOT conflict, error codes must be in range <b>10000-14999</b> inclusive.
  *
  * @author Yevhenii Voevodin
  */

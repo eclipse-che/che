@@ -134,10 +134,13 @@ public class URLFactoryBuilder {
     Throwable cause = devfileException.getCause();
     if (cause instanceof ScmUnauthorizedException) {
       ScmUnauthorizedException scmCause = (ScmUnauthorizedException) cause;
-      return new UnauthorizedException("SCM Authentication required", 401,
-          Map.of("oauth_version",  scmCause.getOauthVersion(),
-                 "oauth_provider", scmCause.getOauthProvider(),
-                 "oauth_authentication_url", scmCause.getAuthenticateUrl()));
+      return new UnauthorizedException(
+          "SCM Authentication required",
+          401,
+          Map.of(
+              "oauth_version", scmCause.getOauthVersion(),
+              "oauth_provider", scmCause.getOauthProvider(),
+              "oauth_authentication_url", scmCause.getAuthenticateUrl()));
     } else if (cause instanceof UnknownScmProviderException) {
       return new ServerException(
           "Provided location is unknown or misconfigured on the server side. Error message:"

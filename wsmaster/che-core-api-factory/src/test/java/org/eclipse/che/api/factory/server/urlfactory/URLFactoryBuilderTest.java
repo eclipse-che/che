@@ -72,8 +72,7 @@ public class URLFactoryBuilderTest {
 
   @BeforeClass
   public void setUp() {
-    this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser);
+    this.urlFactoryBuilder = new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser);
   }
 
   @Test
@@ -145,8 +144,7 @@ public class URLFactoryBuilderTest {
 
   @Test(dataProvider = "devfiles")
   public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
-      throws ApiException, IOException,
-      OverrideParameterException, DevfileException {
+      throws ApiException, IOException, OverrideParameterException, DevfileException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocations())

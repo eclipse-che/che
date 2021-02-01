@@ -61,7 +61,6 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApiCl
                 + " It should contain values from 'che.oauth1.bitbucket.endpoint'");
       } else {
         if (bitbucketEndpoints.contains(bitbucketOauth1Endpoint)) {
-          LOG.info("Authenticators size:" + authenticators.size());
           Optional<OAuthAuthenticator> authenticator =
               authenticators
                   .stream()

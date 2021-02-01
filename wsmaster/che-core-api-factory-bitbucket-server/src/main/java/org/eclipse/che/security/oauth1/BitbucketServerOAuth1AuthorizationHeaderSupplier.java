@@ -46,7 +46,8 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplier
                 + " is not authorized in "
                 + authenticator.getOAuthProvider()
                 + " OAuth1 provider",
-            authenticator.getOAuthProvider(), "1.0",
+            authenticator.getOAuthProvider(),
+            "1.0",
             authenticator.getLocalAuthenticateUrl());
       }
       return authorizationHeader;
