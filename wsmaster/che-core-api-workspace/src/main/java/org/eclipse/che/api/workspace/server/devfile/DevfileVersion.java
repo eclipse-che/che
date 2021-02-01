@@ -47,10 +47,13 @@ public class DevfileVersion {
    * Gives major version of the devfile.
    *
    * <pre>
+   *   1 -> 1
    *   1.0.0 -> 1
    *   1.99 -> 1
    *   2.0.0 -> 2
    *   2.1 -> 2
+   *   a.a -> DevfileException
+   *   a -> DevfileException
    * </pre>
    *
    * @param devfile to inspect
@@ -60,7 +63,13 @@ public class DevfileVersion {
   public int devfileMajorVersion(JsonNode devfile) throws DevfileException {
     String version = devfileVersion(devfile);
 
-    String majorVersion = version.substring(0, version.indexOf("."));
-    return Integer.parseInt(majorVersion);
+    int dot = version.indexOf(".");
+    final String majorVersion = dot > 0 ? version.substring(0, dot) : version;
+    try {
+      return Integer.parseInt(majorVersion);
+    } catch (NumberFormatException nfe) {
+      throw new DevfileException(
+          "Unable to parse devfile version. This is not a valid devfile.", nfe);
+    }
   }
 }

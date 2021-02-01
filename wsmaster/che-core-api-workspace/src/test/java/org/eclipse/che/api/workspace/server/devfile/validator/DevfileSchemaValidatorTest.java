@@ -77,6 +77,7 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_name_and_generatename.yaml"},
       {"devfile/devfile_with_sparse_checkout_dir.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
+      {"devfile/devfile_v2_just_schemaVersion.yaml"},
       {"command/devfile_command_with_preview_url.yaml"},
       {"command/devfile_command_with_preview_url_only_port.yaml"},
     };
@@ -254,6 +255,14 @@ public class DevfileSchemaValidatorTest {
         "command/devfile_command_with_preview_url_only_path.yaml",
         "(/commands/0/previewUrl):The object must have a property whose name is \"port\"."
       },
+      {
+        "devfile/devfile_v2_invalid_schemaVersion.yaml",
+        "Version 'a.b.c' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+      },
+      {
+        "devfile/devfile_v2_unsupported_schemaVersion.yaml",
+        "Version '22.33.44' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+      }
     };
   }
 
