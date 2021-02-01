@@ -19,9 +19,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
@@ -153,40 +150,6 @@ public class FactoryService extends Service {
       } else {
         throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
       }
-    }
-  }
-
-  /**
-   * Creates factory image from input stream. InputStream should be closed manually.
-   *
-   * @param is input stream with image data
-   * @param mediaType media type of image
-   * @param name image name
-   * @return factory image, if {@param is} has no content then empty factory image will be returned
-   * @throws BadRequestException when factory image exceeded maximum size
-   * @throws ServerException when any server errors occurs
-   */
-  public static FactoryImage createImage(InputStream is, String mediaType, String name)
-      throws BadRequestException, ServerException {
-    try {
-      final ByteArrayOutputStream out = new ByteArrayOutputStream();
-      final byte[] buffer = new byte[1024];
-      int read;
-      while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-        out.write(buffer, 0, read);
-        if (out.size() > 1024 * 1024) {
-          throw new BadRequestException("Maximum upload size exceeded.");
-        }
-      }
-
-      if (out.size() == 0) {
-        return new FactoryImage();
-      }
-      out.flush();
-
-      return new FactoryImage(out.toByteArray(), mediaType, name);
-    } catch (IOException ioEx) {
-      throw new ServerException(ioEx.getLocalizedMessage());
     }
   }
 

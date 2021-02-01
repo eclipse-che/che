@@ -73,14 +73,6 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   @Override
   @FactoryParameter(obligation = OPTIONAL)
-  ButtonDto getButton();
-
-  void setButton(ButtonDto button);
-
-  FactoryDto withButton(ButtonDto button);
-
-  @Override
-  @FactoryParameter(obligation = OPTIONAL)
   IdeDto getIde();
 
   void setIde(IdeDto ide);
