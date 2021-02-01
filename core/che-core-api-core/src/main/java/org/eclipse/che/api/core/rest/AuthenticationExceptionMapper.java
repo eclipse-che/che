@@ -36,14 +36,6 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
     LOG.debug(exception.getLocalizedMessage());
 
     int responseStatus = exception.getResponseStatus();
-    String authenticationURL = exception.getAuthenticationURL();
-    if (authenticationURL != null) {
-      return Response.status(responseStatus)
-          .header("Location", authenticationURL)
-          .build();
-    }
-
-
     String message = exception.getMessage();
     if (message != null) {
       return Response.status(responseStatus)

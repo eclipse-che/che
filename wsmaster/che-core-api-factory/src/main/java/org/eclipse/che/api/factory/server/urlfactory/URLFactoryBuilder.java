@@ -26,10 +26,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.AuthenticationException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.factory.server.AuthenticationLocationComposer;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
@@ -63,18 +62,14 @@ public class URLFactoryBuilder {
 
   private final DevfileParser devfileParser;
 
-  private final Map<String, AuthenticationLocationComposer> authenticationLocationComposerProvider;
-
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileParser devfileParser,
-      Map<String, AuthenticationLocationComposer> authenticationLocationComposerProvider) {
+      DevfileParser devfileParser) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.devfileParser = devfileParser;
-    this.authenticationLocationComposerProvider = authenticationLocationComposerProvider;
   }
 
   /**
@@ -136,17 +131,13 @@ public class URLFactoryBuilder {
   }
 
   private ApiException toApiException(DevfileException devfileException, DevfileLocation location) {
-    final Throwable cause = devfileException.getCause();
+    Throwable cause = devfileException.getCause();
     if (cause instanceof ScmUnauthorizedException) {
-      AuthenticationLocationComposer locationComposer =
-          authenticationLocationComposerProvider.get(
-              ((ScmUnauthorizedException) cause).getOauthProvider());
-      if (locationComposer != null) {
-        return new AuthenticationException(
-            303, cause.getMessage(), locationComposer.composeLocation());
-      } else {
-        return new AuthenticationException(cause.getMessage());
-      }
+      ScmUnauthorizedException scmCause = (ScmUnauthorizedException) cause;
+      return new UnauthorizedException("SCM Authentication required", 401,
+          Map.of("oauth_version",  scmCause.getOauthVersion(),
+                 "oauth_provider", scmCause.getOauthProvider(),
+                 "oauth_authentication_url", scmCause.getAuthenticateUrl()));
     } else if (cause instanceof UnknownScmProviderException) {
       return new ServerException(
           "Provided location is unknown or misconfigured on the server side. Error message:"

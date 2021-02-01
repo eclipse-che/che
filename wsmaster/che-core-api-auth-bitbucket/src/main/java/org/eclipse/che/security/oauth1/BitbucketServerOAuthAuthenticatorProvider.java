@@ -40,7 +40,7 @@ public class BitbucketServerOAuthAuthenticatorProvider implements Provider<OAuth
       throws IOException {
     authenticator =
         getOAuthAuthenticator(consumerKeyPath, privateKeyPath, bitbucketEndpoint, apiEndpoint);
-    LOG.debug("{} Bitbucket OAuthAuthenticator is used.", authenticator);
+    LOG.info("{} Bitbucket OAuthAuthenticator is used.", authenticator);
   }
 
   @Override

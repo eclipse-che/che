@@ -30,8 +30,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
@@ -74,8 +73,7 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(
-            defaultEditor, defaultPlugin, devfileParser, authenticationLocationComposerProvider);
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser);
   }
 
   @Test
@@ -147,8 +145,8 @@ public class URLFactoryBuilderTest {
 
   @Test(dataProvider = "devfiles")
   public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
-      throws BadRequestException, ServerException, DevfileException, IOException,
-          OverrideParameterException {
+      throws ApiException, IOException,
+      OverrideParameterException, DevfileException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocations())

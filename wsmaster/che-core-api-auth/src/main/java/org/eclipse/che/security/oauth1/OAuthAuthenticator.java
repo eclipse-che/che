@@ -351,6 +351,8 @@ public abstract class OAuthAuthenticator {
     return keyFactory.generatePrivate(keySpec);
   }
 
+  public abstract String getLocalAuthenticateUrl();
+
   private static class OAuthPostTemporaryToken extends OAuthGetTemporaryToken {
     OAuthPostTemporaryToken(String authorizationServerUrl) {
       super(authorizationServerUrl);

@@ -15,18 +15,34 @@ package org.eclipse.che.api.factory.server.scm.exception;
 public class ScmUnauthorizedException extends Exception {
 
   private final String oauthProvider;
+  private final String oauthVersion;
+  private final String authenticateUrl;
 
-  public ScmUnauthorizedException(String message, String oauthProvider) {
+  public ScmUnauthorizedException(String message, String oauthProvider,
+      String oauthVersion, String authenticateUrl) {
     super(message);
     this.oauthProvider = oauthProvider;
+    this.oauthVersion = oauthVersion;
+    this.authenticateUrl = authenticateUrl;
   }
 
-  public ScmUnauthorizedException(String message, String oauthProvider, Throwable cause) {
+  public ScmUnauthorizedException(String message, String oauthProvider, Throwable cause,
+      String oauthVersion, String authenticateUrl) {
     super(message, cause);
     this.oauthProvider = oauthProvider;
+    this.oauthVersion = oauthVersion;
+    this.authenticateUrl = authenticateUrl;
   }
 
   public String getOauthProvider() {
     return oauthProvider;
+  }
+
+  public String getAuthenticateUrl() {
+    return authenticateUrl;
+  }
+
+  public String getOauthVersion() {
+    return oauthVersion;
   }
 }

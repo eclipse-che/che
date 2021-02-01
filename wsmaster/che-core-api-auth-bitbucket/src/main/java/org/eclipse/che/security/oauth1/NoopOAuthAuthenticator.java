@@ -46,4 +46,9 @@ public class NoopOAuthAuthenticator extends OAuthAuthenticator {
     throw new RuntimeException(
         "The fallback noop authenticator cannot be used for authentication. Make sure OAuth is properly configured.");
   }
+
+  @Override
+  public String getLocalAuthenticateUrl() {
+    return null;
+  }
 }
