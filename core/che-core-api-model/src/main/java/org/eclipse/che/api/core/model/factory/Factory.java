@@ -38,9 +38,6 @@ public interface Factory {
   /** Returns restrictions of this factory instance. */
   Policies getPolicies();
 
-  /** Returns factory button for this instance. */
-  Button getButton();
-
   /** Returns IDE for this factory instance. */
   Ide getIde();
 }

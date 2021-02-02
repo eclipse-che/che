@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -29,11 +30,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import okio.BufferedSink;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
 public class DirectKubernetesAPIAccessHelper {
+  // four megabytes is hopefully gonna be fine even for the most monstrous YAML files ;)
+  private static final int MAX_BODY_SIZE = 4 * 1024 * 1024;
+
   private static final String DEFAULT_MEDIA_TYPE =
       javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE
           .withCharset(StandardCharsets.UTF_8.name())
@@ -87,8 +90,14 @@ public class DirectKubernetesAPIAccessHelper {
       throws IOException {
     String mediaType = inputMediaType(headers);
 
+    // ByteStreams is stable in the newer versions of Guava
+    @SuppressWarnings("UnstableApiUsage")
     RequestBody requestBody =
-        body == null ? null : new InputStreamBasedRequestBody(body, mediaType);
+        body == null
+            ? null
+            : RequestBody.create(
+                MediaType.parse(mediaType),
+                ByteStreams.toByteArray(ByteStreams.limit(body, MAX_BODY_SIZE)));
 
     Call httpCall =
         httpClient.newCall(prepareRequest(url, httpMethod, requestBody, toOkHttpHeaders(headers)));
@@ -150,29 +159,5 @@ public class DirectKubernetesAPIAccessHelper {
     }
 
     return headersBuilder.build();
-  }
-
-  private static final class InputStreamBasedRequestBody extends RequestBody {
-    private final InputStream inputStream;
-    private final MediaType mediaType;
-
-    private InputStreamBasedRequestBody(InputStream is, String contentType) {
-      this.inputStream = is;
-      this.mediaType = contentType == null ? null : MediaType.parse(contentType);
-    }
-
-    @Override
-    public MediaType contentType() {
-      return mediaType;
-    }
-
-    @Override
-    public void writeTo(BufferedSink sink) throws IOException {
-      byte[] buffer = new byte[1024];
-      int cnt;
-      while ((cnt = inputStream.read(buffer)) != -1) {
-        sink.write(buffer, 0, cnt);
-      }
-    }
   }
 }

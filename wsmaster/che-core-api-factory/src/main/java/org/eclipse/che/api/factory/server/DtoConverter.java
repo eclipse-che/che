@@ -17,8 +17,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import java.util.List;
 import org.eclipse.che.api.core.model.factory.Action;
 import org.eclipse.che.api.core.model.factory.Author;
-import org.eclipse.che.api.core.model.factory.Button;
-import org.eclipse.che.api.core.model.factory.ButtonAttributes;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.api.core.model.factory.OnAppClosed;
@@ -27,8 +25,6 @@ import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 import org.eclipse.che.api.core.model.factory.Policies;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
-import org.eclipse.che.api.factory.shared.dto.ButtonAttributesDto;
-import org.eclipse.che.api.factory.shared.dto.ButtonDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
@@ -63,9 +59,6 @@ public final class DtoConverter {
     }
     if (factory.getPolicies() != null) {
       factoryDto.withPolicies(asDto(factory.getPolicies()));
-    }
-    if (factory.getButton() != null) {
-      factoryDto.withButton(asDto(factory.getButton()));
     }
     return factoryDto;
   }
@@ -112,26 +105,6 @@ public final class DtoConverter {
         .withReferer(policies.getReferer())
         .withSince(policies.getSince())
         .withUntil(policies.getUntil());
-  }
-
-  public static ButtonDto asDto(Button button) {
-    final ButtonDto buttonDto = newDto(ButtonDto.class);
-    if (button.getAttributes() != null) {
-      buttonDto.withAttributes(asDto(button.getAttributes()));
-    }
-
-    if (button.getType() != null) {
-      buttonDto.withType(button.getType());
-    }
-    return buttonDto;
-  }
-
-  public static ButtonAttributesDto asDto(ButtonAttributes attributes) {
-    return newDto(ButtonAttributesDto.class)
-        .withColor(attributes.getColor())
-        .withCounter(attributes.getCounter())
-        .withLogo(attributes.getLogo())
-        .withStyle(attributes.getStyle());
   }
 
   private DtoConverter() {}

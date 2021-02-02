@@ -67,14 +67,6 @@ public interface FactoryDto extends FactoryMetaDto, Factory, Hyperlinks {
   @Override
   FactoryDto withLinks(List<Link> links);
 
-  @Override
-  @FactoryParameter(obligation = OPTIONAL)
-  ButtonDto getButton();
-
-  void setButton(ButtonDto button);
-
-  FactoryDto withButton(ButtonDto button);
-
   /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override
   @FactoryParameter(obligation = OPTIONAL)

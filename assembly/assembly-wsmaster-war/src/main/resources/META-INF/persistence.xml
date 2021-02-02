@@ -42,10 +42,7 @@
         <class>org.eclipse.che.api.factory.server.model.impl.PoliciesImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.ActionImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.AuthorImpl</class>
-        <class>org.eclipse.che.api.factory.server.model.impl.ButtonAttributesImpl</class>
-        <class>org.eclipse.che.api.factory.server.model.impl.ButtonImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.IdeImpl</class>
-        <class>org.eclipse.che.api.factory.server.FactoryImage</class>
 
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl</class>
