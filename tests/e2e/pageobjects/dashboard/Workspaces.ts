@@ -38,6 +38,12 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
+    async clickOpenButton(workspaceName: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Workspaces.clickOpenButton');
+
+        await this.driverHelper.waitAndClick(this.getOpenButtonLocator(workspaceName), timeout);
+    }
+
     async waitWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItem "${workspaceName}"`);
 
@@ -176,5 +182,8 @@ export class Workspaces {
         return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//li[@role='menuitem']//button[text()='${buttonText}']`);
     }
 
+    private getOpenButtonLocator(workspaceName: string) {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-key=5]//a[text()='Open']`);
+    }
 
 }

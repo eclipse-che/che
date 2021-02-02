@@ -26,6 +26,8 @@ import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -34,15 +36,17 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
+const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const leftToolbar: LeftToolbar = e2eContainer.get(CLASSES.LeftToolbar);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
 const workspaceRootFolderName: string = 'src';
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
+// const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
-const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
+// const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
 const pathToJavaFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
 const pathToChangedJavaFileFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
@@ -70,10 +74,24 @@ suite('Login', async () => {
     });
 });
 
+
 suite('Validation of workspace start', async () => {
-    test('Open workspace', async () => {
-        await driverHelper.navigateToUrl(workspaceUrl);
+    // test('Open workspace', async () => {
+    //     await driverHelper.navigateToUrl(workspaceUrl);
+    // });
+
+    // test('Wait workspace start', async () => {
+    //     await dashboard.waitPage();
+    //     await workspaces.waitWorkspaceWithRunningStatus(workspaceName, TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+    // });
+
+    test ('test', async () => {
+        await dashboard.waitPage();
+        await dashboard.clickWorkspacesButton();
+        await workspaces.waitPage();
+        await workspaces.clickOpenButton(workspaceName);
     });
+
 
     await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
 
