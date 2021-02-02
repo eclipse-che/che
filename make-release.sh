@@ -40,6 +40,7 @@ loadMvnSettingsGpgKey() {
     echo $CHE_OSS_SONATYPE_GPG_KEY | base64 -d > $HOME/.m2/gpg.key
     #load SSH key for release process
     echo ${#CHE_OSS_SONATYPE_GPG_KEY}
+    mkdir $HOME/.ssh/
     echo $CHE_GITHUB_SSH_KEY | base64 -d > $HOME/.ssh/id_rsa
     chmod 0400 $HOME/.ssh/id_rsa
     ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -94,7 +95,11 @@ checkoutProject() {
     PROJECT="${1##*/}"
     echo "checking out project $PROJECT with ${BRANCH} branch"
 
-    git clone $1
+    if [[ ! -d PROJECT ]]; then
+        echo "project not found in ${PROJECT} directory, performing 'git clone'"
+        git clone $1
+    fi
+
     cd $PROJECT
     git checkout ${BASEBRANCH}
 
@@ -384,7 +389,7 @@ updateImageTagsInCheServer() {
     git push origin ${BRANCH}
 }
 
-mkdir $HOME/.ssh/
+
 loadMvnSettingsGpgKey
 installDebDeps
 set -x
@@ -394,3 +399,9 @@ checkoutProjects
 createTags
 prepareRelease
 releaseCheServer
+
+buildImages  ${CHE_VERSION}
+tagLatestImages ${CHE_VERSION}
+pushImagesOnQuay ${CHE_VERSION} pushLatest
+bumpVersions
+updateImageTagsInCheServer

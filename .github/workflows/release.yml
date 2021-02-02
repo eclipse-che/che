@@ -32,9 +32,16 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           fetch-depth: 0
+          path: che
+      - uses: actions/checkout@v2
+        if: ${{ release_parent }}
+        with:
+          name: eclipse/che-parent
+          ref: refs/heads/release
+          path: che-parent
       - name: Check existing tag
         run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(git ls-remote --exit-code origin refs/tags/${CHE_VERSION}) ]]; then
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${CHE_VERSION}) ]]; then
             echo "cannot create release, when tag already exists"
             exit 1
           fi
@@ -61,12 +68,6 @@ jobs:
           architecture: x64 
       - name: Set up environment
         run: |
-          python -m pip install --upgrade pip
-          pip install yq
-          python --version
-          pip --version
-          yq --version
-
           # install more repos
           sudo apt-get update -y || true
           # install more dependencies
