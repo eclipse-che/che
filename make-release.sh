@@ -389,7 +389,7 @@ updateImageTagsInCheServer() {
     git push origin ${BRANCH}
 }
 
-
+installMaven
 loadMvnSettingsGpgKey
 installDebDeps
 set -x

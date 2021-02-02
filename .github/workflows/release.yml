@@ -34,14 +34,14 @@ jobs:
           fetch-depth: 0
           path: che
       - uses: actions/checkout@v2
-        if: ${{ release_parent }}
+        if: ${{ github.event.inputs.releaseParent == 'true' }}
         with:
-          name: eclipse/che-parent
-          ref: refs/heads/release
+          repository: eclipse/che-parent
+          token: {{ secrets.CHE_BOT_GITHUB_TOKEN }}
           path: che-parent
       - name: Check existing tag
         run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${CHE_VERSION}) ]]; then
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}} ]]; then
             echo "cannot create release, when tag already exists"
             exit 1
           fi
