@@ -71,7 +71,7 @@ import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.devfile.DevfileEntityProvider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -153,7 +153,7 @@ public class WorkspaceServiceTest {
   private DevfileEntityProvider devfileEntityProvider =
       new DevfileEntityProvider(
           new DevfileParser(
-              new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersion()),
+              new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector()),
               new DevfileIntegrityValidator(Collections.emptyMap())));
 
   @Mock private WorkspaceManager wsManager;

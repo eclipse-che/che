@@ -34,7 +34,7 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
@@ -61,18 +61,18 @@ public class URLFactoryBuilder {
   private final String defaultChePlugins;
 
   private final DevfileParser devfileParser;
-  private final DevfileVersion devfileVersion;
+  private final DevfileVersionDetector devfileVersionDetector;
 
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
       DevfileParser devfileParser,
-      DevfileVersion devfileVersion) {
+      DevfileVersionDetector devfileVersionDetector) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.devfileParser = devfileParser;
-    this.devfileVersion = devfileVersion;
+    this.devfileVersionDetector = devfileVersionDetector;
   }
 
   /**
@@ -149,7 +149,7 @@ public class URLFactoryBuilder {
       DevfileLocation location)
       throws OverrideParameterException, DevfileException {
 
-    if (devfileVersion.devfileMajorVersion(devfileJson) == 1) {
+    if (devfileVersionDetector.devfileMajorVersion(devfileJson) == 1) {
       DevfileImpl devfile = devfileParser.parseJsonNode(devfileJson, overrideProperties);
       devfileParser.resolveReference(devfile, fileContentProvider);
       devfile = ensureToUseGenerateName(devfile);

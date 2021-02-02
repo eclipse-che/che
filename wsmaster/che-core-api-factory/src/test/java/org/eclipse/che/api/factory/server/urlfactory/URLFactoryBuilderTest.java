@@ -38,7 +38,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -72,7 +72,7 @@ public class URLFactoryBuilderTest {
 
   @Mock private DevfileParser devfileParser;
 
-  @Mock private DevfileVersion devfileVersion;
+  @Mock private DevfileVersionDetector devfileVersionDetector;
 
   /** Tested instance. */
   private URLFactoryBuilder urlFactoryBuilder;
@@ -80,7 +80,7 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser, devfileVersion);
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser, devfileVersionDetector);
   }
 
   @Test
@@ -113,7 +113,7 @@ public class URLFactoryBuilderTest {
     when(devfileParser.parseYamlRaw(anyString()))
         .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
-    when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
+    when(devfileVersionDetector.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
 
     FactoryDto factory =
         (FactoryDto)
@@ -177,7 +177,7 @@ public class URLFactoryBuilderTest {
     when(devfileParser.parseYamlRaw("anything"))
         .thenReturn(new ObjectNode(JsonNodeFactory.instance));
     when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
-    when(devfileVersion.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
+    when(devfileVersionDetector.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
     FactoryDto factory =
         (FactoryDto)
             urlFactoryBuilder

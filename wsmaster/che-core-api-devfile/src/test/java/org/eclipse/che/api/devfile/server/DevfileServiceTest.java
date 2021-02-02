@@ -61,7 +61,7 @@ import org.eclipse.che.api.devfile.server.spi.UserDevfileDao;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileEntityProvider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
@@ -99,7 +99,7 @@ public class DevfileServiceTest {
 
   private DevfileParser devfileParser =
       new DevfileParser(
-          new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersion()),
+          new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector()),
           new DevfileIntegrityValidator(Collections.emptyMap()));
   DevfileEntityProvider devfileEntityProvider = new DevfileEntityProvider(devfileParser);
   UserDevfileEntityProvider userDevfileEntityProvider =

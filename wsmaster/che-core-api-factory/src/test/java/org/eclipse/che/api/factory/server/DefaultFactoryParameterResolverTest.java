@@ -32,7 +32,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
@@ -68,7 +68,7 @@ public class DefaultFactoryParameterResolverTest {
 
     // we need to set up an "almost real" devfile converter which is a little bit involved
     DevfileSchemaValidator validator =
-        new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersion());
+        new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector());
 
     Map<String, ComponentIntegrityValidator> validators = new HashMap<>();
     validators.put(EDITOR_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
@@ -81,7 +81,7 @@ public class DefaultFactoryParameterResolverTest {
     DevfileParser devfileParser = new DevfileParser(validator, integrityValidator);
 
     URLFactoryBuilder factoryBuilder =
-        new URLFactoryBuilder("editor", "plugin", devfileParser, new DevfileVersion());
+        new URLFactoryBuilder("editor", "plugin", devfileParser, new DevfileVersionDetector());
 
     DefaultFactoryParameterResolver res =
         new DefaultFactoryParameterResolver(factoryBuilder, urlFetcher);

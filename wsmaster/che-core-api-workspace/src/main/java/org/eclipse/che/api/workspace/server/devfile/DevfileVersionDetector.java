@@ -17,7 +17,7 @@ import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
 /** Class that helps determine devfile versions. */
 @Singleton
-public class DevfileVersion {
+public class DevfileVersionDetector {
 
   private final String DEVFILE_V1_VERSION_FIELD = "apiVersion";
   private final String DEVFILE_V2_VERSION_FIELD = "schemaVersion";

@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -35,7 +35,8 @@ public class DevfileSchemaValidatorTest {
   @BeforeClass
   public void setUp() {
     yamlMapper = new ObjectMapper(new YAMLFactory());
-    schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersion());
+    schemaValidator =
+        new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector());
   }
 
   @Test(dataProvider = "validDevfiles")

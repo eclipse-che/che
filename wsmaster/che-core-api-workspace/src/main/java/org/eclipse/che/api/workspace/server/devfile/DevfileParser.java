@@ -125,9 +125,19 @@ public class DevfileParser {
   }
 
   /**
-   * Parse given devfile in {@link JsonNode} format into our {@link DevfileImpl}.
+   * Parse given devfile in {@link JsonNode} format into our {@link DevfileImpl} and provides
+   * possibility to override its values using key-value map, where key is an json-pointer-like
+   * string and value is desired property value. NOTE: unlike json pointers, objects in arrays
+   * should be pointed by their names, not by index. Examples:
    *
-   * @param devfile given devfile
+   * <ul>
+   *   <li>metadata.generateName : python-dev-
+   *   <li>projects.foo.source.type : git // foo is an project name
+   * </ul>
+   *
+   * <p>Performs schema and integrity validation of input data.
+   *
+   * @param devfile devfile parsed in Json
    * @param overrideProperties properties to override
    * @return devfile created from given {@link JsonNode}
    * @throws OverrideParameterException when any error when overriding parameters

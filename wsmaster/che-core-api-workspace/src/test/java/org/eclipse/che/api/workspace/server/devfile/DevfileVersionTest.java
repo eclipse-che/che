@@ -20,26 +20,26 @@ import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.testng.annotations.Test;
 
 public class DevfileVersionTest {
-  private final DevfileVersion devfileVersion = new DevfileVersion();
+  private final DevfileVersionDetector devfileVersionDetector = new DevfileVersionDetector();
 
   @Test(expectedExceptions = DevfileException.class)
   public void shouldThrowExceptionWhenEmptyDevfile() throws DevfileException {
     JsonNode devfile = new ObjectNode(JsonNodeFactory.instance);
-    devfileVersion.devfileVersion(devfile);
+    devfileVersionDetector.devfileVersion(devfile);
   }
 
   @Test
   public void shouldReturnApiVersion() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "1.1.1");
-    assertEquals(devfileVersion.devfileVersion(devfile), "1.1.1");
+    assertEquals(devfileVersionDetector.devfileVersion(devfile), "1.1.1");
   }
 
   @Test
   public void shouldReturnSchemaVersion() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("schemaVersion", "1.1.1");
-    assertEquals(devfileVersion.devfileVersion(devfile), "1.1.1");
+    assertEquals(devfileVersionDetector.devfileVersion(devfile), "1.1.1");
   }
 
   @Test
@@ -47,54 +47,54 @@ public class DevfileVersionTest {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "1");
     devfile.put("schemaVersion", "2");
-    assertEquals(devfileVersion.devfileVersion(devfile), "1");
+    assertEquals(devfileVersionDetector.devfileVersion(devfile), "1");
   }
 
   @Test
   public void shouldReturnMainVersionFromSchemaVersion() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("schemaVersion", "10.1.1");
-    assertEquals(devfileVersion.devfileMajorVersion(devfile), 10);
+    assertEquals(devfileVersionDetector.devfileMajorVersion(devfile), 10);
   }
 
   @Test
   public void shouldReturnMainVersionFromApiVersion() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "11.1.1");
-    assertEquals(devfileVersion.devfileMajorVersion(devfile), 11);
+    assertEquals(devfileVersionDetector.devfileMajorVersion(devfile), 11);
   }
 
   @Test(expectedExceptions = DevfileException.class)
   public void shouldThrowExceptionWhenVersionNotDefined() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
-    devfileVersion.devfileMajorVersion(devfile);
+    devfileVersionDetector.devfileMajorVersion(devfile);
   }
 
   @Test
   public void shouldReturnMajorVersionWhenIsNumberString() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "2");
-    assertEquals(devfileVersion.devfileMajorVersion(devfile), 2);
+    assertEquals(devfileVersionDetector.devfileMajorVersion(devfile), 2);
   }
 
   @Test
   public void shouldReturnMajorVersionWhenIsNumber() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", 2);
-    assertEquals(devfileVersion.devfileMajorVersion(devfile), 2);
+    assertEquals(devfileVersionDetector.devfileMajorVersion(devfile), 2);
   }
 
   @Test(expectedExceptions = DevfileException.class)
   public void shouldThrowExceptionWhenVersionIsNotNumber() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "a");
-    devfileVersion.devfileMajorVersion(devfile);
+    devfileVersionDetector.devfileMajorVersion(devfile);
   }
 
   @Test(expectedExceptions = DevfileException.class)
   public void shouldThrowExceptionWhenVersionIsNotSemverNumber() throws DevfileException {
     ObjectNode devfile = new ObjectNode(JsonNodeFactory.instance);
     devfile.put("apiVersion", "a.a");
-    devfileVersion.devfileMajorVersion(devfile);
+    devfileVersionDetector.devfileMajorVersion(devfile);
   }
 }

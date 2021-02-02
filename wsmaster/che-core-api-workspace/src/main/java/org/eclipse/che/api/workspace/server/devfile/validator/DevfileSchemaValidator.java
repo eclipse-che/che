@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.JsonReader;
-import org.eclipse.che.api.workspace.server.devfile.DevfileVersion;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
@@ -42,15 +42,15 @@ public class DevfileSchemaValidator {
   private final ObjectMapper jsonMapper;
   private final Map<String, JsonSchema> schemasByVersion;
   private final ErrorMessageComposer errorMessageComposer;
-  private final DevfileVersion devfileVersionParser;
+  private final DevfileVersionDetector devfileVersionDetector;
 
   @Inject
   public DevfileSchemaValidator(
-      DevfileSchemaProvider schemaProvider, DevfileVersion devfileVersionParser) {
+      DevfileSchemaProvider schemaProvider, DevfileVersionDetector devfileVersionDetector) {
     this.service = JsonValidationService.newInstance();
     this.jsonMapper = new ObjectMapper();
     this.errorMessageComposer = new ErrorMessageComposer();
-    this.devfileVersionParser = devfileVersionParser;
+    this.devfileVersionDetector = devfileVersionDetector;
     try {
       this.schemasByVersion = new HashMap<>();
       for (String version : SUPPORTED_VERSIONS) {
@@ -65,7 +65,7 @@ public class DevfileSchemaValidator {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
-      String devfileVersion = devfileVersionParser.devfileVersion(contentNode);
+      String devfileVersion = devfileVersionDetector.devfileVersion(contentNode);
 
       if (!schemasByVersion.containsKey(devfileVersion)) {
         throw new DevfileFormatException(
