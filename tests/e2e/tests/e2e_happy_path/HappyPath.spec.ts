@@ -76,25 +76,14 @@ suite('Login', async () => {
 
 
 suite('Validation of workspace start', async () => {
-    // test('Open workspace', async () => {
-    //     await driverHelper.navigateToUrl(workspaceUrl);
-    // });
-
-    // test('Wait workspace start', async () => {
-    //     await dashboard.waitPage();
-    //     await workspaces.waitWorkspaceWithRunningStatus(workspaceName, TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-    // });
-
-    test ('test', async () => {
+    test ('Start workspace', async () => {
         await dashboard.waitPage();
         await dashboard.clickWorkspacesButton();
         await workspaces.waitPage();
         await workspaces.clickOpenButton(workspaceName);
     });
 
-
     await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
-
 });
 
 suite('Language server validation', async () => {
