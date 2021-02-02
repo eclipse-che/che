@@ -9,7 +9,9 @@
 #
 # See: https://sipb.mit.edu/doc/safe-shell/
 
-. ./build.include
+base_dir=$(cd "$(dirname "$0")"; pwd)
+. "${base_dir}"/build.include
+
 init "$@"
 
 DIRECTORIES_PROCESSED=""
@@ -43,7 +45,7 @@ build_directory() {
 
 build_all() {
   # loop on all directories and call build.sh script if present
-  for directory in */ ; do
+  for directory in ${base_dir}/*/ ; do
     if [ -e ${directory}/build.sh ] ; then
       build_directory ${directory}
     else
@@ -56,7 +58,7 @@ build_custom() {
   echo "directories are $ARGS and options $OPTIONS"
   # loop on provided directories by the user
    for directory in $(echo ${ARGS}); do
-     build_directory "${directory}/" ${OPTIONS}
+     build_directory "${base_dir}/${directory}/" ${OPTIONS}
    done
 
 }

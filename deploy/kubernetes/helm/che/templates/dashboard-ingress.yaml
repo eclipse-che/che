@@ -45,7 +45,7 @@ spec:
 {{- end }}
       paths:
         # The path rule for Che Dashboard
-      - path: /dashboard/
+      - path: /dashboard/*
         backend:
           serviceName: che-dashboard
           servicePort: 8080
