@@ -32,7 +32,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.user.server.UserManager;
 
 /**
@@ -78,7 +78,7 @@ public class FactoryService extends Service {
     @ApiResponse(code = 400, message = "Missed required parameters, failed to validate factory"),
     @ApiResponse(code = 500, message = "Internal server error")
   })
-  public FactoryDto resolveFactory(
+  public FactoryMetaDto resolveFactory(
       @ApiParam(value = "Parameters provided to create factories") Map<String, String> parameters,
       @ApiParam(
               value = "Whether or not to validate values like it is done when accepting a Factory",
@@ -93,7 +93,7 @@ public class FactoryService extends Service {
     requiredNotNull(parameters, "Factory build parameters");
 
     // search matching resolver and create factory from matching resolver
-    FactoryDto resolvedFactory =
+    FactoryMetaDto resolvedFactory =
         factoryParametersResolverHolder
             .getFactoryParametersResolver(parameters)
             .createFactory(parameters);
@@ -103,11 +103,14 @@ public class FactoryService extends Service {
     if (validate) {
       acceptValidator.validateOnAccept(resolvedFactory);
     }
-    return injectLinks(resolvedFactory);
+
+    resolvedFactory = injectLinks(resolvedFactory);
+
+    return resolvedFactory;
   }
 
   /** Injects factory links. If factory is named then accept named link will be injected. */
-  private FactoryDto injectLinks(FactoryDto factory) {
+  private FactoryMetaDto injectLinks(FactoryMetaDto factory) {
     String username = null;
     if (factory.getCreator() != null && factory.getCreator().getUserId() != null) {
       try {

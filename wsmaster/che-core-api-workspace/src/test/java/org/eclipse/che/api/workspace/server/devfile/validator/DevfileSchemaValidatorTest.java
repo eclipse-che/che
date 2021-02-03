@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import org.eclipse.che.api.workspace.server.devfile.Constants;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -34,7 +35,8 @@ public class DevfileSchemaValidatorTest {
   @BeforeClass
   public void setUp() {
     yamlMapper = new ObjectMapper(new YAMLFactory());
-    schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider());
+    schemaValidator =
+        new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector());
   }
 
   @Test(dataProvider = "validDevfiles")
@@ -76,6 +78,7 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_name_and_generatename.yaml"},
       {"devfile/devfile_with_sparse_checkout_dir.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
+      {"devfile/devfile_v2_just_schemaVersion.yaml"},
       {"command/devfile_command_with_preview_url.yaml"},
       {"command/devfile_command_with_preview_url_only_port.yaml"},
     };
@@ -105,7 +108,7 @@ public class DevfileSchemaValidatorTest {
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          "Version '111.111' of the devfile is not supported. "
+          "Devfile schema validation failed. Error: Version '111.111' of the devfile is not supported. "
               + "Supported versions are '"
               + Constants.SUPPORTED_VERSIONS
               + "'.");
@@ -136,7 +139,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "devfile/devfile_missing_api_version.yaml",
-        "The object must have a property whose name is \"apiVersion\"."
+        "Neither of `apiVersion` or `schemaVersion` found. This is not a valid devfile."
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",
@@ -253,6 +256,14 @@ public class DevfileSchemaValidatorTest {
         "command/devfile_command_with_preview_url_only_path.yaml",
         "(/commands/0/previewUrl):The object must have a property whose name is \"port\"."
       },
+      {
+        "devfile/devfile_v2_invalid_schemaVersion.yaml",
+        "Version 'a.b.c' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+      },
+      {
+        "devfile/devfile_v2_unsupported_schemaVersion.yaml",
+        "Version '22.33.44' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+      }
     };
   }
 
