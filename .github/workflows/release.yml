@@ -17,19 +17,19 @@ on:
         required: true
         default: ''
       releaseParent:
-        description: 'If true, will also release parent'
-        required: true
+        description: 'If true, will also release Che Parent.'
+        required: false
         default: 'false'
       versionParent:
-        description: 'Specify che parent version here, if its release is enabled'
+        description: 'Specify Che Parent version here, if *releaseParent is true'
         required: false
         default: ''
       forceRecreateTags:
-        description: 'If true, tags will be overriden and regenerated. Use with caution'
+        description: 'If true, tags will be overriden and regenerated. Use with caution.'
         required: false
         default: 'false'
       autoReleaseOnNexus:
-        description: 'If true, artifacts will be automatically released when deployed to Nexus'
+        description: 'If true, artifacts will be automatically released when deployed to Nexus, but only if *deployOnNexus* is also true.'
         required: false
         default: 'true'
       deployOnNexus:
@@ -44,12 +44,14 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           path: che
+          fetch-depth: 0
       - uses: actions/checkout@v2
         if: ${{ github.event.inputs.releaseParent == 'true' }}
         with:
           repository: eclipse/che-parent
           token: {{ secrets.CHE_BOT_GITHUB_TOKEN }}
           path: che-parent
+          fetch-depth: 0
       - name: Check existing tag
         run: |
           if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}} ]]; then
