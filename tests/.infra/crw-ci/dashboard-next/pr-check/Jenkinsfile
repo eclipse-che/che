@@ -25,8 +25,7 @@ pipeline {
         mutableCheImageTag = ""
         pathToChectl = ""
 
-        CHE_REPO_BRANCH = "iokhrime-dashboard-next"
-        DASHBOARD_NEXT_REPO_URL="https://github.com/eclipse/che-dashboard.git"
+        UPSTREAM_DASHBOARD_REPO_URL="https://github.com/eclipse/che-dashboard.git"
     }
 
     parameters {
@@ -44,6 +43,9 @@ pipeline {
 
         string(name: 'ghprbSourceBranch',
                 defaultValue: "master")
+
+        string(name: 'ghprbAuthorRepoGitUrl',
+                defaultValue: "https://github.com/eclipse/che-dashboard.git")
 
         string(name: 'e2eTestParameters',
                 defaultValue: "")
@@ -152,7 +154,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     steps {
-                        echo "Build branch $CHE_REPO_BRANCH of upstream projects"
+                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
                         sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
 
                         sh """
@@ -162,13 +164,13 @@ pipeline {
                             
                             for project in \${project_list[@]};
                             do
-                                result=\$(git ls-remote --heads https://github.com/\${project}.git $CHE_REPO_BRANCH)
+                                result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
                                 if [[ \$result == *"refs"* ]]; then
-                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: $CHE_REPO_BRANCH"
-                                    git clone -b $CHE_REPO_BRANCH https://github.com/\${project} \${project}
+                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
+                                    git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
                                     mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
                                 else
-                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: $CHE_REPO_BRANCH."
+                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
                                 fi
                             done
                         """
@@ -198,10 +200,16 @@ pipeline {
                 sh """
                     echo "Donwload the 'che-dashboard-next' project and checkout to branch"
 
-                    git clone $DASHBOARD_NEXT_REPO_URL
+                    git clone $ghprbAuthorRepoGitUrl
                     cd che-dashboard
-                    git checkout $ghprbSourceBranch
 
+                    if [[ "$UPSTREAM_DASHBOARD_REPO_URL" != "$ghprbAuthorRepoGitUrl" ]]; then
+                        echo "Using fork $ghprbAuthorRepoGitUrl"
+                        git fetch -f $UPSTREAM_DASHBOARD_REPO_URL master:$ghprbSourceBranch
+                    fi
+
+                    git checkout $ghprbSourceBranch
+                    
 
                     echo "Build the 'che-dashboard-next' image"
 
