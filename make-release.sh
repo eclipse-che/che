@@ -79,7 +79,6 @@ evaluateCheVariables() {
     echo "Version che-parent: ${VERSION_CHE_PARENT}"
     echo "Deploy to nexus: ${DEPLOY_TO_NEXUS}"
     echo "Autorelease on nexus: ${AUTORELEASE_ON_NEXUS}"
-    echo "Release Process Phases: '${PHASES}'"
 }
 
 checkoutProjects() {

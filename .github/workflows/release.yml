@@ -17,13 +17,25 @@ on:
         required: true
         default: ''
       releaseParent:
-        description: 'If true, will also release parent of the same version'
+        description: 'If true, will also release parent'
         required: true
         default: 'false'
+      versionParent:
+        description: 'Specify che parent version here, if its release is enabled'
+        required: false
+        default: ''
       forceRecreateTags:
         description: 'If true, tags will be overriden and regenerated. Use with caution'
         required: false
         default: 'false'
+      autoReleaseOnNexus:
+        description: 'If true, artifacts will be automatically released when deployed to Nexus'
+        required: false
+        default: 'true'
+      deployOnNexus:
+        description: 'If true, artifacts will be deployed to Nexus.'
+        required: false
+        default: 'true'
 
 jobs:
   build:
@@ -95,6 +107,11 @@ jobs:
           export CHE_OSS_SONATYPE_PASSPHRASE=${{ secrets.CHE_OSS_SONATYPE_PASSPHRASE}}
           export CHE_GITHUB_SSH_KEY=${{ secrets.CHE_GITHUB_SSH_KEY}}
           export CHE_NPM_AUTH_TOKEN=${{ secrets.CHE_NPM_AUTH_TOKEN}}
+
+          export RELEASE_CHE_PARENT="${{ github.event.inputs.releaseParent }}"
+          export VERSION_CHE_PARENT="${{ github.event.inputs.versionParent }}"
+          export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
+          export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
 
           export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
           export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}
