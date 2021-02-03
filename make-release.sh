@@ -1,11 +1,7 @@
 #!/bin/bash
 # Release process automation script. 
 # Used to create branch/tag, update versions in pom.xml
-# and and trigger release by force pushing changes to the release branch 
-
-
-# TODO ensure usage of respective bugfix branches
-
+# build and push maven artifacts and docker images to Quay.io
 
 REGISTRY="quay.io"
 ORGANIZATION="eclipse"

@@ -31,7 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with: 
-          fetch-depth: 0
           path: che
       - uses: actions/checkout@v2
         if: ${{ github.event.inputs.releaseParent == 'true' }}
@@ -68,7 +67,6 @@ jobs:
           architecture: x64 
       - name: Set up environment
         run: |
-          # install more repos
           sudo apt-get update -y || true
           # install more dependencies
           sudo apt-get -y -q install wget curl bash git 
@@ -84,12 +82,6 @@ jobs:
           which java
           javac -version
           which javac
-
-          # do we need any of these?
-          # docker-ce          x86_64  3:19.03.14-3.el7            docker-ce-stable   24 M
-          # gcc-c++            x86_64  4.8.5-44.el7                base              7.2 M
-          # nodejs             x86_64  2:10.23.0-1nodesource       nodesource         20 M
-          # yarn               noarch  1.22.5-1                    yarn              1.2 M
       - name: Release
         run: |
           CHE_VERSION="${{ github.event.inputs.version }}"
@@ -113,4 +105,4 @@ jobs:
           set -e
           # determine which OS we're using: rhel or ubuntu
           cat /etc/os-release || true
-          ./make-release.sh ubuntu
+          ./make-release.sh
