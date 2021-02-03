@@ -28,6 +28,7 @@ import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -74,7 +75,7 @@ suite('Login', async () => {
 
 
 suite('Validation of workspace start', async () => {
-    test ('Start workspace', async () => {
+    test('Start workspace', async () => {
         await dashboard.waitPage();
         await dashboard.clickWorkspacesButton();
         await workspaces.waitPage();
@@ -107,7 +108,7 @@ suite('Language server validation', async () => {
 
     test('Error highlighting', async () => {
         await editor.type(javaFileName, 'error', 30);
-        await editor.waitErrorInLine(30);
+        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
