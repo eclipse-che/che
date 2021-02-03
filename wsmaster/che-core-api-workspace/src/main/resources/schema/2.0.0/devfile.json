@@ -1,0 +1,8 @@
+{
+  "description": "This is a temporary dummy structure for devfile 2.0.0.",
+  "type": "object",
+  "title": "Devfile schema - Version 2.0.0",
+  "required": [
+    "schemaVersion"
+  ]
+}

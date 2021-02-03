@@ -32,11 +32,8 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
-import org.eclipse.che.api.factory.server.model.impl.ButtonAttributesImpl;
-import org.eclipse.che.api.factory.server.model.impl.ButtonImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.model.impl.IdeImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl;
@@ -148,9 +145,6 @@ public class FactoryDaoTest {
     final long currentTime = System.currentTimeMillis();
     update.setPolicies(new PoliciesImpl("ref", "per-click", currentTime, currentTime + 1000));
     update.setCreator(new AuthorImpl(userId, currentTime));
-    update.setButton(
-        new ButtonImpl(
-            new ButtonAttributesImpl("green", "icon", "opacity 0.9", true), Button.Type.NOLOGO));
     update
         .getIde()
         .getOnAppClosed()
@@ -272,8 +266,6 @@ public class FactoryDaoTest {
 
   private static FactoryImpl createFactory(int index, String userId) {
     final long timeMs = System.currentTimeMillis();
-    final ButtonImpl factoryButton =
-        new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true), Button.Type.LOGO);
     final AuthorImpl creator = new AuthorImpl(userId, timeMs);
     final PoliciesImpl policies = new PoliciesImpl("referrer", "perClick", timeMs, timeMs + 1000);
     final List<ActionImpl> a1 =
@@ -294,7 +286,6 @@ public class FactoryDaoTest {
             .generateId()
             .setVersion("4_0")
             .setName("factoryName" + index)
-            .setButton(factoryButton)
             .setCreator(creator)
             .setPolicies(policies)
             .setIde(ide)

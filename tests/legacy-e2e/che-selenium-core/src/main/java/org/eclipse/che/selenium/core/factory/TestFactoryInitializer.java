@@ -26,7 +26,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
-import org.eclipse.che.api.factory.shared.dto.ButtonDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
@@ -238,21 +237,6 @@ public class TestFactoryInitializer {
     @Override
     public FactoryDto withCreator(AuthorDto creator) {
       return factoryDto.withCreator(creator);
-    }
-
-    @Override
-    public ButtonDto getButton() {
-      return factoryDto.getButton();
-    }
-
-    @Override
-    public void setButton(ButtonDto button) {
-      factoryDto.setButton(button);
-    }
-
-    @Override
-    public FactoryDto withButton(ButtonDto button) {
-      return factoryDto.withButton(button);
     }
 
     @Override

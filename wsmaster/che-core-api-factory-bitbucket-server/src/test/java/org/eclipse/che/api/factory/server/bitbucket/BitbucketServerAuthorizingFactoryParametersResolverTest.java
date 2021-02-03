@@ -108,7 +108,8 @@ public class BitbucketServerAuthorizingFactoryParametersResolverTest {
         .thenReturn(Optional.empty());
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
     // when
-    FactoryDto factory = bitbucketServerFactoryParametersResolver.createFactory(params);
+    FactoryDto factory =
+        (FactoryDto) bitbucketServerFactoryParametersResolver.createFactory(params);
     // then
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("repo"));
     assertEquals(factory, computedFactory);
@@ -129,7 +130,8 @@ public class BitbucketServerAuthorizingFactoryParametersResolverTest {
 
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
     // when
-    FactoryDto factory = bitbucketServerFactoryParametersResolver.createFactory(params);
+    FactoryDto factory =
+        (FactoryDto) bitbucketServerFactoryParametersResolver.createFactory(params);
     // then
     assertNotNull(factory.getDevfile());
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
