@@ -670,12 +670,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>assembly-workspace-loader-war</artifactId>
-                <version>${che.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
@@ -1240,12 +1234,6 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.workspace.loader</groupId>
-                <artifactId>che-workspace-loader</artifactId>
-                <version>${che.version}</version>
-                <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>
