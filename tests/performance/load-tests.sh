@@ -5,6 +5,7 @@ set -e
 TIMESTAMP=$(date +%s)
 TEST_FOLDER=$(pwd)
 LOG_LEVEL="INFO"
+SETTING="oauth"
 
 function printHelp {
   YELLOW="\\033[93;1m"
@@ -23,7 +24,9 @@ function printHelp {
   echo -e "-f    full path to folder ${NC} all reports will be saved in this folder"${WHITE}
   echo -e "-c    credential file ${NC} with usernames and passwords in *.csv format: \`user,pass\`"${WHITE}
   echo -e "-t    count on how many times one user should run a workspace"
-  echo -e "-l    log level for test [ 'INFO' (default), 'DEBUG', 'TRACE' ]"${NC} 
+  echo -e "-l    log level for test [ 'INFO' (default), 'DEBUG', 'TRACE' ]" 
+  echo -e "-s    setting of CRW [ 'oauth' (default), 'no-oauth'] "
+  echo -e "-v    cluster URL to obtain OC user token"${NC}
 }
 
 oc whoami 1>/dev/null
@@ -33,7 +36,7 @@ if [ $? -gt 0 ] ; then
 fi
 
 echo "You are logged in OC: $(oc whoami -c)"
-while getopts "c:f:hi:l:n:p:r:t:u:" opt; do 
+while getopts "c:f:hi:l:n:p:r:t:u:s:v:" opt; do 
   case $opt in
     h) printHelp
       exit 0
@@ -52,9 +55,13 @@ while getopts "c:f:hi:l:n:p:r:t:u:" opt; do
       ;;
     r) export URL=$OPTARG
       ;;
+    s) export SETTING=$OPTARG
+      ;;
     t) export COMPLETITIONS_COUNT=$OPTARG
       ;;
     u) export USERNAME=$OPTARG
+      ;;
+    v) export cheClusterUrl=$OPTARG
       ;;
     \?) # invalid option
       exit 1
@@ -130,27 +137,34 @@ fi
 
 # wait for ftp-server to be running
 echo "wait for ftp server to be running"
+status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
+while [[ $status != "Running" ]]
+do
+  echo "ftp-server is not running, sleep 1 sec and re-check"
+  sleep 5
+  status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
+done
+echo "ftp-server pod is running"
+
+# clean pvc
 if [[ $clean_pvc == true ]]; then
-  while [ true ] 
-  do
-    status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
-    if [[ $status == "Running" ]]; then
-      oc exec ftp-server -- rm -rf /home/vsftpd/user/*
-      break
-    fi
-  done
+  oc exec ftp-server -- rm -rf /home/vsftpd/user/*
 fi
 
-sleep 10
-
-#setup and run vsftpd in ftp-server pod
+# setup and run vsftpd in ftp-server pod
 oc exec ftp-server -- sed -i 's/connect_from_port_20/#connect_from_port_20/' /etc/vsftpd/vsftpd.conf
 oc exec ftp-server -- sed -i 's/ftp_data_port/#ftp_data_port/' /etc/vsftpd/vsftpd.conf
 oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 
 # set common variables to template.yaml
+if [ $SETTING == "oauth" ]; then
+  pod_spec="pod-oauth.yaml"
+elif [ $SETTING == "no-oauth" ]; then
+  pod_spec="pod.yaml"
+fi
+
 echo "set common variables to template.yaml"
-cp pod.yaml template.yaml
+cp $pod_spec template.yaml
 parsed_url=$(echo $URL | sed 's/\//\\\//g')
 parsed_image=$(echo $TEST_IMAGE | sed 's/\//\\\//g')
 
@@ -160,9 +174,9 @@ sed -i "s/REPLACE_TIMESTAMP/\"$TIMESTAMP\"/g" template.yaml
 sed -i "s/REPLACE_IMAGE/\"$parsed_image\"/g" template.yaml
 sed -i "s/REPLACE_LOG_LEVEL/$LOG_LEVEL/g" template.yaml
 
+
 # ----------- RUNNING TEST ----------- #
 echo "-- Running pods with tests."
-
 echo "Searching for already created jobs..."
 jobs=$(oc get jobs -l group=load-tests)
 if [[ ! -z $jobs ]]; then
@@ -173,6 +187,7 @@ fi
 
 # set variables specific for each pod and create pods
 users_assigned=0
+executor_context=$(oc whoami -c)
 if [ ! -z $USER_COUNT ]; then
   while [ $users_assigned -lt $USER_COUNT ] 
   do
@@ -181,6 +196,11 @@ if [ ! -z $USER_COUNT ]; then
     sed -i "s/REPLACE_NAME/load-test-$users_assigned/g" final.yaml
     sed -i "s/REPLACE_USERNAME/$USERNAME$users_assigned/g" final.yaml
     sed -i "s/REPLACE_PASSWORD/$PASSWORD/g" final.yaml
+    echo "Getting OC token for this cluster url: ${cheClusterUrl}"
+    oc login ${cheClusterUrl} -u $USERNAME$users_assigned -p $PASSWORD
+    oc_token=$(oc whoami -t)
+    sed -i "s/REPLACE_TOKEN/$oc_token/g" final.yaml
+    oc config use-context $executor_context
     oc create -f final.yaml
   done
 fi
@@ -229,6 +249,7 @@ echo "Pods ended with those statuses: $statuses"
 # ----------- GATHERING LOGS ----------- #
 echo "-- Gathering logs."
 
+set -x
 echo "Syncing files from PVC to local folder."
 mkdir $FOLDER/$TIMESTAMP
 cd $FOLDER/$TIMESTAMP
@@ -237,8 +258,9 @@ echo "Tar files rsynced, untarring..."
 for filename in *.tar; do 
   tar xf $filename; 
 done
-rm *.tar
+rm ./*.tar
 cd ..
+set +x
 
 # ----------- CLEANING ENVIRONMENT ----------- #
 echo "-- Cleaning environment."
