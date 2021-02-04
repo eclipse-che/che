@@ -82,7 +82,9 @@ evaluateCheVariables() {
 }
 
 checkoutProjects() {
-    checkoutProject git@github.com:eclipse/che-parent
+    if [[ ${RELEASE_CHE_PARENT} = "true" ]]; then
+        checkoutProject git@github.com:eclipse/che-parent
+    fi
     checkoutProject git@github.com:eclipse/che
 }
 
@@ -90,7 +92,7 @@ checkoutProject() {
     PROJECT="${1##*/}"
     echo "checking out project $PROJECT with ${BRANCH} branch"
 
-    if [[ ! -d PROJECT ]]; then
+    if [[ ! -d ${PROJECT} ]]; then
         echo "project not found in ${PROJECT} directory, performing 'git clone'"
         git clone $1
     fi
@@ -109,6 +111,27 @@ checkoutProject() {
     set -e
     set +x
     cd ..
+}
+
+checkoutTags() {
+    if [[ ${RELEASE_CHE_PARENT} = "true" ]]; then
+        cd che-parent
+        git checkout ${CHE_VERSION}
+        cd ..
+    fi
+    cd che
+    git checkout ${CHE_VERSION}
+    cd ..
+}
+
+# check for build errors, since we're using set +e above to NOT fail the build for Nexus problems
+checkLogForErrors () {
+    tmplog="$1"
+    errors_in_log="$(grep -E "FAILURE \[|BUILD FAILURE|Failed to execute goal" $tmplog || true)"
+    if [[ ${errors_in_log} ]]; then
+        echo "${errors_in_log}"
+        exit 1
+    fi
 }
 
 # TODO change it to someone else?
@@ -390,9 +413,15 @@ installDebDeps
 set -x
 setupGitconfig
 
+evaluateCheVariables
+
 checkoutProjects
-createTags
-prepareRelease
+if [[ "${REBUILD_FROM_EXISTING_TAGS}" ]]; then
+    checkoutTags
+else
+    prepareRelease
+    createTags
+fi
 releaseCheServer
 
 buildImages  ${CHE_VERSION}
