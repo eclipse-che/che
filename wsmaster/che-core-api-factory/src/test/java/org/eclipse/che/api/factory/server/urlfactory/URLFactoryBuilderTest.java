@@ -25,12 +25,19 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
@@ -170,5 +177,73 @@ public class URLFactoryBuilderTest {
 
     assertNull(factory.getDevfile().getMetadata().getName());
     assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);
+  }
+
+  @Test(dataProvider = "devfileExceptions")
+  public void checkCorrectExceptionThrownDependingOnCause(
+      Throwable cause,
+      Class expectedClass,
+      String expectedMessage,
+      Map<String, String> expectedAttributes)
+      throws IOException, DevfileException {
+    DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
+    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
+    when(defaultFactoryUrl.devfileFileLocations())
+        .thenReturn(
+            singletonList(
+                new DevfileLocation() {
+                  @Override
+                  public Optional<String> filename() {
+                    return Optional.empty();
+                  }
+
+                  @Override
+                  public String location() {
+                    return "http://foo.bar/anything";
+                  }
+                }));
+
+    when(fileContentProvider.fetchContent(anyString())).thenThrow(new DevfileException("", cause));
+
+    // when
+    try {
+      urlFactoryBuilder.createFactoryFromDevfile(
+          defaultFactoryUrl, fileContentProvider, emptyMap());
+    } catch (ApiException e) {
+      assertTrue(e.getClass().isAssignableFrom(expectedClass));
+      assertEquals(e.getMessage(), expectedMessage);
+      if (e.getServiceError() instanceof ExtendedError)
+        assertEquals(((ExtendedError) e.getServiceError()).getAttributes(), expectedAttributes);
+    }
+  }
+
+  @DataProvider
+  public static Object[][] devfileExceptions() {
+    return new Object[][] {
+      {
+        new ScmCommunicationException("foo"),
+        ServerException.class,
+        "There is an error happened when communicate with SCM server. Error message:foo",
+        null
+      },
+      {
+        new UnknownScmProviderException("foo", "bar"),
+        ServerException.class,
+        "Provided location is unknown or misconfigured on the server side. Error message:foo",
+        null
+      },
+      {
+        new ScmUnauthorizedException("foo", "bitbucket", "1.0", "http://foo.bar"),
+        UnauthorizedException.class,
+        "SCM Authentication required",
+        Map.of(
+            "oauth_version",
+            "1.0",
+            "oauth_authentication_url",
+            "http://foo.bar",
+            "oauth_provider",
+            "bitbucket")
+      }
+    };
   }
 }

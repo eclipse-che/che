@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
@@ -144,6 +145,10 @@ public class URLFactoryBuilder {
     } else if (cause instanceof UnknownScmProviderException) {
       return new ServerException(
           "Provided location is unknown or misconfigured on the server side. Error message:"
+              + cause.getMessage());
+    } else if (cause instanceof ScmCommunicationException) {
+      return new ServerException(
+          "There is an error happened when communicate with SCM server. Error message:"
               + cause.getMessage());
     }
     return new BadRequestException(
