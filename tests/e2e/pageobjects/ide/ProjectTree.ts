@@ -270,7 +270,7 @@ export class ProjectTree {
     async waitProjectImportedNoSubfolder(projectName: string,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
-        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
+        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 90) {
 
         Logger.debug(`ProjectTree.waitProjectImportedNoSubfolder "${projectName}"`);
 

@@ -20,8 +20,8 @@ import { Logger } from '../../utils/Logger';
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 
     constructor(
-        @inject (CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
+        @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
+        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
 
     async login() {
         Logger.debug('RegularUserOcpCheLoginPage.login');

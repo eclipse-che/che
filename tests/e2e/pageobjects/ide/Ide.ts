@@ -33,7 +33,7 @@ export class Ide {
     private static readonly TOP_MENU_PANEL_CSS: string = '#theia-app-shell #theia-top-panel .p-MenuBar-content';
     private static readonly LEFT_CONTENT_PANEL_CSS: string = '#theia-left-content-panel';
     private static readonly PRELOADER_CSS: string = '.theia-preload';
-    private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-application-iframe';
+    private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-iframe';
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,

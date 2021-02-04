@@ -26,6 +26,9 @@ import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -34,15 +37,15 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
+const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const leftToolbar: LeftToolbar = e2eContainer.get(CLASSES.LeftToolbar);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const projectName: string = 'petclinic';
 const workspaceRootFolderName: string = 'src';
-const namespace: string = TestConstants.TS_SELENIUM_USERNAME;
 const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME;
-const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
 const pathToJavaFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
 const pathToChangedJavaFileFolder: string = `${projectName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic/system`;
 const classPathFilename: string = '.classpath';
@@ -63,11 +66,20 @@ const SpringAppLocators = {
     springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`)
 };
 
+suite('Login', async () => {
+    test('Login', async () => {
+        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+        await loginPage.login();
+    });
+});
+
 
 suite('Validation of workspace start', async () => {
-    test('Open workspace', async () => {
-        await driverHelper.navigateToUrl(workspaceUrl);
-        await loginPage.login();
+    test('Start workspace', async () => {
+        await dashboard.waitPage();
+        await dashboard.clickWorkspacesButton();
+        await workspaces.waitPage();
+        await workspaces.clickOpenButton(workspaceName);
     });
 
     await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
@@ -96,7 +108,7 @@ suite('Language server validation', async () => {
 
     test('Error highlighting', async () => {
         await editor.type(javaFileName, 'error', 30);
-        await editor.waitErrorInLine(30);
+        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
@@ -142,14 +154,13 @@ suite('Validation of workspace build and run', async () => {
     let applicationUrl: string = '';
 
     test('Build application', async () => {
+        let buildTaskName: string = 'build-file-output';
         await topMenu.runTask('build-file-output');
 
         // workaround for issue: https://github.com/eclipse/che/issues/14771
 
         // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
-        await projectTree.expandPathAndOpenFile(projectName, 'result-build-output.txt', 220_000);
-        await editor.waitText('result-build-output.txt', '[INFO] BUILD SUCCESS');
-        // await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 300000, 10000);
+        await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
     test('Run application', async () => {
@@ -193,11 +204,10 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Build application with changes', async () => {
+        let buildTaskName: string = 'build';
+
         await topMenu.runTask('build');
-        await projectTree.clickOnItem(projectName + '/src/main/java');
-        await projectTree.collapseProjectTree(projectName + '/src', 'main');
-        await projectTree.expandPathAndOpenFile(projectName, 'result-build.txt', 300_000);
-        await editor.waitText('result-build.txt', '[INFO] BUILD SUCCESS');
+        await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
     test('Run application with changes', async () => {

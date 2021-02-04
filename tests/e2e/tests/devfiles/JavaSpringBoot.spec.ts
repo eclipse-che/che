@@ -57,11 +57,9 @@ suite(`${stack} test`, async () => {
         suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test(`Stop worksapce`, async () => {
-            await workspaceHandling.stopWorkspace(workspaceName);
-        });
-        test(`Remove workspace`, async () => {
-            await workspaceHandling.removeWorkspace(workspaceName);
+
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

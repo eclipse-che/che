@@ -11,7 +11,7 @@ import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandler from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { Key } from 'selenium-webdriver';
 
@@ -27,7 +27,7 @@ const taskStartNative: string = 'Start Native';
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
-        workspaceHandler.createAndOpenWorkspace(workspaceStack);
+        workspaceHandling.createAndOpenWorkspace(workspaceStack);
         projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -58,14 +58,12 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Stop and remove workspace', async() => {
         let workspaceName = 'not defined';
-        suiteSetup( async () => {
+        suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test (`Stop worksapce`, async () => {
-            await workspaceHandler.stopWorkspace(workspaceName);
-        });
-        test (`Remove workspace`, async () => {
-            await workspaceHandler.removeWorkspace(workspaceName);
+
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

@@ -22,7 +22,7 @@ export class GetStarted {
     async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`GetStarted.waitTitleContains text: "${expectedText}"`);
 
-        const pageTitleLocator: By = By.xpath(`//div[contains(@title, '${expectedText}')]`);
+        const pageTitleLocator: By = By.xpath(`//h1[contains(text(), '${expectedText}')]`);
 
         await this.driverHelper.waitVisibility(pageTitleLocator, timeout);
     }
@@ -49,37 +49,10 @@ export class GetStarted {
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
     }
 
-    async waitSampleSelected(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
-        Logger.debug(`GetStarted.waitSampleSelected sampleName: "${sampleName}"`);
-
-        const selectedSampleLocator: By =
-            By.xpath(`//div[contains(@class, 'get-started-template') and contains(@class, 'selected')]//span[text()='${sampleName}']`);
-
-        await this.driverHelper.waitVisibility(selectedSampleLocator, timeout);
-    }
-
-    async waitSampleUnselected(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
-        Logger.debug(`GetStarted.waitSampleUnselected sampleName: "${sampleName}"`);
-
-        const unselectedSampleLocator: By =
-            By.xpath(`//div[contains(@class, 'get-started-template') and not(contains(@class, 'selected'))]//span[text()='${sampleName}']`);
-
-        await this.driverHelper.waitVisibility(unselectedSampleLocator, timeout);
-    }
-
-    async clickCreateAndOpenButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('GetStarted.clickCreateAndOpenButton');
-
-        const createAndOpenButtonLocator: By =
-            By.xpath('(//che-button-save-flat[@che-button-title=\'Create & Open\'][@aria-disabled=\'false\']/button)[1]');
-
-        await this.driverHelper.waitAndClick(createAndOpenButtonLocator, timeout);
-    }
-
     private getSampleLocator(sampleName: string): By {
         Logger.trace(`GetStarted.getSampleLocator sampleName: ${sampleName}`);
 
-        return By.xpath(`//div[contains(@devfile, 'devfile')]/div/b[text()='${sampleName}']`);
+        return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
     }
 
 }

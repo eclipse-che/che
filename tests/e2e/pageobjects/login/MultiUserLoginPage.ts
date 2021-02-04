@@ -19,7 +19,7 @@ import { Logger } from '../../utils/Logger';
 export class MultiUserLoginPage implements ICheLoginPage {
 
     constructor(
-        @inject (CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) {}
+        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
 
     async login() {
         Logger.debug('MultiUserLoginPage.login');
