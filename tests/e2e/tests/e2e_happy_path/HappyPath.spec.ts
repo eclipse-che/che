@@ -115,7 +115,7 @@ suite('Language server validation', async () => {
 
     test('Error highlighting', async () => {
         await editor.type(javaFileName, 'error', 30);
-        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 10);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
