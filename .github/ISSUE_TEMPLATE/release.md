@@ -16,7 +16,7 @@ In series, the following will be released via [che-release](https://github.com/e
 
 * che-theia, che-machine-exec, che-devfile registry, 
 * che-plugin-registry (once che-theia and machine-exec are done)
-* che-parent, che-dashboard, che-workspace-loader, and che (server assembly)
+* che-parent, che-dashboard, and che (server assembly)
   * Note that [release to Maven Central is deprecated](https://github.com/eclipse/che/issues/18941)
 * che-operator
 
@@ -26,7 +26,7 @@ Then, these steps will be done, which still [require some manual intervention](h
 * chectl
 
 - [ ] che-theia, che-machine-exec, che-devfile-registry, che-plugin-registry
-- [ ] che-parent, che-dashboard, che-workspace-loader, che
+- [ ] che-parent, che-dashboard, che
 - [ ] che-operator _(depends on all of the above)_
 - [ ] chectl _(depends on che-operator)_
 - [ ] [Che community operator PRs](https://github.com/operator-framework/community-operators/pulls?q=%22Update+eclipse-che+operator%22+is%3Aopen) _(depends on che-operator)_
@@ -49,7 +49,6 @@ If this is a .0 release:
 | [che-plugin-registry](https://github.com/eclipse/che-plugin-registry/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-plugin-registry/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che-plugin-registry/actions?query=workflow%3A%22Release+Che+Plugin+Registry%22) | [`eclipse/che-plugin-registry`](https://quay.io/eclipse/che-plugin-registry)|
 | [che-parent](https://github.com/eclipse/che-parent/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-parent/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che/actions?query=workflow%3A%22Release+Che+Server%22) | [che-server](https://search.maven.org/search?q=a:che-server) <sup>[2]</sup> |
 | [che-dashboard](https://github.com/eclipse/che-dashboard/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-dashboard/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che-dashboard/actions?query=workflow%3A%22Release+Che+Dashboard%22) | [`che-dashboard`](https://quay.io/repository/eclipse/che-dashboard?tag=next&tab=tags) |
-| [che-workspace-loader](https://github.com/eclipse/che-workspace-loader/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-workspace-loader/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che-workspace-loader/actions?query=workflow%3A%22Release+Che+Workspace+Loader%22) | [`che-workspace-loader`](https://quay.io/repository/eclipse/che-workspace-loader?tag=next&tab=tags) |
 | [che](https://github.com/eclipse/che/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che/actions?query=workflow%3A%22Release+Che+Server%22) | [che.core](https://search.maven.org/search?q=che.core) <sup>[2]</sup>,<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/>[`eclipse/che-endpoint-watcher`](https://quay.io/eclipse/che-endpoint-watcher),<br/> [`eclipse/che-keycloak`](https://quay.io/eclipse/che-keycloak),<br/> [`eclipse/che-postgres`](https://quay.io/eclipse/che-postgres),<br/> [`eclipse/che-server`](https://quay.io/eclipse/che-server),<br/> [`eclipse/che-e2e`](https://quay.io/eclipse/che-e2e) |
 | [che-operator](https://github.com/eclipse/che-operator/blob/master/RELEASE.md) | [make-release.sh](https://github.com/eclipse/che-operator/blob/master/make-release.sh) | [Action](https://github.com/eclipse/che-operator/actions?query=workflow%3A%22Release+Che+Operator%22) | [`eclipse/che-operator`](https://quay.io/eclipse/che-operator)|
 | [chectl](https://github.com/che-incubator/chectl/blob/master/RELEASE.md) | [make-release.sh](https://github.com/che-incubator/chectl/blob/master/make-release.sh) | [Action](https://github.com/che-incubator/chectl/actions) | [chectl releases](https://github.com/che-incubator/chectl/releases)
