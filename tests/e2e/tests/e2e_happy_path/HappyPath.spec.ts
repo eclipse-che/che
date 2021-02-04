@@ -106,18 +106,18 @@ suite('Language server validation', async () => {
         await checkJavaPathCompletion();
     });
 
-    test('Error highlighting', async () => {
-        await editor.type(javaFileName, 'error', 30);
-        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
-        await editor.waitErrorInLineDisappearance(30);
-    });
-
     test('Autocomplete', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.pressControlSpaceCombination(javaFileName);
         await editor.waitSuggestionContainer();
         await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
+    });
+
+    test('Error highlighting', async () => {
+        await editor.type(javaFileName, 'error', 30);
+        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        await editor.waitErrorInLineDisappearance(30);
     });
 
     test('Suggestion', async () => {
