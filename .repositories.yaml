@@ -103,13 +103,6 @@ repositories:
     description: >-
       JS library to interact with a che-server.
     useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse/che-workspace-loader
-    name: workspace-loader
-    description: >-
-      UI to load workspaces within dashboard
-    devfile: https://github.com/eclipse/che-workspace-loader/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che-workspace-loader/blob/master/CONTRIBUTING.md
-    useCheReleaseLifecycle: true
   - url: https://github.com/che-dockerfiles/che-sidecar-bazel
     name: che-sidecar-bazel
     description: >-

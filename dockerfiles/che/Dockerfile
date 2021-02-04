@@ -10,11 +10,8 @@
 # this is workaround to handle that.
 ARG CHE_DASHBOARD_ORGANIZATION=quay.io/eclipse
 ARG CHE_DASHBOARD_VERSION=next
-ARG CHE_WORKSPACE_LOADER_ORGANIZATION=quay.io/eclipse
-ARG CHE_WORKSPACE_LOADER_VERSION=next
 
 FROM ${CHE_DASHBOARD_ORGANIZATION}/che-dashboard:${CHE_DASHBOARD_VERSION} as che_dashboard_base
-FROM ${CHE_WORKSPACE_LOADER_ORGANIZATION}/che-workspace-loader:${CHE_WORKSPACE_LOADER_VERSION} as che_workspace_loader_base
 
 FROM adoptopenjdk/openjdk11:jre-11.0.8_10
 ENV LANG=C.UTF-8
@@ -25,6 +22,5 @@ ENTRYPOINT ["/entrypoint.sh"]
 RUN mkdir /logs /data && \
     chmod 0777 /logs /data
 COPY --from=che_dashboard_base /usr/local/apache2/htdocs/dashboard /home/user/eclipse-che/tomcat/webapps/dashboard
-COPY --from=che_workspace_loader_base /usr/local/apache2/htdocs/workspace-loader/ /home/user/eclipse-che/tomcat/webapps/workspace-loader
 ADD eclipse-che /home/user/eclipse-che
 RUN find /home/user -type d -exec chmod 777 {} \;

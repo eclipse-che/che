@@ -45,11 +45,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-workspace-loader-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
             <type>war</type>
         </dependency>
@@ -107,13 +102,6 @@
                                     <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency/assembly-dashboard-war</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che</groupId>
-                                    <artifactId>assembly-workspace-loader-war</artifactId>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency/assembly-workspace-loader-war</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
