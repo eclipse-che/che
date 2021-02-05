@@ -114,7 +114,7 @@ suite('Language server validation', async () => {
         await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
     });
 
-    test('Error highlighting', async () => {
+    test.skip('Error highlighting', async () => {
         await editor.type(javaFileName, '$#%@#', 30);
         try {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
