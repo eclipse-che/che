@@ -116,10 +116,10 @@ suite('Language server validation', async () => {
 
     test('Error highlighting', async () => {
         await editor.type(javaFileName, '$#%@#', 30);
-        try{
-        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
-        }catch(err){
-            Logger.debug('==============>>>>>>>>>>>>>>>>>> Workaround for error highlighting.')
+        try {
+            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+        } catch (err) {
+            Logger.debug('==============>>>>>>>>>>>>>>>>>> Workaround for error highlighting.');
             await (await driverHelper.getDriver()).navigate().refresh();
 
             await ide.waitAndSwitchToIdeFrame();
@@ -250,10 +250,10 @@ suite('Display source code changes in the running application', async () => {
 suite('Validation of debug functionality', async () => {
     let applicationUrl: string = '';
 
-    test('Open file and activate breakpoint', async () => {
-        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
-        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
-    });
+    // test('Open file and activate breakpoint', async () => {
+    //     await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
+    //     await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
+    // });
 
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
@@ -279,6 +279,10 @@ suite('Validation of debug functionality', async () => {
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
         await debugView.waitForDebuggerToConnect();
+
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
+        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
+
         await previewWidget.refreshPage();
         try {
             await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
