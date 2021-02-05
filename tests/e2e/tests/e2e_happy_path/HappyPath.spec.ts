@@ -272,6 +272,7 @@ suite('Validation of debug functionality', async () => {
 
 
     test('Run debug and check application stop in the breakpoint', async () => {
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
