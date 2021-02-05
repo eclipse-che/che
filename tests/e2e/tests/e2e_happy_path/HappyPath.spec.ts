@@ -29,6 +29,7 @@ import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { Logger } from '../../utils/Logger';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -114,16 +115,19 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
-        await editor.type(javaFileName, 'error', 30);
+        await editor.type(javaFileName, '$#%@#', 30);
         try{
         await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
         }catch(err){
+            Logger.debug('==============>>>>>>>>>>>>>>>>>> Workaround for error highlighting.')
             await (await driverHelper.getDriver()).navigate().refresh();
 
             await ide.waitAndSwitchToIdeFrame();
+            await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
+            await editor.selectTab(javaFileName);
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
         }
-        
+
         await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
