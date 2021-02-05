@@ -347,6 +347,20 @@ tagLatestImages() {
      done
 }
 
+pushImagesOnQuay() {
+    #PUSH IMAGES
+    for image in ${IMAGES_LIST[@]}
+        do
+            echo y | docker push "${image}:$1"
+            if [[ $2 == "pushLatest" ]]; then
+                echo y | docker push "${image}:latest"
+            fi
+            if [[ $? -ne 0 ]]; then
+            die_with  "docker push of '${image}' image is failed!"
+            fi
+        done
+}
+
 bumpVersions() {
     # infer project version + commit change into ${BASEBRANCH} branch
     echo "${BASEBRANCH} ${BRANCH}"
