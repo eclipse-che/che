@@ -40,6 +40,14 @@ on:
         description: 'If true, and *forceRecreateTags* is false, a checkout to existing tags will be performed.'
         required: false
         default: 'false'
+      buildAndPushImages:
+        description: 'If true, Che Server images will be build.'
+        required: false
+        default: 'true'
+      bumpNextVersion:
+        description: 'If true, will update this project to the next version.'
+        required: false
+        default: 'false'
 
 jobs:
   build:
@@ -116,6 +124,8 @@ jobs:
           export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
           export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
           export REBUILD_FROM_EXISTING_TAGS="${{ github.event.inputs.rebuildFromExistingTags }}"
+          export BUILD_AND_PUSH_IMAGES="${{ github.event.inputs.buildAndPushImages }}"
+          export BUMP_NEXT_VERSION="${{ github.event.inputs.bumpNextVersion }}"
 
           export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
           export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}

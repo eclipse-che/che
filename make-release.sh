@@ -462,10 +462,15 @@ else
     prepareRelease
     createTags
 fi
-# releaseCheServer
+releaseCheServer
 
-# buildImages  ${CHE_VERSION}
-# tagLatestImages ${CHE_VERSION}
-# pushImagesOnQuay ${CHE_VERSION} pushLatest
-bumpVersions
-updateImageTagsInCheServer
+if [[ "${BUILD_AND_PUSH_IMAGES}" ]]; then
+    buildImages  ${CHE_VERSION}
+    tagLatestImages ${CHE_VERSION}
+    pushImagesOnQuay ${CHE_VERSION} pushLatest
+fi
+
+if [[ "${BUMP_NEXT_VERSION}" ]]; then
+    bumpVersions
+    updateImageTagsInCheServer
+fi
