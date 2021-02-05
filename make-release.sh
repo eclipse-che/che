@@ -145,6 +145,32 @@ setupGitconfig() {
   export GITHUB_TOKEN="${CHE_BOT_GITHUB_TOKEN}"
 }
 
+commitChangeOrCreatePR() {
+    set +e
+    aVERSION="$1"
+    aBRANCH="$2"
+    PR_BRANCH="$3"
+
+    COMMIT_MSG="[release] Bump to ${aVERSION} in ${aBRANCH}"
+
+    # commit change into branch
+    git commit -asm "${COMMIT_MSG}"
+    git pull origin "${aBRANCH}"
+
+    PUSH_TRY="$(git push origin "${aBRANCH}")"
+    # shellcheck disable=SC2181
+    if [[ $? -gt 0 ]] || [[ $PUSH_TRY == *"protected branch hook declined"* ]]; then
+        # create pull request for master branch, as branch is restricted
+        git branch "${PR_BRANCH}"
+        git checkout "${PR_BRANCH}"
+        git pull origin "${PR_BRANCH}"
+        git push origin "${PR_BRANCH}"
+        lastCommitComment="$(git log -1 --pretty=%B)"
+        hub pull-request -f -m "${lastCommitComment}" -b "${aBRANCH}" -h "${PR_BRANCH}"
+    fi
+    set -e
+}
+
 createTags() {
     if [[ $RELEASE_CHE_PARENT = "true" ]]; then
         tagAndCommit che-parent
@@ -436,10 +462,10 @@ else
     prepareRelease
     createTags
 fi
-releaseCheServer
+# releaseCheServer
 
-buildImages  ${CHE_VERSION}
-tagLatestImages ${CHE_VERSION}
-pushImagesOnQuay ${CHE_VERSION} pushLatest
+# buildImages  ${CHE_VERSION}
+# tagLatestImages ${CHE_VERSION}
+# pushImagesOnQuay ${CHE_VERSION} pushLatest
 bumpVersions
 updateImageTagsInCheServer
