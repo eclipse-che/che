@@ -21,12 +21,19 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -57,6 +64,15 @@ public class HttpConnectionServerCheckerTest {
     when(conn.getResponseCode()).thenReturn(200);
   }
 
+  @BeforeClass
+  public void setup() {
+    // These variables affect on ProxyAuthenticator's enums HTTP and HTTPS. It's very hard
+    // to reinitialize them (internal fields in a private enum).
+    // Until they do not affect other tests we can skip the cleanup phase.
+    System.setProperty("http.proxyUser", "u1");
+    System.setProperty("http.proxyPassword", "p1");
+  }
+
   @Test(dataProvider = "successfulResponseCodeProvider")
   public void shouldConfirmConnectionSuccessIfResponseCodeIsBetween200And400(Integer responseCode)
       throws Exception {
@@ -79,6 +95,21 @@ public class HttpConnectionServerCheckerTest {
   @DataProvider
   public static Object[][] nonSuccessfulResponseCodeProvider() {
     return new Object[][] {{199}, {400}, {401}, {402}, {403}, {404}, {405}, {409}, {500}};
+  }
+
+  @Test
+  public void shouldSetProxyAuthenticatorBeforeCreateConnection() throws Exception {
+
+    Assert.assertFalse(isPasswordAuthenticationSet());
+    when(checker.createConnection(eq(SERVER_URL)))
+        .thenAnswer(
+            (Answer<HttpURLConnection>)
+                invocation -> {
+                  assertTrue(isPasswordAuthenticationSet());
+                  return conn;
+                });
+    checker.isAvailable();
+    Assert.assertFalse(isPasswordAuthenticationSet());
   }
 
   @Test
@@ -130,5 +161,26 @@ public class HttpConnectionServerCheckerTest {
     when(conn.getResponseCode()).thenReturn(401);
     assertFalse(checker.isAvailable());
     verify(conn).disconnect();
+  }
+
+  public boolean isPasswordAuthenticationSet() {
+
+    Authenticator authenticator = Authenticator.getDefault();
+    if (authenticator != null && authenticator instanceof ProxyAuthenticator) {
+      ProxyAuthenticator proxyAuthenticator = (ProxyAuthenticator) authenticator;
+
+      try {
+        Method method =
+            ProxyAuthenticator.class.getDeclaredMethod("getPasswordAuthentication", null);
+        method.setAccessible(true);
+
+        PasswordAuthentication value =
+            (PasswordAuthentication) method.invoke(proxyAuthenticator, null);
+        return value != null;
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return false;
   }
 }

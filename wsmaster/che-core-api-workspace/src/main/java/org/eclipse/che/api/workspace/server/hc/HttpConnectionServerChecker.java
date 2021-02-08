@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
   public boolean isAvailable() {
     HttpURLConnection httpURLConnection = null;
     try {
+      ProxyAuthenticator.initAuthenticator(url.toString());
       httpURLConnection = createConnection(url);
       // TODO consider how much time we should use as a limit
       httpURLConnection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3));
@@ -75,6 +77,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
           e.getMessage());
       return false;
     } finally {
+      ProxyAuthenticator.resetAuthenticator();
       if (httpURLConnection != null) {
         httpURLConnection.disconnect();
       }
