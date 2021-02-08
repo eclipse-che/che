@@ -36,10 +36,6 @@ public final class Constants {
   public static final String WORKSPACE_STOPPED_BY = "stopped_by";
   public static final String WORKSPACE_STOP_REASON = "stop_reason";
 
-  public static final String LINK_REL_GET_ICON = "get icon link";
-  public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
-  public static final String LINK_REL_DELETE_ICON = "delete icon link";
-
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
   /**
@@ -71,6 +67,9 @@ public final class Constants {
   /** Property name for internal network Che Devfile Registry URL. */
   public static final String CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL_PROPERTY =
       "che.workspace.devfile_registry_internal_url";
+
+  public static final String CHE_FACTORY_DEFAULT_EDITOR_PROPERTY = "che.factory.default_editor";
+  public static final String CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY = "che.factory.default_plugins";
 
   /** Name for environment variable of machine name */
   public static final String CHE_MACHINE_NAME_ENV_VAR = "CHE_MACHINE_NAME";
@@ -194,13 +193,8 @@ public final class Constants {
   public static final String BOOTSTRAPPER_STATUS_CHANGED_METHOD = "bootstrapper/statusChanged";
 
   public static final String SERVER_WS_AGENT_HTTP_REFERENCE = "wsagent/http";
-  public static final String SERVER_WS_AGENT_WEBSOCKET_REFERENCE = "wsagent/ws";
   public static final String SERVER_TERMINAL_REFERENCE = "terminal";
-  public static final String SERVER_SSH_REFERENCE = "ssh";
   public static final String SERVER_EXEC_AGENT_HTTP_REFERENCE = "exec-agent/http";
-  public static final String SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE = "exec-agent/ws";
-
-  public static final String WS_AGENT_PORT = "4401/tcp";
 
   public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
 
