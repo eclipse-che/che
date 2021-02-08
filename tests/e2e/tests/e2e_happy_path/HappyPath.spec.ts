@@ -114,7 +114,7 @@ suite('Language server validation', async () => {
         await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
     });
 
-    test.skip('Error highlighting', async () => {
+    test('Error highlighting', async () => {
         await editor.type(javaFileName, '$#%@#', 30);
         try {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
@@ -249,11 +249,6 @@ suite('Display source code changes in the running application', async () => {
 
 suite('Validation of debug functionality', async () => {
     let applicationUrl: string = '';
-
-    // test('Open file and activate breakpoint', async () => {
-    //     await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
-    //     await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
-    // });
 
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
