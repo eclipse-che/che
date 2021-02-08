@@ -21,7 +21,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -34,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -65,11 +64,13 @@ public class HttpConnectionServerCheckerTest {
     when(conn.getResponseCode()).thenReturn(200);
   }
 
-  @BeforeMethod
-  @AfterMethod
-  public void cleanup() {
-    System.clearProperty("http.proxyUser");
-    System.clearProperty("http.proxyPassword");
+  @BeforeClass
+  public void setup() {
+    // These variables affect on ProxyAuthenticator's enums HTTP and HTTPS. It's very hard
+    // to reinitialize them (internal fields in a private enum).
+    // Until they do not affect other tests we can skip the cleanup phase.
+    System.setProperty("http.proxyUser", "u1");
+    System.setProperty("http.proxyPassword", "p1");
   }
 
   @Test(dataProvider = "successfulResponseCodeProvider")
@@ -98,8 +99,7 @@ public class HttpConnectionServerCheckerTest {
 
   @Test
   public void shouldSetProxyAuthenticatorBeforeCreateConnection() throws Exception {
-    System.setProperty("http.proxyUser", "u1");
-    System.setProperty("http.proxyPassword", "p1");
+
     Assert.assertFalse(isPasswordAuthenticationSet());
     when(checker.createConnection(eq(SERVER_URL)))
         .thenAnswer(
@@ -177,12 +177,8 @@ public class HttpConnectionServerCheckerTest {
         PasswordAuthentication value =
             (PasswordAuthentication) method.invoke(proxyAuthenticator, null);
         return value != null;
-      } catch (NoSuchMethodException e) {
-        e.printStackTrace();
-      } catch (IllegalAccessException e) {
-        e.printStackTrace();
-      } catch (InvocationTargetException e) {
-        e.printStackTrace();
+      } catch (ReflectiveOperationException e) {
+        throw new RuntimeException(e);
       }
     }
     return false;
