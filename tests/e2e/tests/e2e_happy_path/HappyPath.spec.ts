@@ -281,7 +281,7 @@ suite('Validation of debug functionality', async () => {
         await debugView.clickOnRunDebugButton();
         await debugView.waitForDebuggerToConnect();
 
-        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
+        await editor.selectTab(weclomeControllerJavaFileName);
         await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
 
         await previewWidget.refreshPage();
