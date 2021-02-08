@@ -29,6 +29,7 @@ import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { Logger } from '../../utils/Logger';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -106,18 +107,31 @@ suite('Language server validation', async () => {
         await checkJavaPathCompletion();
     });
 
-    test('Error highlighting', async () => {
-        await editor.type(javaFileName, 'error', 30);
-        await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
-        await editor.waitErrorInLineDisappearance(30);
-    });
-
     test('Autocomplete', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.pressControlSpaceCombination(javaFileName);
         await editor.waitSuggestionContainer();
         await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
+    });
+
+    test('Error highlighting', async () => {
+        const textForErrorDisplaying: string = '$#%@#';
+
+        await editor.type(javaFileName, textForErrorDisplaying, 30);
+
+        try {
+            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+        } catch (err) {
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974 issue.');
+            await (await driverHelper.getDriver()).navigate().refresh();
+
+            await ide.waitAndSwitchToIdeFrame();
+            await editor.selectTab(javaFileName);
+            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+        }
+
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        await editor.waitErrorInLineDisappearance(30);
     });
 
     test('Suggestion', async () => {
@@ -238,11 +252,6 @@ suite('Display source code changes in the running application', async () => {
 suite('Validation of debug functionality', async () => {
     let applicationUrl: string = '';
 
-    test('Open file and activate breakpoint', async () => {
-        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
-        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
-    });
-
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180_000);
@@ -260,6 +269,7 @@ suite('Validation of debug functionality', async () => {
 
 
     test('Run debug and check application stop in the breakpoint', async () => {
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', weclomeControllerJavaFileName);
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
@@ -267,6 +277,10 @@ suite('Validation of debug functionality', async () => {
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
         await debugView.waitForDebuggerToConnect();
+
+        await editor.selectTab(weclomeControllerJavaFileName);
+        await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
+
         await previewWidget.refreshPage();
         try {
             await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, 27);
