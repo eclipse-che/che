@@ -115,11 +115,14 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
-        await editor.type(javaFileName, '$#%@#', 30);
+        const textForErrorDisplaying: string = '$#%@#';
+
+        await editor.type(javaFileName, textForErrorDisplaying, 30);
+
         try {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
         } catch (err) {
-            Logger.debug('==============>>>>>>>>>>>>>>>>>> Workaround for error highlighting.');
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974 issue.');
             await (await driverHelper.getDriver()).navigate().refresh();
 
             await ide.waitAndSwitchToIdeFrame();
