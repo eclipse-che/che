@@ -1,0 +1,42 @@
+schemaVersion: "2.0.0"
+metadata:
+  name: "devfile example"
+  version: "1.0.0"
+projects:
+  - name: "my-project"
+    git:
+      remotes:
+        origin: "https://github.com/devfile/api"
+      checkoutFrom:
+        revision: "master"
+        remote: origin
+components:
+  - name: editor
+    attributes:
+      kjkh: "128M"
+      kjhkjh:
+        "": ""
+    plugin:
+      id: eclipse/che-theia/latest
+  - name: "ownplugin"
+    plugin:
+      id: acme/newPlugin/latest
+      registryUrl: "https://acme.com/registry/"
+  - name: "myplugin"
+    plugin:
+      uri: "https://github.com/johndoe/che-plugins/blob/master/cool-plugin/0.0.1/meta.yaml"
+  - name: "mycontainer"
+    container:
+      image: "busybox"
+      memoryLimit: "128M"
+      mountSources: true
+      endpoints:
+        - name: term-websockets
+          exposure: public
+          protocol: ws
+          attributes:
+            type: terminal
+          targetPort: 4000
+  - name: "production"
+    kubernetes:
+      uri: "https://somewhere/production-environment.yaml"

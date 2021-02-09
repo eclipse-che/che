@@ -105,6 +105,7 @@ public class DevfileParser {
   public JsonNode parseYamlRaw(String yaml) throws DevfileFormatException {
     try {
       JsonNode devfileJson = yamlMapper.readTree(yaml);
+      schemaValidator.validate(devfileJson);
       if (devfileJson == null) {
         throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
       }
