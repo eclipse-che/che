@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -88,7 +89,7 @@ public class DevfileParser {
    */
   public DevfileImpl parseYaml(String devfileContent) throws DevfileFormatException {
     try {
-      return parse(parseYamlRaw(devfileContent), yamlMapper, emptyMap());
+      return parse(parseYamlRaw(devfileContent, false), yamlMapper, emptyMap());
     } catch (OverrideParameterException e) {
       // should never happen as we send empty overrides map
       throw new RuntimeException(e.getMessage());
@@ -103,11 +104,19 @@ public class DevfileParser {
    * @throws DevfileFormatException if given yaml is empty or is not valid devfile
    */
   public JsonNode parseYamlRaw(String yaml) throws DevfileFormatException {
+    return parseYamlRaw(yaml, true);
+  }
+
+  private JsonNode parseYamlRaw(String yaml, boolean validate) throws DevfileFormatException {
     try {
-      JsonNode devfileJson = yamlMapper.readTree(yaml);
-      schemaValidator.validate(devfileJson);
-      if (devfileJson == null) {
-        throw new DevfileFormatException("Unable to parse Devfile - provided source is empty");
+      JsonNode devfileJson =
+          Optional.ofNullable(yamlMapper.readTree(yaml))
+              .orElseThrow(
+                  () ->
+                      new DevfileFormatException(
+                          "Unable to parse Devfile - provided source is empty"));
+      if (validate) {
+        schemaValidator.validate(devfileJson);
       }
       return devfileJson;
     } catch (JsonProcessingException jpe) {
