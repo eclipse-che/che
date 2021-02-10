@@ -17,6 +17,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isValidConfigMapKeyName;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -187,6 +188,7 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
         sshPairs
             .stream()
             .filter(sshPair -> !isNullOrEmpty(sshPair.getPrivateKey()))
+            .filter(sshPair -> isValidConfigMapKeyName(sshPair.getName()))
             .collect(
                 toMap(
                     SshPairImpl::getName,

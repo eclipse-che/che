@@ -99,6 +99,25 @@ public class SshKeySecretProvisionerTest {
   }
 
   @Test
+  public void shuldNotMountKeysWithInvalidKeyNames() throws Exception {
+    // given
+    when(sshManager.getPairs(someUser, "vcs"))
+        .thenReturn(
+            ImmutableList.of(
+                new SshPairImpl(someUser, "vcs", "http://blah.blah", "public", "private"),
+                new SshPairImpl(someUser, "vcs", "gothub.mk", "public", "private"),
+                new SshPairImpl(someUser, "vcs", "boombaket.barabaket.com", "public", "private")));
+    // when
+    sshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
+    // then
+    Secret secret = k8sEnv.getSecrets().get("wksp-sshprivatekeys");
+    assertNotNull(secret);
+    assertEquals(secret.getData().size(), 2);
+    assertTrue(secret.getData().containsKey("gothub.mk"));
+    assertTrue(secret.getData().containsKey("boombaket.barabaket.com"));
+  }
+
+  @Test
   public void addSshKeysConfigInPod() throws Exception {
     String keyName1 = UUID.randomUUID().toString();
     String keyName2 = "default-" + UUID.randomUUID().toString();
