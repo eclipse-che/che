@@ -36,6 +36,18 @@ on:
         description: 'If true, artifacts will be deployed to Nexus.'
         required: false
         default: 'true'
+      rebuildFromExistingTags:
+        description: 'If true, and *forceRecreateTags* is false, a checkout to existing tags will be performed.'
+        required: false
+        default: 'false'
+      buildAndPushImages:
+        description: 'If true, Che Server images will be build.'
+        required: false
+        default: 'true'
+      bumpNextVersion:
+        description: 'If true, will update this project to the next version.'
+        required: false
+        default: 'false'
 
 jobs:
   build:
@@ -49,12 +61,12 @@ jobs:
         if: ${{ github.event.inputs.releaseParent == 'true' }}
         with:
           repository: eclipse/che-parent
-          token: {{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           path: che-parent
           fetch-depth: 0
       - name: Check existing tag
         run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}} ]]; then
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
             echo "cannot create release, when tag already exists"
             exit 1
           fi
@@ -98,11 +110,8 @@ jobs:
           which javac
       - name: Release
         run: |
-          CHE_VERSION="${{ github.event.inputs.version }}"
+          export CHE_VERSION="${{ github.event.inputs.version }}"
           echo "CHE_VERSION=${CHE_VERSION}"
-          PHASES="${{ github.event.inputs.phases }}"
-          echo "PHASES=${PHASES}"
-          sed -i VERSION -r -e "s#PHASES=.*#PHASES=${PHASES}#"
 
           export CHE_MAVEN_SETTINGS=${{ secrets.CHE_MAVEN_SETTINGS}}
           export CHE_OSS_SONATYPE_GPG_KEY=${{ secrets.CHE_OSS_SONATYPE_GPG_KEY}}
@@ -114,6 +123,9 @@ jobs:
           export VERSION_CHE_PARENT="${{ github.event.inputs.versionParent }}"
           export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
           export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
+          export REBUILD_FROM_EXISTING_TAGS="${{ github.event.inputs.rebuildFromExistingTags }}"
+          export BUILD_AND_PUSH_IMAGES="${{ github.event.inputs.buildAndPushImages }}"
+          export BUMP_NEXT_VERSION="${{ github.event.inputs.bumpNextVersion }}"
 
           export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
           export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}
@@ -124,4 +136,4 @@ jobs:
           set -e
           # determine which OS we're using: rhel or ubuntu
           cat /etc/os-release || true
-          ./make-release.sh
+          ./che/make-release.sh
