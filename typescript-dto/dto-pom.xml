@@ -17,13 +17,13 @@
     <parent>
         <artifactId>maven-parent-pom</artifactId>
         <groupId>org.eclipse.che.parent</groupId>
-        <version>7.26.0-SNAPSHOT</version>
+        <version>7.27.0-SNAPSHOT</version>
     </parent>
     <artifactId>dts-dto-typescript</artifactId>
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>7.26.0-SNAPSHOT</che.version>
+        <che.version>7.27.0-SNAPSHOT</che.version>
     </properties>
     <repositories>
         <repository>
@@ -48,7 +48,7 @@
             <plugin>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-typescript-dto-maven-plugin</artifactId>
-                <version>7.26.0-SNAPSHOT</version>
+                <version>7.27.0-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
@@ -63,27 +63,27 @@
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-factory-shared</artifactId>
-                        <version>7.26.0-SNAPSHOT</version>
+                        <version>7.27.0-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-ssh-shared</artifactId>
-                        <version>7.26.0-SNAPSHOT</version>
+                        <version>7.27.0-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-system-shared</artifactId>
-                        <version>7.26.0-SNAPSHOT</version>
+                        <version>7.27.0-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-user-shared</artifactId>
-                        <version>7.26.0-SNAPSHOT</version>
+                        <version>7.27.0-SNAPSHOT</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-workspace-shared</artifactId>
-                        <version>7.26.0-SNAPSHOT</version>
+                        <version>7.27.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
                 <configuration>
