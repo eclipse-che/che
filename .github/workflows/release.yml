@@ -47,7 +47,7 @@ on:
       bumpNextVersion:
         description: 'If true, will update this project to the next version.'
         required: false
-        default: 'false'
+        default: 'true'
 
 jobs:
   build:
