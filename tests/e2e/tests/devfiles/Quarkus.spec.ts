@@ -13,7 +13,6 @@ import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import { Key } from 'selenium-webdriver';
 
 const workspaceStack: string = 'Quarkus CLI';
 const workspaceSampleName: string = 'quarkus-quickstarts';
@@ -45,8 +44,10 @@ suite(`${workspaceStack} test`, async () => {
         codeExecutionHelper.runTask(taskPackageNative, 600_000);
         codeExecutionHelper.closeTerminal(taskPackageNative);
     });
-    suite('Start Quarkus Native application', async () => {
-        codeExecutionHelper.runTaskInputText(taskStartNative, 'Enter your name', 'Test User' + Key.ENTER, 90_000);
+
+    // test is being skipped because of broken devfile, link: https://github.com/eclipse/che/issues/18982
+    suite.skip('Start Quarkus Native application', async () => {
+        codeExecutionHelper.runTaskInputText(taskStartNative, 'Enter your name', 'Test User', 90_000);
     });
 
     suite(`'Language server validation'`, async () => {
