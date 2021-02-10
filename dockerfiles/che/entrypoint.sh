@@ -311,8 +311,14 @@ add_cert_to_truststore() {
   echo yes | keytool -keystore $JAVA_TRUST_STORE -importcert -alias "$2" -file $SELF_SIGNED_CERT -storepass $DEFAULT_JAVA_TRUST_STOREPASS > /dev/null
   # set read-only permissions on keystore file
   chmod 444 "$JAVA_TRUST_STORE"
-  if [[ "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStore"* && "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStorePassword"* ]]; then
-    export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$JAVA_TRUST_STORE -Djavax.net.ssl.trustStorePassword=$DEFAULT_JAVA_TRUST_STOREPASS"
+  set_truststore_system_variables "$JAVA_TRUST_STORE" "$DEFAULT_JAVA_TRUST_STOREPASS"
+}
+
+set_truststore_system_variables() {
+  KEYSTORE_PATH=$1
+  KEYSTORE_PASSWORD=$2
+   if [[ "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStore"* && "$JAVA_OPTS" != *"-Djavax.net.ssl.trustStorePassword"* ]]; then
+    export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=$KEYSTORE_PATH -Djavax.net.ssl.trustStorePassword=$KEYSTORE_PASSWORD"
   fi
 }
 
@@ -343,6 +349,7 @@ add_public_certs_to_truststore() {
   fi
 
   chmod 444 "$JAVA_TRUST_STORE"
+  set_truststore_system_variables "$JAVA_TRUST_STORE" "$DEFAULT_JAVA_TRUST_STOREPASS"
 }
 
 function jks_import_ca_bundle {
