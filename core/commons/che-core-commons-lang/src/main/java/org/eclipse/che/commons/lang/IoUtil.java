@@ -17,6 +17,7 @@ import static java.nio.file.FileVisitResult.TERMINATE;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -137,7 +138,7 @@ public class IoUtil {
             ? new FileInputStream(resourceFile)
             : Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
     if (is == null) {
-      throw new IOException(String.format("Resource %s is not found", resource));
+      throw new FileNotFoundException(String.format("Resource %s is not found", resource));
     }
     return is;
   }
