@@ -81,6 +81,28 @@ public class DevfileParserTest {
   }
 
   @Test
+  public void testParseRaw() throws DevfileFormatException {
+    JsonNode parsed = devfileParser.parseYamlRaw(DEVFILE_YAML_CONTENT);
+
+    assertEquals(parsed, devfileJsonNode);
+    verify(schemaValidator).validate(eq(devfileJsonNode));
+  }
+
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void testParseRawThrowsExceptionWhenNothinParsed()
+      throws DevfileFormatException, JsonProcessingException {
+    when(yamlMapper.readTree(DEVFILE_YAML_CONTENT)).thenReturn(null);
+    devfileParser.parseYamlRaw(DEVFILE_YAML_CONTENT);
+  }
+
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void testParseRawThrowsDevfilExceptionWhenJsonParsingFails()
+      throws JsonProcessingException, DevfileFormatException {
+    when(yamlMapper.readTree(DEVFILE_YAML_CONTENT)).thenThrow(JsonProcessingException.class);
+    devfileParser.parseYamlRaw(DEVFILE_YAML_CONTENT);
+  }
+
+  @Test
   public void testInitializingDevfileMapsAfterParsing() throws Exception {
     // given
     CommandImpl command = new CommandImpl();

@@ -78,9 +78,12 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_name_and_generatename.yaml"},
       {"devfile/devfile_with_sparse_checkout_dir.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
-      {"devfile/devfile_v2_just_schemaVersion.yaml"},
       {"command/devfile_command_with_preview_url.yaml"},
       {"command/devfile_command_with_preview_url_only_port.yaml"},
+      {"devfile/devfile_v2_just_schemaVersion.yaml"},
+      {"devfile/devfile_v2_sample-devfile.yaml"},
+      {"devfile/devfile_v2_simple-devfile.yaml"},
+      {"devfile/devfile_v2_spring-boot-http-booster-devfile.yaml"}
     };
   }
 
