@@ -52,6 +52,9 @@ export class DebugView {
     async waitForDebuggerToConnect(timeout: number = TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT) {
         await this.driverHelper.getDriver().wait(async () => {
             Logger.debug(`Waiting for debugger to connect (threads to appear in "Threads" view)`);
+
+            // collapse "Threads" view to work around che/18034 issue
+
             const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(`//div[contains(@class, 'theia-debug-thread')]`));
             if (threadElements.length > 1) {
                 return true;
