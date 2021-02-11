@@ -12,8 +12,10 @@
 package org.eclipse.che.api.core;
 
 /**
- * Defines error codes, defined codes MUST NOT conflict, error codes must be in range <b>10000-14999</b> inclusive.
+ * Defines error codes that are used in exceptions, defined codes MUST NOT conflict, error codes
+ * must be in range <b>10000-14999</b> inclusive.
  *
+ * @author Igor Vinokur
  * @author Yevhenii Voevodin
  */
 public final class ErrorCodes {
