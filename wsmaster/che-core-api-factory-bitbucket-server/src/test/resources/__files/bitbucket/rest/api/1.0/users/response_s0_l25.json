@@ -1,0 +1,57 @@
+{
+  "size": 3,
+  "limit": 3,
+  "isLastPage": false,
+  "values": [
+    {
+      "name": "admin",
+      "emailAddress": "admin@ksmster.com",
+      "id": 1,
+      "displayName": "Admin",
+      "active": true,
+      "slug": "admin",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/admin"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ksmster",
+      "emailAddress": "ksmster@gmail.com",
+      "id": 2,
+      "displayName": "Sergii Kabashniuk",
+      "active": true,
+      "slug": "ksmster",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/ksmster"
+          }
+        ]
+      }
+    },
+    {
+      "name": "skabashn",
+      "emailAddress": "skabashniuk@redhat.com",
+      "id": 3,
+      "displayName": "Kabashn",
+      "active": true,
+      "slug": "skabashn",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/skabashn"
+          }
+        ]
+      }
+    }
+  ],
+  "start": 0,
+  "nextPageStart": 3
+}
