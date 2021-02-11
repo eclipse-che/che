@@ -128,15 +128,15 @@
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
+            <artifactId>jakarta.json</artifactId>
         </dependency>
         <dependency>
             <groupId>org.leadpony.justify</groupId>
             <artifactId>justify</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>javax.json-api</artifactId>
-                    <groupId>javax.json</groupId>
+                    <artifactId>jakarta.json-api</artifactId>
+                    <groupId>jakarta.json</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
