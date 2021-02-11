@@ -102,7 +102,6 @@ public final class TestObjectsFactory {
         createWorkspaceConfig(id),
         new AuthorImpl(creator, System.currentTimeMillis()),
         null,
-        null,
         null);
   }
 

@@ -25,6 +25,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.JsonReader;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.leadpony.justify.api.JsonSchema;
@@ -36,15 +38,19 @@ import org.leadpony.justify.api.ProblemHandler;
 @Singleton
 public class DevfileSchemaValidator {
 
-  private final JsonValidationService service = JsonValidationService.newInstance();
-  private ObjectMapper jsonMapper;
-  private Map<String, JsonSchema> schemasByVersion;
-  private ErrorMessageComposer errorMessageComposer;
+  private final JsonValidationService service;
+  private final ObjectMapper jsonMapper;
+  private final Map<String, JsonSchema> schemasByVersion;
+  private final ErrorMessageComposer errorMessageComposer;
+  private final DevfileVersionDetector devfileVersionDetector;
 
   @Inject
-  public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
+  public DevfileSchemaValidator(
+      DevfileSchemaProvider schemaProvider, DevfileVersionDetector devfileVersionDetector) {
+    this.service = JsonValidationService.newInstance();
     this.jsonMapper = new ObjectMapper();
     this.errorMessageComposer = new ErrorMessageComposer();
+    this.devfileVersionDetector = devfileVersionDetector;
     try {
       this.schemasByVersion = new HashMap<>();
       for (String version : SUPPORTED_VERSIONS) {
@@ -59,19 +65,15 @@ public class DevfileSchemaValidator {
     try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
-      if (!contentNode.hasNonNull("apiVersion")) {
-        throw new DevfileFormatException(
-            "Devfile schema validation failed. Error: The object must have a property whose name is \"apiVersion\".");
-      }
-      String apiVersion = contentNode.get("apiVersion").asText();
+      String devfileVersion = devfileVersionDetector.devfileVersion(contentNode);
 
-      if (!schemasByVersion.containsKey(apiVersion)) {
+      if (!schemasByVersion.containsKey(devfileVersion)) {
         throw new DevfileFormatException(
             String.format(
                 "Version '%s' of the devfile is not supported. Supported versions are '%s'.",
-                apiVersion, SUPPORTED_VERSIONS));
+                devfileVersion, SUPPORTED_VERSIONS));
       }
-      JsonSchema schema = schemasByVersion.get(apiVersion);
+      JsonSchema schema = schemasByVersion.get(devfileVersion);
       try (JsonReader reader =
           service.createReader(
               new StringReader(jsonMapper.writeValueAsString(contentNode)), schema, handler)) {
@@ -79,9 +81,11 @@ public class DevfileSchemaValidator {
       }
       if (!validationErrors.isEmpty()) {
         String error = errorMessageComposer.extractMessages(validationErrors, new StringBuilder());
-        throw new DevfileFormatException(
-            format("Devfile schema validation failed. Error: %s", error));
+        throw new DevfileFormatException(error);
       }
+    } catch (DevfileException dfe) {
+      throw new DevfileFormatException(
+          format("Devfile schema validation failed. Error: %s", dfe.getMessage()));
     } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }

@@ -1,0 +1,6 @@
+--timeout 2200000
+--reporter 'dist/driver/CheReporter.js'
+-u tdd
+--full-trace
+--bail
+--require source-map-support/register

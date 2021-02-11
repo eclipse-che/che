@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.factory.Author;
-import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.api.core.model.factory.Policies;
@@ -69,10 +68,6 @@ public class FactoryImpl implements Factory {
   private UserImpl userEntity;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "button_id")
-  private ButtonImpl button;
-
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "ide_id")
   private IdeImpl ide;
 
@@ -87,8 +82,7 @@ public class FactoryImpl implements Factory {
       WorkspaceConfig workspace,
       Author creator,
       Policies policies,
-      Ide ide,
-      Button button) {
+      Ide ide) {
     this.id = id;
     this.name = name;
     this.version = version;
@@ -104,9 +98,6 @@ public class FactoryImpl implements Factory {
     if (ide != null) {
       this.ide = new IdeImpl(ide);
     }
-    if (button != null) {
-      this.button = new ButtonImpl(button);
-    }
   }
 
   public FactoryImpl(Factory factory) {
@@ -117,8 +108,7 @@ public class FactoryImpl implements Factory {
         factory.getWorkspace(),
         factory.getCreator(),
         factory.getPolicies(),
-        factory.getIde(),
-        factory.getButton());
+        factory.getIde());
   }
 
   @Override
@@ -176,15 +166,6 @@ public class FactoryImpl implements Factory {
   }
 
   @Override
-  public ButtonImpl getButton() {
-    return button;
-  }
-
-  public void setButton(ButtonImpl button) {
-    this.button = button;
-  }
-
-  @Override
   public IdeImpl getIde() {
     return ide;
   }
@@ -204,8 +185,7 @@ public class FactoryImpl implements Factory {
         && Objects.equals(workspace, other.workspace)
         && Objects.equals(creator, other.creator)
         && Objects.equals(policies, other.policies)
-        && Objects.equals(ide, other.ide)
-        && Objects.equals(button, other.button);
+        && Objects.equals(ide, other.ide);
   }
 
   @Override
@@ -218,7 +198,6 @@ public class FactoryImpl implements Factory {
     hash = 31 * hash + Objects.hashCode(creator);
     hash = 31 * hash + Objects.hashCode(policies);
     hash = 31 * hash + Objects.hashCode(ide);
-    hash = 31 * hash + Objects.hashCode(button);
     return hash;
   }
 
@@ -242,8 +221,6 @@ public class FactoryImpl implements Factory {
         + policies
         + ", ide="
         + ide
-        + ", button="
-        + button
         + '}';
   }
 
@@ -257,12 +234,11 @@ public class FactoryImpl implements Factory {
     private Author creator;
     private Policies policies;
     private Ide ide;
-    private Button button;
 
     private FactoryImplBuilder() {}
 
     public FactoryImpl build() {
-      return new FactoryImpl(id, name, version, workspace, creator, policies, ide, button);
+      return new FactoryImpl(id, name, version, workspace, creator, policies, ide);
     }
 
     public FactoryImplBuilder from(FactoryImpl factory) {
@@ -273,7 +249,6 @@ public class FactoryImpl implements Factory {
       this.creator = factory.getCreator();
       this.policies = factory.getPolicies();
       this.ide = factory.getIde();
-      this.button = factory.getButton();
       return this;
     }
 
@@ -314,11 +289,6 @@ public class FactoryImpl implements Factory {
 
     public FactoryImplBuilder setIde(Ide ide) {
       this.ide = ide;
-      return this;
-    }
-
-    public FactoryImplBuilder setButton(Button button) {
-      this.button = button;
       return this;
     }
   }

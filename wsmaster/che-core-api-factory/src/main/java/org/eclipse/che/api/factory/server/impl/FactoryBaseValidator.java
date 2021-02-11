@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryConstants;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
 import org.eclipse.che.api.factory.shared.dto.OnAppLoadedDto;
@@ -94,7 +95,7 @@ public abstract class FactoryBaseValidator {
    * @throws BadRequestException if since date greater than current date<br>
    * @throws BadRequestException if until date less than current date<br>
    */
-  protected void validateCurrentTimeBetweenSinceUntil(FactoryDto factory)
+  protected void validateCurrentTimeBetweenSinceUntil(FactoryMetaDto factory)
       throws BadRequestException {
     final PoliciesDto policies = factory.getPolicies();
     if (policies == null) {
@@ -149,7 +150,7 @@ public abstract class FactoryBaseValidator {
    * @param factory factory to validate
    * @throws BadRequestException when factory actions is invalid
    */
-  protected void validateProjectActions(FactoryDto factory) throws BadRequestException {
+  protected void validateProjectActions(FactoryMetaDto factory) throws BadRequestException {
     final IdeDto ide = factory.getIde();
     if (ide == null) {
       return;

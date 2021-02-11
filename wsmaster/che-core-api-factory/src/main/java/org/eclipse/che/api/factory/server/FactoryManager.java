@@ -40,7 +40,7 @@ public class FactoryManager {
   }
 
   /**
-   * Stores {@link Factory} instance and related set of {@link FactoryImage}.
+   * Stores {@link Factory} instance.
    *
    * @param factory instance of factory which would be stored
    * @return factory which has been stored

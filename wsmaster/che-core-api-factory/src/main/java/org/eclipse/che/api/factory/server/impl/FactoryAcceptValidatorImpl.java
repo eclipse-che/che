@@ -14,7 +14,7 @@ package org.eclipse.che.api.factory.server.impl;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 
 /** Factory accept stage validator. */
 @Singleton
@@ -22,7 +22,7 @@ public class FactoryAcceptValidatorImpl extends FactoryBaseValidator
     implements FactoryAcceptValidator {
 
   @Override
-  public void validateOnAccept(FactoryDto factory) throws BadRequestException {
+  public void validateOnAccept(FactoryMetaDto factory) throws BadRequestException {
     validateCurrentTimeBetweenSinceUntil(factory);
     validateProjectActions(factory);
   }

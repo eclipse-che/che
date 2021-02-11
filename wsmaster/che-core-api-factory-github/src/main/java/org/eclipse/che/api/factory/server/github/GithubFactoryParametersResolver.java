@@ -15,18 +15,17 @@ import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryVisitor;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
@@ -82,49 +81,57 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
    * @throws BadRequestException when data are invalid
    */
   @Override
-  public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException, ServerException {
+  public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
+      throws BadRequestException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
-    FactoryDto factory =
-        urlFactoryBuilder
-            .createFactoryFromDevfile(
-                githubUrl,
-                new GithubFileContentProvider(githubUrl, urlFetcher),
-                extractOverrideParams(factoryParameters))
-            .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"));
+    return urlFactoryBuilder
+        .createFactoryFromDevfile(
+            githubUrl,
+            new GithubFileContentProvider(githubUrl, urlFetcher),
+            extractOverrideParams(factoryParameters))
+        .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
+        .acceptVisitor(new GithubFactoryVisitor(githubUrl));
+  }
 
-    if (factory.getWorkspace() != null) {
-      return projectConfigDtoMerger.merge(
-          factory,
-          () -> {
-            // Compute project configuration
-            return newDto(ProjectConfigDto.class)
-                .withSource(githubSourceStorageBuilder.buildWorkspaceConfigSource(githubUrl))
-                .withName(githubUrl.getRepository())
-                .withPath("/".concat(githubUrl.getRepository()));
-          });
-    } else if (factory.getDevfile() == null) {
-      // initialize default devfile
-      factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
+  /**
+   * Visitor that puts the default devfile or updates devfile projects into the Github Factory, if
+   * needed.
+   */
+  private class GithubFactoryVisitor implements FactoryVisitor {
+
+    private final GithubUrl githubUrl;
+
+    private GithubFactoryVisitor(GithubUrl githubUrl) {
+      this.githubUrl = githubUrl;
     }
 
-    List<ProjectDto> projects = factory.getDevfile().getProjects();
-    // if no projects set, set the default one from GitHub url
-    if (projects.isEmpty()) {
-      factory
-          .getDevfile()
-          .setProjects(
-              Collections.singletonList(
-                  newDto(ProjectDto.class)
-                      .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
-                      .withName(githubUrl.getRepository())));
-    } else {
-      // update existing project with same repository, set current branch if needed
-      projects.forEach(
+    @Override
+    public FactoryDto visit(FactoryDto factory) {
+      if (factory.getWorkspace() != null) {
+        return projectConfigDtoMerger.merge(
+            factory,
+            () -> {
+              // Compute project configuration
+              return newDto(ProjectConfigDto.class)
+                  .withSource(githubSourceStorageBuilder.buildWorkspaceConfigSource(githubUrl))
+                  .withName(githubUrl.getRepository())
+                  .withPath("/".concat(githubUrl.getRepository()));
+            });
+      } else if (factory.getDevfile() == null) {
+        // initialize default devfile
+        factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
+      }
+
+      updateProjects(
+          factory.getDevfile(),
+          () ->
+              newDto(ProjectDto.class)
+                  .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
+                  .withName(githubUrl.getRepository()),
           project -> {
             final String location = project.getSource().getLocation();
             if (location.equals(githubUrl.repositoryLocation())
@@ -132,7 +139,8 @@ public class GithubFactoryParametersResolver extends DefaultFactoryParameterReso
               project.getSource().setBranch(githubUrl.getBranch());
             }
           });
+
+      return factory;
     }
-    return factory;
   }
 }

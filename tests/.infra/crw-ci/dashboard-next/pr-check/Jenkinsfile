@@ -1,0 +1,424 @@
+#!groovy
+
+pipeline {
+    agent { label "minikube-rhel7-24gb" }
+
+    options {
+        timestamps()
+        timeout(time: 90, unit: 'MINUTES')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
+    }
+
+    environment {
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.6.1/bin:/qa/tools/opt/openjdk-11.0.6.10/bin:$PATH"
+        JAVA_HOME="/qa/tools/opt/openjdk-11.0.6.10"
+        JENKINS_BUILD = "true"
+
+        DEVFILE_PATH = "${WORKSPACE}/test-workspace-devfile.yaml"
+        CUSTOM_RESOURCE_PATCH_FILE = "${WORKSPACE}/custom-resource-patch.yaml"
+
+        SUCCESS_THRESHOLD = 5
+
+        LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
+
+        mutableCheImageTag = ""
+        pathToChectl = ""
+
+        UPSTREAM_DASHBOARD_REPO_URL="https://github.com/eclipse/che-dashboard.git"
+    }
+
+    parameters {
+        booleanParam(name: 'cheSingleHost',
+               defaultValue: false,
+               description: 'Configuration Che server strategy')
+
+        string(name: 'cheImageRepo',
+                defaultValue: "maxura/che-server",
+                description: 'Repo of Che server image')
+
+        string(name: 'testWorkspaceDevfileUrl',
+                defaultValue: "",
+                description: 'URL of devfile of test workspace')
+
+        string(name: 'ghprbSourceBranch',
+                defaultValue: "master")
+
+        string(name: 'ghprbAuthorRepoGitUrl',
+                defaultValue: "https://github.com/eclipse/che-dashboard.git")
+
+        string(name: 'e2eTestParameters',
+                defaultValue: "")
+
+        string(
+                name: "chectlPackageUrl",
+                defaultValue: "",
+                description: "URL address of chectl package"
+        )
+
+        string(
+                name: "cheE2eImageTag",
+                defaultValue: "nightly",
+                description: "Tag of quay.io/eclipse/che-e2e image"
+        )
+    }
+
+    stages {
+        stage("Setup environment") {
+            steps {
+                script { 
+                    mutableCheImageTag = ghprbPullId
+
+                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                        sh """
+                            docker login -u maxura -p ${maxura_docker_password}
+
+                            TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                            curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                        """
+                    }
+
+                    echo "Print anonymous dockerhub limits"
+                    sh """
+                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                    """
+               }
+            }
+        }
+
+        stage("Prepare to start Che on K8S") {
+            failFast true
+
+            parallel {
+                stage("Download chectl") {
+                    steps {
+                        script {
+                            retry(2) {
+                                if (chectlPackageUrl != "") {
+                                    sh """
+                                        wget ${chectlPackageUrl} -O chectl-linux-x64.tar.gz
+                                        tar -xzf chectl-linux-x64.tar.gz
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl/bin/chectl"
+
+                                } else {
+                                    echo "Install chectl using https://www.eclipse.org/che/chectl/ --channel=next"
+                                    sh """
+                                        curl -sL https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                        chmod +x install_chectl.sh
+                                        sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                        sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                        sudo chmod +x ${WORKSPACE}/chectl
+                                    """
+                                    pathToChectl = "${WORKSPACE}/chectl"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage("Start Kubernetes") {
+                    steps {
+                        script {
+                            retry(2) {
+                                echo "Workaround k8s error https://github.com/eclipse/che/issues/14902"
+                                sh """
+                                    cat /etc/sysctl.conf
+                                    echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.conf
+                                    sudo sysctl -p
+                                """
+
+                                sh """
+                                    # https://github.com/kubernetes/minikube/blob/master/docs/vmdriver-none.md
+                                    export MINIKUBE_WANTUPDATENOTIFICATION=false
+                                    export MINIKUBE_WANTREPORTERRORPROMPT=false
+                                    export MINIKUBE_HOME=\$HOME
+                                    export CHANGE_MINIKUBE_NONE_USER=true
+                                    export KUBECONFIG=\$HOME/.kube/config
+                                    export DOCKER_CONFIG=\$HOME/.docker
+
+                                    mkdir -p \$HOME/.kube \$HOME/.minikube
+                                    touch \$KUBECONFIG
+
+                                    sudo -E /usr/local/bin/minikube start \\
+                                    --vm-driver=none \\
+                                    --cpus 4 \\
+                                    --memory 13000 \\
+                                    --logtostderr
+                                """
+                            }
+                        }
+                    }
+                }
+
+                stage("Build Che including upstream projects") {
+                    steps {
+                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
+                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+
+                        sh """
+                            project_list=(
+                                eclipse/che-parent
+                            )
+                            
+                            for project in \${project_list[@]};
+                            do
+                                result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
+                                if [[ \$result == *"refs"* ]]; then
+                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
+                                    git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
+                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
+                                else
+                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
+                                fi
+                            done
+                        """
+
+                        echo "Build Che"
+                        sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                    }
+                }
+
+                stage("Pull test images") {
+                    steps {
+                        script {
+                            retry(2) {
+                                echo "Pull test images"
+                                sh """
+                                    docker pull quay.io/eclipse/che-e2e:$cheE2eImageTag
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Build and push 'che-dashboard-next' image"){
+            steps {
+                sh """
+                    echo "Donwload the 'che-dashboard-next' project and checkout to branch"
+
+                    git clone $ghprbAuthorRepoGitUrl
+                    cd che-dashboard
+
+                    if [[ "$UPSTREAM_DASHBOARD_REPO_URL" != "$ghprbAuthorRepoGitUrl" ]]; then
+                        echo "Using fork $ghprbAuthorRepoGitUrl"
+                        git fetch -f $UPSTREAM_DASHBOARD_REPO_URL master:$ghprbSourceBranch
+                    fi
+
+                    git checkout $ghprbSourceBranch
+                    
+
+                    echo "Build the 'che-dashboard-next' image"
+
+                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard:${mutableCheImageTag}
+
+                    docker push docker.io/maxura/che-dashboard:${mutableCheImageTag}
+
+                    cd ..
+                """
+            }
+        }
+
+        stage("Build and push che-server image") {
+            steps {
+                sh """
+                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=${mutableCheImageTag} --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
+                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
+                """
+            }
+        }
+
+        stage("Start Che") {
+            steps {
+                script {
+                    echo "Pre-pull Eclipse Che and test images from dockerhub"
+                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                        sh """
+                            eval \$(minikube docker-env)
+                            docker login -u maxura -p ${maxura_docker_password}
+
+                            docker pull mariolet/petclinic:d2831f9b
+                            docker pull centos/postgresql-96-centos7:9.6
+                            docker pull centos/mysql-57-centos7
+                            docker pull ${cheImageRepo}:${mutableCheImageTag}
+                            docker pull docker.io/traefik:v2.2.8
+                        """
+                    }
+
+
+                    echo "Create custom-resource patch file"
+                    if (cheSingleHost.toBoolean() == true) {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+spec:
+  server:
+    cheImage: '${cheImageRepo}'
+    cheImageTag: '${mutableCheImageTag}'
+    serverExposureStrategy: 'single-host'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+      CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
+      CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE__UNRECOVERABLE__EVENTS: 'Failed Scheduling,Failed to pull image'
+  k8s:  
+    singleHostExposureType: 'gateway'
+  auth:
+    updateAdminPassword: false
+EOL"""
+
+                    } else {
+                        sh """cat > $CUSTOM_RESOURCE_PATCH_FILE <<EOL
+spec:
+  server:
+    cheImage: '${cheImageRepo}'
+    cheImageTag: '${mutableCheImageTag}'
+    customCheProperties:
+      CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
+      CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
+      CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE__UNRECOVERABLE__EVENTS: 'Failed Scheduling,Failed to pull image'
+  auth:
+    updateAdminPassword: false
+EOL"""
+                    }
+
+                    echo "Install Che"
+                    sh """
+                        ${pathToChectl} server:deploy \\
+                        --k8spodreadytimeout=600000 \\
+                        --k8spodwaittimeout=600000 \\
+                        --k8spoddownloadimagetimeout=600000 \\
+                        --listr-renderer=verbose \\
+                        --platform=minikube \\
+                        --che-operator-cr-patch-yaml=$CUSTOM_RESOURCE_PATCH_FILE \\
+                        --chenamespace=eclipse-che \\
+                        --telemetry=off
+                    """
+
+                    cheHost = sh(
+                            script: "kubectl get ingress che --namespace=eclipse-che -o=jsonpath={'.spec.rules[0].host'}",
+                            returnStdout: true
+                    ).trim()
+
+                    echo "Wait che-server to be available"
+                    sh """
+                            COUNTER=0;
+                            SUCCESS_RATE_COUNTER=0;
+                            while true; do
+                            if [ \$COUNTER -gt 180 ]; then
+                            echo "Unable to get stable route. Exiting"
+                            exit 1
+                            fi
+                            
+                            ((COUNTER+=1))
+                            
+                            
+                            STATUS_CODE=\$(curl -k -sL -w "%{http_code}" -I http://${cheHost} -o /dev/null; true) || true
+                            
+                            echo "Try \${COUNTER}. Status code: \${STATUS_CODE}"
+                            if [ "\$STATUS_CODE" == "200" ]; then 
+                            ((SUCCESS_RATE_COUNTER+=1))
+                            fi
+                            sleep 1;
+                        
+                            if [ \$SUCCESS_RATE_COUNTER == \$SUCCESS_THRESHOLD ]; then 
+                            echo "Route is stable enough. Continuing running tests"
+                            break
+                            fi
+                            done
+                    """
+
+                    sh """
+                        cat /tmp/cheCA.crt
+                    """
+                }
+            }
+        }
+
+        stage("Run the 'JavaMaven' devfile test") {
+            steps {
+                sh """
+                     CHE_URL=https://${cheHost}
+                     docker run --shm-size=1g --net=host --ipc=host \\
+                       -p 5920:5920 \\
+                       -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
+                       -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
+                       -e TS_SELENIUM_MULTIUSER="true" \\
+                       -e TS_SELENIUM_USERNAME="admin" \\
+                       -e TS_SELENIUM_PASSWORD="admin" \\
+                       -e TEST_SUITE="test-all-devfiles" ${e2eTestParameters} \\
+                       -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
+                       -e TS_SELENIUM_DEFAULT_POLLING=2000 \\
+                       -e USERSTORY=DevfileSmoke \\
+                       -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \\
+                       -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
+                       quay.io/eclipse/che-e2e:${cheE2eImageTag}
+                """
+            }
+        }
+    }
+
+    post {
+        cleanup {
+            withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                sh """
+                    TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                    curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+                """
+            }
+
+            echo "Print anonymous dockerhub limits"
+            sh """
+                TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+                curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+            """
+
+            sh """                   
+                mkdir -p $LOGS_AND_CONFIGS/kubectl
+                kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
+                kubectl --namespace=eclipse-che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
+
+                mkdir -p $LOGS_AND_CONFIGS/che-config
+
+                cp ${WORKSPACE}/org_v1_che_cr.yaml $LOGS_AND_CONFIGS/che-config || true
+                cp ${DEVFILE_PATH} $LOGS_AND_CONFIGS || true
+                cp ${CUSTOM_RESOURCE_PATCH_FILE} $LOGS_AND_CONFIGS || true
+
+                kubectl get checluster --namespace=eclipse-che -o yaml > $LOGS_AND_CONFIGS/che-config/checluster.yaml || true
+                kubectl get configmaps --namespace=eclipse-che che -o yaml > $LOGS_AND_CONFIGS/che-config/configmap.yaml || true
+                kubectl get ingresses --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-config/ingresses.txt || true
+                kubectl get pods --namespace=eclipse-che >$LOGS_AND_CONFIGS/che-config/pods.txt || true
+                kubectl get all --namespace=eclipse-che -o yaml > $LOGS_AND_CONFIGS/che-config/all.yaml || true
+
+                mkdir -p $LOGS_AND_CONFIGS/che-logs
+                export PODS=\$(kubectl get pod --namespace=eclipse-che | awk 'NR>1 {print \$1}')
+                for pod in \$PODS ; do \
+                    kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
+                done
+
+                mkdir -p $LOGS_AND_CONFIGS/workspace-logs
+                export WS_POD=\$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=eclipse-che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
+                    kubectl logs \$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                done
+                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+
+                mkdir -p $LOGS_AND_CONFIGS/docker
+                docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
+                docker ps -a > $LOGS_AND_CONFIGS/docker/containers.txt || true
+
+                env > $LOGS_AND_CONFIGS/env.output.txt || true
+                ${pathToChectl} --help > $LOGS_AND_CONFIGS/chectl.version.txt || true
+
+                cp -r /tmp/chectl-logs $LOGS_AND_CONFIGS || true
+            """
+
+            archiveArtifacts allowEmptyArchive: true, artifacts: "tests/e2e/report/**, logs-and-configs/**"
+        }
+
+    }
+
+}

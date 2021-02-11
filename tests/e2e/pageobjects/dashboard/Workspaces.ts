@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
@@ -16,45 +15,47 @@ import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
+export enum WorkspaceStatusUI {
+    Running = 'green',
+    Stopped = 'grey'
+}
 
 @injectable()
 export class Workspaces {
-    private static readonly ADD_WORKSPACE_BUTTON_CSS: string = '#add-item-button';
+    private static readonly ADD_WORKSPACE_BUTTON_XPATH: string = `//button[text()='Add Workspace']`;
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Workspaces.waitPage');
 
-        await this.driverHelper.waitVisibility(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
+        await this.driverHelper.waitVisibility(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickAddWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug('Workspaces.clickAddWorkspaceButton');
 
-        await this.driverHelper.waitAndClick(By.css(Workspaces.ADD_WORKSPACE_BUTTON_CSS), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
+    }
+
+    async clickOpenButton(workspaceName: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug('Workspaces.clickOpenButton');
+
+        await this.driverHelper.waitAndClick(this.getOpenButtonLocator(workspaceName), timeout);
     }
 
     async waitWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItem "${workspaceName}"`);
 
-        const workspaceListItemLocator: By = By.css(this.getWorkspaceListItemLocator(workspaceName));
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout);
-    }
-
-    async clickOnStopWorkspaceButton(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug(`Workspaces.clickOnStopWorkspaceButton "${workspaceName}"`);
-
-        const stopWorkspaceButtonLocator: By = By.css(`#ws-name-${workspaceName} .workspace-status[uib-tooltip="Stop workspace"]`);
-
-        await this.driverHelper.waitAndClick(stopWorkspaceButtonLocator, timeout);
     }
 
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
 
-        const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'RUNNING'));
+        const runningStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Running);
 
         await this.driverHelper.waitVisibility(runningStatusLocator, timeout);
     }
@@ -62,7 +63,7 @@ export class Workspaces {
     async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
 
-        const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'STOPPED'));
+        const stoppedStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped);
 
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
     }
@@ -70,60 +71,119 @@ export class Workspaces {
     async clickWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
         Logger.debug(`Workspaces.clickWorkspaceListItem "${workspaceName}"`);
 
-        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-        const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
     }
 
-    async clickDeleteButtonOnWorkspaceDetails(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Workspaces.clickDeleteButtonOnWorkspaceDetails');
+    async clickActionsButton(workspaceName: string) {
+        Logger.debug(`Workspaces.clickActionsButton of the '${workspaceName}' list item`);
 
-        const deleteButtonOnWorkspaceDetailsLocator: By = By.css('che-button-danger[che-button-title=\'Delete\']');
+        await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
+    }
 
-        await this.driverHelper.waitAndClick(deleteButtonOnWorkspaceDetailsLocator, timeout);
+    async waitActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
+        Logger.debug(`Workspaces.waitActionsPopup of the '${workspaceName}' list item`);
+
+        await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
+        await this.driverHelper.wait(5000);
+    }
+
+    async openActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
+        Logger.debug(`Workspaces.openActionsPopup for the '${workspaceName}' list item`);
+
+        await this.clickActionsButton(workspaceName);
+        await this.waitActionsPopup(workspaceName, timeout);
+    }
+
+    async clickActionsDeleteButton(workspaceName: string) {
+        Logger.debug(`Workspaces.clickActionsDeleteButton for the '${workspaceName}' list item`);
+
+        await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Delete Workspace'));
+    }
+
+    async clickActionsStopWorkspaceButton(workspaceName: string) {
+        Logger.debug(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item`);
+
+        await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+    }
+
+    async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug(`Workspaces.waitDeleteWorkspaceConfirmationWindow`);
+
+        const confirmationWindowLocator: By = By.xpath(`//div[@aria-label='Delete workspaces confirmation window']`);
+
+        await this.driverHelper.waitVisibility(confirmationWindowLocator, timeout);
+        await this.driverHelper.wait(5000);
+    }
+
+
+    async clickToDeleteConfirmationCheckbox(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug(`Workspaces.clickToDeleteConfirmationCheckbox`);
+
+        const deleteConfirmationCheckboxLocator: By = By.xpath(`//input[@data-testid='confirmation-checkbox']`);
+
+        await this.driverHelper.waitAndClick(deleteConfirmationCheckboxLocator, timeout);
+    }
+
+    async waitAndClickEnabledConfirmationWindowDeleteButton(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug(`Workspaces.waitEnabledConfirmationWindowDeleteButton`);
+
+        const enabledConfirmationWindowDeleteButton: By = By.xpath(`//button[@data-testid='delete-workspace-button' and not(@disabled)]`);
+
+        await this.driverHelper.waitAndClick(enabledConfirmationWindowDeleteButton, timeout);
+    }
+
+
+    async deleteWorkspaceByActionsButton(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug('Workspaces.deleteWorkspaceByActionsButton');
+
+        await this.waitWorkspaceListItem(workspaceName, timeout);
+        await this.openActionsPopup(workspaceName, timeout);
+        await this.clickActionsDeleteButton(workspaceName);
+        await this.waitDeleteWorkspaceConfirmationWindow(timeout);
+        await this.clickToDeleteConfirmationCheckbox(timeout);
+        await this.waitAndClickEnabledConfirmationWindowDeleteButton(timeout);
+    }
+
+    async stopWorkspaceByActionsButton(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {
+        Logger.debug('Workspaces.stopWorkspaceByActionsButton');
+
+        await this.waitWorkspaceListItem(workspaceName, timeout);
+        await this.openActionsPopup(workspaceName, timeout);
+        await this.clickActionsStopWorkspaceButton(workspaceName);
     }
 
     async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbcence "${workspaceName}"`);
 
-        let namespace: string = TestConstants.TS_SELENIUM_USERNAME;
-        const workspaceListItemLocator: By = By.css(`div[id='ws-full-name-${namespace}/${workspaceName}']`);
+        const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
-    async confirmWorkspaceDeletion(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Workspaces.confirmWorkspaceDeletion');
-
-        const checkbox: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-empty')]`);
-        const checkbox_checked: By = By.xpath(`//che-popup//input[@id='enable-button' and contains(@class, 'ng-not-empty')]`);
-        const deleteButton: By = By.xpath('//che-popup//che-button-danger');
-
-        await this.driverHelper.waitAndClick(checkbox, 5000);
-        try {
-            await this.driverHelper.waitVisibility(checkbox_checked, 3000);
-        } catch (err) {
-            Logger.info('The checkbox is not checked. Trying again.');
-            await this.driverHelper.waitAndClick(checkbox, 5000);
-
-            try {
-                await this.driverHelper.waitVisibility(checkbox_checked, 3000);
-            } catch (err) {
-                Logger.error('Test was not able to select the checkbox during a workspace deletion.');
-                throw err;
-            }
-        }
-
-        await this.driverHelper.waitAndClick(deleteButton, 10000);
-    }
-
     private getWorkspaceListItemLocator(workspaceName: string): string {
-        return `#ws-name-${workspaceName}`;
+        return `//table[@aria-label='Workspaces List Table']//tbody//tr[//a[text()='${workspaceName}']]`;
     }
 
-    private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: string): string {
-        return `#ws-name-${workspaceName}[data-ws-status='${workspaceStatus}']`;
+    private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): By {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`);
+    }
+
+    private getActionsLocator(workspaceName: string): By {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//button[@aria-label='Actions']`);
+    }
+
+    private getExpandedActionsLocator(workspaceName: string): By {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//button[@aria-label='Actions' and @aria-expanded='true']`);
+    }
+
+    private getActionsPopupButtonLocator(workspaceName: string, buttonText: string): By {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//li[@role='menuitem']//button[text()='${buttonText}']`);
+    }
+
+    private getOpenButtonLocator(workspaceName: string) {
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-key=5]//a[text()='Open']`);
     }
 
 }

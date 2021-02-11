@@ -1,0 +1,139 @@
+#
+# Copyright (c) 2020 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+name: Release Che Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version that is going to be released. Should be in format 7.y.z'
+        required: true
+        default: ''
+      releaseParent:
+        description: 'If true, will also release Che Parent.'
+        required: false
+        default: 'false'
+      versionParent:
+        description: 'Specify Che Parent version here, if *releaseParent is true'
+        required: false
+        default: ''
+      forceRecreateTags:
+        description: 'If true, tags will be overriden and regenerated. Use with caution.'
+        required: false
+        default: 'false'
+      autoReleaseOnNexus:
+        description: 'If true, artifacts will be automatically released when deployed to Nexus, but only if *deployOnNexus* is also true.'
+        required: false
+        default: 'true'
+      deployOnNexus:
+        description: 'If true, artifacts will be deployed to Nexus.'
+        required: false
+        default: 'true'
+      rebuildFromExistingTags:
+        description: 'If true, and *forceRecreateTags* is false, a checkout to existing tags will be performed.'
+        required: false
+        default: 'false'
+      buildAndPushImages:
+        description: 'If true, Che Server images will be build.'
+        required: false
+        default: 'true'
+      bumpNextVersion:
+        description: 'If true, will update this project to the next version.'
+        required: false
+        default: 'false'
+
+jobs:
+  build:
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          path: che
+          fetch-depth: 0
+      - uses: actions/checkout@v2
+        if: ${{ github.event.inputs.releaseParent == 'true' }}
+        with:
+          repository: eclipse/che-parent
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          path: che-parent
+          fetch-depth: 0
+      - name: Check existing tag
+        run: |
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
+            echo "cannot create release, when tag already exists"
+            exit 1
+          fi
+      - name: Login to docker.io
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          registry: docker.io
+      - name: Login to quay.io
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+          registry: quay.io
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11.0.7'
+          java-package: jdk
+          architecture: x64 
+      - name: Set up environment
+        run: |
+          sudo apt-get update -y || true
+          # install more dependencies
+          sudo apt-get -y -q install wget curl bash git 
+          java -version
+
+          # want git >=2.24, hub >=2
+          hub --version # hub reports git version too
+
+          # want >=5
+          bash --version
+
+          java -version
+          which java
+          javac -version
+          which javac
+      - name: Release
+        run: |
+          export CHE_VERSION="${{ github.event.inputs.version }}"
+          echo "CHE_VERSION=${CHE_VERSION}"
+
+          export CHE_MAVEN_SETTINGS=${{ secrets.CHE_MAVEN_SETTINGS}}
+          export CHE_OSS_SONATYPE_GPG_KEY=${{ secrets.CHE_OSS_SONATYPE_GPG_KEY}}
+          export CHE_OSS_SONATYPE_PASSPHRASE=${{ secrets.CHE_OSS_SONATYPE_PASSPHRASE}}
+          export CHE_GITHUB_SSH_KEY=${{ secrets.CHE_GITHUB_SSH_KEY}}
+          export CHE_NPM_AUTH_TOKEN=${{ secrets.CHE_NPM_AUTH_TOKEN}}
+
+          export RELEASE_CHE_PARENT="${{ github.event.inputs.releaseParent }}"
+          export VERSION_CHE_PARENT="${{ github.event.inputs.versionParent }}"
+          export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
+          export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
+          export REBUILD_FROM_EXISTING_TAGS="${{ github.event.inputs.rebuildFromExistingTags }}"
+          export BUILD_AND_PUSH_IMAGES="${{ github.event.inputs.buildAndPushImages }}"
+          export BUMP_NEXT_VERSION="${{ github.event.inputs.bumpNextVersion }}"
+
+          export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
+          export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}
+          git config --global user.name "Mykhailo Kuznietsov"
+          git config --global user.email "mkuznets@redhat.com"
+          export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          set -e
+          # determine which OS we're using: rhel or ubuntu
+          cat /etc/os-release || true
+          ./che/make-release.sh

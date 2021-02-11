@@ -18,6 +18,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -25,16 +26,23 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -68,12 +76,15 @@ public class URLFactoryBuilderTest {
 
   @Mock private DevfileParser devfileParser;
 
+  @Mock private DevfileVersionDetector devfileVersionDetector;
+
   /** Tested instance. */
   private URLFactoryBuilder urlFactoryBuilder;
 
   @BeforeClass
   public void setUp() {
-    this.urlFactoryBuilder = new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser);
+    this.urlFactoryBuilder =
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, devfileParser, devfileVersionDetector);
   }
 
   @Test
@@ -103,9 +114,12 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileParser.parseYaml(anyString(), anyMap())).thenReturn(devfile);
+    when(devfileParser.parseYamlRaw(anyString()))
+        .thenReturn(new ObjectNode(JsonNodeFactory.instance));
+    when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
+    when(devfileVersionDetector.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
 
-    FactoryDto factory =
+    FactoryMetaDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
                 new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
@@ -115,6 +129,67 @@ public class URLFactoryBuilderTest {
 
     assertNotNull(factory);
     assertNull(factory.getSource());
+    assertTrue(factory instanceof FactoryDto);
+  }
+
+  @Test
+  public void testDevfileV2() throws BadRequestException, DevfileException {
+    String myLocation = "http://foo-location/";
+    Map<String, Object> devfileAsMap = Map.of("hello", "there", "how", "are", "you", "?");
+
+    JsonNode devfile = new ObjectNode(JsonNodeFactory.instance);
+    when(devfileParser.parseYamlRaw(anyString())).thenReturn(devfile);
+    when(devfileParser.convertYamlToMap(devfile)).thenReturn(devfileAsMap);
+    when(devfileVersionDetector.devfileMajorVersion(devfile)).thenReturn(2);
+
+    FactoryMetaDto factory =
+        urlFactoryBuilder
+            .createFactoryFromDevfile(
+                new DefaultFactoryUrl().withDevfileFileLocation(myLocation),
+                s -> myLocation + ".list",
+                emptyMap())
+            .get();
+
+    assertNotNull(factory);
+    assertNull(factory.getSource());
+    assertTrue(factory instanceof FactoryDevfileV2Dto);
+    assertEquals(((FactoryDevfileV2Dto) factory).getDevfile(), devfileAsMap);
+  }
+
+  @Test
+  public void testDevfileV2WithFilename() throws BadRequestException, DevfileException {
+    String myLocation = "http://foo-location/";
+    Map<String, Object> devfileAsMap = Map.of("hello", "there", "how", "are", "you", "?");
+
+    JsonNode devfile = new ObjectNode(JsonNodeFactory.instance);
+    when(devfileParser.parseYamlRaw(anyString())).thenReturn(devfile);
+    when(devfileParser.convertYamlToMap(devfile)).thenReturn(devfileAsMap);
+    when(devfileVersionDetector.devfileMajorVersion(devfile)).thenReturn(2);
+
+    RemoteFactoryUrl githubLikeRemoteUrl =
+        () ->
+            Collections.singletonList(
+                new DevfileLocation() {
+                  @Override
+                  public Optional<String> filename() {
+                    return Optional.of("devfile.yaml");
+                  }
+
+                  @Override
+                  public String location() {
+                    return myLocation;
+                  }
+                });
+
+    FactoryMetaDto factory =
+        urlFactoryBuilder
+            .createFactoryFromDevfile(githubLikeRemoteUrl, s -> myLocation + ".list", emptyMap())
+            .get();
+
+    assertNotNull(factory);
+    assertEquals(factory.getSource(), "devfile.yaml");
+    assertTrue(factory instanceof FactoryDevfileV2Dto);
+    assertEquals(((FactoryDevfileV2Dto) factory).getDevfile(), devfileAsMap);
   }
 
   @DataProvider
@@ -145,8 +220,7 @@ public class URLFactoryBuilderTest {
 
   @Test(dataProvider = "devfiles")
   public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
-      throws BadRequestException, ServerException, DevfileException, IOException,
-          OverrideParameterException {
+      throws BadRequestException, DevfileException, IOException, OverrideParameterException {
     DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     when(defaultFactoryUrl.devfileFileLocations())
@@ -163,12 +237,16 @@ public class URLFactoryBuilderTest {
                     return "http://foo.bar/anything";
                   }
                 }));
-    when(devfileParser.parseYaml(anyString(), anyMap())).thenReturn(devfile);
     when(fileContentProvider.fetchContent(anyString())).thenReturn("anything");
+    when(devfileParser.parseYamlRaw("anything"))
+        .thenReturn(new ObjectNode(JsonNodeFactory.instance));
+    when(devfileParser.parseJsonNode(any(JsonNode.class), anyMap())).thenReturn(devfile);
+    when(devfileVersionDetector.devfileMajorVersion(any(JsonNode.class))).thenReturn(1);
     FactoryDto factory =
-        urlFactoryBuilder
-            .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
-            .get();
+        (FactoryDto)
+            urlFactoryBuilder
+                .createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider, emptyMap())
+                .get();
 
     assertNull(factory.getDevfile().getMetadata().getName());
     assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);

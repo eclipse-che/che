@@ -141,7 +141,7 @@ public class GithubFactoryParametersResolverTest {
         .thenReturn(Optional.empty());
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
     // when
-    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) githubFactoryParametersResolver.createFactory(params);
     // then
     verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
@@ -165,7 +165,7 @@ public class GithubFactoryParametersResolverTest {
 
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
     // when
-    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) githubFactoryParametersResolver.createFactory(params);
     // then
     assertNotNull(factory.getDevfile());
     assertNull(factory.getWorkspace());
@@ -191,7 +191,7 @@ public class GithubFactoryParametersResolverTest {
 
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
     // when
-    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) githubFactoryParametersResolver.createFactory(params);
     // then
     assertNotNull(factory.getDevfile());
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
@@ -218,7 +218,7 @@ public class GithubFactoryParametersResolverTest {
 
     Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
     // when
-    FactoryDto factory = githubFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) githubFactoryParametersResolver.createFactory(params);
     // then
     assertNotNull(factory.getDevfile());
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();

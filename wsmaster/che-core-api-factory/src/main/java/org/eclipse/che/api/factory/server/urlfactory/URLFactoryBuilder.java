@@ -19,6 +19,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +29,12 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.OverrideParameterException;
@@ -57,15 +61,18 @@ public class URLFactoryBuilder {
   private final String defaultChePlugins;
 
   private final DevfileParser devfileParser;
+  private final DevfileVersionDetector devfileVersionDetector;
 
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileParser devfileParser) {
+      DevfileParser devfileParser,
+      DevfileVersionDetector devfileVersionDetector) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
     this.devfileParser = devfileParser;
+    this.devfileVersionDetector = devfileVersionDetector;
   }
 
   /**
@@ -83,7 +90,7 @@ public class URLFactoryBuilder {
    * @param overrideProperties map of overridden properties to apply in devfile
    * @return a factory or null if devfile is not found
    */
-  public Optional<FactoryDto> createFactoryFromDevfile(
+  public Optional<FactoryMetaDto> createFactoryFromDevfile(
       RemoteFactoryUrl remoteFactoryUrl,
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
@@ -109,17 +116,11 @@ public class URLFactoryBuilder {
       if (isNullOrEmpty(devfileYamlContent)) {
         return Optional.empty();
       }
-      try {
-        DevfileImpl devfile = devfileParser.parseYaml(devfileYamlContent, overrideProperties);
-        devfileParser.resolveReference(devfile, fileContentProvider);
-        devfile = ensureToUseGenerateName(devfile);
 
-        FactoryDto factoryDto =
-            newDto(FactoryDto.class)
-                .withV(CURRENT_VERSION)
-                .withDevfile(DtoConverter.asDto(devfile))
-                .withSource(location.filename().isPresent() ? location.filename().get() : null);
-        return Optional.of(factoryDto);
+      try {
+        JsonNode parsedDevfile = devfileParser.parseYamlRaw(devfileYamlContent);
+        return Optional.of(
+            createFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
       } catch (DevfileException | OverrideParameterException e) {
         throw new BadRequestException(
             "Error occurred during creation a workspace from devfile located at `"
@@ -129,6 +130,41 @@ public class URLFactoryBuilder {
       }
     }
     return Optional.empty();
+  }
+
+  /**
+   * Converts given devfile json into factory based on the devfile version.
+   *
+   * @param overrideProperties map of overridden properties to apply in devfile
+   * @param fileContentProvider service-specific devfile related file content provider
+   * @param location devfile's location
+   * @return new factory created from the given devfile
+   * @throws OverrideParameterException when any issue when overriding parameters occur
+   * @throws DevfileException when devfile is not valid or we can't work with it
+   */
+  private FactoryMetaDto createFactory(
+      JsonNode devfileJson,
+      Map<String, String> overrideProperties,
+      FileContentProvider fileContentProvider,
+      DevfileLocation location)
+      throws OverrideParameterException, DevfileException {
+
+    if (devfileVersionDetector.devfileMajorVersion(devfileJson) == 1) {
+      DevfileImpl devfile = devfileParser.parseJsonNode(devfileJson, overrideProperties);
+      devfileParser.resolveReference(devfile, fileContentProvider);
+      devfile = ensureToUseGenerateName(devfile);
+
+      return newDto(FactoryDto.class)
+          .withV(CURRENT_VERSION)
+          .withDevfile(DtoConverter.asDto(devfile))
+          .withSource(location.filename().isPresent() ? location.filename().get() : null);
+
+    } else {
+      return newDto(FactoryDevfileV2Dto.class)
+          .withV(CURRENT_VERSION)
+          .withDevfile(devfileParser.convertYamlToMap(devfileJson))
+          .withSource(location.filename().isPresent() ? location.filename().get() : null);
+    }
   }
 
   /**

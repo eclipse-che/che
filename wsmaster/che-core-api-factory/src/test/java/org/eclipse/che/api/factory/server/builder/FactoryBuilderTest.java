@@ -28,11 +28,8 @@ import java.net.URISyntaxException;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
-import org.eclipse.che.api.factory.shared.dto.ButtonAttributesDto;
-import org.eclipse.che.api.factory.shared.dto.ButtonDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
 import org.eclipse.che.api.factory.shared.dto.IdeDto;
@@ -286,15 +283,6 @@ public class FactoryBuilderTest {
                 .withReferer("referrer")
                 .withSince(123L)
                 .withUntil(123L))
-        .withButton(
-            dto.createDto(ButtonDto.class)
-                .withType(Button.Type.LOGO)
-                .withAttributes(
-                    dto.createDto(ButtonAttributesDto.class)
-                        .withColor("color")
-                        .withCounter(true)
-                        .withLogo("logo")
-                        .withStyle("style")))
         .withIde(ide);
   }
 }

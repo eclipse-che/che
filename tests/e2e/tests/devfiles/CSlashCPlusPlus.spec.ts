@@ -13,7 +13,8 @@ import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
-import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { Editor, CLASSES } from '../..';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
@@ -25,7 +26,7 @@ const runTaskName: string = 'run';
 const stack: string = 'C/C++';
 
 suite(`${stack} test`, async () => {
-    suite (`Create ${stack} workspace`, async () => {
+    suite(`Create ${stack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
@@ -48,16 +49,14 @@ suite(`${stack} test`, async () => {
         // commonLsTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
-    suite ('Stopping and deleting the workspace', async () => {
+    suite('Stopping and deleting the workspace', async () => {
         let workspaceName = 'not defined';
-        suiteSetup( async () => {
+        suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        test (`Stop worksapce`, async () => {
-            await workspaceHandling.stopWorkspace(workspaceName);
-        });
-        test (`Remove workspace`, async () => {
-            await workspaceHandling.removeWorkspace(workspaceName);
+
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

@@ -41,6 +41,7 @@ import org.eclipse.che.api.devfile.server.model.impl.UserDevfileImpl;
 import org.eclipse.che.api.devfile.shared.dto.UserDevfileDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileEntityProvider;
 import org.eclipse.che.api.workspace.server.devfile.DevfileParser;
+import org.eclipse.che.api.workspace.server.devfile.DevfileVersionDetector;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
@@ -70,7 +71,7 @@ public class UserDevfilePermissionsFilterTest {
   private DevfileEntityProvider devfileEntityProvider =
       new DevfileEntityProvider(
           new DevfileParser(
-              new DevfileSchemaValidator(new DevfileSchemaProvider()),
+              new DevfileSchemaValidator(new DevfileSchemaProvider(), new DevfileVersionDetector()),
               new DevfileIntegrityValidator(Collections.emptyMap())));
 
   @SuppressWarnings("unused")

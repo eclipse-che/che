@@ -14,7 +14,6 @@ package org.eclipse.che.api.factory.server.jpa;
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
-import org.eclipse.che.api.factory.server.model.impl.ButtonImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.model.impl.IdeImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl;
@@ -67,7 +66,6 @@ public class FactoryTckModule extends TckModule {
                 OnProjectsLoadedImpl.class,
                 OnAppLoadedImpl.class,
                 ActionImpl.class,
-                ButtonImpl.class,
                 IdeImpl.class,
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
