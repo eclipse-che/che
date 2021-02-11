@@ -12,7 +12,6 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
@@ -27,7 +26,13 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl.DevfileLocation;
 import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -94,7 +99,7 @@ public class URLFactoryBuilder {
       RemoteFactoryUrl remoteFactoryUrl,
       FileContentProvider fileContentProvider,
       Map<String, String> overrideProperties)
-      throws BadRequestException {
+      throws ApiException {
     String devfileYamlContent;
     for (DevfileLocation location : remoteFactoryUrl.devfileFileLocations()) {
       try {
@@ -108,10 +113,7 @@ public class URLFactoryBuilder {
         continue;
       } catch (DevfileException e) {
         LOG.debug("Unexpected devfile exception: {}", e.getMessage());
-        throw new BadRequestException(
-            format(
-                "There is an error resolving defvile. Error: %s. URL is %s",
-                e.getMessage(), location.location()));
+        throw toApiException(e, location);
       }
       if (isNullOrEmpty(devfileYamlContent)) {
         return Optional.empty();
@@ -121,15 +123,40 @@ public class URLFactoryBuilder {
         JsonNode parsedDevfile = devfileParser.parseYamlRaw(devfileYamlContent);
         return Optional.of(
             createFactory(parsedDevfile, overrideProperties, fileContentProvider, location));
-      } catch (DevfileException | OverrideParameterException e) {
-        throw new BadRequestException(
-            "Error occurred during creation a workspace from devfile located at `"
-                + location.location()
-                + "`. Cause: "
-                + e.getMessage());
+      } catch (OverrideParameterException e) {
+        throw new BadRequestException("Error processing override parameter(s): " + e.getMessage());
+      } catch (DevfileException e) {
+        throw toApiException(e, location);
       }
     }
     return Optional.empty();
+  }
+
+  private ApiException toApiException(DevfileException devfileException, DevfileLocation location) {
+    Throwable cause = devfileException.getCause();
+    if (cause instanceof ScmUnauthorizedException) {
+      ScmUnauthorizedException scmCause = (ScmUnauthorizedException) cause;
+      return new UnauthorizedException(
+          "SCM Authentication required",
+          401,
+          Map.of(
+              "oauth_version", scmCause.getOauthVersion(),
+              "oauth_provider", scmCause.getOauthProvider(),
+              "oauth_authentication_url", scmCause.getAuthenticateUrl()));
+    } else if (cause instanceof UnknownScmProviderException) {
+      return new ServerException(
+          "Provided location is unknown or misconfigured on the server side. Error message:"
+              + cause.getMessage());
+    } else if (cause instanceof ScmCommunicationException) {
+      return new ServerException(
+          "There is an error happened when communicate with SCM server. Error message:"
+              + cause.getMessage());
+    }
+    return new BadRequestException(
+        "Error occurred during creation a workspace from devfile located at `"
+            + location.location()
+            + "`. Cause: "
+            + devfileException.getMessage());
   }
 
   /**

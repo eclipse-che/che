@@ -87,7 +87,7 @@ public class FactoryService extends Service {
           @DefaultValue("false")
           @QueryParam(VALIDATE_QUERY_PARAMETER)
           Boolean validate)
-      throws BadRequestException, ServerException {
+      throws ApiException {
 
     // check parameter
     requiredNotNull(parameters, "Factory build parameters");

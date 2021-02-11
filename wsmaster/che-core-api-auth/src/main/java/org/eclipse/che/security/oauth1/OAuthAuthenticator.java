@@ -230,6 +230,14 @@ public abstract class OAuthAuthenticator {
   abstract String getOAuthProvider();
 
   /**
+   * Returns URL to initiate authentication process using given authenticator. Typically points to
+   * {@code /api/oauth/} or {@code /api/oauth/1.0} endpoint with necessary request params.
+   *
+   * @return URL to initiate authentication process
+   */
+  public abstract String getLocalAuthenticateUrl();
+
+  /**
    * Compute the Authorization header to sign the OAuth 1 request.
    *
    * @param userId the user id.
