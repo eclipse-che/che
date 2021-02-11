@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-server</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.26.0-SNAPSHOT</version>
+        <version>7.27.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.infrastructure</groupId>
