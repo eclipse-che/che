@@ -82,7 +82,9 @@ evaluateCheVariables() {
 }
 
 checkoutProjects() {
-    checkoutProject git@github.com:eclipse/che-parent
+    if [[ ${RELEASE_CHE_PARENT} = "true" ]]; then
+        checkoutProject git@github.com:eclipse/che-parent
+    fi
     checkoutProject git@github.com:eclipse/che
 }
 
@@ -90,7 +92,7 @@ checkoutProject() {
     PROJECT="${1##*/}"
     echo "checking out project $PROJECT with ${BRANCH} branch"
 
-    if [[ ! -d PROJECT ]]; then
+    if [[ ! -d ${PROJECT} ]]; then
         echo "project not found in ${PROJECT} directory, performing 'git clone'"
         git clone $1
     fi
@@ -111,6 +113,27 @@ checkoutProject() {
     cd ..
 }
 
+checkoutTags() {
+    if [[ ${RELEASE_CHE_PARENT} = "true" ]]; then
+        cd che-parent
+        git checkout ${CHE_VERSION}
+        cd ..
+    fi
+    cd che
+    git checkout ${CHE_VERSION}
+    cd ..
+}
+
+# check for build errors, since we're using set +e above to NOT fail the build for Nexus problems
+checkLogForErrors () {
+    tmplog="$1"
+    errors_in_log="$(grep -E "FAILURE \[|BUILD FAILURE|Failed to execute goal" $tmplog || true)"
+    if [[ ${errors_in_log} ]]; then
+        echo "${errors_in_log}"
+        exit 1
+    fi
+}
+
 # TODO change it to someone else?
 setupGitconfig() {
   git config --global user.name "Mykhailo Kuznietsov"
@@ -120,6 +143,32 @@ setupGitconfig() {
   git config --global push.default matching
   # replace default GITHUB_TOKEN, that is used by GitHub 
   export GITHUB_TOKEN="${CHE_BOT_GITHUB_TOKEN}"
+}
+
+commitChangeOrCreatePR() {
+    set +e
+    aVERSION="$1"
+    aBRANCH="$2"
+    PR_BRANCH="$3"
+
+    COMMIT_MSG="[release] Bump to ${aVERSION} in ${aBRANCH}"
+
+    # commit change into branch
+    git commit -asm "${COMMIT_MSG}"
+    git pull origin "${aBRANCH}"
+
+    PUSH_TRY="$(git push origin "${aBRANCH}")"
+    # shellcheck disable=SC2181
+    if [[ $? -gt 0 ]] || [[ $PUSH_TRY == *"protected branch hook declined"* ]]; then
+        # create pull request for master branch, as branch is restricted
+        git branch "${PR_BRANCH}"
+        git checkout "${PR_BRANCH}"
+        git pull origin "${PR_BRANCH}"
+        git push origin "${PR_BRANCH}"
+        lastCommitComment="$(git log -1 --pretty=%B)"
+        hub pull-request -f -m "${lastCommitComment}" -b "${aBRANCH}" -h "${PR_BRANCH}"
+    fi
+    set -e
 }
 
 createTags() {
@@ -324,6 +373,20 @@ tagLatestImages() {
      done
 }
 
+pushImagesOnQuay() {
+    #PUSH IMAGES
+    for image in ${IMAGES_LIST[@]}
+        do
+            echo y | docker push "${image}:$1"
+            if [[ $2 == "pushLatest" ]]; then
+                echo y | docker push "${image}:latest"
+            fi
+            if [[ $? -ne 0 ]]; then
+            die_with  "docker push of '${image}' image is failed!"
+            fi
+        done
+}
+
 bumpVersions() {
     # infer project version + commit change into ${BASEBRANCH} branch
     echo "${BASEBRANCH} ${BRANCH}"
@@ -390,13 +453,24 @@ installDebDeps
 set -x
 setupGitconfig
 
+evaluateCheVariables
+
 checkoutProjects
-createTags
-prepareRelease
+if [[ "${REBUILD_FROM_EXISTING_TAGS}" ]]; then
+    checkoutTags
+else
+    prepareRelease
+    createTags
+fi
 releaseCheServer
 
-buildImages  ${CHE_VERSION}
-tagLatestImages ${CHE_VERSION}
-pushImagesOnQuay ${CHE_VERSION} pushLatest
-bumpVersions
-updateImageTagsInCheServer
+if [[ "${BUILD_AND_PUSH_IMAGES}" ]]; then
+    buildImages  ${CHE_VERSION}
+    tagLatestImages ${CHE_VERSION}
+    pushImagesOnQuay ${CHE_VERSION} pushLatest
+fi
+
+if [[ "${BUMP_NEXT_VERSION}" ]]; then
+    bumpVersions
+    updateImageTagsInCheServer
+fi

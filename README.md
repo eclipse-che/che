@@ -39,8 +39,9 @@ Here you can find links on how to get started with Eclipse Che:
 ### Using Eclipse Che
 Here you can find references to useful documentation and hands-on guides to learn how to get the most of Eclipse Che:
 - [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/configuring-a-workspace-using-a-devfile/)
-- [Run VSCode Extensions in Che workspaces](https://www.eclipse.org/che/docs/che-7/using-a-visual-studio-code-extension-in-che)
-- [Configure Che for your teams](https://www.eclipse.org/che/docs/che-7/building-and-running-a-custom-registry-image/)
+- [Run VSCode Extensions in Che workspaces](https://www.eclipse.org/che/docs/che-7/end-user-guide/adding-a-vs-code-extension-to-a-workspace/)
+- [Creating and configuring a new Che 7 workspace](https://www.eclipse.org/che/docs/che-7/end-user-guide/creating-and-configuring-a-new-workspace/)
+- [Making a workspace portable using a devfile](https://www.eclipse.org/che/docs/che-7/end-user-guide/making-a-workspace-portable-using-a-devfile/)
 
 
 ### Feedback and Community
@@ -66,7 +67,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 
 #### Extending Eclipse Che
 - [Add a new language support. (to be provided soon)](https://www.eclipse.org/che/docs/che-7/adding-support-for-a-new-language/)
-- [Package your favorite VSCode extensions and make them available in Che.](https://www.eclipse.org/che/docs/che-7/using-a-visual-studio-code-extension-in-che/#publishing-a-vs-code-extension-into-the-che-plug-in-registry_using-a-visual-studio-code-extension-in-che)
+- [Package your favorite VSCode extensions and make them available in Che.](https://www.eclipse.org/che/docs/che-7/end-user-guide/publishing-metadata-for-a-vs-code-extension/)
 - [Write your own VSCode extension that runs on a dedicated side car container.](https://www.eclipse.org/che/docs/che-7/what-is-a-che-theia-plug-in/)
 - [Build and package your custom Che-Theia editor with your extensions and plugins.](https://www.eclipse.org/che/docs/che-7/using-alternative-ides-in-che/)
 
