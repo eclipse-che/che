@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -43,6 +44,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -72,15 +74,15 @@ public class SshKeySecretProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    when(runtimeIdentity.getOwnerId()).thenReturn(someUser);
-    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
+    lenient().when(runtimeIdentity.getOwnerId()).thenReturn(someUser);
+    lenient().when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
     k8sEnv = KubernetesEnvironment.builder().build();
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
-    when(pod.getMetadata()).thenReturn(podMeta);
-    when(pod.getSpec()).thenReturn(podSpec);
-    when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
-    when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
-    when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
+    lenient().when(pod.getMetadata()).thenReturn(podMeta);
+    lenient().when(pod.getSpec()).thenReturn(podSpec);
+    lenient().when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
+    lenient().when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
+    lenient().when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
     sshKeysProvisioner = new SshKeysProvisioner(sshManager);
   }
@@ -98,13 +100,13 @@ public class SshKeySecretProvisionerTest {
     assertEquals(k8sEnv.getSecrets().size(), 1);
   }
 
-  @Test
-  public void shuldNotMountKeysWithInvalidKeyNames() throws Exception {
+  @Test(dataProvider = "invalidNames")
+  public void shuldNotMountKeysWithInvalidKeyNames(String invalidName) throws Exception {
     // given
     when(sshManager.getPairs(someUser, "vcs"))
         .thenReturn(
             ImmutableList.of(
-                new SshPairImpl(someUser, "vcs", "http://blah.blah", "public", "private"),
+                new SshPairImpl(someUser, "vcs", invalidName, "public", "private"),
                 new SshPairImpl(someUser, "vcs", "gothub.mk", "public", "private"),
                 new SshPairImpl(someUser, "vcs", "boombaket.barabaket.com", "public", "private")));
     // when
@@ -115,6 +117,43 @@ public class SshKeySecretProvisionerTest {
     assertEquals(secret.getData().size(), 2);
     assertTrue(secret.getData().containsKey("gothub.mk"));
     assertTrue(secret.getData().containsKey("boombaket.barabaket.com"));
+    assertFalse(secret.getData().containsKey(invalidName));
+  }
+
+  @Test(dataProvider = "invalidNames")
+  public void shouldIgnoreInvalidKeyNames(String invalidName) throws Exception {
+    assertFalse(
+        sshKeysProvisioner.isValidSshKeyPair(
+            new SshPairImpl(someUser, "vcs", invalidName, "public", "private")));
+  }
+
+  @Test(dataProvider = "validNames")
+  public void shouldAcceptValidKeyNames(String validName) throws Exception {
+    assertTrue(
+        sshKeysProvisioner.isValidSshKeyPair(
+            new SshPairImpl(someUser, "vcs", validName, "public", "private")));
+  }
+
+  @DataProvider
+  public static Object[][] invalidNames() {
+    return new Object[][] {
+      new Object[] {"https://foo.bar"},
+      new Object[] {"_fef_123-ah_*zz**"},
+      new Object[] {"_fef_123-ah_z.z"},
+      new Object[] {"a-b#-hello"},
+      new Object[] {"--ab--"}
+    };
+  }
+
+  @DataProvider
+  public static Object[][] validNames() {
+    return new Object[][] {
+      new Object[] {"foo.bar"},
+      new Object[] {"fef-123-ahzz"},
+      new Object[] {"fef0123-ahz.z"},
+      new Object[] {"a-b.hello"},
+      new Object[] {"a--a----------b"}
+    };
   }
 
   @Test

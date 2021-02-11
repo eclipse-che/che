@@ -68,5 +68,9 @@ public final class Warnings {
       NOT_ABLE_TO_PROVISION_WORKSPACE_DEPLOYMENT_LABELS_OR_ANNOTATIONS_MESSAGE =
           "Not able to provision workspace %s deployment labels or annotations because of invalid configuration. Reason: '%s'";
 
+  public static final int SSH_KEYS_WILL_NOT_BE_MOUNTED = 4300;
+  public static final String SSH_KEYS_WILL_NOT_BE_MOUNTED_MESSAGE =
+      "Ssh keys %s has invalid names and can't be mounted to workspace %s.";
+
   private Warnings() {}
 }
