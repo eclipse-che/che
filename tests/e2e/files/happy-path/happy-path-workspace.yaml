@@ -13,7 +13,7 @@ components:
     memoryLimit: 512Mi
   - type: kubernetes
     alias: petclinic-web
-    reference: https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/containers-happy-path.yaml
+    reference: https://raw.githubusercontent.com/eclipse/che/che-18034/tests/e2e/files/happy-path/containers-happy-path.yaml
     selector:
       app.kubernetes.io/component: webapp
     entrypoints:
@@ -22,7 +22,7 @@ components:
         args: ["-f", "/dev/null"]
   - type: kubernetes
     alias: petclinic-db
-    reference: https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/containers-happy-path.yaml
+    reference: https://raw.githubusercontent.com/eclipse/che/che-18034/tests/e2e/files/happy-path/containers-happy-path.yaml
     selector:
       app.kubernetes.io/component: database
   - type: dockerimage
