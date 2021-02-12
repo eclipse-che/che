@@ -52,7 +52,10 @@ export class DebugView {
     async waitForDebuggerToConnect(timeout: number = TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT) {
         await this.driverHelper.getDriver().wait(async () => {
             Logger.debug(`Waiting for debugger to connect (threads to appear in "Threads" view)`);
-            const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(`'theia-debug-thread`));
+
+            const threadsTreeLocator = `//div[contains(@class, 'theia-debug-thread')]`;
+
+            const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(threadsTreeLocator));
             if (threadElements.length > 1) {
                 return true;
             }
@@ -64,6 +67,8 @@ export class DebugView {
      * Click on "Threads" view title.
      */
     async clickOnThreadsViewTitle() {
+        Logger.debug(`Click on "Threads" view title`)
+        
         const threadsViewTitleLocator: By = By.xpath('//div[@id="debug:view-container:-1--debug:threads:-1"]/*/span[@title="Threads"]');
         await this.driverHelper.waitAndClick(threadsViewTitleLocator);
     }

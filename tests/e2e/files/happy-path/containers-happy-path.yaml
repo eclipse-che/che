@@ -97,7 +97,7 @@ spec:
     spec:
       containers:
       - name: spring-boot
-        image: quay.io/crw_pr/petclinic
+        image: quay.io/mloriedo/spring-petclinic
         resources:
           requests:
             memory: 512Mi
