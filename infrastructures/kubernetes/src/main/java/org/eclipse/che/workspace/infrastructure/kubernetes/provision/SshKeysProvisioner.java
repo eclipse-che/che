@@ -31,6 +31,7 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -54,6 +55,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +102,12 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
   private static final Logger LOG = LoggerFactory.getLogger(SshKeysProvisioner.class);
 
   private final SshManager sshManager;
+  private final RuntimeEventsPublisher runtimeEventsPublisher;
 
   @Inject
-  public SshKeysProvisioner(SshManager sshManager) {
+  public SshKeysProvisioner(SshManager sshManager, RuntimeEventsPublisher runtimeEventsPublisher) {
     this.sshManager = sshManager;
+    this.runtimeEventsPublisher = runtimeEventsPublisher;
   }
 
   @Override
@@ -133,6 +137,7 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
               identity.getWorkspaceId());
       LOG.warn(message);
       k8sEnv.addWarning(new WarningImpl(Warnings.SSH_KEYS_WILL_NOT_BE_MOUNTED, message));
+      runtimeEventsPublisher.sendRuntimeLogEvent(message, ZonedDateTime.now().toString(), identity);
     }
 
     doProvisionSshKeys(

@@ -41,6 +41,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -68,6 +69,8 @@ public class SshKeySecretProvisionerTest {
 
   @Mock private Container container;
 
+  @Mock RuntimeEventsPublisher runtimeEventsPublisher;
+
   private final String someUser = "someuser";
 
   private SshKeysProvisioner sshKeysProvisioner;
@@ -84,7 +87,7 @@ public class SshKeySecretProvisionerTest {
     lenient().when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
     lenient().when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
     k8sEnv.addPod(pod);
-    sshKeysProvisioner = new SshKeysProvisioner(sshManager);
+    sshKeysProvisioner = new SshKeysProvisioner(sshManager, runtimeEventsPublisher);
   }
 
   @Test
@@ -101,7 +104,7 @@ public class SshKeySecretProvisionerTest {
   }
 
   @Test(dataProvider = "invalidNames")
-  public void shuldNotMountKeysWithInvalidKeyNames(String invalidName) throws Exception {
+  public void shouldNotMountKeysWithInvalidKeyNames(String invalidName) throws Exception {
     // given
     when(sshManager.getPairs(someUser, "vcs"))
         .thenReturn(
@@ -118,6 +121,8 @@ public class SshKeySecretProvisionerTest {
     assertTrue(secret.getData().containsKey("gothub.mk"));
     assertTrue(secret.getData().containsKey("boombaket.barabaket.com"));
     assertFalse(secret.getData().containsKey(invalidName));
+    verify(runtimeEventsPublisher, times(1))
+        .sendRuntimeLogEvent(anyString(), anyString(), eq(runtimeIdentity));
   }
 
   @Test(dataProvider = "invalidNames")
