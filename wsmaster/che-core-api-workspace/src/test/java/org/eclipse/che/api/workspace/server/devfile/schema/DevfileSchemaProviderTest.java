@@ -16,6 +16,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import org.testng.annotations.Test;
@@ -47,7 +48,7 @@ public class DevfileSchemaProviderTest {
             .contains("This schema describes the structure of the devfile object"));
   }
 
-  @Test(expectedExceptions = IOException.class)
+  @Test(expectedExceptions = FileNotFoundException.class)
   public void shouldThrowExceptionWhenInvalidVersionRequested() throws IOException {
     devfileSchemaProvider.getSchemaContent("this_is_clearly_not_a_valid_schema_version");
   }

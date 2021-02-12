@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.devfile.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_VERSIONS;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -85,11 +87,24 @@ public class DevfileService extends Service {
   @ApiOperation(value = "Retrieves current version of devfile JSON schema")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The schema successfully retrieved"),
+    @ApiResponse(code = 404, message = "The schema for given version was not found"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public Response getSchema() throws ServerException {
+  public Response getSchema(
+      @ApiParam("Devfile schema version") @DefaultValue(CURRENT_API_VERSION) @QueryParam("version")
+          String version)
+      throws ServerException, NotFoundException {
+    if (!SUPPORTED_VERSIONS.contains(version)) {
+      throw new NotFoundException(
+          String.format(
+              "Devfile schema version '%s' is invalid or not supported. Supported versions are '%s'.",
+              version, SUPPORTED_VERSIONS));
+    }
+
     try {
-      return Response.ok(schemaCachedProvider.getSchemaContent(CURRENT_API_VERSION)).build();
+      return Response.ok(schemaCachedProvider.getSchemaContent(version)).build();
+    } catch (FileNotFoundException e) {
+      throw new NotFoundException(e.getLocalizedMessage());
     } catch (IOException e) {
       throw new ServerException(e);
     }

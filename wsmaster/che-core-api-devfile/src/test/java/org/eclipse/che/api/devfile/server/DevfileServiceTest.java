@@ -19,6 +19,7 @@ import static org.eclipse.che.api.devfile.server.TestObjectGenerator.TEST_ACCOUN
 import static org.eclipse.che.api.devfile.server.TestObjectGenerator.TEST_SUBJECT;
 import static org.eclipse.che.api.devfile.server.TestObjectGenerator.USER_DEVFILE_ID;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_VERSIONS;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -125,6 +126,41 @@ public class DevfileServiceTest {
     assertEquals(response.getStatusCode(), 200);
     assertEquals(
         response.getBody().asString(), schemaProvider.getSchemaContent(CURRENT_API_VERSION));
+  }
+
+  @Test
+  public void shouldReturn404WhenSchemaNotFound() {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/devfile?version=1.2.3.4.5");
+
+    assertEquals(response.getStatusCode(), 404);
+  }
+
+  @Test(dataProvider = "schemaVersions")
+  public void shouldRetrieveSchemaVersion(String version) throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/devfile?version=" + version);
+
+    assertEquals(response.getStatusCode(), 200);
+    assertEquals(response.getBody().asString(), schemaProvider.getSchemaContent(version));
+  }
+
+  @DataProvider
+  public static Object[][] schemaVersions() {
+    Object[][] versions = new Object[SUPPORTED_VERSIONS.size()][];
+    for (int i = 0; i < SUPPORTED_VERSIONS.size(); i++) {
+      versions[i] = new Object[] {SUPPORTED_VERSIONS.get(i)};
+    }
+
+    return versions;
   }
 
   @BeforeMethod
