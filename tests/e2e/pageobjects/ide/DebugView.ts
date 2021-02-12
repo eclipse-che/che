@@ -55,7 +55,7 @@ export class DebugView {
 
             const threadsTreeLocator = `//div[contains(@class, 'theia-debug-thread')]`;
 
-            const threadElements: WebElement[] = await this.driverHelper.getDriver().findElements(By.xpath(threadsTreeLocator));
+            const threadElements: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(threadsTreeLocator));
             if (threadElements.length > 1) {
                 return true;
             }
