@@ -1,0 +1,57 @@
+{
+  "size": 3,
+  "limit": 3,
+  "isLastPage": false,
+  "values": [
+    {
+      "name": "user4",
+      "emailAddress": "user4@gmail.com",
+      "id": 55,
+      "displayName": "user4",
+      "active": true,
+      "slug": "user4",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/user4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "user5",
+      "emailAddress": "user5@gmail.com",
+      "id": 56,
+      "displayName": "user5",
+      "active": true,
+      "slug": "user5",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/user5"
+          }
+        ]
+      }
+    },
+    {
+      "name": "user6",
+      "emailAddress": "user6@gmail.com",
+      "id": 57,
+      "displayName": "user6",
+      "active": true,
+      "slug": "user6",
+      "type": "NORMAL",
+      "links": {
+        "self": [
+          {
+            "href": "https://bitbucket-bitbucket.apps.cluster-devtools-c9ac.devtools-c9ac.example.opentlc.com/users/user6"
+          }
+        ]
+      }
+    }
+  ],
+  "start": 6,
+  "nextPageStart": 9
+}

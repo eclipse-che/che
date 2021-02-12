@@ -21,7 +21,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-server</artifactId>
-    <version>7.26.0-SNAPSHOT</version>
+    <version>7.27.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Server</name>
     <modules>
@@ -42,8 +42,8 @@
     <properties>
         <?SORTPOM IGNORE?>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.26.0-SNAPSHOT</che.dashboard.version>
-        <che.version>7.26.0-SNAPSHOT</che.version>
+        <che.dashboard.version>7.27.0-SNAPSHOT</che.dashboard.version>
+        <che.version>7.27.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
         <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>
@@ -84,9 +84,9 @@
         <io.opentracing.web-servlet-filter.version>0.4.0</io.opentracing.web-servlet-filter.version>
         <io.prometheus.simpleclient.version>0.7.0</io.prometheus.simpleclient.version>
         <io.swagger.version>1.5.9</io.swagger.version>
+        <jakarta.json.version>2.0.0</jakarta.json.version>
         <javax.annotation.version>1.2</javax.annotation.version>
         <javax.inject.version>1</javax.inject.version>
-        <javax.json.version>1.1.4</javax.json.version>
         <javax.mail.version>1.4.4</javax.mail.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.validation.version>1.1.0.Final</javax.validation.version>
@@ -112,7 +112,7 @@
         <org.jgroups.kubernetes.version>1.0.13.Final</org.jgroups.kubernetes.version>
         <org.jgroups.version>4.1.9.Final</org.jgroups.version>
         <org.kohsuke.github-api.version>1.90</org.kohsuke.github-api.version>
-        <org.leadpony.justify.version>0.14.0</org.leadpony.justify.version>
+        <org.leadpony.justify.version>3.1.0</org.leadpony.justify.version>
         <org.mockito.mockito-testng.version>0.1.1</org.mockito.mockito-testng.version>
         <org.mockito.version>2.21.0</org.mockito.version>
         <org.postgresql.version>42.2.2</org.postgresql.version>
@@ -698,6 +698,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-auth-bitbucket</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1293,8 +1298,8 @@
             </dependency>
             <dependency>
                 <groupId>org.glassfish</groupId>
-                <artifactId>javax.json</artifactId>
-                <version>${javax.json.version}</version>
+                <artifactId>jakarta.json</artifactId>
+                <version>${jakarta.json.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>

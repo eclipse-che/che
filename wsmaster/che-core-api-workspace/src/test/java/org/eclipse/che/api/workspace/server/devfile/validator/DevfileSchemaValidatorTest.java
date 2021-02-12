@@ -78,9 +78,12 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_name_and_generatename.yaml"},
       {"devfile/devfile_with_sparse_checkout_dir.yaml"},
       {"devfile/devfile_name_and_generatename.yaml"},
-      {"devfile/devfile_v2_just_schemaVersion.yaml"},
       {"command/devfile_command_with_preview_url.yaml"},
       {"command/devfile_command_with_preview_url_only_port.yaml"},
+      {"devfile/devfile_v2_just_schemaVersion.yaml"},
+      {"devfile/devfile_v2_sample-devfile.yaml"},
+      {"devfile/devfile_v2_simple-devfile.yaml"},
+      {"devfile/devfile_v2_spring-boot-http-booster-devfile.yaml"}
     };
   }
 
@@ -192,7 +195,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+\\z\"."
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
@@ -200,11 +203,11 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+\\z\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_registry_in_id.yaml",
-        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+\\z\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_bad_registry.yaml",

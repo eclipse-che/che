@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.26.0-SNAPSHOT</version>
+        <version>7.27.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
@@ -26,6 +26,7 @@
     <modules>
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
+        <module>che-core-api-auth-bitbucket</module>
         <module>che-core-api-auth-github</module>
         <module>che-core-api-auth-openshift</module>
         <module>che-core-api-workspace-shared</module>
