@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 /**
  * Authentication service which allows get access token from OAuth provider site.
@@ -105,7 +106,24 @@ public abstract class OAuthAuthenticator {
       throws OAuthAuthenticationException {
     try {
       final GenericUrl callbackUrl = new GenericUrl(redirectUri);
-      callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
+      String userId = getParameterFromState(requestUrl.getQuery(), USER_ID_PARAM_KEY);
+      String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
+      if (userId != null) {
+        if (currentUserId.equals(userId)) {
+          callbackUrl.put(STATE_PARAM_KEY, requestUrl.getQuery());
+        } else {
+          throw new OAuthAuthenticationException(
+              "Provided query parameter "
+                  + USER_ID_PARAM_KEY
+                  + "="
+                  + userId
+                  + " does not match the current user id: "
+                  + currentUserId);
+        }
+      } else {
+        callbackUrl.put(
+            STATE_PARAM_KEY, requestUrl.getQuery() + "&" + USER_ID_PARAM_KEY + "=" + currentUserId);
+      }
 
       OAuthGetTemporaryToken temporaryToken;
       if (requestMethod != null && "post".equalsIgnoreCase(requestMethod)) {
