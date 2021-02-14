@@ -142,7 +142,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
@@ -166,7 +166,7 @@ export class Ide {
         }
     }
 
-    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_IMPORT_PROJECT_DEFAULT_POLLING) {
         Logger.debug('Ide.waitLeftToolbarButton');
 
         const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
