@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
@@ -39,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ConflictException;
@@ -123,17 +123,17 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
     List<SshPairImpl> all = new ArrayList<>(vcsSshPairs);
     all.addAll(systemSshPairs);
 
-    List<String> invalidSshKeys =
+    List<String> invalidSshKeyNames =
         all.stream()
             .filter(keyPair -> !isValidSshKeyPair(keyPair))
             .map(SshPairImpl::getName)
-            .collect(Collectors.toList());
+            .collect(toList());
 
-    if (!invalidSshKeys.isEmpty()) {
+    if (!invalidSshKeyNames.isEmpty()) {
       String message =
           format(
               Warnings.SSH_KEYS_WILL_NOT_BE_MOUNTED_MESSAGE,
-              invalidSshKeys.toString(),
+              invalidSshKeyNames.toString(),
               identity.getWorkspaceId());
       LOG.warn(message);
       k8sEnv.addWarning(new WarningImpl(Warnings.SSH_KEYS_WILL_NOT_BE_MOUNTED, message));
@@ -141,11 +141,9 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
     }
 
     doProvisionSshKeys(
-        all.stream().filter(this::isValidSshKeyPair).collect(Collectors.toList()),
-        k8sEnv,
-        workspaceId);
+        all.stream().filter(this::isValidSshKeyPair).collect(toList()), k8sEnv, workspaceId);
     doProvisionVcsSshConfig(
-        vcsSshPairs.stream().filter(this::isValidSshKeyPair).collect(Collectors.toList()),
+        vcsSshPairs.stream().filter(this::isValidSshKeyPair).collect(toList()),
         k8sEnv,
         workspaceId);
   }
