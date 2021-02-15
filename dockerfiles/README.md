@@ -20,9 +20,6 @@ The `che` repository is where we do development and there are many ways you can 
 - Review [source code changes](https://github.com/eclipse/che/pulls)
 - [Improve docs](https://github.com/codenvy/che-docs)
 
-### Customizing
-There are many ways to customize Che out-of-the-box including [stacks, templates, commands, IDE extensions, server-side extensions plugins, assemblies, RESTful APIs, and editors](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md).
-
 ### Contributing
 If you are interested in fixing issues and contributing directly to the code base, please see [How to Contribute](https://github.com/eclipse/che/wiki/How-To-Contribute). It covers:
 - [Submitting bugs](https://github.com/eclipse/che/wiki/Submitting-Bugs-and-Suggestions)
