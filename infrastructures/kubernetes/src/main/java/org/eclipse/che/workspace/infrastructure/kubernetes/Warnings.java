@@ -70,7 +70,7 @@ public final class Warnings {
 
   public static final int SSH_KEYS_WILL_NOT_BE_MOUNTED = 4300;
   public static final String SSH_KEYS_WILL_NOT_BE_MOUNTED_MESSAGE =
-      "Ssh keys %s has invalid names and can't be mounted to workspace %s.";
+      "Ssh keys %s have invalid names and can't be mounted to workspace %s.";
 
   private Warnings() {}
 }
