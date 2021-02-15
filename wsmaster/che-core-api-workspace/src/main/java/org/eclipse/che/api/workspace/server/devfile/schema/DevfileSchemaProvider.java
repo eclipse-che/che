@@ -17,6 +17,7 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.SUPPORTED_V
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
@@ -28,7 +29,7 @@ import javax.inject.Singleton;
 @Singleton
 public class DevfileSchemaProvider {
 
-  private Map<String, SoftReference<String>> schemas = new HashMap<>();
+  private final Map<String, SoftReference<String>> schemas = new HashMap<>();
 
   public String getSchemaContent(String version) throws IOException {
     if (schemas.containsKey(version)) {
@@ -50,6 +51,11 @@ public class DevfileSchemaProvider {
   private String loadFile(String version) throws IOException {
     try {
       return readAndCloseQuietly(getResource(SCHEMAS_LOCATION + version + "/" + SCHEMA_FILENAME));
+    } catch (FileNotFoundException e) {
+      throw new FileNotFoundException(
+          String.format(
+              "Unable to find schema for devfile version '%s'. Supported versions are '%s'.",
+              version, SUPPORTED_VERSIONS));
     } catch (IOException ioe) {
       throw new IOException(
           String.format(
