@@ -70,9 +70,9 @@ export const TimeoutConstants = {
     TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
 
     /**
-     * Timeout for error highlighting presence, "10 000" by default
+     * Timeout for error highlighting presence, "30 000" by default
      */
-    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
+    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 90_000,
 
 
     // -------------------------------------------- PROJECT TREE --------------------------------------------
@@ -130,7 +130,7 @@ export const TimeoutConstants = {
     /**
      * Timeout for debugger to connect, "30 000" by default
      */
-    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 30_000,
+    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 60_000,
 
     /**
      * Timeout for context menu manipulation, "10 000" by default

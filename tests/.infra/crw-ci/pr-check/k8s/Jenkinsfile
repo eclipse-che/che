@@ -398,6 +398,7 @@ EOL"""
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
                 kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
                 kubectl --namespace=eclipse-che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
+                kubectl get pods -A >$LOGS_AND_CONFIGS/kubectl/pods.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
@@ -416,13 +417,15 @@ EOL"""
                 for pod in \$PODS ; do \
                     kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
                 done
+                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
-                export WS_POD=\$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}')
-                for c in \$(kubectl get pod --namespace=eclipse-che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
-                    kubectl logs \$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                WORKSPACE_NAMESPACE_NAME=admin-che
+                export WS_POD=\$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME | grep ".workspace-" | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
+                    kubectl logs \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=\$WORKSPACE_NAMESPACE_NAME > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
                 done
-                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+                kubectl describe pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/docker
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true
