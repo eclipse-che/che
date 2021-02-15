@@ -126,8 +126,7 @@ suite('Language server validation', async () => {
             await driverHelper.reloadPage();
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde();
-            await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-            await editor.selectTab(javaFileName);
+            await editor.type(javaFileName, Key.chord(Key.END), 30);
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
         }
 
