@@ -120,11 +120,12 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
     List<SshPairImpl> vcsSshPairs = getVcsSshPairs(k8sEnv, identity);
     List<SshPairImpl> systemSshPairs = getSystemSshPairs(k8sEnv, identity);
 
-    List<SshPairImpl> all = new ArrayList<>(vcsSshPairs);
-    all.addAll(systemSshPairs);
+    List<SshPairImpl> allSshPairs = new ArrayList<>(vcsSshPairs);
+    allSshPairs.addAll(systemSshPairs);
 
     List<String> invalidSshKeyNames =
-        all.stream()
+        allSshPairs
+            .stream()
             .filter(keyPair -> !isValidSshKeyPair(keyPair))
             .map(SshPairImpl::getName)
             .collect(toList());
@@ -141,7 +142,9 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
     }
 
     doProvisionSshKeys(
-        all.stream().filter(this::isValidSshKeyPair).collect(toList()), k8sEnv, workspaceId);
+        allSshPairs.stream().filter(this::isValidSshKeyPair).collect(toList()),
+        k8sEnv,
+        workspaceId);
     doProvisionVcsSshConfig(
         vcsSshPairs.stream().filter(this::isValidSshKeyPair).collect(toList()),
         k8sEnv,
