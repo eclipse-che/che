@@ -133,7 +133,7 @@ export const TimeoutConstants = {
     TS_NOTIFICATION_CENTER_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 10_000,
 
     /**
-     * Timeout for debugger to connect, "30 000" by default
+     * Timeout for debugger to connect, "60 000" by default
      */
     TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 60_000,
 
