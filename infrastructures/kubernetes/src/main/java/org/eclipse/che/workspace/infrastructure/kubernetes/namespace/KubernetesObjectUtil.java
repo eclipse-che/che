@@ -36,6 +36,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 
 /**
@@ -46,6 +47,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 public class KubernetesObjectUtil {
 
   private static final String STORAGE_PARAM = "storage";
+  private static final String VALID_CONFIG_MAP_KEY_NAME = "[-._a-zA-Z0-9]+";
+  private static final Pattern VALID_CONFIG_MAP_KEY_NAME_PATTERN =
+      Pattern.compile(VALID_CONFIG_MAP_KEY_NAME);
 
   /** Checks if the specified object has the specified label. */
   public static boolean isLabeled(HasMetadata source, String key, String value) {
@@ -252,5 +256,10 @@ public class KubernetesObjectUtil {
     return annotations
         .getOrDefault(CREATE_IN_CHE_INSTALLATION_NAMESPACE, FALSE.toString())
         .equals(TRUE.toString());
+  }
+
+  /** Checks the provided name is a valid kubernetes config map key name */
+  public static boolean isValidConfigMapKeyName(String configMapKeyName) {
+    return VALID_CONFIG_MAP_KEY_NAME_PATTERN.matcher(configMapKeyName).matches();
   }
 }
