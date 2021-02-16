@@ -9,6 +9,7 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../inversify.types';
+import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement } from 'selenium-webdriver';
 import { Ide } from './Ide';
@@ -59,7 +60,8 @@ export class DebugView {
             if (threadElements.length > 1) {
                 return true;
             }
-            return false;
+
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
         }, timeout);
     }
 
