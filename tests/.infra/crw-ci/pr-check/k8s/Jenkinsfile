@@ -242,11 +242,12 @@ pipeline {
                             eval \$(minikube docker-env)
                             docker login -u maxura -p ${maxura_docker_password}
 
-                            docker pull mariolet/petclinic:d2831f9b
-                            docker pull centos/postgresql-96-centos7:9.6
-                            docker pull centos/mysql-57-centos7
                             docker pull ${cheImageRepo}:${mutableCheImageTag}
                             docker pull docker.io/traefik:v2.2.8
+
+                            # temporary for issue https://github.com/eclipse/che/issues/19004
+                            docker pull maxura/che-theia-endpoint-runtime-binary:695
+                            docker pull maxura/che-theia:695
                         """
                     }
 
@@ -423,8 +424,11 @@ EOL"""
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
                 WORKSPACE_NAMESPACE_NAME=admin-che
                 export WS_POD=\$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME | grep ".workspace-" | awk '{print \$1}')
-                for c in \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
-                    kubectl logs \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=\$WORKSPACE_NAMESPACE_NAME > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                for c in \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do
+                    CONTAINER_LOGS_DIR=$LOGS_AND_CONFIGS/workspace-logs/"\${c}"
+                    mkdir \$CONTAINER_LOGS_DIR
+                    kubectl logs \$WS_POD "\${c}" --namespace=\$WORKSPACE_NAMESPACE_NAME > \${CONTAINER_LOGS_DIR}.container.log || true;
+                    kubectl cp \$WORKSPACE_NAMESPACE_NAME/\$WS_POD:/workspace-logs \$CONTAINER_LOGS_DIR -c "\${c}" || true;
                 done
                 kubectl describe pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
