@@ -12,6 +12,7 @@
 package org.eclipse.che.multiuser.permission.devfile.server.filters;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
@@ -138,9 +139,10 @@ public class UserDevfilePermissionsFilterTest {
 
   @Test
   public void shouldNotCheckAnyPermissionOnDevfileSchema()
-      throws BadRequestException, ForbiddenException, NotFoundException, ServerException {
+      throws NotFoundException, ServerException {
     // given
-    Mockito.when(devfileService.getSchema()).thenReturn(javax.ws.rs.core.Response.ok().build());
+    Mockito.when(devfileService.getSchema(CURRENT_API_VERSION))
+        .thenReturn(javax.ws.rs.core.Response.ok().build());
     // when
     final Response response =
         given()

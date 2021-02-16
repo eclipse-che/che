@@ -14,10 +14,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.isValidConfigMapKeyName;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
@@ -29,12 +32,14 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ConflictException;
@@ -47,8 +52,10 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodRole;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,13 +96,18 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
 
   private static final String SSH_SECRET_TYPE = "opaque";
 
+  public static final Pattern VALID_DOMAIN_PATTERN =
+      Pattern.compile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$");
+
   private static final Logger LOG = LoggerFactory.getLogger(SshKeysProvisioner.class);
 
   private final SshManager sshManager;
+  private final RuntimeEventsPublisher runtimeEventsPublisher;
 
   @Inject
-  public SshKeysProvisioner(SshManager sshManager) {
+  public SshKeysProvisioner(SshManager sshManager, RuntimeEventsPublisher runtimeEventsPublisher) {
     this.sshManager = sshManager;
+    this.runtimeEventsPublisher = runtimeEventsPublisher;
   }
 
   @Override
@@ -108,11 +120,35 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
     List<SshPairImpl> vcsSshPairs = getVcsSshPairs(k8sEnv, identity);
     List<SshPairImpl> systemSshPairs = getSystemSshPairs(k8sEnv, identity);
 
-    List<SshPairImpl> all = new ArrayList<>(vcsSshPairs);
-    all.addAll(systemSshPairs);
+    List<SshPairImpl> allSshPairs = new ArrayList<>(vcsSshPairs);
+    allSshPairs.addAll(systemSshPairs);
 
-    doProvisionSshKeys(all, k8sEnv, workspaceId);
-    doProvisionVcsSshConfig(vcsSshPairs, k8sEnv, workspaceId);
+    List<String> invalidSshKeyNames =
+        allSshPairs
+            .stream()
+            .filter(keyPair -> !isValidSshKeyPair(keyPair))
+            .map(SshPairImpl::getName)
+            .collect(toList());
+
+    if (!invalidSshKeyNames.isEmpty()) {
+      String message =
+          format(
+              Warnings.SSH_KEYS_WILL_NOT_BE_MOUNTED_MESSAGE,
+              invalidSshKeyNames.toString(),
+              identity.getWorkspaceId());
+      LOG.warn(message);
+      k8sEnv.addWarning(new WarningImpl(Warnings.SSH_KEYS_WILL_NOT_BE_MOUNTED, message));
+      runtimeEventsPublisher.sendRuntimeLogEvent(message, ZonedDateTime.now().toString(), identity);
+    }
+
+    doProvisionSshKeys(
+        allSshPairs.stream().filter(this::isValidSshKeyPair).collect(toList()),
+        k8sEnv,
+        workspaceId);
+    doProvisionVcsSshConfig(
+        vcsSshPairs.stream().filter(this::isValidSshKeyPair).collect(toList()),
+        k8sEnv,
+        workspaceId);
   }
 
   /**
@@ -296,6 +332,12 @@ public class SshKeysProvisioner implements ConfigurationProvisioner<KubernetesEn
                   .build();
           container.getVolumeMounts().add(volumeMount);
         });
+  }
+
+  @VisibleForTesting
+  boolean isValidSshKeyPair(SshPairImpl keyPair) {
+    return isValidConfigMapKeyName(keyPair.getName())
+        && VALID_DOMAIN_PATTERN.matcher(keyPair.getName()).matches();
   }
 
   /**
