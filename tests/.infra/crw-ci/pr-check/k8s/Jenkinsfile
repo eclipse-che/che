@@ -372,6 +372,7 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
+                       -e TS_SELENIUM_LOG_LEVEL="TRACE" \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
