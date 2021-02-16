@@ -50,13 +50,14 @@ suite('Git with ssh workflow', async () => {
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
+        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+        await loginPage.login();
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);
     });
 
     test('Login into workspace and open tree container', async () => {
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
-        await loginPage.login();
         await dashboard.waitPage();
+        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
@@ -101,7 +102,9 @@ suite('Git with ssh workflow', async () => {
 
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
+        await driverHelper.reloadPage();
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
+        await dashboard.waitPage();
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
