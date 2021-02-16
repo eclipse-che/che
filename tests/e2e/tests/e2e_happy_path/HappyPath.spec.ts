@@ -115,18 +115,18 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
+        await driverHelper.getDriver().sleep(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
+        
         const textForErrorDisplaying: string = '$';
-
         await editor.type(javaFileName, textForErrorDisplaying, 30);
 
         try {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
         } catch (err) {
-            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974 issue.');
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
             await driverHelper.reloadPage();
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde();
-            await editor.type(javaFileName, Key.chord(Key.END), 30);
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
         }
 
