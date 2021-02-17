@@ -46,7 +46,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mvn clean package | tee /workspace_logs/build.log && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
+        command: mvn clean package | tee /workspace_logs/build.log && tail -n 40 /workspace_logs/build.log | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
         workdir: /projects/petclinic
   - name: build-file-output
     actions:
