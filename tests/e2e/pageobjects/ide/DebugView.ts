@@ -9,8 +9,9 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../inversify.types';
+import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By, Key, WebElement } from 'selenium-webdriver';
+import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
@@ -55,11 +56,19 @@ export class DebugView {
 
             const threadsTreeLocator = `//div[contains(@class, 'theia-debug-thread')]`;
 
-            const threadElements: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(threadsTreeLocator));
-            if (threadElements.length > 1) {
-                return true;
+            try {
+                const threadElements: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(threadsTreeLocator));
+                if (threadElements.length > 1) {
+                    return true;
+                }
+        
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+                
+                return await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
-            return false;
         }, timeout);
     }
 

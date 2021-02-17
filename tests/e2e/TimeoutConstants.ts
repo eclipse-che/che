@@ -65,14 +65,14 @@ export const TimeoutConstants = {
     TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180_000,
 
     /**
-     * Timeout for suggestion invoking, "30 000" by default.
+     * Timeout for suggestion invoking, "60 000" by default.
      */
-    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
+    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 60_000,
 
     /**
-     * Timeout for error highlighting presence, "10 000" by default
+     * Timeout for error highlighting presence, "90 000" by default
      */
-    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
+    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 90_000,
 
 
     // -------------------------------------------- PROJECT TREE --------------------------------------------
@@ -128,9 +128,9 @@ export const TimeoutConstants = {
     TS_NOTIFICATION_CENTER_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 10_000,
 
     /**
-     * Timeout for debugger to connect, "30 000" by default
+     * Timeout for debugger to connect, "60 000" by default
      */
-    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 30_000,
+    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 60_000,
 
     /**
      * Timeout for context menu manipulation, "10 000" by default
