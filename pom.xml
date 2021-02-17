@@ -21,7 +21,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-server</artifactId>
-    <version>7.26.1-SNAPSHOT</version>
+    <version>7.26.1</version>
     <packaging>pom</packaging>
     <name>Che Server</name>
     <modules>
@@ -42,8 +42,8 @@
     <properties>
         <?SORTPOM IGNORE?>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.26.1-SNAPSHOT</che.dashboard.version>
-        <che.version>7.26.1-SNAPSHOT</che.version>
+        <che.dashboard.version>7.26.1</che.dashboard.version>
+        <che.version>7.26.1</che.version>
         <specification.version>1.0-beta2</specification.version>
         <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>
