@@ -276,7 +276,15 @@ suite('Validation of debug functionality', async () => {
         await debugView.clickOnDebugConfigurationDropDown();
         await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
         await debugView.clickOnRunDebugButton();
-        await debugView.waitForDebuggerToConnect();
+
+        try {
+            await debugView.waitForDebuggerToConnect();
+        } catch (err) {
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18034 issue.');
+            await debugView.clickOnThreadsViewTitle();
+
+            await debugView.waitForDebuggerToConnect();
+        }
 
         await editor.selectTab(weclomeControllerJavaFileName);
         await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
