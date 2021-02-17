@@ -67,8 +67,8 @@ export class DebugView {
      * Click on "Threads" view title.
      */
     async clickOnThreadsViewTitle() {
-        Logger.debug(`Click on "Threads" view title`)
-        
+        Logger.debug(`Click on "Threads" view title`);
+
         const threadsViewTitleLocator: By = By.xpath('//div[@id="debug:view-container:-1--debug:threads:-1"]/*/span[@title="Threads"]');
         await this.driverHelper.waitAndClick(threadsViewTitleLocator);
     }
