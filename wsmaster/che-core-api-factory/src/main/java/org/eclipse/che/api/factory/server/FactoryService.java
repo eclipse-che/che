@@ -30,7 +30,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.user.server.UserManager;
@@ -87,7 +86,7 @@ public class FactoryService extends Service {
           @DefaultValue("false")
           @QueryParam(VALIDATE_QUERY_PARAMETER)
           Boolean validate)
-      throws BadRequestException, ServerException {
+      throws ApiException {
 
     // check parameter
     requiredNotNull(parameters, "Factory build parameters");

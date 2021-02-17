@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
   public static final String AUTHENTICATOR_NAME = "bitbucket-server";
+  private final String apiEndpoint;
 
   public BitbucketServerOAuthAuthenticator(
       String consumerKey, String privateKey, String bitbucketEndpoint, String apiEndpoint) {
@@ -32,10 +33,19 @@ public class BitbucketServerOAuthAuthenticator extends OAuthAuthenticator {
         apiEndpoint + "/oauth/1.0/callback",
         null,
         privateKey);
+    this.apiEndpoint = apiEndpoint;
   }
 
   @Override
   public final String getOAuthProvider() {
     return AUTHENTICATOR_NAME;
+  }
+
+  @Override
+  public String getLocalAuthenticateUrl() {
+    return apiEndpoint
+        + "/oauth/1.0/authenticate?oauth_provider="
+        + AUTHENTICATOR_NAME
+        + "&request_method=POST&signature_method=rsa";
   }
 }

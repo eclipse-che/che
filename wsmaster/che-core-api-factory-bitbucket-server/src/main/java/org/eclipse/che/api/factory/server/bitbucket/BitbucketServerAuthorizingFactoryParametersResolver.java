@@ -19,6 +19,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
@@ -81,7 +82,7 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
    */
   @Override
   public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException {
+      throws ApiException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final BitbucketUrl bitbucketUrl =
