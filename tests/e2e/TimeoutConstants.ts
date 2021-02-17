@@ -65,9 +65,9 @@ export const TimeoutConstants = {
     TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180_000,
 
     /**
-     * Timeout for suggestion invoking, "30 000" by default.
+     * Timeout for suggestion invoking, "60 000" by default.
      */
-    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
+    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 60_000,
 
     /**
      * Timeout for error highlighting presence, "90 000" by default
