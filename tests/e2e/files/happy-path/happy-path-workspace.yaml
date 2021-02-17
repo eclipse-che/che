@@ -52,7 +52,7 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: cd /projects/petclinic && mvn package | tee /workspace_logs/build-output.log && tail -n 40 tee /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
+        command: cd /projects/petclinic && mvn package | tee /workspace_logs/build-output.log && tail -n 40 /workspace_logs/build-output.log | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
   - name: run
     actions:
       - type: exec

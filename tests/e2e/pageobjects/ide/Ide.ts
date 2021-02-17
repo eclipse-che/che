@@ -114,7 +114,7 @@ export class Ide {
     async waitNotificationAndOpenLink(notificationText: string, timeout: number) {
         Logger.debug(`Ide.waitNotificationAndOpenLink "${notificationText}"`);
         await this.waitNotification(notificationText, timeout);
-        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText), timeout);
+        // await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText), timeout);  // workaround https://github.com/eclipse/che/issues/19085
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
