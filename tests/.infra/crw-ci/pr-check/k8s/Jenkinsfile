@@ -244,10 +244,6 @@ pipeline {
 
                             docker pull ${cheImageRepo}:${mutableCheImageTag}
                             docker pull docker.io/traefik:v2.2.8
-
-                            # temporary for issue https://github.com/eclipse/che/issues/19004
-                            docker pull maxura/che-theia-endpoint-runtime-binary:695
-                            docker pull maxura/che-theia:695
                         """
                     }
 
