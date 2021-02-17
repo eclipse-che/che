@@ -43,7 +43,7 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 suite('Git with ssh workflow', async () => {
     const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-    const wsNameCheckGeneratingKeys = 'checkGeneraringSsh';
+    const wsNameCheckGeneratingKeys = 'checkGeneratingSsh';
     const wsNameCheckPropagatingKeys = 'checkPropagatingSsh';
     const committedFile = 'README.md';
 
@@ -102,6 +102,7 @@ suite('Git with ssh workflow', async () => {
 
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
+        // update view of dashboard, it's related to https://github.com/eclipse/che/issues/19020
         await driverHelper.reloadPage();
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await dashboard.waitPage();
