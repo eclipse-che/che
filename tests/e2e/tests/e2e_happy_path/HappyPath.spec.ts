@@ -282,7 +282,7 @@ suite('Validation of debug functionality', async () => {
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18034 issue.');
             await debugView.clickOnThreadsViewTitle();
-            
+
             await debugView.waitForDebuggerToConnect();
         }
 
