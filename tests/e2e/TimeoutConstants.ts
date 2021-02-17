@@ -70,7 +70,7 @@ export const TimeoutConstants = {
     TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
 
     /**
-     * Timeout for error highlighting presence, "120 000" by default
+     * Timeout for error highlighting presence, "90 000" by default
      */
     TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 90_000,
 
