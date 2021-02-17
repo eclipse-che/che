@@ -148,7 +148,7 @@ export const TimeoutConstants = {
     TS_GIT_CONAINER_INTERACTION_TIMEOUT: Number(process.env.TS_GIT_CONAINER_INTERACTION_TIMEOUT) || 20_000,
 
     /**
-     * Timeout for toolbars interaction, "20 000" by default
+     * Timeout for toolbars interaction, "30 000" by default
      */
     TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 30_000,
 
