@@ -428,7 +428,7 @@ EOL"""
                     CONTAINER_LOGS_DIR=$LOGS_AND_CONFIGS/workspace-logs/"\${c}"
                     mkdir \$CONTAINER_LOGS_DIR
                     kubectl logs \$WS_POD "\${c}" --namespace=\$WORKSPACE_NAMESPACE_NAME > \${CONTAINER_LOGS_DIR}.container.log || true;
-                    kubectl cp \$WORKSPACE_NAMESPACE_NAME/\$WS_POD:/workspace-logs \$CONTAINER_LOGS_DIR -c "\${c}" || true;
+                    kubectl cp \$WORKSPACE_NAMESPACE_NAME/\$WS_POD:/workspace_logs \$CONTAINER_LOGS_DIR -c "\${c}" || true;
                 done
                 kubectl describe pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 

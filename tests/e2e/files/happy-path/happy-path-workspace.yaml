@@ -46,30 +46,30 @@ commands:
     actions:
       - type: exec
         component: maven-container
-        command: mvn clean package | tee build.txt && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
+        command: mvn clean package | tee /workspace_logs/build.log && tail -n 40 /projects/petclinic/build.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build.txt
         workdir: /projects/petclinic
   - name: build-file-output
     actions:
       - type: exec
         component: maven-container
-        command: cd /projects/petclinic && mvn package | tee build-output.txt && tail -n 40 /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
+        command: cd /projects/petclinic && mvn package | tee /workspace_logs/build-output.log && tail -n 40 tee /projects/petclinic/build-output.txt | grep 'BUILD SUCCESS' > /projects/petclinic/result-build-output.txt
   - name: run
     actions:
       - type: exec
         component: maven-container
-        command: java -jar spring-petclinic-2.4.2.jar --spring.profiles.active=mysql
+        command: java -jar spring-petclinic-2.4.2.jar --spring.profiles.active=mysql | tee /workspace_logs/run.log
         workdir: /projects/petclinic/target
   - name: run-with-changes
     actions:
       - type: exec
         component: maven-container
-        command: java -jar spring-petclinic-2.4.2.jar --spring.profiles.active=mysql
+        command: java -jar spring-petclinic-2.4.2.jar --spring.profiles.active=mysql | tee /workspace_logs/run-with-changes.log
         workdir: /projects/petclinic/target
   - name: run-debug
     actions:
       - type: exec
         component: maven-container
-        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 spring-petclinic-2.4.2.jar --spring.profiles.active=mysql
+        command: java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 spring-petclinic-2.4.2.jar --spring.profiles.active=mysql | tee /workspace_logs/run-debug.log
         workdir: /projects/petclinic/target
   - name: Debug remote java application
     actions:
