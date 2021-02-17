@@ -55,10 +55,14 @@ export class DebugView {
             Logger.debug(`Waiting for debugger to connect (threads to appear in "Threads" view)`);
 
             const threadsTreeLocator = `//div[contains(@class, 'theia-debug-thread')]`;
-
-            const threadElements: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(threadsTreeLocator));
-            if (threadElements.length > 1) {
-                return true;
+            try {
+                const threadElements: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(threadsTreeLocator));
+                if (threadElements.length > 1) {
+                    return true;
+                }
+            } catch (err) {
+                Logger.debug(`Error while waiting for "${threadsTreeLocator}"`);
+                Logger.debug(err);
             }
 
             await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
