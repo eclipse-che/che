@@ -12,11 +12,6 @@ export const TimeoutConstants = {
     // -------------------------------------------- INSTALLING AND STARTUP --------------------------------------------
 
     /**
-     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "600 000" by default.
-     */
-    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600_000,
-
-    /**
      * Wait between workspace started and IDE ready to be used, "20 000" by default.
      */
     TS_IDE_LOAD_TIMEOUT: Number(process.env.TS_IDE_LOAD_TIMEOUT) || 20_000,
@@ -155,7 +150,7 @@ export const TimeoutConstants = {
     /**
      * Timeout for toolbars interaction, "20 000" by default
      */
-    TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 20_000,
+    TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 30_000,
 
     /**
      * Timeout for clicking on visible item, "3 000" by default

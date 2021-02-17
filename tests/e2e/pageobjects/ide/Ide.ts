@@ -166,7 +166,7 @@ export class Ide {
         }
     }
 
-    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_IMPORT_PROJECT_DEFAULT_POLLING) {
+    async waitLeftToolbarButton(buttonTitle: LeftToolbarButton, timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('Ide.waitLeftToolbarButton');
 
         const buttonLocator: By = this.getLeftToolbarButtonLocator(buttonTitle);
