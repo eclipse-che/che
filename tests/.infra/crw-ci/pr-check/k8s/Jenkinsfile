@@ -418,7 +418,7 @@ EOL"""
                 for pod in \$PODS ; do \
                     kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
                 done
-                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
+                kubectl describe pod --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
                 WORKSPACE_NAMESPACE_NAME=admin-che
