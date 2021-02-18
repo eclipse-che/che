@@ -155,7 +155,10 @@ pipeline {
                 stage("Build Che including upstream projects") {
                     steps {
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+                        sh """
+                            sudo sed -i 's/https/http/g' /etc/yum.repos.d/epel.repo
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686
+                        """
 
                         sh """
                             project_list=(
