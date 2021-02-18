@@ -176,7 +176,10 @@ pipeline {
 
                     steps {
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+                        sh """
+                            sudo sed -i 's/https/http/g' /etc/yum.repos.d/epel.repo
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686
+                        """
 
                         sh """
                             project_list=(
@@ -415,7 +418,7 @@ EOL"""
                 for pod in \$PODS ; do \
                     kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
                 done
-                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
+                kubectl describe pod --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
                 WORKSPACE_NAMESPACE_NAME=admin-che
