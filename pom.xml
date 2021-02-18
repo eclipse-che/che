@@ -49,7 +49,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <ch.qos.logback.version>1.2.1</ch.qos.logback.version>
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
-        <com.fasterxml.jackson.core.version>2.10.3</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.core.version>2.12.1</com.fasterxml.jackson.core.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
