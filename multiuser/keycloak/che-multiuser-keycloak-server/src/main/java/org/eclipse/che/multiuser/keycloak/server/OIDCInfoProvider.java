@@ -140,9 +140,7 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
   }
 
   private String setPublicUrl(String endpointUrl) {
-    if (serverInternalURL != null
-        && serverURL != null
-        && endpointUrl.startsWith(serverInternalURL)) {
+    if (serverURL != null && serverInternalURL != null) {
       return endpointUrl.replace(serverInternalURL, serverURL);
     }
     return endpointUrl;
