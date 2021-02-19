@@ -25,6 +25,7 @@ import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -37,6 +38,7 @@ const cheGitAPI: CheGitApi = e2eContainer.get(CLASSES.CheGitApi);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 
 suite('Git with ssh workflow', async () => {
@@ -98,9 +100,11 @@ suite('Git with ssh workflow', async () => {
 
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
+        await driverHelper.reloadPage();
+        await dashboard.waitPage();
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
-        await projectTree.waitProjectTreeContainer(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        await projectTree.openProjectTreeContainer(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');
