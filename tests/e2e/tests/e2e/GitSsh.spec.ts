@@ -55,7 +55,7 @@ suite('Git with ssh workflow', async () => {
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await loginPage.login();
         await ide.waitWorkspaceAndIde();
-        await projectTree.openProjectTreeContainer();
+        await projectTree.openProjectTreeContainer(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     });
 
@@ -100,7 +100,7 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
-        await projectTree.openProjectTreeContainer();
+        await projectTree.openProjectTreeContainer(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
         await projectTree.waitItem('Spoon-Knife');
