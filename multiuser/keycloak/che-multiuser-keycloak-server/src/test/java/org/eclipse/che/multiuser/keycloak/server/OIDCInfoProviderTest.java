@@ -178,6 +178,73 @@ public class OIDCInfoProviderTest {
   }
 
   @Test
+  public void shouldParseOIDCConfigurationWithPublicUrlsForInternalServerUrl() {
+    String serverPublicUrl = "https://keycloak-che.domain/auth";
+    String serverInternalUrl = SERVER_URL;
+
+    String OPEN_ID_CONF_TEMPLATE =
+        ""
+            + "{"
+            + "  \"token_endpoint\": \""
+            + serverInternalUrl
+            + "/realms/"
+            + CHE_REALM
+            + "/protocol/openid-connect/token\","
+            + "  \"end_session_endpoint\": \""
+            + serverInternalUrl
+            + "/realms/"
+            + CHE_REALM
+            + "/protocol/openid-connect/logout\","
+            + "  \"userinfo_endpoint\": \""
+            + serverInternalUrl
+            + "/realms/"
+            + CHE_REALM
+            + "/protocol/openid-connect/userinfo\","
+            + "  \"jwks_uri\": \""
+            + serverInternalUrl
+            + "/realms/"
+            + CHE_REALM
+            + "/protocol/openid-connect/certs\""
+            + "}";
+
+    stubFor(
+        get(urlEqualTo("/auth/realms/che/.well-known/openid-configuration"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "text/html")
+                    .withBody(OPEN_ID_CONF_TEMPLATE)));
+
+    OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
+    oidcInfoProvider.serverURL = serverPublicUrl;
+    oidcInfoProvider.serverInternalURL = serverInternalUrl;
+    oidcInfoProvider.realm = CHE_REALM;
+    OIDCInfo oidcInfo = oidcInfoProvider.get();
+
+    assertEquals(
+        serverPublicUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
+        oidcInfo.getTokenPublicEndpoint());
+    assertEquals(
+        serverPublicUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
+        oidcInfo.getEndSessionPublicEndpoint());
+    assertEquals(
+        serverPublicUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
+        oidcInfo.getUserInfoPublicEndpoint());
+    assertEquals(
+        serverPublicUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
+        oidcInfo.getJwksPublicUri());
+
+    assertEquals(
+        serverInternalUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
+        oidcInfo.getJwksUri());
+    assertEquals(
+        serverInternalUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
+        oidcInfo.getUserInfoEndpoint());
+
+    assertEquals(serverInternalUrl, oidcInfo.getAuthServerURL());
+    assertEquals(serverPublicUrl, oidcInfo.getAuthServerPublicURL());
+  }
+
+  @Test
   public void shouldParseOIDCConfigurationForOIDCProviderUrl() {
     String OIDCProviderUrl = "http://localhost:" + getHttpPort() + "/realms/";
     stubFor(
