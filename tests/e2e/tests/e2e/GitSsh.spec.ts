@@ -56,6 +56,7 @@ suite('Git with ssh workflow', async () => {
     });
 
     test('Login into workspace and open tree container', async () => {
+        await driverHelper.reloadPage();
         await dashboard.waitPage();
         await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
@@ -104,8 +105,8 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         // update view of dashboard, it's related to https://github.com/eclipse/che/issues/19020
         await driverHelper.reloadPage();
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await dashboard.waitPage();
+        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
