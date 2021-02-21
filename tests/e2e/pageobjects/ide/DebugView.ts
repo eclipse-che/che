@@ -61,12 +61,12 @@ export class DebugView {
                 if (threadElements.length > 1) {
                     return true;
                 }
-        
+
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
                 }
-                
+
                 return await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
         }, timeout);
