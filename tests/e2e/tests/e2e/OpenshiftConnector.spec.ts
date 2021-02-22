@@ -94,16 +94,17 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
 
-    await topMenu.selectOption('View', 'Find Command...');
+    /*await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('OpenShift: Set Active Project', 'OpenShift: Set Active Project');
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await openshiftPlugin.clickOnItemInTree(openshiftIP);
-    await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
+    await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);*/
   });
 
   test('Create new component with application', async () => {
     await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('OpenShift: New Component', 'OpenShift: New Component from local folder');
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('$(plus) Create new Application...');
     await quickOpenContainer.typeAndSelectSuggestion('node-js-app', `Provide Application name ${selectSugestionSuffix}` );
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new context folder.');
@@ -122,8 +123,9 @@ suite('Openshift connector user story', async () => {
   test('Push new component', async () => {
     driverHelper.getDriver().switchTo().activeElement().sendKeys(Key.F1);
     await quickOpenContainer.typeAndSelectSuggestion(OpenshiftContextMenuItems.Push, 'OpenShift: Push Component');
+    await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
     await quickOpenContainer.clickOnContainerItem('node-js-app');
-    await quickOpenContainer.clickOnContainerItem('component-node-js (s2i)');
+    await quickOpenContainer.clickOnContainerItem('component-node-js');
     await terminal.selectTabByPrefixAndWaitText('OpenShift: Push', 'Changes successfully pushed to component', 240000);
   });
 
