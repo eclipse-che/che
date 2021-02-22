@@ -66,12 +66,15 @@ suite('Openshift connector user story', async () => {
         }
       ];
 
+    await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+    await loginPage.login();
     await testWorkspaceUtils.createWsFromDevFile(wsConfig);
   });
 
   test('Login into workspace and open plugin', async () => {
+    await driverHelper.reloadPage();
+    await dashboard.waitPage();
     await driverHelper.navigateToUrl(workspacePrefixUrl + wsName);
-    await loginPage.login();
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');

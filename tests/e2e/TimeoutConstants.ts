@@ -198,6 +198,6 @@ export const TimeoutConstants = {
     /**
      * Timeout for waiting fr openshift connector tree, "10 000" by default.
      */
-    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 40_000,
+    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 120_000,
 
 };
