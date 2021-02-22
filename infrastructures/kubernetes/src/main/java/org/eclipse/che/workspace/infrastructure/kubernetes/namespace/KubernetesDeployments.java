@@ -199,10 +199,7 @@ public class KubernetesDeployments {
             .inNamespace(namespace)
             .withLabels(
                 Map.of(
-                    CHE_WORKSPACE_ID_LABEL,
-                    workspaceId,
-                    CHE_DEPLOYMENT_NAME_LABEL,
-                    deploymentName))
+                    CHE_WORKSPACE_ID_LABEL, workspaceId, CHE_DEPLOYMENT_NAME_LABEL, deploymentName))
             .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
     try {
       clientFactory
