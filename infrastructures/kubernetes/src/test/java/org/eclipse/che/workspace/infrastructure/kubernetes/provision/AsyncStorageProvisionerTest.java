@@ -122,7 +122,10 @@ public class AsyncStorageProvisionerTest {
     sshPair = new SshPairImpl(USER, "internal", SSH_KEY_NAME, "", "");
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace configuration not valid: Asynchronous storage available only for 'common' PVC strategy.*")
   public void shouldThrowExceptionIfNotCommonStrategy() throws Exception {
     AsyncStorageProvisioner asyncStorageProvisioner =
         new AsyncStorageProvisioner(
@@ -142,7 +145,10 @@ public class AsyncStorageProvisionerTest {
     verifyNoMoreInteractions(identity);
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace configuration not valid: Asynchronous storage available only if 'persistVolumes' attribute set to false")
   public void shouldThrowExceptionIfAsyncStorageForNotEphemeralWorkspace() throws Exception {
     Map attributes = new HashMap<>(2);
     attributes.put(ASYNC_PERSIST_ATTRIBUTE, "true");

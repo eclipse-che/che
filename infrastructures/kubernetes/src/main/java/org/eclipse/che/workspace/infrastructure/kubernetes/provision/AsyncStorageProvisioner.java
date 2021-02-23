@@ -17,6 +17,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_DEPLOYMENT_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_USER_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.NOT_ABLE_TO_PROVISION_SSH_KEYS;
@@ -169,7 +170,7 @@ public class AsyncStorageProvisioner {
       String message =
           format(
               "Workspace configuration not valid: Asynchronous storage available only if '%s' attribute set to false",
-              ASYNC_PERSIST_ATTRIBUTE);
+              PERSIST_VOLUMES_ATTRIBUTE);
       LOG.warn(message);
       k8sEnv.addWarning(new WarningImpl(4200, message));
       throw new InfrastructureException(message);
