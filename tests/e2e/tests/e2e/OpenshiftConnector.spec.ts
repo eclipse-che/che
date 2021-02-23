@@ -73,7 +73,7 @@ suite('Openshift connector user story', async () => {
     await driverHelper.navigateToUrl(workspacePrefixUrl + wsName);
     await loginPage.login();
     await ide.waitWorkspaceAndIde();
-    await projectTree.openProjectTreeContainer();
+    await projectTree.openProjectTreeContainer(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
     await projectTree.waitProjectImported(projectName, 'index.js');
     await dashboard.waitDisappearanceNavigationMenu();
     await openshiftPlugin.clickOnOpenshiftToollBarIcon();
