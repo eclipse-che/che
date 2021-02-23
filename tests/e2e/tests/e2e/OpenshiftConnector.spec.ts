@@ -93,6 +93,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.clickOnContainerItem('$(plus) Add new user...');
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_USERNAME, `Provide Username ${provideAuthenticationSuffix}`);
     await quickOpenContainer.typeAndSelectSuggestion(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD, `Provide Password ${provideAuthenticationSuffix}`);
+    await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT, TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT);
 
     // workaround for openshift-connector v0.1.5 related to known issue https://github.com/redhat-developer/vscode-openshift-tools/issues/1636
     /*await topMenu.selectOption('View', 'Find Command...');
