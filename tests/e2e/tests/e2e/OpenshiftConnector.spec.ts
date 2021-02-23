@@ -114,7 +114,7 @@ suite('Openshift connector user story', async () => {
     await quickOpenContainer.typeAndSelectSuggestion('component-node-js', `Provide Component name ${selectSugestionSuffix}`);
 
     await quickOpenContainer.clickOnContainerItem('nodejs');
-    await quickOpenContainer.clickOnContainerItem('14-ubi7');
+    await quickOpenContainer.clickOnContainerItem('10');
 
     await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
     await openshiftPlugin.waitItemInTree(TestConstants.TS_TEST_OPENSHIFT_PLUGIN_PROJECT);
