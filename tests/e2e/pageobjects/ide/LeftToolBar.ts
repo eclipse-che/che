@@ -70,7 +70,7 @@ export class LeftToolBar {
     }
 
     private getSelectedViewLocator(viewTitle: string): By {
-        return By.css(`div.theia-app-left .p-TabBar-content li.p-mod-current[title='${viewTitle}']`)
+        return By.css(`div.theia-app-left .p-TabBar-content li.p-mod-current[title='${viewTitle}']`);
     }
 
     private getViewLocator(viewTitle: string): By {

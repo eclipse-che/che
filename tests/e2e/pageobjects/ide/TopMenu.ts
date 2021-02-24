@@ -59,7 +59,7 @@ export class TopMenu {
 
     public async runTask(task: string) {
         await this.selectOption('Terminal', 'Run Task...');
-        
+
         try {
             await this.quickOpenContainer.waitContainer();
         } catch (err) {
@@ -76,7 +76,7 @@ export class TopMenu {
 
     public async openTerminalForSpecificContainer(containerName: string) {
         await this.selectOption('Terminal', 'Open Terminal in specific container');
-        
+
         try {
             await this.quickOpenContainer.waitContainer();
         } catch (err) {

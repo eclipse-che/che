@@ -3,17 +3,14 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../../inversify.types';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { Logger } from '../../../utils/Logger';
-import { WebElement, Button, By } from 'selenium-webdriver';
+import { By } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { LeftToolBar } from '../LeftToolBar';
-import { TestConstants } from '../../../TestConstants';
 
 
 
 @injectable()
 export class KubernetesPlugin {
-    private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'ul.p-Menu-content';
-
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.LeftToolBar) private readonly leftToolbar: LeftToolBar) { }
 
@@ -44,6 +41,12 @@ export class KubernetesPlugin {
         Logger.debug(`KubernetesPlugin.waitSectionExpanded  ${sectionTitle}`);
 
         await this.driverHelper.waitVisibility(this.getExpandedSectionLocator(sectionTitle), timeout);
+    }
+
+    async waitSectionCollapsed(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
+        Logger.debug(`KubernetesPlugin.waitSectionCollapsed  ${sectionTitle}`);
+
+        await this.driverHelper.waitVisibility(this.getCollapsedSectionLocator(sectionTitle), timeout);
     }
 
     async expandSection(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
@@ -92,11 +95,11 @@ export class KubernetesPlugin {
     }
 
     private getListItemPartialTextLocator(partialText: string): By {
-        return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[contains(text(), '${partialText}')]`)
+        return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[contains(text(), '${partialText}')]`);
     }
 
     private getListItemTextLocator(expectedText: string): By {
-        return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[text()='${expectedText}']`)
+        return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[text()='${expectedText}']`);
     }
 
 }
