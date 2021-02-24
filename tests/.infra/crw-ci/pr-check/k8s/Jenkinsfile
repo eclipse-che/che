@@ -83,22 +83,7 @@ pipeline {
                     } else {
                         mutableCheImageTag = cheImageTag
                     }
-
-                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                        sh """
-                            docker login -u maxura -p ${maxura_docker_password}
-
-                            TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                            curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                        """
-                    }
-
-                    echo "Print anonymous dockerhub limits"
-                    sh """
-                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                    """
-               }
+                }
             }
         }
 
@@ -233,12 +218,21 @@ pipeline {
             }
 
             steps {
+                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                    sh """
+                        echo "Build 'che-server' image"
+                        echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
+
+                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    """
+                }
+
                 withCredentials([string(credentialsId: 'quay.io-crw_pr+crw_pr_bot_user_token', variable: 'QUAY_TOKEN')]) {
                     sh """
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                        docker tag eclipseche/che-server:${mutableCheImageTag} ${cheImageRepo}:${mutableCheImageTag}
-
+                        echo "Push 'che-server' image"
                         echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
+
+                        docker tag eclipseche/che-server:${mutableCheImageTag} ${cheImageRepo}:${mutableCheImageTag}
                         echo y | docker push ${cheImageRepo}:${mutableCheImageTag}
                     """
                 }
@@ -248,7 +242,7 @@ pipeline {
         stage("Start Che") {
             steps {
                 script {
-                    echo "Pre-pull Eclipse Che and test images from dockerhub"
+                    echo "Pre-pull test images"
                     withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                         sh """
                             eval \$(minikube docker-env)
@@ -392,19 +386,6 @@ EOL"""
 
     post {
         cleanup {
-            withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                sh """
-                    TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                    curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                """
-            }
-
-            echo "Print anonymous dockerhub limits"
-            sh """
-                TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-            """
-
             sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
                 kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
