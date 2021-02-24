@@ -34,7 +34,8 @@ const CLASSES = {
     QuickOpenContainer: 'QuickOpenContainer',
     PreviewWidget: 'PreviewWidget',
     GitHubPlugin: 'GitHubPlugin',
-    LeftToolbar: 'LeftToolbar',
+    RightToolBar: 'RightToolBar',
+    LeftToolBar: 'LeftToolBar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
     DialogWindow: 'DialogWindow',
@@ -53,7 +54,8 @@ const CLASSES = {
     CheApiRequestHandler: 'CheApiRequestHandler',
     GetStarted: 'GetStarted',
     OpenDialogWidget: 'OpenDialogWidget',
-    UpdateAccountInformationPage: 'UpdateAccountInformationPage'
+    UpdateAccountInformationPage: 'UpdateAccountInformationPage',
+    KubernetesPlugin: 'KubernetesPlugin'
 };
 
 export { TYPES, CLASSES };

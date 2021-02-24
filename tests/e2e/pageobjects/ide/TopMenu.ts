@@ -59,6 +59,7 @@ export class TopMenu {
 
     public async runTask(task: string) {
         await this.selectOption('Terminal', 'Run Task...');
+
         try {
             await this.quickOpenContainer.waitContainer();
         } catch (err) {
@@ -71,6 +72,23 @@ export class TopMenu {
         }
 
         await this.quickOpenContainer.clickOnContainerItem(task);
+    }
+
+    public async openTerminalForSpecificContainer(containerName: string) {
+        await this.selectOption('Terminal', 'Open Terminal in specific container');
+
+        try {
+            await this.quickOpenContainer.waitContainer();
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                Logger.info(`After clicking to the "Terminal" -> "Open Terminal in specific container" the "Quick Open Container" has not been displayed, one more try`);
+
+                await this.selectOption('Terminal', 'Open Terminal in specific container');
+                await this.quickOpenContainer.waitContainer();
+            }
+        }
+
+        await this.quickOpenContainer.clickOnContainerItem(containerName);
     }
 
     private getTopMenuButtonLocator(buttonText: string): By {
