@@ -49,6 +49,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <ch.qos.logback.version>1.2.1</ch.qos.logback.version>
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
+        <com.fasterxml.jackson.core.jackson-databind.version>2.10.5.1</com.fasterxml.jackson.core.jackson-databind.version>
         <com.fasterxml.jackson.core.version>2.10.3</com.fasterxml.jackson.core.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
@@ -156,7 +157,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${com.fasterxml.jackson.core.version}</version>
+                <version>${com.fasterxml.jackson.core.jackson-databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
