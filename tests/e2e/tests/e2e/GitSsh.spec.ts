@@ -66,7 +66,7 @@ suite('Git with ssh workflow', async () => {
 
     test('Generate a SSH key', async () => {
         await topMenu.selectOption('View', 'Find Command...');
-        await quickOpenContainer.typeAndSelectSuggestion('SSH', 'SSH: generate key pair...');
+        await quickOpenContainer.typeAndSelectSuggestion('SSH', 'SSH: Generate Key...');
         await ide.waitNotificationAndClickOnButton('Key pair successfully generated, do you want to view the public key', 'View');
         await editor.waitEditorOpened('Untitled-0');
         await editor.waitText('Untitled-0', 'ssh-rsa');
