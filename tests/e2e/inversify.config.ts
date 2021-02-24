@@ -34,7 +34,7 @@ import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
 import { GitPlugin } from './pageobjects/ide/GitPlugin';
-import { LeftToolbar } from './pageobjects/ide/LeftToolBar';
+import { RightToolBar } from './pageobjects/ide/RightToolBar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
 import { DialogWindow } from './pageobjects/ide/DialogWindow';
@@ -56,6 +56,8 @@ import { GetStarted } from './pageobjects/dashboard/GetStarted';
 import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
+import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
+import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -92,7 +94,8 @@ e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu);
 e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer);
 e2eContainer.bind<PreviewWidget>(CLASSES.PreviewWidget).to(PreviewWidget);
 e2eContainer.bind<GitPlugin>(CLASSES.GitPlugin).to(GitPlugin);
-e2eContainer.bind<LeftToolbar>(CLASSES.LeftToolbar).to(LeftToolbar);
+e2eContainer.bind<RightToolBar>(CLASSES.RightToolBar).to(RightToolBar);
+e2eContainer.bind<LeftToolBar>(CLASSES.LeftToolBar).to(LeftToolBar);
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal);
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView);
 e2eContainer.bind<DialogWindow>(CLASSES.DialogWindow).to(DialogWindow);
@@ -109,5 +112,6 @@ e2eContainer.bind<OpenshiftPlugin>(CLASSES.OpenshiftPlugin).to(OpenshiftPlugin);
 e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
+e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
 
 export { e2eContainer };

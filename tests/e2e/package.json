@@ -21,7 +21,8 @@
     "test-intelij": "tsc && mocha --opts mocha.intelij.opts",
     "test-oauth": "tsc && mocha --opts mocha.ocp.link.opts",
     "lint": "tslint --fix -p .",
-    "tsc": "tsc -p ."
+    "tsc": "tsc -p .",
+    "test-plugins": "./initPluginsTest.sh"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
