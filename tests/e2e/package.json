@@ -22,7 +22,8 @@
     "test-oauth": "tsc && mocha --opts mocha.ocp.link.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p .",
-    "test-plugins": "./initPluginsTest.sh"
+    "init-mocha-opts": "tsc && mocha --opts mocha-single-devfile.opts",
+    "test-plugin": "npm run init-mocha-opts -- --spec dist/tests/login/Login.spec.js --spec dist/tests/plugins/${USERSTORY}.spec.js"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
