@@ -55,7 +55,15 @@ export class PreferencesHandler {
         await this.setPreference('go.useLanguageServer', 'true');
     }
 
-    private async setPreference(attribute: string, value: string) {
+    /**
+     * Works properly only if set before workspace startup.
+     */
+    public async setVscodeKubernetesPluginConfig(vsKubernetesConfig: any) {
+        Logger.debug(`PreferencesHandler.setVscodeKubernetesPluginConfig`);
+        await this.setPreference('vs-kubernetes', vsKubernetesConfig);
+    }
+
+    private async setPreference(attribute: string, value: any) {
         Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
         let response;
         try {
