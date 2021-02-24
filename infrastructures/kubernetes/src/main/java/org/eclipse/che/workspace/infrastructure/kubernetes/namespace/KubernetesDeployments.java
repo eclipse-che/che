@@ -197,6 +197,9 @@ public class KubernetesDeployments {
             .create(workspaceId)
             .pods()
             .inNamespace(namespace)
+            .withLabels(
+                Map.of(
+                    CHE_WORKSPACE_ID_LABEL, workspaceId, CHE_DEPLOYMENT_NAME_LABEL, deploymentName))
             .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
     try {
       clientFactory
@@ -1096,9 +1099,7 @@ public class KubernetesDeployments {
 
     @Override
     public void eventReceived(Action action, Pod resource) {
-      Map<String, String> labels = resource.getMetadata().getLabels();
-      if (workspaceId.equals(labels.get(CHE_WORKSPACE_ID_LABEL))
-          && deploymentName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
+      if (action == Action.ADDED) {
         future.complete(resource);
       }
     }
