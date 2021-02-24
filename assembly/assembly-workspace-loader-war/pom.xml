@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.26.2-SNAPSHOT</version>
+        <version>7.26.3-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-workspace-loader-war</artifactId>
     <packaging>war</packaging>
