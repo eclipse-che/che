@@ -32,7 +32,7 @@ pipeline {
                description: 'Configuration Che server strategy')
 
         string(name: 'cheImageRepo',
-                defaultValue: "maxura/che-server",
+                defaultValue: "quay.io/crw_pr/che-server",
                 description: 'Repo of Che server image')
 
         string(name: 'cheImageTag',
@@ -233,11 +233,15 @@ pipeline {
             }
 
             steps {
-                sh """
-                    ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
-                """
+                withCredentials([string(credentialsId: 'quay.io-crw_pr+crw_pr_bot_user_token', variable: 'QUAY_TOKEN')]) {
+                    sh """
+                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                        docker tag eclipseche/che-server:${mutableCheImageTag} ${cheImageRepo}:${mutableCheImageTag}
+
+                        echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
+                        echo y | docker push ${cheImageRepo}:${mutableCheImageTag}
+                    """
+                }
             }
         }
 
@@ -248,10 +252,11 @@ pipeline {
                     withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                         sh """
                             eval \$(minikube docker-env)
-                            docker login -u maxura -p ${maxura_docker_password}
 
                             docker pull ${cheImageRepo}:${mutableCheImageTag}
-                            docker pull docker.io/traefik:v2.2.8
+
+                            echo "${maxura_docker_password}" | docker login -u="maxura" --password-stdin docker.io
+                            docker pull docker.io/traefik:v2.2.8 || true
                         """
                     }
 
