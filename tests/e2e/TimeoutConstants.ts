@@ -12,11 +12,6 @@ export const TimeoutConstants = {
     // -------------------------------------------- INSTALLING AND STARTUP --------------------------------------------
 
     /**
-     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "600 000" by default.
-     */
-    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 600_000,
-
-    /**
      * Wait between workspace started and IDE ready to be used, "20 000" by default.
      */
     TS_IDE_LOAD_TIMEOUT: Number(process.env.TS_IDE_LOAD_TIMEOUT) || 20_000,
@@ -70,14 +65,14 @@ export const TimeoutConstants = {
     TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180_000,
 
     /**
-     * Timeout for suggestion invoking, "30 000" by default.
+     * Timeout for suggestion invoking, "60 000" by default.
      */
-    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 30_000,
+    TS_SUGGESTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 60_000,
 
     /**
-     * Timeout for error highlighting presence, "10 000" by default
+     * Timeout for error highlighting presence, "90 000" by default
      */
-    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
+    TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 90_000,
 
 
     // -------------------------------------------- PROJECT TREE --------------------------------------------
@@ -133,9 +128,9 @@ export const TimeoutConstants = {
     TS_NOTIFICATION_CENTER_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 10_000,
 
     /**
-     * Timeout for debugger to connect, "30 000" by default
+     * Timeout for debugger to connect, "60 000" by default
      */
-    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 30_000,
+    TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 60_000,
 
     /**
      * Timeout for context menu manipulation, "10 000" by default
@@ -153,9 +148,9 @@ export const TimeoutConstants = {
     TS_GIT_CONAINER_INTERACTION_TIMEOUT: Number(process.env.TS_GIT_CONAINER_INTERACTION_TIMEOUT) || 20_000,
 
     /**
-     * Timeout for toolbars interaction, "20 000" by default
+     * Timeout for toolbars interaction, "30 000" by default
      */
-    TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 20_000,
+    TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 30_000,
 
     /**
      * Timeout for clicking on visible item, "3 000" by default
@@ -203,6 +198,6 @@ export const TimeoutConstants = {
     /**
      * Timeout for waiting fr openshift connector tree, "10 000" by default.
      */
-    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 40_000,
+    TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 120_000,
 
 };

@@ -12,6 +12,7 @@
 package org.eclipse.che.multiuser.resource.api.workspace;
 
 import java.util.Map;
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
 import org.eclipse.che.dto.server.DtoFactory;

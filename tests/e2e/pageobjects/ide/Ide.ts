@@ -114,7 +114,6 @@ export class Ide {
     async waitNotificationAndOpenLink(notificationText: string, timeout: number) {
         Logger.debug(`Ide.waitNotificationAndOpenLink "${notificationText}"`);
         await this.waitNotification(notificationText, timeout);
-        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText), timeout);
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -142,7 +141,7 @@ export class Ide {
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
-    async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 

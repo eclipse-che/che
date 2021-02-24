@@ -115,22 +115,22 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
-        const textForErrorDisplaying: string = '$#%@#';
+        await driverHelper.getDriver().sleep(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
 
+        const textForErrorDisplaying: string = '$';
         await editor.type(javaFileName, textForErrorDisplaying, 30);
 
         try {
-            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
         } catch (err) {
-            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974 issue.');
-            await (await driverHelper.getDriver()).navigate().refresh();
-
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
+            await driverHelper.reloadPage();
             await ide.waitAndSwitchToIdeFrame();
-            await editor.selectTab(javaFileName);
-            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 3);
+            await ide.waitIde();
+            await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
         }
 
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
 
@@ -170,10 +170,6 @@ suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         let buildTaskName: string = 'build-file-output';
         await topMenu.runTask('build-file-output');
-
-        // workaround for issue: https://github.com/eclipse/che/issues/14771
-
-        // await projectTree.expandPathAndOpenFileInAssociatedWorkspace(projectName, 'build-output.txt');
         await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
@@ -282,7 +278,7 @@ suite('Validation of debug functionality', async () => {
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18034 issue.');
             await debugView.clickOnThreadsViewTitle();
-            
+
             await debugView.waitForDebuggerToConnect();
         }
 

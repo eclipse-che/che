@@ -456,21 +456,23 @@ setupGitconfig
 evaluateCheVariables
 
 checkoutProjects
-if [[ "${REBUILD_FROM_EXISTING_TAGS}" ]]; then
+if [[ "${REBUILD_FROM_EXISTING_TAGS}" = "true" ]]; then
+    echo "[INFO] Checking out from existing ${CHE_VERSION} tag"
     checkoutTags
 else
+    echo "[INFO] Creating a new ${CHE_VERSION} tag"
     prepareRelease
     createTags
 fi
 releaseCheServer
 
-if [[ "${BUILD_AND_PUSH_IMAGES}" ]]; then
+if [[ "${BUILD_AND_PUSH_IMAGES}" = "true" ]]; then
     buildImages  ${CHE_VERSION}
     tagLatestImages ${CHE_VERSION}
     pushImagesOnQuay ${CHE_VERSION} pushLatest
 fi
 
-if [[ "${BUMP_NEXT_VERSION}" ]]; then
+if [[ "${BUMP_NEXT_VERSION}" = "true" ]]; then
     bumpVersions
     updateImageTagsInCheServer
 fi

@@ -175,9 +175,17 @@ pipeline {
                     }
 
                     steps {
-                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh "sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686"
+                        echo "Install dependencies needed for build of Eclipse Che"
+                        sh """
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686 || true
 
+                            # workaround https://github.com/eclipse/che/issues/19093
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686 || true
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686 || true
+                            sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686
+                        """
+
+                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
                         sh """
                             project_list=(
                                 eclipse/che-parent
@@ -242,9 +250,6 @@ pipeline {
                             eval \$(minikube docker-env)
                             docker login -u maxura -p ${maxura_docker_password}
 
-                            docker pull mariolet/petclinic:d2831f9b
-                            docker pull centos/postgresql-96-centos7:9.6
-                            docker pull centos/mysql-57-centos7
                             docker pull ${cheImageRepo}:${mutableCheImageTag}
                             docker pull docker.io/traefik:v2.2.8
                         """
@@ -372,6 +377,7 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
+                       -e TS_SELENIUM_LOG_LEVEL="TRACE" \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
@@ -398,6 +404,7 @@ EOL"""
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
                 kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
                 kubectl --namespace=eclipse-che get events -o json > $LOGS_AND_CONFIGS/kubectl/events.json || true
+                kubectl get pods -A >$LOGS_AND_CONFIGS/kubectl/pods.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/che-config
 
@@ -416,13 +423,18 @@ EOL"""
                 for pod in \$PODS ; do \
                     kubectl logs --namespace=eclipse-che "\${pod}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-logs/"\${pod}".pod.log || true; \
                 done
+                kubectl describe pod --namespace=eclipse-che > $LOGS_AND_CONFIGS/che-config/eclipse-che-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/workspace-logs
-                export WS_POD=\$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}')
-                for c in \$(kubectl get pod --namespace=eclipse-che \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do \\
-                    kubectl logs \$(kubectl get pod --namespace=eclipse-che | grep ".workspace-" | awk '{print \$1}') "\${c}" --namespace=eclipse-che > $LOGS_AND_CONFIGS/workspace-logs/"\${c}".container.log || true; \\
+                WORKSPACE_NAMESPACE_NAME=admin-che
+                export WS_POD=\$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME | grep ".workspace-" | awk '{print \$1}')
+                for c in \$(kubectl get pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD -o jsonpath="{.spec.containers[*].name}") ; do
+                    CONTAINER_LOGS_DIR=$LOGS_AND_CONFIGS/workspace-logs/"\${c}"
+                    mkdir \$CONTAINER_LOGS_DIR
+                    kubectl logs \$WS_POD "\${c}" --namespace=\$WORKSPACE_NAMESPACE_NAME > \${CONTAINER_LOGS_DIR}.container.log || true;
+                    kubectl cp \$WORKSPACE_NAMESPACE_NAME/\$WS_POD:/workspace_logs \$CONTAINER_LOGS_DIR -c "\${c}" || true;
                 done
-                kubectl describe pod --namespace=eclipse-che \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
+                kubectl describe pod --namespace=\$WORKSPACE_NAMESPACE_NAME \$WS_POD > $LOGS_AND_CONFIGS/che-config/workspace-pod-description.txt || true
 
                 mkdir -p $LOGS_AND_CONFIGS/docker
                 docker image ls > $LOGS_AND_CONFIGS/docker/images.txt || true

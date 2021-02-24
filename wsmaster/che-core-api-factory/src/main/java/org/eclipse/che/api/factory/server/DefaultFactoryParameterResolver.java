@@ -28,8 +28,8 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.urlfactory.DefaultFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
@@ -72,7 +72,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
    */
   @Override
   public FactoryMetaDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException, ServerException {
+      throws ApiException {
     // This should never be null, because our contract in #accept prohibits that
     String devfileLocation = factoryParameters.get(URL_PARAMETER_NAME);
 

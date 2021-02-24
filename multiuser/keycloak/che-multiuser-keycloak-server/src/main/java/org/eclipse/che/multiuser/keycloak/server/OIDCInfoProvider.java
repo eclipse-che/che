@@ -12,7 +12,9 @@
 package org.eclipse.che.multiuser.keycloak.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.*;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_INTERNAL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OIDC_PROVIDER_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -78,10 +80,12 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
 
       LOG.info("openid configuration = {}", openIdConfiguration);
 
-      String tokenPublicEndPoint = (String) openIdConfiguration.get("token_endpoint");
-      String userInfoPublicEndpoint = (String) openIdConfiguration.get("userinfo_endpoint");
-      String endSessionPublicEndpoint = (String) openIdConfiguration.get("end_session_endpoint");
-      String jwksPublicUri = (String) openIdConfiguration.get("jwks_uri");
+      String tokenPublicEndPoint = setPublicUrl((String) openIdConfiguration.get("token_endpoint"));
+      String userInfoPublicEndpoint =
+          setPublicUrl((String) openIdConfiguration.get("userinfo_endpoint"));
+      String endSessionPublicEndpoint =
+          setPublicUrl((String) openIdConfiguration.get("end_session_endpoint"));
+      String jwksPublicUri = setPublicUrl((String) openIdConfiguration.get("jwks_uri"));
       String jwksUri = setInternalUrl(jwksPublicUri);
       String userInfoEndpoint = setInternalUrl(userInfoPublicEndpoint);
 
@@ -131,6 +135,13 @@ public class OIDCInfoProvider implements Provider<OIDCInfo> {
   private String setInternalUrl(String endpointUrl) {
     if (serverURL != null && serverInternalURL != null) {
       return endpointUrl.replace(serverURL, serverInternalURL);
+    }
+    return endpointUrl;
+  }
+
+  private String setPublicUrl(String endpointUrl) {
+    if (serverURL != null && serverInternalURL != null) {
+      return endpointUrl.replace(serverInternalURL, serverURL);
     }
     return endpointUrl;
   }

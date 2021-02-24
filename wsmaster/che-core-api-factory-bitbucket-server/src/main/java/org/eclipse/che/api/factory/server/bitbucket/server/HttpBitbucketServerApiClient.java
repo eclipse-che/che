@@ -13,7 +13,6 @@ package org.eclipse.che.api.factory.server.bitbucket.server;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.time.Duration.ofSeconds;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -89,7 +88,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
 
   @Override
   public BitbucketUser getUser(Subject cheUser)
-      throws ScmUnauthorizedException, ScmCommunicationException {
+      throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException {
     try {
       // Since Bitbucket server API doesn't provide a way to get an account profile currently
       // authenticated user we will try to find it and by iterating over the list available to the
@@ -118,11 +117,10 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
       if (currentUser.isPresent()) {
         return currentUser.get();
       }
-    } catch (ScmBadRequestException | ScmItemNotFoundException scmBadRequestException) {
-      throw new ScmCommunicationException(
-          scmBadRequestException.getMessage(), scmBadRequestException);
+    } catch (ScmBadRequestException | ScmItemNotFoundException scmException) {
+      throw new ScmCommunicationException(scmException.getMessage(), scmException);
     }
-    throw new ScmUnauthorizedException(
+    throw new ScmItemNotFoundException(
         "Current user not found. That is possible only if user are not authorized against "
             + serverUri);
   }
@@ -349,8 +347,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
         switch (response.statusCode()) {
           case HTTP_BAD_REQUEST:
             throw new ScmBadRequestException(body);
-          case HTTP_UNAUTHORIZED:
-            throw new ScmUnauthorizedException(body);
           case HTTP_NOT_FOUND:
             throw new ScmItemNotFoundException(body);
           default:

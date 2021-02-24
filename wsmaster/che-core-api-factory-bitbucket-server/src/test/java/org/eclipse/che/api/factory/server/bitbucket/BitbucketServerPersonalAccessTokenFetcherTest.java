@@ -107,7 +107,7 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
       dataProvider = "expectedExceptions",
       expectedExceptions = {ScmUnauthorizedException.class, ScmCommunicationException.class})
   public void shouldRethrowBasicExceptionsOnGetUserStep(Class<? extends Throwable> exception)
-      throws ScmUnauthorizedException, ScmCommunicationException {
+      throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException {
     // given
     when(bitbucketServerApiClient.isConnected(eq(someNotBitbucketURL))).thenReturn(true);
     doThrow(exception).when(bitbucketServerApiClient).getUser(eq(subject));
