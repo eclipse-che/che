@@ -19,13 +19,13 @@ export class KubernetesPlugin {
 
 
     async openView(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.openView`);
+        Logger.debug(`KubernetesPlugin.openView`);
 
         await this.leftToolbar.selectView('Kubernetes', timeout);
     }
 
     async clickToSection(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.clickToSection  ${sectionTitle}`);
+        Logger.debug(`KubernetesPlugin.clickToSection  ${sectionTitle}`);
 
         const sectionLocator: By = By.xpath(this.getSectionLocator(sectionTitle));
 
@@ -33,7 +33,7 @@ export class KubernetesPlugin {
     }
 
     async isSectionExpanded(sectionTitle: string): Promise<boolean> {
-        Logger.debug(`LeftToolBar.isSectionExpanded  ${sectionTitle}`);
+        Logger.debug(`KubernetesPlugin.isSectionExpanded  ${sectionTitle}`);
 
         const expandedsectionLocator: By = this.getExpandedSectionLocator(sectionTitle);
 
@@ -41,13 +41,13 @@ export class KubernetesPlugin {
     }
 
     async waitSectionExpanded(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.waitSectionExpanded  ${sectionTitle}`);
+        Logger.debug(`KubernetesPlugin.waitSectionExpanded  ${sectionTitle}`);
 
         await this.driverHelper.waitVisibility(this.getExpandedSectionLocator(sectionTitle), timeout);
     }
 
     async expandSection(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.expandSection  ${sectionTitle}`);
+        Logger.debug(`KubernetesPlugin.expandSection  ${sectionTitle}`);
 
         if (await this.isSectionExpanded(sectionTitle)) {
             return;
@@ -58,7 +58,7 @@ export class KubernetesPlugin {
     }
 
     async clickToRefreshButton(sectionTitle: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.clickToRefreshButton`);
+        Logger.debug(`KubernetesPlugin.clickToRefreshButton`);
 
         const refreshButtonLocator: By = By.xpath(`//div[contains(@class, 'theia-header')]//div[contains(@class, 'theia-view-container-part-title')]//div[@title='Refresh']`);
         const sectionTitleLocator: By = By.xpath(this.getSectionLocator(sectionTitle));
@@ -68,13 +68,13 @@ export class KubernetesPlugin {
     }
 
     async waitListItemContains(partialText: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.waitListItemContains  ${partialText}`);
+        Logger.debug(`KubernetesPlugin.waitListItemContains  ${partialText}`);
 
         await this.driverHelper.waitVisibility(this.getListItemPartialTextLocator(partialText), timeout);
     }
 
     async waitListItem(expectedText: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
-        Logger.debug(`LeftToolBar.waitListItem  ${expectedText}`);
+        Logger.debug(`KubernetesPlugin.waitListItem  ${expectedText}`);
 
         await this.driverHelper.waitVisibility(this.getListItemTextLocator(expectedText), timeout);
     }
@@ -98,6 +98,5 @@ export class KubernetesPlugin {
     private getListItemTextLocator(expectedText: string): By {
         return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[text()='${expectedText}']`)
     }
-
 
 }
