@@ -29,7 +29,7 @@ suite('Workspace creation via factory url', async () => {
         });
     });
 
-    suite('Wait workspace readyness', async () => {
+    suite('Wait workspace readiness', async () => {
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
