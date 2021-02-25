@@ -10,6 +10,7 @@
     "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
     "load-test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-load.opts",
     "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
+    "test-devworkspace-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-devworkspace-happy-path.opts",
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "test-git-ssh": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-ssh.opts",
