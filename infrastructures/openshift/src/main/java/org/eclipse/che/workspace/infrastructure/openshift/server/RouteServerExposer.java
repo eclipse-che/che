@@ -26,6 +26,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
@@ -99,14 +100,17 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnvironment> {
 
   private final Map<String, String> labels;
+  private final String host;
 
   @Inject
   public RouteServerExposer(
-      @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty) {
+      @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty,
+      @Nullable @Named("che.infra.openshift.route.host") String host) {
     this.labels =
         labelsProperty != null
             ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
             : emptyMap();
+    this.host = host;
   }
 
   @Override
@@ -124,6 +128,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
             .withTargetPort(servicePort.getName())
             .withServers(externalServers)
             .withLabels(labels)
+            .withHost(host != null ? NameGenerator.generate("route", "." + host, 10) : null)
             .withTo(serviceName)
             .build();
     env.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
@@ -132,6 +137,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
   private static class RouteBuilder {
 
     private String name;
+    private String host;
     private String serviceName;
     private IntOrString targetPort;
     private Map<String, ServerConfig> servers;
@@ -145,6 +151,11 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
 
     private RouteBuilder withTo(String serviceName) {
       this.serviceName = serviceName;
+      return this;
+    }
+
+    private RouteBuilder withHost(String host) {
+      this.host = host;
       return this;
     }
 
@@ -189,6 +200,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
           .withLabels(labels)
           .endMetadata()
           .withNewSpec()
+          .withHost(host)
           .withNewTo()
           .withName(serviceName)
           .endTo()
