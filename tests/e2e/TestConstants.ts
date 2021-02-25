@@ -223,6 +223,11 @@ export const TestConstants = {
     /**
      * Print all timeout variables when tests launch, defaulte to false
      */
-    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false
+    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false,
+
+    /**
+     * URL of the workspace created by devworkspace-controller
+     */
+    TS_SELENIUM_DEVWORKSPACE_URL: process.env.TS_SELENIUM_DEVWORKSPACE_URL
 
 };
