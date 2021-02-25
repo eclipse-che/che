@@ -34,7 +34,7 @@ pipeline {
                description: 'Configuration Che server strategy')
 
         string(name: 'cheImageRepo',
-                defaultValue: "maxura/che-server",
+                defaultValue: "quay.io/crw_pr/che-server",
                 description: 'Repo of Che server image')
 
         string(name: 'testWorkspaceDevfileUrl',
@@ -68,22 +68,7 @@ pipeline {
             steps {
                 script { 
                     mutableCheImageTag = ghprbPullId
-
-                    withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                        sh """
-                            docker login -u maxura -p ${maxura_docker_password}
-
-                            TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                            curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                        """
-                    }
-
-                    echo "Print anonymous dockerhub limits"
-                    sh """
-                        TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                        curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                    """
-               }
+                }
             }
         }
 
@@ -203,10 +188,10 @@ pipeline {
             }
         }
 
-        stage("Build and push 'che-dashboard-next' image"){
+        stage("Build and push 'che-dashboard' image"){
             steps {
                 sh """
-                    echo "Donwload the 'che-dashboard-next' project and checkout to branch"
+                    echo "Download the 'che-dashboard-next' project and checkout to branch"
 
                     git clone $ghprbAuthorRepoGitUrl
                     cd che-dashboard
@@ -217,43 +202,64 @@ pipeline {
                     fi
 
                     git checkout $ghprbSourceBranch
-                    
-
-                    echo "Build the 'che-dashboard-next' image"
-
-                    docker build . -f apache.Dockerfile -t docker.io/maxura/che-dashboard:${mutableCheImageTag}
-
-                    docker push docker.io/maxura/che-dashboard:${mutableCheImageTag}
-
-                    cd ..
                 """
+
+                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                    sh """
+                        echo "Build 'che-dashboard' image"
+                        echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
+                        
+                        cd ${WORKSPACE}/che-dashboard
+                        docker build . -f apache.Dockerfile -t quay.io/crw_pr/che-dashboard:${mutableCheImageTag}
+                    """
+                }
+
+                withCredentials([string(credentialsId: 'quay.io-crw_pr+crw_pr_bot_user_token', variable: 'QUAY_TOKEN')]) {
+                    sh """
+                        echo "Push 'che-dashboard' image"
+                        echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
+
+                        echo y | docker push quay.io/crw_pr/che-dashboard:${mutableCheImageTag}
+                    """
+                }
             }
         }
 
-        stage("Build and push che-server image") {
+        stage("Build and push 'che-server' image") {
             steps {
-                sh """
-                    ${WORKSPACE}/dockerfiles/che/build.sh --build-arg:CHE_DASHBOARD_NEXT_VERSION=${mutableCheImageTag} --build-arg:CHE_DASHBOARD_NEXT_ORGANIZATION=docker.io/maxura --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                    docker tag eclipseche/che-server:${mutableCheImageTag} docker.io/${cheImageRepo}:${mutableCheImageTag}
-                    docker push docker.io/${cheImageRepo}:${mutableCheImageTag}
-                """
+                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                    sh """
+                        echo "Build 'che-server' image"
+                        echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
+
+                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
+                    """
+                }
+
+                withCredentials([string(credentialsId: 'quay.io-crw_pr+crw_pr_bot_user_token', variable: 'QUAY_TOKEN')]) {
+                    sh """
+                        echo "Push 'che-server' image"
+                        echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
+
+                        docker tag eclipseche/che-server:${mutableCheImageTag} ${cheImageRepo}:${mutableCheImageTag}
+                        echo y | docker push ${cheImageRepo}:${mutableCheImageTag}
+                    """
+                }
             }
         }
 
         stage("Start Che") {
             steps {
                 script {
-                    echo "Pre-pull Eclipse Che and test images from dockerhub"
+                    echo "Pre-pull test images"
                     withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                         sh """
                             eval \$(minikube docker-env)
-                            docker login -u maxura -p ${maxura_docker_password}
 
-                            docker pull mariolet/petclinic:d2831f9b
-                            docker pull centos/postgresql-96-centos7:9.6
-                            docker pull centos/mysql-57-centos7
                             docker pull ${cheImageRepo}:${mutableCheImageTag}
-                            docker pull docker.io/traefik:v2.2.8
+
+                            docker login -u maxura -p ${maxura_docker_password}
+                            docker pull docker.io/traefik:v2.2.8 || true
                         """
                     }
 
@@ -371,19 +377,6 @@ EOL"""
 
     post {
         cleanup {
-            withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                sh """
-                    TOKEN=\$(curl --user 'maxura:${maxura_docker_password}' "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                    curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-                """
-            }
-
-            echo "Print anonymous dockerhub limits"
-            sh """
-                TOKEN=\$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-                curl --head -H "Authorization: Bearer \$TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-            """
-
             sh """                   
                 mkdir -p $LOGS_AND_CONFIGS/kubectl
                 kubectl --namespace=eclipse-che get events > $LOGS_AND_CONFIGS/kubectl/events.txt || true
