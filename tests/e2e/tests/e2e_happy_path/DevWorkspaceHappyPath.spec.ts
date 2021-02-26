@@ -16,7 +16,7 @@ import { TestConstants } from '../..';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
-// This test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
+// this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
 
     let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
