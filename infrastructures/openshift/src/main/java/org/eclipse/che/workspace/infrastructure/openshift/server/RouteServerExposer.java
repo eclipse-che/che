@@ -100,17 +100,17 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnvironment> {
 
   private final Map<String, String> labels;
-  private final String host;
+  private final String domainSuffix;
 
   @Inject
   public RouteServerExposer(
       @Nullable @Named("che.infra.openshift.route.labels") String labelsProperty,
-      @Nullable @Named("che.infra.openshift.route.host") String host) {
+      @Nullable @Named("che.infra.openshift.route.host.domain_suffix") String domainSuffix) {
     this.labels =
         labelsProperty != null
             ? Splitter.on(",").withKeyValueSeparator("=").split(labelsProperty)
             : emptyMap();
-    this.host = host;
+    this.domainSuffix = domainSuffix;
   }
 
   @Override
@@ -128,7 +128,10 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
             .withTargetPort(servicePort.getName())
             .withServers(externalServers)
             .withLabels(labels)
-            .withHost(host != null ? NameGenerator.generate("route", "." + host, 10) : null)
+            .withHost(
+                domainSuffix != null
+                    ? NameGenerator.generate("route", "." + domainSuffix, 10)
+                    : null)
             .withTo(serviceName)
             .build();
     env.getRoutes().put(commonRoute.getMetadata().getName(), commonRoute);
