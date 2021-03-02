@@ -130,7 +130,7 @@ public class RouteServerExposer implements ExternalServerExposer<OpenShiftEnviro
             .withLabels(labels)
             .withHost(
                 domainSuffix != null
-                    ? NameGenerator.generate("route", "." + domainSuffix, 10)
+                    ? NameGenerator.generate("route", "." + domainSuffix, 6)
                     : null)
             .withTo(serviceName)
             .build();
