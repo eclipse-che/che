@@ -68,6 +68,10 @@ public final class Constants {
   public static final String CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL_PROPERTY =
       "che.workspace.devfile_registry_internal_url";
 
+  /** Name for property that specifies whether che is deployed with devworkspaces enabled  */
+  public static final String CHE_DEVWORKSPACES_ENABLED_PROPERTY =
+          "che.devworkspaces.enabled";
+
   public static final String CHE_FACTORY_DEFAULT_EDITOR_PROPERTY = "che.factory.default_editor";
   public static final String CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY = "che.factory.default_plugins";
 

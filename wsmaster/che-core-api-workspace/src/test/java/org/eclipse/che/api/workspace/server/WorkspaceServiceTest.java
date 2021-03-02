@@ -138,6 +138,7 @@ public class WorkspaceServiceTest {
   private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL =
       "http://plugin-registry.che.svc.cluster.local";
   private static final boolean CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES = false;
+  private static final boolean CHE_DEVWORKSPACES_ENABLED = false;
   private static final Long LOG_LIMIT_BYTES = 64L;
 
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
@@ -185,7 +186,9 @@ public class WorkspaceServiceTest {
             availableStorageTypes,
             preferredStorageType,
             defaultEditor,
-            defaultPlugins);
+            defaultPlugins,
+                CHE_DEVWORKSPACES_ENABLED
+        );
   }
 
   @Test
