@@ -13,6 +13,8 @@ package org.eclipse.che.workspace.infrastructure.openshift.server;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
@@ -33,7 +35,7 @@ import org.testng.annotations.Test;
 public class OpenShiftExternalServerExposerTest {
 
   private static final String LABELS = "foo=bar";
-  private RouteServerExposer osExternalServerExposer = new RouteServerExposer(LABELS);
+  private RouteServerExposer osExternalServerExposer = new RouteServerExposer(LABELS, null);
 
   @Test
   public void shouldAddRouteToEnvForExposingSpecifiedServer() {
@@ -63,5 +65,34 @@ public class OpenShiftExternalServerExposerTest {
     assertEquals(annotations.machineName(), "machine123");
     assertEquals(annotations.servers(), servers);
     assertEquals(route.getMetadata().getLabels().get("foo"), "bar");
+    assertNull(route.getSpec().getHost());
+  }
+
+  @Test
+  public void shouldAddRouteToEnvForExposingSpecifiedServerWithSpecificHost() {
+    // given
+    RouteServerExposer osExternalServerExposer = new RouteServerExposer(LABELS, "open.che.org");
+    OpenShiftEnvironment osEnv = OpenShiftEnvironment.builder().build();
+    Map<String, ServerConfig> servers = new HashMap<>();
+    servers.put("server", new ServerConfigImpl());
+
+    // when
+    osExternalServerExposer.expose(
+        osEnv,
+        "machine123",
+        "service123",
+        null,
+        new ServicePort("servicePort", null, null, "TCP", null),
+        servers);
+
+    // then
+    assertEquals(1, osEnv.getRoutes().size());
+    Route route = osEnv.getRoutes().values().iterator().next();
+    assertNotNull(route);
+
+    assertEquals(route.getSpec().getTo().getName(), "service123");
+    assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), "servicePort");
+    assertTrue(route.getSpec().getHost().endsWith(".open.che.org"));
+    assertTrue(route.getSpec().getHost().startsWith("route"));
   }
 }
