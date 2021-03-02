@@ -23,14 +23,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_EDITOR_PROPERTY;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_STORAGE_PREFERRED_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START;
-import static org.eclipse.che.api.workspace.shared.Constants.DEBUG_WORKSPACE_START_LOG_LIMIT_BYTES;
-import static org.eclipse.che.api.workspace.shared.Constants.SUPPORTED_RECIPE_TYPES;
+import static org.eclipse.che.api.workspace.shared.Constants.*;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -138,7 +131,6 @@ public class WorkspaceServiceTest {
   private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_INTERNAL_URL =
       "http://plugin-registry.che.svc.cluster.local";
   private static final boolean CHE_WORKSPACES_DEFAULT_PERSIST_VOLUMES = false;
-  private static final boolean CHE_DEVWORKSPACES_ENABLED = false;
   private static final Long LOG_LIMIT_BYTES = 64L;
 
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
@@ -150,6 +142,8 @@ public class WorkspaceServiceTest {
   private final String preferredStorageType = "persistent";
   private final String defaultEditor = "theia";
   private final String defaultPlugins = "machine-exec";
+
+  private static final boolean CHE_DEVWORKSPACES_ENABLED = false;
 
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
@@ -187,8 +181,7 @@ public class WorkspaceServiceTest {
             preferredStorageType,
             defaultEditor,
             defaultPlugins,
-                CHE_DEVWORKSPACES_ENABLED
-        );
+            CHE_DEVWORKSPACES_ENABLED);
   }
 
   @Test
@@ -910,6 +903,7 @@ public class WorkspaceServiceTest {
             .put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType)
             .put(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY, defaultEditor)
             .put(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY, defaultPlugins)
+            .put(CHE_DEVWORKSPACES_ENABLED_PROPERTY, Boolean.toString(CHE_DEVWORKSPACES_ENABLED))
             .build());
   }
 
