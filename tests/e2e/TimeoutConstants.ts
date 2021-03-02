@@ -78,9 +78,9 @@ export const TimeoutConstants = {
     // -------------------------------------------- PROJECT TREE --------------------------------------------
 
     /**
-     * Wait for IDE showing project tree tab, "20 000" by default.
+     * Wait for IDE showing project tree tab, "60 000" by default.
      */
-    TS_PROJECT_TREE_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
+    TS_PROJECT_TREE_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 60_000,
 
     /**
      * Click on item timeout (project tree), "10 000" by default.
