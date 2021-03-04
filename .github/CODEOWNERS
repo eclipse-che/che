@@ -6,7 +6,7 @@ dockerfiles/** @benoitf @nickboldt
 
 # assembly
 assembly/** @skabashnyuk @nickboldt
-assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @nickboldt @themr0c @boczkowska
+assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @nickboldt @themr0c @boczkowska @MichalMaler
 
 # core
 core/** @skabashnyuk @nickboldt
