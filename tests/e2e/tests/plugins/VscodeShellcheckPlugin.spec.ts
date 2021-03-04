@@ -57,7 +57,7 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
 
     suite('Check the "Shellcheck" plugin', async () => {
         test('Check errors highlighting', async () => {
-            // The simple " character as a result. Workaround to avoiding autocomplete.
+            // the simple " character as a result. Workaround to avoiding autocomplete.
             const errorText: string = Key.chord('"""', Key.BACK_SPACE, Key.BACK_SPACE);
 
             await projectTree.expandPathAndOpenFile(pathToFile, fileName);
@@ -76,7 +76,7 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
 
         test('Uncomment the 4-th row', async () => {
             await editor.type(fileName, Key.DELETE, 3);
-        })
+        });
 
         test('Check warning highlighting disappearance', async () => {
             await editor.waitWarningInLineDisappearance(5);
