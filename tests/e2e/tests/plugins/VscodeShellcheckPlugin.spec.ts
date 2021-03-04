@@ -74,7 +74,7 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
             await editor.waitWarningInLine(5);
         });
 
-        test('Uncoment the 4-th row', async () => {
+        test('Uncomment the 4-th row', async () => {
             await editor.type(fileName, Key.DELETE, 3);
         })
 
