@@ -9,7 +9,6 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { e2eContainer } from '../../inversify.config';
@@ -40,8 +39,8 @@ const fileName: string = 'test.sh';
 suite(`The 'VscodeShellcheckPlugin' test`, async () => {
     suite('Create workspace', async () => {
         test('Set shellcheck path', async () => {
-            const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath'
-            const shellcheckExecutablePath: string = '/bin/shellcheck'
+            const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath';
+            const shellcheckExecutablePath: string = '/bin/shellcheck';
 
             await preferencesHandler.setPreference(shellcheckExecutablePathPropertyName, shellcheckExecutablePath);
         });
