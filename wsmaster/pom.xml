@@ -41,6 +41,7 @@
         <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
         <module>che-core-api-factory-github</module>
+        <module>che-core-api-factory-gitlab</module>
         <module>che-core-api-factory-bitbucket-server</module>
         <module>che-core-api-ssh</module>
         <module>che-core-api-ssh-shared</module>
