@@ -21,7 +21,6 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Key } from 'selenium-webdriver';
 
-
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
@@ -30,7 +29,6 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 
 const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/f8ea2b4ae1eada70d7072df43de22dd5/raw/d7d448a38ffd9668506f232a1eb41bdf48278d15/shellcheckPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
 const pathToFile: string = `${sampleName}`;
@@ -63,7 +61,6 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
 
             await editor.type(fileName, '"""', 4);
             await editor.type(fileName, Key.chord(Key.DELETE, Key.DELETE), 4);
-
             await editor.waitErrorInLine(4);
         });
 
@@ -71,7 +68,6 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
             await editor.type(fileName, Key.DELETE, 4);
             await editor.waitErrorInLineDisappearance(4);
         });
-
 
         test('Check warning highlighting', async () => {
             await editor.waitWarningInLine(5);
