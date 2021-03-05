@@ -35,8 +35,9 @@ public class GitlabUrlParser {
   private final DevfileFilenamesProvider devfileFilenamesProvider;
   private static final List<String> gitlabUrlPatternTemplates =
       List.of(
-          "^(?<host>%s)/(?<user>[^/]++)/(?<project>[^.]++).git",
+          "^(?<host>%s)/(?<user>[^/]++)/(?<project>[^./]++).git",
           "^(?<host>%s)/(?<user>[^/]++)/(?<project>[^/]++)/(?<repository>[^.]++).git",
+          "^(?<host>%s)/(?<user>[^/]++)/(?<project>[^/]++)(/)?(?<repository>[^/]++)?(/)?",
           "^(?<host>%s)/(?<user>[^/]++)/(?<project>[^/]++)(/)?(?<repository>[^/]++)?/-/tree/(?<branch>[^/]++)(/)?(?<subfolder>[^/]++)?");
   private final List<Pattern> gitlabUrlPatterns = new ArrayList<>();
 
