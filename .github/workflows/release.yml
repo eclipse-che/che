@@ -70,22 +70,22 @@ jobs:
       #       echo "cannot create release, when tag already exists"
       #       exit 1
       #     fi
-      - name: Login to docker.io
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          registry: docker.io
-      - name: Login to quay.io
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-          registry: quay.io
-      - name: Set up Python 3.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.6
+      # - name: Login to docker.io
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      #     registry: docker.io
+      # - name: Login to quay.io
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.QUAY_USERNAME }}
+      #     password: ${{ secrets.QUAY_PASSWORD }}
+      #     registry: quay.io
+      # - name: Set up Python 3.6
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.6
       # - uses: actions/setup-java@v1
       #   with:
       #     java-version: '11.0.7'
@@ -137,6 +137,9 @@ jobs:
       #     # determine which OS we're using: rhel or ubuntu
       #     cat /etc/os-release || true
       #     ./che/make-release.sh
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
       - name: Create changelog
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
@@ -166,7 +169,7 @@ jobs:
           enhancementLabel: "Enhancements, Epics, and UX"
           enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
           bugsLabel: "Bugs fixed"
-          bugsLabels: "kind/bug"
+          bugLabels: "kind/bug"
       - name: Create GH Release
         id: create_release
         uses: actions/create-release@v1
