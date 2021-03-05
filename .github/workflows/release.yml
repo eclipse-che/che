@@ -145,8 +145,8 @@ jobs:
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
         uses: heinrichreimer/github-changelog-generator-action@v2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo: eclipse/che 
           # output: CHANGELOG-next.md
@@ -172,12 +172,12 @@ jobs:
           enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
           bugsLabel: "Bugs fixed"
           bugLabels: "kind/bug"
-          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GH Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.inputs.version}}
           release_name: Eclipse Che ${{ github.event.inputs.version}}
