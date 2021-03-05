@@ -144,6 +144,8 @@ jobs:
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
         uses: heinrichreimer/github-changelog-generator-action@v2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
         with:
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           repo: eclipse/che 
