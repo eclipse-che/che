@@ -143,8 +143,7 @@ jobs:
         uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          # repo: eclipse/che 
-          # project: "Eclipse Che"
+          repo: eclipse/che 
           # output: CHANGELOG-next.md
           dateFormat: "%Y-%m-%d"
           onlyLastTag: "true"
