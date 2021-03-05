@@ -137,3 +137,15 @@ jobs:
           # determine which OS we're using: rhel or ubuntu
           cat /etc/os-release || true
           ./che/make-release.sh
+      - name: Create GH Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version}}
+          release_name: Eclipse Che ${{ github.event.inputs.version}}
+          body: |
+            Eclipse Che ${{ github.event.inputs.version}}
+          draft: false
+          prerelease: false
