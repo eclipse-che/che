@@ -146,6 +146,7 @@ jobs:
         uses: heinrichreimer/github-changelog-generator-action@v2.2
         env:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
           repo: eclipse/che 
           # output: CHANGELOG-next.md
