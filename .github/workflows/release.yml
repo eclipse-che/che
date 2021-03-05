@@ -57,19 +57,19 @@ jobs:
         with: 
           path: che
           fetch-depth: 0
-      - uses: actions/checkout@v2
-        if: ${{ github.event.inputs.releaseParent == 'true' }}
-        with:
-          repository: eclipse/che-parent
-          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          path: che-parent
-          fetch-depth: 0
-      - name: Check existing tag
-        run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
-            echo "cannot create release, when tag already exists"
-            exit 1
-          fi
+      # - uses: actions/checkout@v2
+      #   if: ${{ github.event.inputs.releaseParent == 'true' }}
+      #   with:
+      #     repository: eclipse/che-parent
+      #     token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      #     path: che-parent
+      #     fetch-depth: 0
+      # - name: Check existing tag
+      #   run: |
+      #     if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
+      #       echo "cannot create release, when tag already exists"
+      #       exit 1
+      #     fi
       - name: Login to docker.io
         uses: docker/login-action@v1
         with:
@@ -86,66 +86,96 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
-      - uses: actions/setup-java@v1
+      # - uses: actions/setup-java@v1
+      #   with:
+      #     java-version: '11.0.7'
+      #     java-package: jdk
+      #     architecture: x64 
+      # - name: Set up environment
+      #   run: |
+      #     sudo apt-get update -y || true
+      #     # install more dependencies
+      #     sudo apt-get -y -q install wget curl bash git 
+      #     java -version
+
+      #     # want git >=2.24, hub >=2
+      #     hub --version # hub reports git version too
+
+      #     # want >=5
+      #     bash --version
+
+      #     java -version
+      #     which java
+      #     javac -version
+      #     which javac
+      # - name: Release
+      #   run: |
+      #     export CHE_VERSION="${{ github.event.inputs.version }}"
+      #     echo "CHE_VERSION=${CHE_VERSION}"
+
+      #     export CHE_MAVEN_SETTINGS=${{ secrets.CHE_MAVEN_SETTINGS}}
+      #     export CHE_OSS_SONATYPE_GPG_KEY=${{ secrets.CHE_OSS_SONATYPE_GPG_KEY}}
+      #     export CHE_OSS_SONATYPE_PASSPHRASE=${{ secrets.CHE_OSS_SONATYPE_PASSPHRASE}}
+      #     export CHE_GITHUB_SSH_KEY=${{ secrets.CHE_GITHUB_SSH_KEY}}
+      #     export CHE_NPM_AUTH_TOKEN=${{ secrets.CHE_NPM_AUTH_TOKEN}}
+
+      #     export RELEASE_CHE_PARENT="${{ github.event.inputs.releaseParent }}"
+      #     export VERSION_CHE_PARENT="${{ github.event.inputs.versionParent }}"
+      #     export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
+      #     export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
+      #     export REBUILD_FROM_EXISTING_TAGS="${{ github.event.inputs.rebuildFromExistingTags }}"
+      #     export BUILD_AND_PUSH_IMAGES="${{ github.event.inputs.buildAndPushImages }}"
+      #     export BUMP_NEXT_VERSION="${{ github.event.inputs.bumpNextVersion }}"
+
+      #     export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
+      #     export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}
+      #     git config --global user.name "Mykhailo Kuznietsov"
+      #     git config --global user.email "mkuznets@redhat.com"
+      #     export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      #     export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      #     set -e
+      #     # determine which OS we're using: rhel or ubuntu
+      #     cat /etc/os-release || true
+      #     ./che/make-release.sh
+      - name: Create changelog
+        id: generate-release-changelog
+        # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
+        uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
-          java-version: '11.0.7'
-          java-package: jdk
-          architecture: x64 
-      - name: Set up environment
-        run: |
-          sudo apt-get update -y || true
-          # install more dependencies
-          sudo apt-get -y -q install wget curl bash git 
-          java -version
-
-          # want git >=2.24, hub >=2
-          hub --version # hub reports git version too
-
-          # want >=5
-          bash --version
-
-          java -version
-          which java
-          javac -version
-          which javac
-      - name: Release
-        run: |
-          export CHE_VERSION="${{ github.event.inputs.version }}"
-          echo "CHE_VERSION=${CHE_VERSION}"
-
-          export CHE_MAVEN_SETTINGS=${{ secrets.CHE_MAVEN_SETTINGS}}
-          export CHE_OSS_SONATYPE_GPG_KEY=${{ secrets.CHE_OSS_SONATYPE_GPG_KEY}}
-          export CHE_OSS_SONATYPE_PASSPHRASE=${{ secrets.CHE_OSS_SONATYPE_PASSPHRASE}}
-          export CHE_GITHUB_SSH_KEY=${{ secrets.CHE_GITHUB_SSH_KEY}}
-          export CHE_NPM_AUTH_TOKEN=${{ secrets.CHE_NPM_AUTH_TOKEN}}
-
-          export RELEASE_CHE_PARENT="${{ github.event.inputs.releaseParent }}"
-          export VERSION_CHE_PARENT="${{ github.event.inputs.versionParent }}"
-          export DEPLOY_TO_NEXUS="${{ github.event.inputs.deployOnNexus }}"
-          export AUTORELEASE_ON_NEXUS="${{ github.event.inputs.autoReleaseOnNexus }}"
-          export REBUILD_FROM_EXISTING_TAGS="${{ github.event.inputs.rebuildFromExistingTags }}"
-          export BUILD_AND_PUSH_IMAGES="${{ github.event.inputs.buildAndPushImages }}"
-          export BUMP_NEXT_VERSION="${{ github.event.inputs.bumpNextVersion }}"
-
-          export QUAY_ECLIPSE_CHE_USERNAME=${{ secrets.QUAY_USERNAME }}
-          export QUAY_ECLIPSE_CHE_PASSWORD=${{ secrets.QUAY_PASSWORD }}
-          git config --global user.name "Mykhailo Kuznietsov"
-          git config --global user.email "mkuznets@redhat.com"
-          export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          set -e
-          # determine which OS we're using: rhel or ubuntu
-          cat /etc/os-release || true
-          ./che/make-release.sh
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          # repo: eclipse/che 
+          # project: "Eclipse Che"
+          # output: CHANGELOG-next.md
+          dateFormat: "%Y-%m-%d"
+          onlyLastTag: "true"
+          stripHeaders: "true"
+          stripGeneratorNotice: "true"
+          verbose: true
+          releaseBranch: master # TODO: change to main
+          dueTag: ${{ github.event.inputs.version }} # all issues up to the current release tag
+          filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
+          pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
+          issuesWoLabels: false # no labels? no logged change
+          issues: true
+          issueLineLabels: "ALL"
+          compareLink: true
+          unreleased: true # show unreleased, but closed items
+          addSections: '{"sprint/current-sprint":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current-sprint"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
+          excludeTags: '' # comma,delimited,list,of,tags
+          # includeLabels: ''
+          excludeLabels: "kind/release"
+          enhancementLabel: "Enhancements, Epics, and UX"
+          enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
+          bugsLabel: "Bugs fixed"
+          bugsLabels: "kind/bug"
       - name: Create GH Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.inputs.version}}
           release_name: Eclipse Che ${{ github.event.inputs.version}}
-          body: |
-            Eclipse Che ${{ github.event.inputs.version}}
+          body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
           prerelease: false
