@@ -63,7 +63,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         });
     });
 
-    suite('Check the "vscode-xml" plugin', async () => {
+    suite('Check the "vscode-yaml" plugin', async () => {
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
             await editor.waitSuggestion(yamlFileName, 'from', 60000, 18, 5);
@@ -81,7 +81,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await editor.waitErrorInLineDisappearance(19);
         });
 
-        test('To unformat the "xml" file', async () => {
+        test('To unformat the "yaml" file', async () => {
             const expectedTextBeforeFormating: string = 'uri:     "timer:tick"';
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
 
@@ -91,7 +91,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await editor.waitText(yamlFileName, expectedTextBeforeFormating, 60000, 10000);
         });
 
-        test('To format the "xml" document', async () => {
+        test('To format the "yaml" document', async () => {
             const expectedTextAfterFormating: string = 'uri: "timer:tick"';
 
             await editor.type(yamlFileName, Key.chord(Key.CONTROL, Key.SHIFT, 'I'), 19);
