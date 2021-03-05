@@ -36,7 +36,7 @@ const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfil
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
-const yamlSchema = { "https://raw.githubusercontent.com/apache/camel-k-runtime/camel-k-runtime-parent-1.5.0/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json": "*.yaml" };
+const yamlSchema = { 'https://raw.githubusercontent.com/apache/camel-k-runtime/camel-k-runtime-parent-1.5.0/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json': '*.yaml' };
 
 suite('The "VscodeYamlPlugin" userstory', async () => {
     suite('Create workspace', async () => {
@@ -67,7 +67,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
             await editor.waitSuggestion(yamlFileName, 'from', 60000, 18, 5);
-        })
+        });
 
         test('Check error appearance', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
@@ -82,7 +82,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         });
 
         test('To unformat the "xml" file', async () => {
-            const expectedTextBeforeFormating: string = 'uri:     "timer:tick"'
+            const expectedTextBeforeFormating: string = 'uri:     "timer:tick"';
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
 
             await editor.selectTab(yamlFileName);
@@ -92,7 +92,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         });
 
         test('To format the "xml" document', async () => {
-            const expectedTextAfterFormating: string = 'uri: "timer:tick"'
+            const expectedTextAfterFormating: string = 'uri: "timer:tick"';
 
             await editor.type(yamlFileName, Key.chord(Key.CONTROL, Key.SHIFT, 'I'), 19);
             await editor.waitText(yamlFileName, expectedTextAfterFormating, 60000, 10000);
