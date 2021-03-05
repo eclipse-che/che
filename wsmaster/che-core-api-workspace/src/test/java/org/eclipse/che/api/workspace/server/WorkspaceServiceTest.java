@@ -23,6 +23,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_DEVWORKSPACES_ENABLED_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_EDITOR_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -150,6 +151,8 @@ public class WorkspaceServiceTest {
   private final String defaultEditor = "theia";
   private final String defaultPlugins = "machine-exec";
 
+  private static final boolean CHE_DEVWORKSPACES_ENABLED = false;
+
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
 
@@ -185,7 +188,8 @@ public class WorkspaceServiceTest {
             availableStorageTypes,
             preferredStorageType,
             defaultEditor,
-            defaultPlugins);
+            defaultPlugins,
+            CHE_DEVWORKSPACES_ENABLED);
   }
 
   @Test
@@ -907,6 +911,7 @@ public class WorkspaceServiceTest {
             .put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType)
             .put(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY, defaultEditor)
             .put(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY, defaultPlugins)
+            .put(CHE_DEVWORKSPACES_ENABLED_PROPERTY, Boolean.toString(CHE_DEVWORKSPACES_ENABLED))
             .build());
   }
 

@@ -63,7 +63,7 @@ export class PreferencesHandler {
         await this.setPreference('vs-kubernetes', vsKubernetesConfig);
     }
 
-    private async setPreference(attribute: string, value: any) {
+    public async setPreference(attribute: string, value: any) {
         Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value}`);
         let response;
         try {

@@ -17,26 +17,30 @@ import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
-import { KubernetesPlugin } from '../../pageobjects/ide/plugins/KubernetesPlugin';
+import { Editor } from '../../pageobjects/ide/Editor';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-
+import { Key } from 'selenium-webdriver';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
-const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
+const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/94d1a70ff94d4d4bc5f2e4678dc8d538/raw/353a2513ea9e2f61b6cb1e0a88be21efd35b353b/kubernetes-plugin-test.yaml';
+const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/f8ea2b4ae1eada70d7072df43de22dd5/raw/d7d448a38ffd9668506f232a1eb41bdf48278d15/shellcheckPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
-const vsKubernetesConfig = { 'vs-kubernetes.kubeconfig': '/projects/nodejs-web-app/config' };
+const pathToFile: string = `${sampleName}`;
+const fileName: string = 'test.sh';
 
-suite(`The 'VscodeKubernetesPlugin' test`, async () => {
+suite(`The 'VscodeShellcheckPlugin' test`, async () => {
     suite('Create workspace', async () => {
-        test('Set kubeconfig path', async () => {
-            await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
+        test('Set shellcheck path', async () => {
+            const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath';
+            const shellcheckExecutablePath: string = '/bin/shellcheck';
+
+            await preferencesHandler.setPreference(shellcheckExecutablePathPropertyName, shellcheckExecutablePath);
         });
 
         test('Create workspace using factory', async () => {
@@ -51,13 +55,31 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
         });
     });
 
-    suite('Check the "Kubernetes" plugin', async () => {
-        test('Check plugin is added to workspace', async () => {
-            await kubernetesPlugin.openView(240_000);
+    suite('Check the "Shellcheck" plugin', async () => {
+        test('Check errors highlighting', async () => {
+            // the simple " character as a result. Workaround to avoiding autocomplete.
+            const errorText: string = Key.chord('"""', Key.BACK_SPACE, Key.BACK_SPACE);
+
+            await projectTree.expandPathAndOpenFile(pathToFile, fileName);
+            await editor.type(fileName, errorText, 4);
+            await editor.waitErrorInLine(4);
         });
 
-        test('Check plugin basic functionality', async () => {
-            await kubernetesPlugin.waitListItemContains('/api-ocp46-crw-qe-com:6443/', 240_000);
+        test('Check errors highlighting disappearance', async () => {
+            await editor.type(fileName, Key.DELETE, 4);
+            await editor.waitErrorInLineDisappearance(4);
+        });
+
+        test('Check warning highlighting', async () => {
+            await editor.waitWarningInLine(5);
+        });
+
+        test('Uncomment the 4-th row', async () => {
+            await editor.type(fileName, Key.DELETE, 3);
+        });
+
+        test('Check warning highlighting disappearance', async () => {
+            await editor.waitWarningInLineDisappearance(5);
         });
     });
 

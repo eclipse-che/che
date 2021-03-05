@@ -332,19 +332,33 @@ export class Editor {
         await this.driverHelper.waitDisappearanceWithTimeout(errorInLineLocator, timeout);
     }
 
+    async waitWarningInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+        Logger.debug(`Editor.waitWarningInLine line: "${lineNumber}"`);
+
+        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber);
+        await this.driverHelper.waitVisibility(warningInLineLocator, timeout);
+    }
+
+    async waitWarningInLineDisappearance(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+        Logger.debug(`Editor.waitWarningInLineDisappearance line: "${lineNumber}"`);
+
+        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber);
+        await this.driverHelper.waitDisappearanceWithTimeout(warningInLineLocator, timeout);
+    }
+
     async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitStoppedDebugBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
         await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber, true), timeout);
     }
 
-    async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number =  TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
+    async waitBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpoint title: "${tabTitle}" line: "${lineNumber}"`);
 
         await this.driverHelper.waitUntilTrue(() => this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
 
-    async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number =  TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
+    async waitBreakpointAbsence(tabTitle: string, lineNumber: number, timeout: number = TimeoutConstants.TS_BREAKPOINT_DEFAULT_TIMEOUT) {
         Logger.debug(`Editor.waitBreakpointAbsence title: "${tabTitle}" line: "${lineNumber}"`);
         await this.driverHelper.waitUntilTrue(() => !this.isBreakpointPresent(tabTitle, lineNumber), timeout);
     }
@@ -479,6 +493,12 @@ export class Editor {
         const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-error')]`);
+    }
+
+    private async getWarningInLineLocator(lineNumber: number): Promise<By> {
+        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
+
+        return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-warning')]`);
     }
 
     private async waitSuggestionWithResettingCursor(editorTabTitle: string,
