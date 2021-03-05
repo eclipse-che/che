@@ -147,7 +147,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           repo: eclipse/che 
           # output: CHANGELOG-next.md
           dateFormat: "%Y-%m-%d"
@@ -172,11 +171,12 @@ jobs:
           enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
           bugsLabel: "Bugs fixed"
           bugLabels: "kind/bug"
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
       - name: Create GH Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
           tag_name: ${{ github.event.inputs.version}}
           release_name: Eclipse Che ${{ github.event.inputs.version}}
