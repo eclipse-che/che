@@ -29,10 +29,10 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 let workspaceName: string = '';
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/806b3d27abbaa989f14ad58e89420773/raw/1299bdb17d0cece20adcec8fcb0954459cd73cfa/CamelkWithYamlAndXmlPlugins.yaml';
+const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/3479628d5bcd3a4ec7135e228a12457e/raw/8883e4d038a0ebc2718ed1b1919ed802cabdd142/xmlPluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-const projectName: string = 'camel-k-examples';
-const pathToFile: string = `${projectName}/examples/languages`;
+const projectName: string = 'nodejs-web-app';
+const pathToFile: string = `${projectName}`;
 const xmlFileName: string = 'hello.xml';
 
 suite('The "VscodeXmlPlugin" userstory', async () => {
@@ -52,7 +52,7 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
     suite('Check workspace readiness to work', async () => {
         test('Wait until project is imported', async () => {
             await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(projectName, 'examples');
+            await projectTree.waitProjectImported(projectName, 'app');
         });
     });
 
@@ -105,7 +105,7 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
 
     suite('Delete workspace', async () => {
         test('Delete workspace', async () => {
-            await dashboard.deleteWorkspaceByUI(workspaceName);
+            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
         });
     });
 });

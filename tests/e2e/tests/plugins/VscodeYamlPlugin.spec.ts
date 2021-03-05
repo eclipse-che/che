@@ -102,7 +102,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
     suite('Delete workspace', async () => {
         test('Delete workspace', async () => {
-            await dashboard.deleteWorkspaceByUI(workspaceName);
+            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
         });
     });
 });
