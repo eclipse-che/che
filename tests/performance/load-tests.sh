@@ -5,7 +5,7 @@ set -e
 TIMESTAMP=$(date +%s)
 TEST_FOLDER=$(pwd)
 LOG_LEVEL="INFO"
-SETTING="oauth"
+SERVER_SETTING="oauth"
 
 function printHelp {
   YELLOW="\\033[93;1m"
@@ -55,7 +55,7 @@ while getopts "c:f:hi:l:n:p:r:t:u:s:v:" opt; do
       ;;
     r) export URL=$OPTARG
       ;;
-    s) export SETTING=$OPTARG
+    s) export SERVER_SETTING=$OPTARG
       ;;
     t) export COMPLETITIONS_COUNT=$OPTARG
       ;;
@@ -157,9 +157,9 @@ oc exec ftp-server -- sed -i 's/ftp_data_port/#ftp_data_port/' /etc/vsftpd/vsftp
 oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 
 # set common variables to template.yaml
-if [ $SETTING == "oauth" ]; then
+if [ $SERVER_SETTING == "oauth" ]; then
   pod_spec="pod-oauth.yaml"
-elif [ $SETTING == "no-oauth" ]; then
+elif [ $SERVER_SETTING == "no-oauth" ]; then
   pod_spec="pod.yaml"
 fi
 
