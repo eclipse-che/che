@@ -53,10 +53,10 @@ jobs:
   build:
     runs-on: ubuntu-16.04
     steps:
-      - uses: actions/checkout@v2
-        with: 
-          path: che
-          fetch-depth: 0
+      # - uses: actions/checkout@v2
+      #   with: 
+      #     path: che
+      #     fetch-depth: 0
       # - uses: actions/checkout@v2
       #   if: ${{ github.event.inputs.releaseParent == 'true' }}
       #   with:
@@ -154,6 +154,7 @@ jobs:
           onlyLastTag: "true"
           stripHeaders: "true"
           stripGeneratorNotice: "true"
+          maxIssues: 200
           verbose: true
           releaseBranch: master # TODO: change to main
           dueTag: ${{ github.event.inputs.version }} # all issues up to the current release tag
