@@ -20,9 +20,10 @@ export class CheApiRequestHandler {
     /**
      * This method adds a request interceptor into axios request interceptors list and returns an ID of the interceptor
      */
-    public static enableRequestInteceptor(): number {
+    public static async enableRequestInteceptor() {
         console.log(`CheApiRequestHandler.enableRequestInterceptor`);
-        return axios.interceptors.request.use( request => {
+        return axios.interceptors.request.use(request => {
+            if (TestConstants.TS_SELENIUM_CENSOR_REQUESTS == "true") {
                 try {
                     let request_censored: AxiosRequestConfig = JSON.parse(JSON.stringify(request));
                     request_censored.headers['Authorization'] = 'CENSORED';
@@ -30,6 +31,9 @@ export class CheApiRequestHandler {
                 } catch (err) {
                     console.log(`RequestHandler request: Failed to deep clone AxiosRequestConfig:`, err);
                 }
+            } else {
+                console.log(`RequestHandler request:\n`, request);
+            }
             return request;
         });
     }
@@ -37,9 +41,10 @@ export class CheApiRequestHandler {
     /**
      * This method adds a response interceptor into axios response interceptors list and returns an ID of the interceptor
      */
-    public static enableResponseInterceptor(): number {
+    public static async enableResponseInterceptor() {
         console.log(`CheApiRequestHandler.enableResponseRedirects`);
         return axios.interceptors.response.use( response => {
+            if (TestConstants.TS_SELENIUM_CENSOR_REQUESTS == "true") {
                 try {
                     let response_censored: AxiosResponse = JSON.parse(JSON.stringify(response, (key, value) => {
                         switch (key) {
@@ -58,6 +63,9 @@ export class CheApiRequestHandler {
                 } catch (err) {
                     console.log(`RequestHandler response: Failed to deep clone AxiosResponse:`, err);
                 }
+            } else {
+                console.log(`RequestHandler response:\n`, response);
+            }
             return response;
         });
     }

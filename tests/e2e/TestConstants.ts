@@ -223,6 +223,11 @@ export const TestConstants = {
     /**
      * Print all timeout variables when tests launch, defaulte to false
      */
-    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false
+    TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false,
+
+    /**
+     * Should, if enabled, the request/response interceptor censor authentication headers? default to true
+     */
+    TS_SELENIUM_CENSOR_REQUESTS: process.env.TS_SELENIUM_CENSOR_REQUESTS || 'true'
 
 };
