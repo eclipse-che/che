@@ -23,13 +23,23 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           fetch-depth: 0
+      - name: Set up GH checkout and tokens
+        run: |
+          git config --global user.name "Mykhailo Kuznietsov"
+          git config --global user.email "mkuznets@redhat.com"
+          git config --global push.default matching
+          export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
       - name: Create changelog
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
         uses: heinrichreimer/github-changelog-generator-action@v2.2
         env:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          # TODO: Do we need to set these env vars too?
+          # INPUT_TOKEN
+          # ACTIONS_RUNTIME_TOKEN
         with:
           repo: eclipse/che 
           # output: CHANGELOG-next.md
