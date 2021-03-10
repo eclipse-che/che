@@ -16,7 +16,6 @@ import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
@@ -61,12 +60,12 @@ suite('The "VscodeValePlugin" userstory', async () => {
 
     suite('Check the "vale" plugin', async () => {
         test('Check warning in the editor appearance', async () => {
-            await projectTree.expandPathAndOpenFile(pathToFile, docFileName)
+            await projectTree.expandPathAndOpenFile(pathToFile, docFileName);
             await editor.waitWarningInLine(16);
         });
 
         test('Open the "Problems" terminal tab', async () => {
-            await editor.type(docFileName, Key.chord(Key.CONTROL, Key.SHIFT, 'm'), 3)
+            await editor.type(docFileName, Key.chord(Key.CONTROL, Key.SHIFT, 'm'), 3);
             await terminal.waitTab('Problems', 60_000);
         });
 

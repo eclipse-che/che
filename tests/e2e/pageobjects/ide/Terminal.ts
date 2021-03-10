@@ -13,7 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
-//div[contains(@class, 'terminal-container')]//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')]
+// div[contains(@class, 'terminal-container')]//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')]
 @injectable()
 export class Terminal {
     private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
@@ -103,7 +103,7 @@ export class Terminal {
 
         const problemsTabBodyLocator: By = By.xpath(`//div[@id='problems']`);
 
-        return await this.driverHelper.waitAndGetText(problemsTabBodyLocator, timeout)
+        return await this.driverHelper.waitAndGetText(problemsTabBodyLocator, timeout);
     }
 
     async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
