@@ -156,8 +156,7 @@ public class WsMasterModule extends AbstractModule {
     factoryParametersResolverMultibinder
         .addBinding()
         .to(BitbucketServerAuthorizingFactoryParametersResolver.class);
-    factoryParametersResolverMultibinder.addBinding()
-        .to(GitlabFactoryParametersResolver.class);
+    factoryParametersResolverMultibinder.addBinding().to(GitlabFactoryParametersResolver.class);
 
     install(new org.eclipse.che.api.factory.server.scm.KubernetesScmModule());
     install(new org.eclipse.che.api.factory.server.bitbucket.BitbucketServerModule());
