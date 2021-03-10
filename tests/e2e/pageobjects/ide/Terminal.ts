@@ -13,7 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
-// div[contains(@class, 'terminal-container')]//div[contains(@class, 'terminal')]//div[contains(@class, 'xterm-rows')]
+
 @injectable()
 export class Terminal {
     private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
