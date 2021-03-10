@@ -1,0 +1,80 @@
+#
+# Copyright (c) 2021 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+name: Release changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version that is going to be released. Should be in format 7.y.z'
+        required: true
+        default: ''
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          fetch-depth: 0
+      - name: Set up GH checkout and tokens
+        run: |
+          git config --global user.name "Mykhailo Kuznietsov"
+          git config --global user.email "mkuznets@redhat.com"
+          git config --global push.default matching
+          export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      - name: Create changelog
+        id: generate-release-changelog
+        # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
+        uses: heinrichreimer/github-changelog-generator-action@v2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+          # TODO: Do we need to set these env vars too?
+          # INPUT_TOKEN
+          # ACTIONS_RUNTIME_TOKEN
+        with:
+          repo: eclipse/che 
+          # output: CHANGELOG-next.md
+          dateFormat: "%Y-%m-%d"
+          onlyLastTag: "true"
+          stripHeaders: "true"
+          stripGeneratorNotice: "true"
+          maxIssues: 200
+          verbose: true
+          releaseBranch: master # TODO: change to main
+          dueTag: ${{ github.event.inputs.version }} # all issues up to the current release tag
+          filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
+          pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
+          issuesWoLabels: false # no labels? no logged change
+          issues: true
+          issueLineLabels: "ALL"
+          compareLink: true
+          unreleased: true # show unreleased, but closed items
+          addSections: '{"sprint/current-sprint":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current-sprint"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
+          excludeTags: '' # comma,delimited,list,of,tags
+          # includeLabels: ''
+          excludeLabels: "kind/release"
+          enhancementLabel: "Enhancements, Epics, and UX"
+          enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
+          bugsLabel: "Bugs fixed"
+          bugLabels: "kind/bug"
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+      - name: Create GH Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
+        with:
+          tag_name: ${{ github.event.inputs.version}}
+          release_name: Eclipse Che ${{ github.event.inputs.version}}
+          body: ${{ steps.generate-release-changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
