@@ -37,9 +37,9 @@ public class GitlabFileContentProviderTest {
   @Test
   public void shouldPreserveAbsolutePaths() throws Exception {
     URLFetcher urlFetcher = Mockito.mock(URLFetcher.class);
-    GitlabUrl githubUrl =
+    GitlabUrl gitlabUrl =
         new GitlabUrl().withHostName("gitlab.net").withUsername("eclipse").withProject("che");
-    FileContentProvider fileContentProvider = new GitlabFileContentProvider(githubUrl, urlFetcher);
+    FileContentProvider fileContentProvider = new GitlabFileContentProvider(gitlabUrl, urlFetcher);
     String url = "https://gitlab.net/eclipse/che/-/raw/master/devfile.yaml";
     fileContentProvider.fetchContent(url);
     verify(urlFetcher).fetch(eq(url));

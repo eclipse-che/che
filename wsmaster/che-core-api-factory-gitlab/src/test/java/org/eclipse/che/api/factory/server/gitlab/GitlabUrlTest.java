@@ -37,14 +37,14 @@ public class GitlabUrlTest {
   @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
 
   /** Parser used to create the url. */
-  private GitlabUrlParser githubUrlParser;
+  private GitlabUrlParser gitlabUrlParser;
 
   /** Setup objects/ */
   @BeforeClass
   protected void init() {
     when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
         .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
-    githubUrlParser = new GitlabUrlParser("https://gitlab.net", devfileFilenamesProvider);
+    gitlabUrlParser = new GitlabUrlParser("https://gitlab.net", devfileFilenamesProvider);
   }
 
   /** Check when there is devfile in the repository */
@@ -54,7 +54,7 @@ public class GitlabUrlTest {
         .when(devfileFilenamesProvider.getConfiguredDevfileFilenames())
         .thenReturn(Arrays.asList("devfile.yaml", "foo.bar"));
 
-    GitlabUrl gitlabUrl = githubUrlParser.parse(repoUrl);
+    GitlabUrl gitlabUrl = gitlabUrlParser.parse(repoUrl);
     assertEquals(gitlabUrl.devfileFileLocations().size(), 2);
     Iterator<DevfileLocation> iterator = gitlabUrl.devfileFileLocations().iterator();
     assertEquals(iterator.next().location(), fileUrl + "devfile.yaml");
@@ -88,7 +88,7 @@ public class GitlabUrlTest {
   /** Check the original repository */
   @Test(dataProvider = "repoProvider")
   public void checkRepositoryLocation(String rawUrl, String repoUrl) {
-    GitlabUrl gitlabUrl = githubUrlParser.parse(rawUrl);
+    GitlabUrl gitlabUrl = gitlabUrlParser.parse(rawUrl);
     assertEquals(gitlabUrl.repositoryLocation(), repoUrl);
   }
 

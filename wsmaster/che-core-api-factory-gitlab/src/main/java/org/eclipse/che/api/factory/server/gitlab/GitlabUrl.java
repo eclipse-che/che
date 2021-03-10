@@ -120,7 +120,7 @@ public class GitlabUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Gets branch of this github url
+   * Gets branch of this gitlab url
    *
    * @return the branch part
    */
@@ -136,7 +136,7 @@ public class GitlabUrl implements RemoteFactoryUrl {
   }
 
   /**
-   * Gets subfolder of this github url
+   * Gets subfolder of this gitlab url
    *
    * @return the subfolder part
    */

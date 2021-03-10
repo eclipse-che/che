@@ -18,7 +18,7 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
-/** Github specific file content provider. */
+/** Gitlab specific file content provider. */
 class GitlabFileContentProvider implements FileContentProvider {
 
   private final GitlabUrl gitlabUrl;
