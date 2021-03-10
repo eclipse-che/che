@@ -49,6 +49,7 @@ export class Ide {
                 Logger.warn('StaleElementException occured during waiting for IDE. Sleeping for 2 secs and retrying.');
                 this.driverHelper.wait(2000);
                 await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+                return;
             } 
             
             if (err instanceof error.TimeoutError) {
@@ -81,10 +82,9 @@ export class Ide {
             if (err instanceof error.TimeoutError) {
                 Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out after ${timeout}.`);
                 throw err;
-            } else {
-                Logger.error(`Waiting for task notification failed.`)
-                throw err;
             }
+            Logger.error(`Waiting for task notification failed.`)
+            throw err;
         }
         Logger.info(`Ide.waitTaskExitCodeNotification checking for correct exit core:${exitCode}`);
         return await this.driverHelper.waitVisibilityBoolean(notificationLocator, 1, 1000);
@@ -171,6 +171,7 @@ export class Ide {
             } catch (err) {
                 if (err instanceof error.NoSuchWindowError) {
                     await this.driverHelper.waitVisibility(idePartLocator, timeout);
+                    return;
                 } 
                 
                 if (err instanceof error.TimeoutError) {
