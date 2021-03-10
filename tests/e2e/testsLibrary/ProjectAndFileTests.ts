@@ -10,6 +10,8 @@
 
 import { CLASSES, Ide, ProjectTree, Editor } from '..';
 import { e2eContainer } from '../inversify.config';
+import { TimeoutConstants } from '../TimeoutConstants';
+import { DriverHelper } from '../utils/DriverHelper';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -18,9 +20,7 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 export function waitWorkspaceReadiness(sampleName : string, folder: string) {
     test('Wait for workspace readiness', async () => {
         await ide.waitAndSwitchToIdeFrame();
-        await ide.waitPreloaderVisible();
-        await ide.waitPreloaderAbsent();
-        await ide.waitIde();
+        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(sampleName, folder);
     });
@@ -29,9 +29,7 @@ export function waitWorkspaceReadiness(sampleName : string, folder: string) {
 export function waitWorkspaceReadinessNoSubfolder(sampleName : string) {
     test('Wait for workspace readiness', async () => {
         await ide.waitAndSwitchToIdeFrame();
-        await ide.waitPreloaderVisible();
-        await ide.waitPreloaderAbsent();
-        await ide.waitIde();
+        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImportedNoSubfolder(sampleName);
     });
