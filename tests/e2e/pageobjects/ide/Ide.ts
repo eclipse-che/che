@@ -50,6 +50,7 @@ export class Ide {
                 this.driverHelper.wait(2000);
                 await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
             } else {
+                Logger.error(`Switching to IDE frame failed after ${timeout} timeout.`)
                 throw err;
             }
         }
@@ -75,6 +76,7 @@ export class Ide {
             if (err instanceof error.TimeoutError) {
                 Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out.`);
             } else {
+                Logger.error(`Waiting for task notification failed after ${timeout} timeout.`)
                 throw err;
             }
         }
@@ -164,6 +166,7 @@ export class Ide {
                 if (err instanceof error.NoSuchWindowError) {
                     await this.driverHelper.waitVisibility(idePartLocator, timeout);
                 }
+                Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`)
                 throw err;
             }
         }
