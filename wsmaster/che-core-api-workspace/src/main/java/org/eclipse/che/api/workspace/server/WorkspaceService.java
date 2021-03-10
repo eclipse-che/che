@@ -18,6 +18,7 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_DEVWORKSPACES_ENABLED_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_EDITOR_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -110,6 +111,7 @@ public class WorkspaceService extends Service {
   private final String devfileRegistryInternalUrl;
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
+  private final boolean cheDevWorkspacesEnabled;
   private final FileContentProvider devfileContentProvider;
   private final Long logLimitBytes;
   private final String availableStorageTypes;
@@ -135,7 +137,8 @@ public class WorkspaceService extends Service {
       @Named(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES) String availableStorageTypes,
       @Named(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE) String preferredStorageType,
       @Named(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY) String defaultEditor,
-      @Named(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY) String defaultPlugins) {
+      @Named(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY) String defaultPlugins,
+      @Named(CHE_DEVWORKSPACES_ENABLED_PROPERTY) boolean cheDevWorkspacesEnabled) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -151,6 +154,7 @@ public class WorkspaceService extends Service {
     this.preferredStorageType = preferredStorageType;
     this.defaultEditor = defaultEditor;
     this.defaultPlugins = defaultPlugins;
+    this.cheDevWorkspacesEnabled = cheDevWorkspacesEnabled;
   }
 
   @Path("/devfile")
@@ -464,6 +468,7 @@ public class WorkspaceService extends Service {
     settings.put(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY, defaultEditor);
     settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
     settings.put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType);
+    settings.put(CHE_DEVWORKSPACES_ENABLED_PROPERTY, Boolean.toString(cheDevWorkspacesEnabled));
     return settings.build();
   }
 
