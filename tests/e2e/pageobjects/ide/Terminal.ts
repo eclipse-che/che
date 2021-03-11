@@ -98,6 +98,14 @@ export class Terminal {
         return await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
     }
 
+    async getTextFromProblemsTab(timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT): Promise<string> {
+        Logger.debug(`Terminal.getTextFromProblemsTab`);
+
+        const problemsTabBodyLocator: By = By.xpath(`//div[@id='problems']`);
+
+        return await this.driverHelper.waitAndGetText(problemsTabBodyLocator, timeout);
+    }
+
     async selectTabByPrefixAndWaitText(terminalTab: string, expectedText: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`Terminal.selectTabByPrefixAndWaitText tab: ${terminalTab} text: ${expectedText}`);
 
@@ -121,6 +129,28 @@ export class Terminal {
             Logger.debug('----------------------------------------------');
 
             const terminalText: string = await this.getText(terminalTab, timeout);
+
+            if (terminalText.includes(expectedText)) {
+                Logger.debug('Expected text is present in the terminal output');
+                return true;
+            }
+
+            Logger.debug('Expected text is not present in the terminal output');
+            await this.driverHelper.wait(1000);
+            return false;
+
+        }, timeout);
+    }
+
+    async waitTextInProblemsTab(expectedText: string, timeout: number) {
+        Logger.debug(`Terminal.waitTextInProblemsTab`);
+
+        await this.selectTerminalTab('Problems', timeout);
+        await this.driverHelper.waitUntilTrue(async () => {
+            // separates each method iteration to the readable blocks in the terminal log
+            Logger.debug('----------------------------------------------');
+
+            const terminalText: string = await this.getTextFromProblemsTab(timeout);
 
             if (terminalText.includes(expectedText)) {
                 Logger.debug('Expected text is present in the terminal output');

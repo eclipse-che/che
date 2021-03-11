@@ -50,14 +50,14 @@ export class Ide {
                 this.driverHelper.wait(2000);
                 await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
                 return;
-            } 
-            
+            }
+
             if (err instanceof error.TimeoutError) {
-                Logger.error(`Switching to IDE frame failed after ${timeout} timeout.`)
+                Logger.error(`Switching to IDE frame failed after ${timeout} timeout.`);
                 throw err;
-            } 
-            
-            Logger.error(`Switching to IDE frame failed.`)
+            }
+
+            Logger.error(`Switching to IDE frame failed.`);
             throw err;
         }
     }
@@ -83,7 +83,7 @@ export class Ide {
                 Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out after ${timeout}.`);
                 throw err;
             }
-            Logger.error(`Waiting for task notification failed.`)
+            Logger.error(`Waiting for task notification failed.`);
             throw err;
         }
         Logger.info(`Ide.waitTaskExitCodeNotification checking for correct exit core:${exitCode}`);
@@ -172,14 +172,14 @@ export class Ide {
                 if (err instanceof error.NoSuchWindowError) {
                     await this.driverHelper.waitVisibility(idePartLocator, timeout);
                     return;
-                } 
-                
+                }
+
                 if (err instanceof error.TimeoutError) {
-                    Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`)
+                    Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`);
                     throw err;
                 }
-                
-                Logger.error(`Waiting for ${idePartLocator} failed.`)
+
+                Logger.error(`Waiting for ${idePartLocator} failed.`);
                 throw err;
             }
         }
