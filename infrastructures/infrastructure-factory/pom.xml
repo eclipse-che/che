@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.27.1-SNAPSHOT</version>
+        <version>7.27.1</version>
     </parent>
     <artifactId>infrastructure-factory</artifactId>
     <packaging>jar</packaging>
