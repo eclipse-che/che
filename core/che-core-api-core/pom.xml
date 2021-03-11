@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.27.1-SNAPSHOT</version>
+        <version>7.27.2-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-core</artifactId>
     <packaging>jar</packaging>
