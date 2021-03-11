@@ -149,3 +149,12 @@ jobs:
             Eclipse Che ${{ github.event.inputs.version}}
           draft: false
           prerelease: false
+      - name: Create MM message
+        run: |
+          echo "{\"text\":\":building_construction: Che Server ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-server:${{ github.event.inputs.version }}\"}" > mattermost.json
+      - name: Send MM message
+        uses: mattermost/action-mattermost-notify@master
+        env:
+          MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          MATTERMOST_CHANNEL: eclipse-che-releases
+          MATTERMOST_USERNAME: che-bot
