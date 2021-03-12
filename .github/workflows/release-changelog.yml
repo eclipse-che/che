@@ -10,6 +10,9 @@
 name: Release changelog
 
 on:
+  push:
+    tags:
+    - '7.*'
   workflow_dispatch:
     inputs:
       version:
@@ -37,9 +40,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          # TODO: Do we need to set these env vars too?
-          # INPUT_TOKEN
-          # ACTIONS_RUNTIME_TOKEN
         with:
           repo: eclipse/che 
           # output: CHANGELOG-next.md
@@ -55,8 +55,8 @@ jobs:
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
           issues: true
-          issueLineLabels: "ALL"
-          compareLink: true
+          # issueLineLabels: "ALL" # doesn't work - /usr/local/bundle/gems/github_changelog_generator-1.15.2/lib/github_changelog_generator/generator/section.rb:52:in `get_string_for_issue': undefined method `line_labels_for' for #<GitHubChangelogGenerator::Section:0x00005608809a9988> (NoMethodError)
+          compareLink: false
           unreleased: true # show unreleased, but closed items
           addSections: '{"sprint/current-sprint":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current-sprint"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
           excludeTags: '' # comma,delimited,list,of,tags
@@ -69,12 +69,16 @@ jobs:
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
       - name: Create GH Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1.8.0
         env:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
-          tag_name: ${{ github.event.inputs.version}}
-          release_name: Eclipse Che ${{ github.event.inputs.version}}
+          allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
+          name: Eclipse Che ${{ github.event.inputs.version}}
+          omitBodyDuringUpdate: false
+          omitNameDuringUpdate: false
           prerelease: false
+          tag: ${{ github.event.inputs.version}}
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
