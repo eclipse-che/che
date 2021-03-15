@@ -1,14 +1,14 @@
-// monitoring-{prod-id-short}
+// monitoring-che
 
-[id="extending-{prod-id-short}-monitoring-metrics_{context}"]
-= Extending {prod-short} monitoring metrics
+[id="extending-che-monitoring-metrics_che"]
+= Extending Che monitoring metrics
 
-This section describes how to create a metric or a group of metrics to extend the monitoring metrics that {prod-short} is exposing.
+This section describes how to create a metric or a group of metrics to extend the monitoring metrics that Che is exposing.
 
-{prod-short} has two major modules metrics:
+Che has two major modules metrics:
 
 * `che-core-metrics-core` -- contains core metrics module
-* `che-core-api-metrics` -- contains metrics that are dependent on core {prod-short} components, such as workspace or user managers
+* `che-core-api-metrics` -- contains metrics that are dependent on core Che components, such as workspace or user managers
 
 
 .Procedure
