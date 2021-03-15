@@ -142,16 +142,16 @@ pipeline {
                         echo "Install dependencies needed for build of Eclipse Che"
                         sh """
                             # workaround https://github.com/eclipse/che/issues/19093
-                            for i in {1..12} 
+                            for i in {1..30} 
                             do
-                                echo "-- ITERATION \$i --"
+                                echo "-- ATTEMPT \$i --"
                                 sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686 \\
                                     --disablerepo=rhel-7-server-extras-os-rpms,rhel-7-server-ose-3.4-os-rpms,rhel-7-server-optional-os-rpms || true
+                                
+                                sudo yum list installed | grep "glibc.i686" && sudo yum list installed | grep "fontconfig.i686" && sudo yum list installed | grep "libstdc++-devel.i686" && break
+                                
+                                sleep 5
                             done
-                            
-                            sudo yum list installed | grep "glibc.i686"
-                            sudo yum list installed | grep "fontconfig.i686"
-                            sudo yum list installed | grep "libstdc++-devel.i686"
                         """
 
                         echo "Build branch ${ghprbSourceBranch} of upstream projects"
