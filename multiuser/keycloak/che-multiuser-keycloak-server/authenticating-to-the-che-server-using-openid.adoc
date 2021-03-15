@@ -1,25 +1,25 @@
-// authenticating-to-the-{prod-id-short}-server
+// authenticating-to-the-che-server
 
-[id="authenticating-to-the-{prod-id-short}-server-using-openid_{context}"]
-= Authenticating to the {prod-short} server using OpenID
+[id="authenticating-to-the-che-server-using-openid_che"]
+= Authenticating to the Che server using OpenID
 
-OpenID authentication on the {prod-short} server implies the presence of an external OpenID Connect provider and has the following main steps:
+OpenID authentication on the Che server implies the presence of an external OpenID Connect provider and has the following main steps:
 
-* Authenticate the user through a JWT token that is retrieved from an HTTP request or, in case of a missing or invalid token, redirect the user to the {identity-provider} login page.
+* Authenticate the user through a JWT token that is retrieved from an HTTP request or, in case of a missing or invalid token, redirect the user to the Keycloak login page.
 
 * Send authentication tokens in an *Authorization* header. In limited cases, when it is impossible to use the *Authorization* header, the token can be sent in the token query parameter. Example: OAuth authentication initialization.
 
-* Compose an internal `subject` object that represents the current user inside the {prod-short} server code.
+* Compose an internal `subject` object that represents the current user inside the Che server code.
 
-NOTE: The only supported and tested OpenID provider is {identity-provider}.
+NOTE: The only supported and tested OpenID provider is Keycloak.
 
 .Procedure
 
-To authenticate to the {prod-short} server using OpenID authentication:
+To authenticate to the Che server using OpenID authentication:
 
 . Request the OpenID settings service where clients can find all the necessary URLs and properties of the OpenId provider, such as `jwks.endpoint`, `token.endpoint`, `logout.endpoint`, `realm.name`, or `client_id` returned in the JSON format.
 
-. The service URL is `pass:c,a,q[{prod-url}/api/keycloak/settings]`, and it is only available in the {prod-short} multiuser mode. The presence of the service in the URL confirms that the authentication is enabled in the current deployment.
+. The service URL is `pass:c,a,q[https://che-host:che-port/api/keycloak/settings]`, and it is only available in the Che multiuser mode. The presence of the service in the URL confirms that the authentication is enabled in the current deployment.
 +
 Example output:
 +
@@ -36,7 +36,7 @@ Example output:
 }
 ----
 +
-The service allows downloading the JavaScript client library to interact with the provider using the `pass:c,a,q[{prod-url}/api/keycloak/OIDCKeycloak.js]` URL.
+The service allows downloading the JavaScript client library to interact with the provider using the `pass:c,a,q[https://che-host:che-port/api/keycloak/OIDCKeycloak.js]` URL.
 
 . Redirect the user to the appropriate provider's login page with all the necessary parameters, including `client_id` and the return redirection path. This can be done with any client library (JS or Java).
 
@@ -52,58 +52,58 @@ If the validation is successful, the parsed form of the token is passed to the e
 +
 If the request was made using only a JWT token, the following single authentication filter is used:
 +
-*org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter*: The filter finds the user that the `userId` token belongs to, retrieves the user instance, and sets the principal to the session. The {prod-short} server-to-server requests are performed using a dedicated request factory that signs every request with the current subject token obtained from the `EnvironmentContext` object.
+*org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter*: The filter finds the user that the `userId` token belongs to, retrieves the user instance, and sets the principal to the session. The Che server-to-server requests are performed using a dedicated request factory that signs every request with the current subject token obtained from the `EnvironmentContext` object.
 
 [NOTE]
 ====
 .Providing user-specific data
 
-Since {identity-provider} may store user-specific information (first and last name, phone number, job title), there is a special implementation of the *ProfileDao* that can provide this data to consumers. The implementation is read-only, so users cannot perform create and update operations.
+Since Keycloak may store user-specific information (first and last name, phone number, job title), there is a special implementation of the *ProfileDao* that can provide this data to consumers. The implementation is read-only, so users cannot perform create and update operations.
 ====
 
 
-[id="obtaining-the-token-from-keycloak_{context}"]
-== Obtaining the token from credentials through {identity-provider}
+[id="obtaining-the-token-from-keycloak_che"]
+== Obtaining the token from credentials through Keycloak
 
-Clients that cannot run JavaScript or other clients (such as command-line clients or Selenium tests) must request the authorization token directly from {identity-provider}.
+Clients that cannot run JavaScript or other clients (such as command-line clients or Selenium tests) must request the authorization token directly from Keycloak.
 
 To obtain the token, send a request to the token endpoint with the username and password credentials. This request can be schematically described as the following cURL request:
 
 [subs="+quotes,+attributes"]
 ----
-$ curl --insecure --data "grant_type=password&client_id={prod-deployment}-public&username=__<USERNAME>__&password=__<PASSWORD>__" \ <1> <2>
-https://<keyckloak_host>/auth/realms/{prod-deployment}/protocol/openid-connect/token <3>
+$ curl --insecure --data "grant_type=password&client_id=che-public&username=__<USERNAME>__&password=__<PASSWORD>__" \ <1> <2>
+https://<keyckloak_host>/auth/realms/che/protocol/openid-connect/token <3>
 ----
-<1> {prod} username
-<2> {prod} user's password
-<3> {identity-provider} host
+<1> Eclipse&#160;Che username
+<2> Eclipse&#160;Che user's password
+<3> Keycloak host
 
-The {prod-short} dashboard uses a customized {identity-provider} login page and an authentication mechanism based on `grant_type=authorization_code`. It is a two-step authentication process:
+The Che dashboard uses a customized Keycloak login page and an authentication mechanism based on `grant_type=authorization_code`. It is a two-step authentication process:
 
 . Logging in and obtaining the authorization code.
 . Obtaining the token using this authorization code.
 
-[id="obtaining-the-token-from-openshift-token-through-keycloak_{context}"]
-== Obtaining the token from the OpenShift token through {identity-provider}
+[id="obtaining-the-token-from-openshift-token-through-keycloak_che"]
+== Obtaining the token from the OpenShift token through Keycloak
 
-When {prod-short} was installed on OpenShift using the Operator, and the OpenShift OAuth integration is enabled, as it is by default,
-the user's {prod-short} authentication token can be retrieved from the user's OpenShift token.
+When Che was installed on OpenShift using the Operator, and the OpenShift OAuth integration is enabled, as it is by default,
+the user's Che authentication token can be retrieved from the user's OpenShift token.
 
 To retrieve the authentication token from the OpenShift token, send a schematically described cURL request to the OpenShift token endpoint:
 
 [subs="+quotes,+attributes"]
 ----
 $ curl --insecure -X POST  \
--d "client_id={prod-deployment}-public" \
+-d "client_id=che-public" \
 -d "subject_token=__<USER_OPENSHIFT_TOKEN>__" \ <1>
 -d "subject_issuer=__<OPENSHIFT_IDENTITY_PROVIDER_NAME>__" \ <2>
 --data-urlencode "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
 --data-urlencode "subject_token_type=urn:ietf:params:oauth:token-type:access_token" \
-https://__<KEYCKLOAK_HOST>__/auth/realms/{prod-deployment}/protocol/openid-connect/token <3>
+https://__<KEYCKLOAK_HOST>__/auth/realms/che/protocol/openid-connect/token <3>
 ----
 <1> The token retrieved by the end-user with the command `oc whoami --show-token`
 <2> `openshift-v4` for OpenShift 4.x and `openshift-v3` for OpenShift 3.11
-<3> {identity-provider} host
+<3> Keycloak host
 
 
-WARNING: Before using this token exchange feature, it is required for an end user to be interactively logged in at least once to the {prod-short} Dashboard using the OpenShift login page. This step is needed to link the OpenShift and {identity-provider} user accounts properly and set the required user profile information.
+WARNING: Before using this token exchange feature, it is required for an end user to be interactively logged in at least once to the Che Dashboard using the OpenShift login page. This step is needed to link the OpenShift and Keycloak user accounts properly and set the required user profile information.
