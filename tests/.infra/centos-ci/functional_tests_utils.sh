@@ -333,13 +333,11 @@ createTestWorkspaceAndRunTest() {
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
   -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
-  -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
   -e TS_SELENIUM_PASSWORD="admin" \
-  -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
-  -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
-  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  -e TS_SELENIUM_LOG_LEVEL=TRACE \
+  -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }

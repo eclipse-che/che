@@ -272,6 +272,7 @@ spec:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE_START_TIMEOUT_MIN: '12'
   k8s:  
     singleHostExposureType: 'gateway'
   auth:
@@ -288,6 +289,7 @@ spec:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
       CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY: IfNotPresent
+      CHE_INFRA_KUBERNETES_WORKSPACE_START_TIMEOUT_MIN: '12'
   auth:
     updateAdminPassword: false
 EOL"""
@@ -381,7 +383,8 @@ EOL"""
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="${e2eTestToRun}" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
-                       -e TS_SELENIUM_LOG_LEVEL="TRACE" \\
+                       -e TS_SELENIUM_LOG_LEVEL=TRACE \\
+                       -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\
                        quay.io/eclipse/che-e2e:${cheE2eImageTag}
                 """
