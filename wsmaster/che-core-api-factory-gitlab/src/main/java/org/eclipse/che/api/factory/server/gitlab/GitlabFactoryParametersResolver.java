@@ -109,7 +109,7 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
                   .withSource(
                       newDto(SourceDto.class)
                           .withLocation(gitlabUrl.repositoryLocation())
-                          .withType("gitlab")
+                          .withType("git")
                           .withBranch(gitlabUrl.getBranch())
                           .withSparseCheckoutDir(gitlabUrl.getSubfolder()))
                   .withName(gitlabUrl.getProject()),
