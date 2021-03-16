@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: Check all properties have description
+      run: ./check_properties_description.sh
     - name: Cache local Maven repository
       uses: actions/cache@v2
       with:

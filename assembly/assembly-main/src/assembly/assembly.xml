@@ -68,10 +68,6 @@
             <directory>${project.build.directory}/dependency/assembly-dashboard-war</directory>
             <outputDirectory>tomcat/webapps/dashboard</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/assembly-workspace-loader-war</directory>
-            <outputDirectory>tomcat/webapps/workspace-loader</outputDirectory>
-        </fileSet>
        <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>

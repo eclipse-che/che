@@ -21,7 +21,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-server</artifactId>
-    <version>7.27.0-SNAPSHOT</version>
+    <version>7.28.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Server</name>
     <modules>
@@ -42,8 +42,8 @@
     <properties>
         <?SORTPOM IGNORE?>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.27.0-SNAPSHOT</che.dashboard.version>
-        <che.version>7.27.0-SNAPSHOT</che.version>
+        <che.dashboard.version>7.28.0-SNAPSHOT</che.dashboard.version>
+        <che.version>7.28.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
         <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>
@@ -670,12 +670,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>assembly-workspace-loader-war</artifactId>
-                <version>${che.version}</version>
-                <type>war</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
@@ -1245,12 +1239,6 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.workspace.loader</groupId>
-                <artifactId>che-workspace-loader</artifactId>
-                <version>${che.version}</version>
-                <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.persistence</groupId>

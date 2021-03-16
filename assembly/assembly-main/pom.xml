@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.27.0-SNAPSHOT</version>
+        <version>7.28.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -41,11 +41,6 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-swagger-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-workspace-loader-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -107,13 +102,6 @@
                                     <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency/assembly-dashboard-war</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che</groupId>
-                                    <artifactId>assembly-workspace-loader-war</artifactId>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency/assembly-workspace-loader-war</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

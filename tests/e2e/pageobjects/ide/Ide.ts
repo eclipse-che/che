@@ -49,10 +49,16 @@ export class Ide {
                 Logger.warn('StaleElementException occured during waiting for IDE. Sleeping for 2 secs and retrying.');
                 this.driverHelper.wait(2000);
                 await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
-            } else {
-                Logger.error(`Switching to IDE frame failed after ${timeout} timeout.`)
+                return;
+            }
+
+            if (err instanceof error.TimeoutError) {
+                Logger.error(`Switching to IDE frame failed after ${timeout} timeout.`);
                 throw err;
             }
+
+            Logger.error(`Switching to IDE frame failed.`);
+            throw err;
         }
     }
 
@@ -74,11 +80,11 @@ export class Ide {
             await this.driverHelper.waitVisibility(exitCodeNotificationLocator, timeout);
         } catch (err) {
             if (err instanceof error.TimeoutError) {
-                Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out.`);
-            } else {
-                Logger.error(`Waiting for task notification failed after ${timeout} timeout.`)
+                Logger.error(`Ide.waitTaskExitCodeNotificationBoolean wait for notification timed out after ${timeout}.`);
                 throw err;
             }
+            Logger.error(`Waiting for task notification failed.`);
+            throw err;
         }
         Logger.info(`Ide.waitTaskExitCodeNotification checking for correct exit core:${exitCode}`);
         return await this.driverHelper.waitVisibilityBoolean(notificationLocator, 1, 1000);
@@ -165,8 +171,15 @@ export class Ide {
             } catch (err) {
                 if (err instanceof error.NoSuchWindowError) {
                     await this.driverHelper.waitVisibility(idePartLocator, timeout);
+                    return;
                 }
-                Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`)
+
+                if (err instanceof error.TimeoutError) {
+                    Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`);
+                    throw err;
+                }
+
+                Logger.error(`Waiting for ${idePartLocator} failed.`);
                 throw err;
             }
         }

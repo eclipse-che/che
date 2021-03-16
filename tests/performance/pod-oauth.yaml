@@ -24,13 +24,13 @@ spec:
         - name: TS_SELENIUM_MULTIUSER
           value: "true"
         - name: TS_SELENIUM_LOAD_PAGE_TIMEOUT
-          value: "1800OO"
+          value: "180000"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
-          value: "180OO0"
+          value: "180000"
         - name: TS_SELENIUM_LOG_LEVEL
           value: "REPLACE_LOG_LEVEL"
         - name: TS_IDE_LOAD_TIMEOUT
-          value: "18OOO0"
+          value: "180000"
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: "0"
         - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
