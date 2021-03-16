@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.27.0-SNAPSHOT</version>
+        <version>7.28.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-metrics-core</artifactId>
     <name>Che Core :: Commons :: Metrics :: Core</name>
