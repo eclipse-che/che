@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-    agent { label "minikube-rhel7-24gb" }
+    agent { label "minikube-rhel7-16gb" }
 
     options {
         timestamps()
@@ -28,8 +28,8 @@ pipeline {
 
     parameters {
         booleanParam(name: 'cheSingleHost',
-               defaultValue: false,
-               description: 'Configuration Che server strategy')
+                defaultValue: false,
+                description: 'Configuration Che server strategy')
 
         string(name: 'cheImageRepo',
                 defaultValue: "quay.io/crw_pr/che-server",
@@ -46,7 +46,7 @@ pipeline {
         string(name: 'e2eTestToRun',
                 defaultValue: "test-happy-path",
                 description: 'TypeScript E2E test to run')
-        
+
         string(name: 'testWorkspaceDevfileUrl',
                 defaultValue: "",
                 description: 'URL of devfile of test workspace')
@@ -154,7 +154,7 @@ pipeline {
 
                 stage("Build Che including upstream projects") {
                     when {
-                        expression { 
+                        expression {
                             return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
                         }
                     }
@@ -163,15 +163,20 @@ pipeline {
                         echo "Install dependencies needed for build of Eclipse Che"
                         sh """
                             # workaround https://github.com/eclipse/che/issues/19093
-                            for i in {1..30} 
+                            for i in {1..100} 
                             do
                                 echo "-- ATTEMPT \$i --"
                                 sudo yum install -y glibc.i686 libfontconfig.so.1 libstdc++-devel.i686 \\
-                                    --disablerepo=rhel-7-server-extras-os-rpms,rhel-7-server-ose-3.4-os-rpms,rhel-7-server-optional-os-rpms || true
+                                    --disablerepo=rhel-7-server-extras-os-rpms,rhel-7-server-ose-3.4-os-rpms,rhel-7-server-optional-os-rpms,rhel-7-server-supplementary-os-rpms || true
                                 
                                 sudo yum list installed | grep "glibc.i686" && sudo yum list installed | grep "fontconfig.i686" && sudo yum list installed | grep "libstdc++-devel.i686" && break
                                 
-                                sleep 5
+                                sleep 10
+                                
+                                if [ "\$i" -gt "100" ]; then 
+                                    echo "Can't install dependencies."
+                                    exit 1
+                                fi
                             done
                         """
 
@@ -218,7 +223,7 @@ pipeline {
         stage("Build and push che-server image") {
             when {
                 expression {
-                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild"))) 
+                    return buildChe.toString() == 'true' || (params['ghprbCommentBody'] && (params.ghprbCommentBody == 'null' || params.ghprbCommentBody.contains("--rebuild")))
                 }
             }
 
@@ -377,7 +382,6 @@ EOL"""
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
                        -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-                       -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
                        -e TS_SELENIUM_MULTIUSER="true" \\
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
