@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -52,7 +53,7 @@ public class DefaultEditorProvisioner {
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
-      @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
+      @Named("che.workspace.devfile.default_editor.plugins") @Nullable String defaultPluginsRefs,
       @Named("che.workspace.devfile.async.storage.plugin") String asyncStoragePluginRef,
       ComponentFQNParser componentFQNParser,
       PluginFQNParser pluginFQNParser)
@@ -66,8 +67,10 @@ public class DefaultEditorProvisioner {
             ? null
             : componentFQNParser.getPluginPublisherAndName(this.defaultEditorRef);
     Map<String, String> map = new HashMap<>();
-    for (String defaultPluginsRef : defaultPluginsRefs) {
-      map.put(componentFQNParser.getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
+    if (!isNullOrEmpty(defaultPluginsRefs)) {
+      for (String defaultPluginsRef : defaultPluginsRefs.split(",")) {
+        map.put(componentFQNParser.getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
+      }
     }
     this.defaultPluginsToRefs = map;
   }

@@ -48,6 +48,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,7 @@ public class URLFactoryBuilder {
   @Inject
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
-      @Named("che.factory.default_plugins") String defaultChePlugins,
+      @Nullable @Named("che.factory.default_plugins") String defaultChePlugins,
       DevfileParser devfileParser,
       DevfileVersionDetector devfileVersionDetector) {
     this.defaultCheEditor = defaultCheEditor;
@@ -221,7 +222,9 @@ public class URLFactoryBuilder {
 
     Map<String, String> attributes = new HashMap<>();
     attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultCheEditor);
-    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins);
+    if (!isNullOrEmpty(defaultChePlugins)) {
+      attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins);
+    }
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
