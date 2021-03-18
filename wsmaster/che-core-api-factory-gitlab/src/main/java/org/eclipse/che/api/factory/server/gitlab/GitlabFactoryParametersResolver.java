@@ -22,6 +22,8 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
+import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
@@ -40,11 +42,20 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
 
   private final GitlabUrlParser gitlabURLParser;
 
+  private final GitCredentialManager gitCredentialManager;
+  private final PersonalAccessTokenManager personalAccessTokenManager;
+
   @Inject
   public GitlabFactoryParametersResolver(
-      URLFactoryBuilder urlFactoryBuilder, URLFetcher urlFetcher, GitlabUrlParser gitlabURLParser) {
+      URLFactoryBuilder urlFactoryBuilder,
+      URLFetcher urlFetcher,
+      GitlabUrlParser gitlabURLParser,
+      GitCredentialManager gitCredentialManager,
+      PersonalAccessTokenManager personalAccessTokenManager) {
     super(urlFactoryBuilder, urlFetcher);
     this.gitlabURLParser = gitlabURLParser;
+    this.gitCredentialManager = gitCredentialManager;
+    this.personalAccessTokenManager = personalAccessTokenManager;
   }
 
   /**
@@ -76,7 +87,8 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
     return urlFactoryBuilder
         .createFactoryFromDevfile(
             gitlabUrl,
-            new GitlabFileContentProvider(gitlabUrl, urlFetcher),
+            new GitlabAuthorizingFileContentProvider(
+                gitlabUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager),
             extractOverrideParams(factoryParameters))
         .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
         .acceptVisitor(new GitlabFactoryVisitor(gitlabUrl));

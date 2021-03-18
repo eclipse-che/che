@@ -27,6 +27,10 @@ public interface RemoteFactoryUrl {
    */
   List<DevfileLocation> devfileFileLocations();
 
+  String rawFileLocation(String filename);
+
+  String getHostName();
+
   /** Describes devfile location, including filename if any. */
   interface DevfileLocation {
     Optional<String> filename();

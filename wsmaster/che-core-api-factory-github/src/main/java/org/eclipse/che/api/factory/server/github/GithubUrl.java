@@ -31,6 +31,8 @@ import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
  */
 public class GithubUrl implements RemoteFactoryUrl {
 
+  private static final String HOSTNAME = "https://github.com/";
+
   /** Username part of github URL */
   private String username;
 
@@ -160,12 +162,17 @@ public class GithubUrl implements RemoteFactoryUrl {
         .toString();
   }
 
+  @Override
+  public String getHostName() {
+    return HOSTNAME;
+  }
+
   /**
    * Provides location to the repository part of the full github URL.
    *
    * @return location of the repository.
    */
   protected String repositoryLocation() {
-    return "https://github.com/" + this.username + "/" + this.repository;
+    return HOSTNAME + this.username + "/" + this.repository;
   }
 }

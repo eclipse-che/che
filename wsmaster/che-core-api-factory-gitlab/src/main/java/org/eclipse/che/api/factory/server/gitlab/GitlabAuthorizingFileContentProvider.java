@@ -9,25 +9,21 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.factory.server.bitbucket;
+package org.eclipse.che.api.factory.server.gitlab;
 
-import org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 
-/**
- * Bitbucket specific file content provider. Files are retrieved using bitbucket REST API and
- * personal access token based authentication is performed during requests.
- */
-public class BitbucketServerAuthorizingFileContentProvider
-    extends AuthorizingFileContentProvider<BitbucketUrl> {
+/** Gitlab specific file content provider. */
+class GitlabAuthorizingFileContentProvider
+    extends org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider<GitlabUrl> {
 
-  public BitbucketServerAuthorizingFileContentProvider(
-      BitbucketUrl bitbucketUrl,
+  GitlabAuthorizingFileContentProvider(
+      GitlabUrl githubUrl,
       URLFetcher urlFetcher,
       GitCredentialManager gitCredentialManager,
       PersonalAccessTokenManager personalAccessTokenManager) {
-    super(bitbucketUrl, urlFetcher, personalAccessTokenManager, gitCredentialManager);
+    super(githubUrl, urlFetcher, personalAccessTokenManager, gitCredentialManager);
   }
 }
