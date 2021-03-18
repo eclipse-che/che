@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.27.2-SNAPSHOT</version>
+        <version>7.27.2</version>
     </parent>
     <artifactId>che-core-api-factory-github</artifactId>
     <packaging>jar</packaging>

@@ -12,7 +12,7 @@ global:
     class: "nginx"
 
 cheDevfileRegistry:
-  image: quay.io/eclipse/che-devfile-registry:7.27.1
+  image: quay.io/eclipse/che-devfile-registry:7.27.2
   imagePullPolicy: Always
   memoryLimit: 256Mi
   memoryRequests: 16Mi
