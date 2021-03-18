@@ -68,6 +68,7 @@ assignees: ''
        - [ ] Azure
        - [ ] GCE
        - [ ] other (please specify)
+   - [ ] Dev Sandbox (workspaces.openshift.com)
    - [ ] other: please specify
 
 ### Eclipse Che Logs
