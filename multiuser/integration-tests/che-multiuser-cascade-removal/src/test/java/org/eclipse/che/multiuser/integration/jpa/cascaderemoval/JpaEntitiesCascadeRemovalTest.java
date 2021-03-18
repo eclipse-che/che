@@ -302,9 +302,9 @@ public class JpaEntitiesCascadeRemovalTest {
                 bindConstant()
                     .annotatedWith(Names.named("che.websocket.endpoint"))
                     .to("che.websocket.endpoint");
-                bind(String[].class)
+                bind(String.class)
                     .annotatedWith(Names.named("che.workspace.devfile.default_editor.plugins"))
-                    .toInstance(new String[] {"default/plugin/0.0.1"});
+                    .toInstance("default/plugin/0.0.1");
                 bind(String.class)
                     .annotatedWith(Names.named("che.workspace.devfile.async.storage.plugin"))
                     .toInstance("");
