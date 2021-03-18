@@ -17,9 +17,7 @@ sed_in_place() {
 # only use /latest plugins so updates are smoother (old plugins are deleted from registries with each new release)
 plugin_version="latest"
 sed_in_place -r -e "s#che.factory.default_editor=eclipse/che-theia/.*#che.factory.default_editor=eclipse/che-theia/$plugin_version#g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
-sed_in_place -r -e "s#che.factory.default_plugins=eclipse/che-machine-exec-plugin/.*#che.factory.default_plugins=eclipse/che-machine-exec-plugin/$plugin_version#g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
 sed_in_place -r -e "s#che.workspace.devfile.default_editor=eclipse/che-theia/.*#che.workspace.devfile.default_editor=eclipse/che-theia/$plugin_version#g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
-sed_in_place -r -e "s#che.workspace.devfile.default_editor.plugins=eclipse/che-machine-exec-plugin/.*#che.workspace.devfile.default_editor.plugins=eclipse/che-machine-exec-plugin/$plugin_version#g" ../assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/che.properties
 
 # use actual image tags, so a new container is used after each update
 image_version="$1"
