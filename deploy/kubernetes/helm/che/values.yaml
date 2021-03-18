@@ -21,7 +21,7 @@ cheWorkspaceNoProxy: ""
 #    operator: "Equal"
 #    value: "aValue"
 #    effect: "NoExecute"
-cheImage: quay.io/eclipse/che-server:7.27.1
+cheImage: quay.io/eclipse/che-server:7.27.2
 cheImagePullPolicy: Always
 cheKeycloakRealm: "che"
 cheKeycloakClientId: "che-public"
@@ -130,7 +130,7 @@ che:
   logLevel: "INFO"
 
 dashboard:
-  image: quay.io/eclipse/che-dashboard:7.27.1
+  image: quay.io/eclipse/che-dashboard:7.27.2
   imagePullPolicy: "Always"
   memoryRequest: 16Mi
   memoryLimit: 256Mi
