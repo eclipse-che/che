@@ -140,6 +140,11 @@ suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
             await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
         });
 
+        test('Create workspace using API', async () => {
+            await testWorkspaceUtil.createWsFromDevFile(workspaceDevfile);
+
+        });
+
         test('Wait until created workspace is started', async () => {
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
