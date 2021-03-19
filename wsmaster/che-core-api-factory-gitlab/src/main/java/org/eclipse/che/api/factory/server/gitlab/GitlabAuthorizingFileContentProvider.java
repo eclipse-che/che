@@ -15,7 +15,7 @@ import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 
-/** Gitlab specific file content provider. */
+/** Gitlab specific authorizing file content provider. */
 class GitlabAuthorizingFileContentProvider
     extends org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider<GitlabUrl> {
 

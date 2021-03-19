@@ -26,6 +26,12 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
+
+/**
+ * Common implementation of file content provider which is able to access
+ * content of private repositories using  personal access tokens from specially
+ * formatted secret in user-s namespace.
+ */
 public class AuthorizingFileContentProvider<T extends RemoteFactoryUrl>
     implements FileContentProvider {
 
