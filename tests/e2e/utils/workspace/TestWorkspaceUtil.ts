@@ -210,4 +210,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         return baseDevfile;
     }
 
+    async startWorkspace(workspaceId: string){
+        try {
+            await this.processRequestHandler.post(`${TestWorkspaceUtil.WORKSPACE_API_URL}/${workspaceId}/runtime?debug-workspace-start=false`);
+       } catch (error) {
+           console.error(error);
+           throw error;
+       }
+    }
+
 }

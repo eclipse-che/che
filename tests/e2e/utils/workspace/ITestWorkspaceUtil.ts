@@ -20,5 +20,6 @@ export interface ITestWorkspaceUtil {
     getIdOfRunningWorkspace(namespace: string): Promise<string>;
     getIdOfRunningWorkspaces(): Promise<Array<string>>;
     createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile): void;
-    getBaseDevfile(): Promise<che.workspace.devfile.Devfile>
+    getBaseDevfile(): Promise<che.workspace.devfile.Devfile>;
+    startWorkspace(workspaceId: string): void;
 }
