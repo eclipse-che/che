@@ -34,23 +34,6 @@ const subRootFolder: string = 'app';
 const vsKubernetesConfig = { 'vs-kubernetes.kubeconfig': '/projects/nodejs-web-app/config' };
 
 suite(`The 'VscodeKubernetesPlugin' test`, async () => {
-    suite('Create workspace', async () => {
-        test('Set kubeconfig path', async () => {
-            await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
-        });
-
-        test('Create workspace using factory', async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
-        });
-
-        test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(sampleName, subRootFolder);
-        });
-    });
-
     suite('Check the "Kubernetes" plugin', async () => {
         test('Check plugin is added to workspace', async () => {
             await kubernetesPlugin.openView(240_000);
@@ -58,17 +41,6 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
 
         test('Check plugin basic functionality', async () => {
             await kubernetesPlugin.waitListItemContains('/api-ocp46-crw-qe-com:6443/', 240_000);
-        });
-    });
-
-    suite('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
-        test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

@@ -27,16 +27,18 @@ const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.Preferen
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
+const vsKubernetesConfig = { 'vs-kubernetes.kubeconfig': '/projects/nodejs-web-app/config' };
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
+
 
 let workspaceId: string = '';
 
 suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
     suite('Set required preferences', async () => {
-        // test('Set kubeconfig path', async () => {
-        //     await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
-        // });
+        test('Set kubeconfig path', async () => {
+            await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
+        });
 
         test('', async () => {
 
