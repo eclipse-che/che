@@ -53,11 +53,6 @@ suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
             await preferencesHandler.setPreference('yaml.schemas', yamlSchema);
         });
 
-
-
-
-
-
     });
 
     suite('Create workspace', async () => {
