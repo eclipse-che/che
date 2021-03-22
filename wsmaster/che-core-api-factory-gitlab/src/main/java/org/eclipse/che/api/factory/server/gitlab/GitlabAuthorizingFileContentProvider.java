@@ -11,13 +11,13 @@
  */
 package org.eclipse.che.api.factory.server.gitlab;
 
+import org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 
 /** Gitlab specific authorizing file content provider. */
-class GitlabAuthorizingFileContentProvider
-    extends org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider<GitlabUrl> {
+class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvider<GitlabUrl> {
 
   GitlabAuthorizingFileContentProvider(
       GitlabUrl githubUrl,

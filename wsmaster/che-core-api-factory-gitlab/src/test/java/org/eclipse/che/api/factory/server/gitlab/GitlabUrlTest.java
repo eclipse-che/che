@@ -59,13 +59,16 @@ public class GitlabUrlTest {
     assertEquals(gitlabUrl.devfileFileLocations().size(), 2);
     Iterator<DevfileLocation> iterator = gitlabUrl.devfileFileLocations().iterator();
     assertEquals(iterator.next().location(), format(fileUrl, "devfile.yaml"));
-    assertEquals(iterator.next().location(), format(fileUrl ,"foo.bar"));
+    assertEquals(iterator.next().location(), format(fileUrl, "foo.bar"));
   }
 
   @DataProvider
   public static Object[][] urlsProvider() {
     return new Object[][] {
-      {"https://gitlab.net/eclipse/che.git", "https://gitlab.net/api/v4/projects/eclipse%%2fche/repository/files/%s/raw?ref=master"},
+      {
+        "https://gitlab.net/eclipse/che.git",
+        "https://gitlab.net/api/v4/projects/eclipse%%2fche/repository/files/%s/raw?ref=master"
+      },
       {
         "https://gitlab.net/eclipse/fooproj/che.git",
         "https://gitlab.net/api/v4/projects/eclipse%%2ffooproj/repository/files/%s/raw?ref=master"
