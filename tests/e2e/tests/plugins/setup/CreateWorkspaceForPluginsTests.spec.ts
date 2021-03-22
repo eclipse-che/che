@@ -40,9 +40,18 @@ suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
             await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
         });
 
-        test('', async () => {
+        test('Set shellcheck path', async () => {
+            const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath';
+            const shellcheckExecutablePath: string = '/bin/shellcheck';
 
+            await preferencesHandler.setPreference(shellcheckExecutablePathPropertyName, shellcheckExecutablePath);
         });
+
+
+
+
+
+
     });
 
     suite('Create workspace', async () => {
