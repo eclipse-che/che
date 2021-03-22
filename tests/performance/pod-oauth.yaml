@@ -18,7 +18,9 @@ spec:
         - name: TS_SELENIUM_BASE_URL
           value: REPLACE_URL
         - name: TEST_SUITE
-          value: load-test
+          value: REPLACE_TEST_SUITE
+        - name: USERSTORY
+          value: REPLACE_USERSTORY
         - name: TIMESTAMP
           value: REPLACE_TIMESTAMP
         - name: TS_SELENIUM_MULTIUSER
@@ -43,6 +45,8 @@ spec:
           value: REPLACE_USERNAME
         - name: TS_SELENIUM_OCP_PASSWORD
           value: REPLACE_PASSWORD
+        - name: TS_SELENIUM_PASSWORD
+          value: REPLACE_PASSWORD
         - name: E2E_OPENSHIFT_TOKEN
           value: REPLACE_TOKEN
         - name: E2E_OCP_CLUSTER_VERSION
@@ -59,14 +63,16 @@ spec:
           value: "1000000"
         - name: TS_SELENIUM_WORKSPACE_STATUS_POLLING
           value: "500000"
+        - name: TS_LOAD_TESTS
+          value: "true"
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container
         resources:
           requests:
-            memory: "900Mi"
+            memory: MEMORY_REQUEST
             cpu: "250m"
           limits:
-            memory: "900Mi"
+            memory: MEMORY_LIMIT
             cpu: "700m"
       restartPolicy: Never    

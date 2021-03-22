@@ -228,6 +228,11 @@ export const TestConstants = {
     /**
      * URL of the workspace created by devworkspace-controller
      */
-    TS_SELENIUM_DEVWORKSPACE_URL: process.env.TS_SELENIUM_DEVWORKSPACE_URL
+    TS_SELENIUM_DEVWORKSPACE_URL: process.env.TS_SELENIUM_DEVWORKSPACE_URL,
+
+    /**
+     * This variable specifies that run test is used for load testing and that all artifacts will be sent to ftp client.
+     */
+    TS_LOAD_TESTS: process.env.TS_LOAD_TESTS || 'false'
 
 };
