@@ -5,7 +5,7 @@ export const COMMON_PLUGIN_TESTS_WORKSPACE_NAME: string = 'common-workspace-plug
 export const COMMON_PLUGIN_TESTS_DEVFILE: che.workspace.devfile.Devfile = {
     'apiVersion': '1.0.0',
     'metadata': {
-      'name': 'nodejs-xml'
+      'name': 'common-workspace-plugins'
     },
     'projects': [
       {
