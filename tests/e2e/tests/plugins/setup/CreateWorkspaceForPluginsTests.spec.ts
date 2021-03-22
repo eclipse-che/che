@@ -66,7 +66,7 @@ suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
         });
 
         test('Get created workspace ID', async () => {
-            workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(COMMON_PLUGIN_TESTS_WORKSPACE_NAME)
+            workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(COMMON_PLUGIN_TESTS_WORKSPACE_NAME);
         });
 
         test('Start workspace', async () => {

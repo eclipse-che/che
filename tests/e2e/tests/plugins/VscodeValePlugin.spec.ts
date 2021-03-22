@@ -10,13 +10,10 @@
 
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CLASSES } from '../../inversify.types';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
