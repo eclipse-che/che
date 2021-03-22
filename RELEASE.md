@@ -14,7 +14,7 @@ RELEASE-TEMPLATE-BEGIN
 
 In series, the following will be released via [che-release](https://github.com/eclipse/che-release/blob/master/cico_release.sh):
 
-* che-theia, che-machine-exec, che-devfile registry,
+* che-theia, che-machine-exec, che-devfile registry
 * che-plugin-registry (once che-theia and machine-exec are done)
 * che-parent, che-dashboard
 * che (server assembly, with maven artifacts + containers)
