@@ -128,8 +128,8 @@ pipeline {
 
                                     sudo -E /usr/local/bin/minikube start \\
                                     --vm-driver=none \\
-                                    --cpus 4 \\
-                                    --memory 13000 \\
+                                    --cpus 2 \\
+                                    --memory 6500 \\
                                     --logtostderr
                                 """
                             }
