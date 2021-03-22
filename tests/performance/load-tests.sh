@@ -6,6 +6,7 @@ TIMESTAMP=$(date +%s)
 TEST_FOLDER=$(pwd)
 LOG_LEVEL="INFO"
 SERVER_SETTING="oauth"
+TEST_SUITE="load-test"
 
 function printHelp {
   YELLOW="\\033[93;1m"
@@ -26,7 +27,8 @@ function printHelp {
   echo -e "-t    count on how many times one user should run a workspace"
   echo -e "-l    log level for test [ 'INFO' (default), 'DEBUG', 'TRACE' ]" 
   echo -e "-s    setting of CRW [ 'oauth' (default), 'no-oauth'] "
-  echo -e "-v    cluster URL to obtain OC user token"${NC}
+  echo -e "-v    cluster URL to obtain OC user token"
+  echo -e "-w    test suite ${NC} default to load-test"${NC}
 }
 
 oc whoami 1>/dev/null
@@ -36,7 +38,7 @@ if [ $? -gt 0 ] ; then
 fi
 
 echo "You are logged in OC: $(oc whoami -c)"
-while getopts "c:f:hi:l:n:p:r:t:u:s:v:" opt; do 
+while getopts "c:f:hi:l:n:p:r:t:u:s:v:w:" opt; do 
   case $opt in
     h) printHelp
       exit 0
@@ -62,6 +64,8 @@ while getopts "c:f:hi:l:n:p:r:t:u:s:v:" opt; do
     u) export USERNAME=$OPTARG
       ;;
     v) export cheClusterUrl=$OPTARG
+      ;;
+    w) export TEST_SUITE=$OPTARG
       ;;
     \?) # invalid option
       exit 1
@@ -173,7 +177,17 @@ sed -i "s/REPLACE_URL/\"$parsed_url\"/g" template.yaml
 sed -i "s/REPLACE_TIMESTAMP/\"$TIMESTAMP\"/g" template.yaml
 sed -i "s/REPLACE_IMAGE/\"$parsed_image\"/g" template.yaml
 sed -i "s/REPLACE_LOG_LEVEL/$LOG_LEVEL/g" template.yaml
-
+if [ $TEST_SUITE == "load-test" ]; then
+  sed -i_.bak '/USERSTORY/d' template.yaml
+  sed -i "s/REPLACE_TEST_SUITE/$TEST_SUITE/g" template.yaml
+  sed -i "s/MEMORY_REQUEST/\"900Mi\"/g" template.yaml
+  sed -i "s/MEMORY_LIMIT/\"900Mi\"/g" template.yaml
+else 
+  sed -i_.bak '/TEST_SUITE/d' template.yaml
+  sed -i "s/REPLACE_USERSTORY/$TEST_SUITE/g" template.yaml
+  sed -i "s/MEMORY_REQUEST/\"1Gi\"/g" template.yaml
+  sed -i "s/MEMORY_LIMIT/\"1Gi\"/g" template.yaml
+fi
 
 # ----------- RUNNING TEST ----------- #
 echo "-- Running pods with tests."
@@ -249,7 +263,6 @@ echo "Pods ended with those statuses: $statuses"
 # ----------- GATHERING LOGS ----------- #
 echo "-- Gathering logs."
 
-set -x
 echo "Syncing files from PVC to local folder."
 mkdir $FOLDER/$TIMESTAMP
 cd $FOLDER/$TIMESTAMP

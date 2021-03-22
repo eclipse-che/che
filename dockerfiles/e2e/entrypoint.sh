@@ -71,7 +71,7 @@ else
 fi
 
 # Launch tests
-if [ $TEST_SUITE == "load-test" ]; then
+if [ $TS_LOAD_TESTS ]; then
   timestamp=$(date +%s)
   user_folder="$TS_SELENIUM_USERNAME-$timestamp"
   export TS_SELENIUM_REPORT_FOLDER="./$user_folder/report"
