@@ -47,6 +47,12 @@ suite(`The 'CreateWorkspaceForPluginsTests' test`, async () => {
             await preferencesHandler.setPreference(shellcheckExecutablePathPropertyName, shellcheckExecutablePath);
         });
 
+        test('Set yaml schema', async () => {
+            const yamlSchema = { 'https://raw.githubusercontent.com/apache/camel-k-runtime/camel-k-runtime-parent-1.5.0/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json': '*.yaml' };
+
+            await preferencesHandler.setPreference('yaml.schemas', yamlSchema);
+        });
+
 
 
 
