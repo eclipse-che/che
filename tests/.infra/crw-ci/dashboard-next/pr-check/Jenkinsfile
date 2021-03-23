@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-    agent { label "minikube-rhel7-16gb" }
+    agent { label "minikube-rhel7-8gb" }
 
     options {
         timestamps()
@@ -128,8 +128,8 @@ pipeline {
 
                                     sudo -E /usr/local/bin/minikube start \\
                                     --vm-driver=none \\
-                                    --cpus 4 \\
-                                    --memory 8000 \\
+                                    --cpus 2 \\
+                                    --memory 6500 \\
                                     --logtostderr
                                 """
                             }
@@ -351,14 +351,12 @@ EOL"""
                      docker run --shm-size=1g --net=host --ipc=host \\
                        -p 5920:5920 \\
                        -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-                       -e TS_SELENIUM_LOG_LEVEL='DEBUG' \\
                        -e TS_SELENIUM_MULTIUSER="true" \\
                        -e TS_SELENIUM_USERNAME="admin" \\
                        -e TS_SELENIUM_PASSWORD="admin" \\
                        -e TEST_SUITE="test-all-devfiles" ${e2eTestParameters} \\
                        -e NODE_TLS_REJECT_UNAUTHORIZED=0 \\
                        -e TS_SELENIUM_LOG_LEVEL=TRACE \\
-                       -e TS_SELENIUM_DEFAULT_POLLING=2000 \\
                        -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \\
                        -e USERSTORY=DevfileSmoke \\
                        -v ${WORKSPACE}/tests/e2e:/tmp/e2e:Z \\

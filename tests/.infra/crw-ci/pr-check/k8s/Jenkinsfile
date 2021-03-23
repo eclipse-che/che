@@ -1,7 +1,7 @@
 #!groovy
 
 pipeline {
-    agent { label "minikube-rhel7-16gb" }
+    agent { label "minikube-rhel7-8gb" }
 
     options {
         timestamps()
