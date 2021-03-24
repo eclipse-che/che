@@ -3,7 +3,5 @@
 -u tdd
 --full-trace
 --spec dist/tests/login/Login.spec.js 
---spec dist/tests/plugins/setup/CreateWorkspaceForPluginsTests.spec.js
 --spec dist/tests/plugins/*.spec.js
---spec dist/tests/plugins/setup/DeleteCommonPluginWorkspace.spec.js
 --require source-map-support/register

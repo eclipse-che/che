@@ -10,21 +10,54 @@
 
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CLASSES } from '../../inversify.types';
+import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { TestConstants } from '../../TestConstants';
+import { TimeoutConstants } from '../../TimeoutConstants';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+
+const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 
-const projectName: string = 'nodejs-web-app';
-const pathToFile: string = `${projectName}`;
+let workspaceName: string = '';
+
+const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/d88057c847fb75b03791d8a9926ebb07/raw/994cb6a923ccf08dfa0a12b007eed84088b6a5af/valePluginTest.yaml';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
+const projectName: string = 'che-docs';
+const pathToFile: string = `${projectName}/modules/administration-guide/partials`;
 const docFileName: string = 'assembly_authenticating-users.adoc';
 
-// skipped until issue: https://github.com/eclipse/che/issues/19289 resolved
-suite.skip('The "VscodeValePlugin" userstory', async () => {
+suite('The "VscodeValePlugin" userstory', async () => {
+    suite('Create workspace', async () => {
+        test('Create workspace using factory', async () => {
+            await driverHelper.navigateToUrl(factoryUrl);
+        });
+
+        test('Wait until created workspace is started', async () => {
+            await ide.waitAndSwitchToIdeFrame();
+            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+        });
+    });
+
+    suite('Check workspace readiness to work', async () => {
+        test('Wait until project is imported', async () => {
+            await projectTree.openProjectTreeContainer();
+            await projectTree.waitProjectImported(projectName, 'modules');
+        });
+    });
+
     suite('Check the "vale" plugin', async () => {
         test('Check warning in the editor appearance', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, docFileName);
@@ -40,5 +73,11 @@ suite.skip('The "VscodeValePlugin" userstory', async () => {
             await terminal.waitTextInProblemsTab('Keep sentences short and to the point', 60_000);
         });
 
+    });
+
+    suite('Delete workspace', async () => {
+        test('Delete workspace', async () => {
+            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+        });
     });
 });
