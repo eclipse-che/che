@@ -37,7 +37,8 @@ const projectName: string = 'che-docs';
 const pathToFile: string = `${projectName}/modules/administration-guide/partials`;
 const docFileName: string = 'assembly_authenticating-users.adoc';
 
-suite('The "VscodeValePlugin" userstory', async () => {
+// skipped until issue: https://github.com/eclipse/che/issues/19289 resolved
+suite.skip('The "VscodeValePlugin" userstory', async () => {
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
             await driverHelper.navigateToUrl(factoryUrl);
