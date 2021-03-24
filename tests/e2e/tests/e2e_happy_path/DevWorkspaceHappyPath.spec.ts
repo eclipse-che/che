@@ -20,8 +20,8 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 suite('Workspace creation via factory url', async () => {
 
     let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
-    const workspaceSampleName: string = 'web-nodejs-sample';
-    const workspaceRootFolderName: string = 'app';
+    const workspaceSampleName: string = 'spring-petclinic';
+    const workspaceRootFolderName: string = 'src';
 
     suite('Open factory URL', async () => {
         test(`Navigating to factory URL`, async () => {
