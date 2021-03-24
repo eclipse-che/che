@@ -21,7 +21,7 @@ const sampleName: string = 'nodejs-web-app';
 const pathToFile: string = `${sampleName}`;
 const fileName: string = 'test.sh';
 
-suite(`The 'VscodeShellcheckPlugin' test`, async () => {
+suite.skip(`The 'VscodeShellcheckPlugin' test`, async () => {
     test('Check errors highlighting', async () => {
         // the simple " character as a result. Workaround to avoiding autocomplete.
         const errorText: string = Key.chord('"""', Key.BACK_SPACE, Key.BACK_SPACE);

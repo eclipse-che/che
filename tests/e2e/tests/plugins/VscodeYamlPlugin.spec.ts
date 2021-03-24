@@ -21,7 +21,7 @@ const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
 
-suite('The "VscodeYamlPlugin" userstory', async () => {
+suite.skip('The "VscodeYamlPlugin" userstory', async () => {
     test('Check autocomplete', async () => {
         await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
         await editor.waitSuggestion(yamlFileName, 'from', 60000, 18, 5);

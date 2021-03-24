@@ -235,7 +235,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         Logger.debug('TestWorkspaceUtil.startWorkspace');
 
         try {
-            await this.processRequestHandler.post(`${TestWorkspaceUtil.WORKSPACE_API_URL}/${workspaceId}/runtime?debug-workspace-start=false`);
+            await this.processRequestHandler.post(`${TestWorkspaceUtil.WORKSPACE_API_URL}/${workspaceId}/runtime`);
         } catch (error) {
             console.error(error);
             throw error;

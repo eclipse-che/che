@@ -14,7 +14,7 @@ import { KubernetesPlugin } from '../../pageobjects/ide/plugins/KubernetesPlugin
 
 const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
 
-suite(`The 'VscodeKubernetesPlugin' test`, async () => {
+suite.skip(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Check the "Kubernetes" plugin', async () => {
         test('Check plugin is added to workspace', async () => {
             await kubernetesPlugin.openView(240_000);
