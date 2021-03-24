@@ -41,13 +41,11 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
         });
   }
 
-  // never really used, just for compatibility
   @Override
   public String rawFileLocation(String filename) {
     return URI.create(devfileFileLocation).resolve(filename).toString();
   }
 
-  // never really used, just for compatibility
   @Override
   public String getHostName() {
     return URI.create(devfileFileLocation).getHost();

@@ -183,7 +183,7 @@ public class GitlabUrl implements RemoteFactoryUrl {
    * @return location of specified file in a repository
    */
   public String rawFileLocation(String fileName) {
-    StringJoiner joiner =
+    String resultUrl =
         new StringJoiner("/")
             .add(hostName)
             .add("api/v4/projects")
@@ -191,8 +191,8 @@ public class GitlabUrl implements RemoteFactoryUrl {
             .add("repository")
             .add("files")
             .add(fileName)
-            .add("raw");
-    String resultUrl = joiner.toString();
+            .add("raw")
+            .toString();
     if (branch != null) {
       resultUrl = resultUrl + "?ref=" + branch;
     } else {
