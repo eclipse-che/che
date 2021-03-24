@@ -18,6 +18,7 @@ import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import { error } from 'selenium-webdriver';
 import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
 import { CLASSES } from '../../inversify.types';
+import { Logger } from '../Logger';
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
@@ -30,6 +31,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     ) { }
 
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
+        Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
+
         const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
@@ -56,6 +59,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
+        Logger.debug('TestWorkspaceUtil.waitPluginAdding');
+
         const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
@@ -84,6 +89,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async getListOfWorkspaceId(): Promise<string[]> {
+        Logger.debug('TestWorkspaceUtil.getListOfWorkspaceId');
+
         const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
 
         interface IMyObj {
@@ -103,12 +110,16 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async getIdOfRunningWorkspace(wsName: string): Promise<string> {
+        Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspace');
+
         const getWorkspacesByNameResponse = await this.processRequestHandler.get(`${TestWorkspaceUtil.WORKSPACE_API_URL}/:${wsName}`);
         return getWorkspacesByNameResponse.data.id;
 
     }
 
     public async getIdOfRunningWorkspaces(): Promise<Array<string>> {
+        Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspaces');
+
         try {
             const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
 
@@ -134,6 +145,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async removeWorkspaceById(id: string) {
+        Logger.debug('TestWorkspaceUtil.removeWorkspaceById');
+
         const workspaceIdUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
         try {
             const deleteWorkspaceResponse = await this.processRequestHandler.delete(workspaceIdUrl);
@@ -148,6 +161,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async stopWorkspaceById(id: string) {
+        Logger.debug('TestWorkspaceUtil.stopWorkspaceById');
+
         const stopWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
 
         try {
@@ -177,6 +192,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async cleanUpAllWorkspaces() {
+        Logger.debug('TestWorkspaceUtil.cleanUpAllWorkspaces');
+
         let listOfRunningWorkspaces: Array<string> = await this.getIdOfRunningWorkspaces();
         for (const entry of listOfRunningWorkspaces) {
             await this.stopWorkspaceById(entry);
@@ -191,8 +208,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile) {
+        Logger.debug('TestWorkspaceUtil.createWsFromDevFile');
+
         try {
-             await this.processRequestHandler.post(TestWorkspaceUtil.WORKSPACE_API_URL + '/devfile', customTemplate);
+            await this.processRequestHandler.post(TestWorkspaceUtil.WORKSPACE_API_URL + '/devfile', customTemplate);
         } catch (error) {
             console.error(error);
             throw error;
@@ -200,6 +219,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async getBaseDevfile(): Promise<che.workspace.devfile.Devfile> {
+        Logger.debug('TestWorkspaceUtil.getBaseDevfile');
+
         const baseDevfile: che.workspace.devfile.Devfile = {
             apiVersion: '1.0.0',
             metadata: {
@@ -208,6 +229,17 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         };
 
         return baseDevfile;
+    }
+
+    async startWorkspace(workspaceId: string) {
+        Logger.debug('TestWorkspaceUtil.startWorkspace');
+
+        try {
+            await this.processRequestHandler.post(`${TestWorkspaceUtil.WORKSPACE_API_URL}/${workspaceId}/runtime`);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
 }

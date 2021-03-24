@@ -9,6 +9,7 @@
  **********************************************************************/
 
 import { WorkspaceStatus } from './WorkspaceStatus';
+import { che } from '@eclipse-che/api';
 
 export interface ITestWorkspaceUtil {
     cleanUpAllWorkspaces() : void;
@@ -18,4 +19,7 @@ export interface ITestWorkspaceUtil {
     stopWorkspaceById(id: string) : void;
     getIdOfRunningWorkspace(namespace: string): Promise<string>;
     getIdOfRunningWorkspaces(): Promise<Array<string>>;
+    createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile): void;
+    getBaseDevfile(): Promise<che.workspace.devfile.Devfile>;
+    startWorkspace(workspaceId: string): void;
 }

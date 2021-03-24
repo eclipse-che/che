@@ -48,7 +48,6 @@ const CLASSES = {
     GitHubUtil: 'GitHubUtil',
     CheGitApi: 'CheGitApi',
     GitPlugin: 'GitPlugin',
-    TestWorkspaceUtil: 'TestWorkspaceUtil',
     NotificationCenter: 'NotificationCenter',
     PreferencesHandler: 'PreferencesHandler',
     CheApiRequestHandler: 'CheApiRequestHandler',
