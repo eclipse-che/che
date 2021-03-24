@@ -34,7 +34,8 @@ const subRootFolder: string = 'app';
 const pathToFile: string = `${sampleName}`;
 const fileName: string = 'test.sh';
 
-suite(`The 'VscodeShellcheckPlugin' test`, async () => {
+// skipped until issue: https://github.com/eclipse/che/issues/19376 resolved
+suite.skip(`The 'VscodeShellcheckPlugin' test`, async () => {
     suite('Create workspace', async () => {
         test('Set shellcheck path', async () => {
             const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath';
