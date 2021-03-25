@@ -67,23 +67,23 @@ public class GitlabUrlTest {
     return new Object[][] {
       {
         "https://gitlab.net/eclipse/che.git",
-        "https://gitlab.net/api/v4/projects/eclipse%%2fche/repository/files/%s/raw?ref=master"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Fche/repository/files/%s/raw?ref=master"
       },
       {
         "https://gitlab.net/eclipse/fooproj/che.git",
-        "https://gitlab.net/api/v4/projects/eclipse%%2ffooproj/repository/files/%s/raw?ref=master"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=master"
       },
       {
         "https://gitlab.net/eclipse/fooproj/-/tree/master/",
-        "https://gitlab.net/api/v4/projects/eclipse%%2ffooproj/repository/files/%s/raw?ref=master"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=master"
       },
       {
         "https://gitlab.net/eclipse/fooproj/che/-/tree/foobranch/",
-        "https://gitlab.net/api/v4/projects/eclipse%%2ffooproj/repository/files/%s/raw?ref=foobranch"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=foobranch"
       },
       {
         "https://gitlab.net/eclipse/fooproj/che/-/tree/foobranch/subfolder",
-        "https://gitlab.net/api/v4/projects/eclipse%%2ffooproj/repository/files/%s/raw?ref=foobranch"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=foobranch"
       },
     };
   }
