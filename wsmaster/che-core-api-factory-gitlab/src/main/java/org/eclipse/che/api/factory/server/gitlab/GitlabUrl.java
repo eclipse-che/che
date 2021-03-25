@@ -190,6 +190,7 @@ public class GitlabUrl implements RemoteFactoryUrl {
         new StringJoiner("/")
             .add(hostName)
             .add("api/v4/projects")
+            // use URL-encoded path to the project as a selector instead of id
             .add(encode(username + "/" + project, Charsets.UTF_8))
             .add("repository")
             .add("files")
