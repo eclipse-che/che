@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-parent</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.28.0-SNAPSHOT</version>
+        <version>7.29.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-multiuser-permission</artifactId>
