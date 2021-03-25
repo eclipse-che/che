@@ -323,7 +323,8 @@ export class ProjectTree {
     }
 
     private async getExpandIconCssLocator(itemPath: string): Promise<string> {
-        const entry: string = await this.getWorkspacePathEntry();
+        const items: Array<string> = itemPath.split('/');
+        const entry: string = items.length > 1 ? await this.getWorkspacePathEntry() : '';
         return `div[data-node-id='${entry}/projects/${itemPath}']`;
     }
 
