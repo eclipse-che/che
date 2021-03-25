@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.28.1-SNAPSHOT</version>
+        <version>7.28.0</version>
     </parent>
     <artifactId>che-core-api-ssh-shared</artifactId>
     <packaging>jar</packaging>
