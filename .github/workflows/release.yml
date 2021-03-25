@@ -66,7 +66,7 @@ jobs:
           fetch-depth: 0
       - name: Check existing tag
         run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version }}) ]]; then
             echo "cannot create release, when tag already exists"
             exit 1
           fi
@@ -144,13 +144,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
           allowUpdates: true
-          body: Eclipse Che ${{ github.event.inputs.version}}
+          body: Eclipse Che ${{ github.event.inputs.version }}
           draft: false
-          name: Eclipse Che ${{ github.event.inputs.version}}
+          name: Eclipse Che ${{ github.event.inputs.version }}
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: ${{ github.event.inputs.version}}
+          tag: ${{ github.event.inputs.version }}
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
       - name: Create failure MM message
         if: ${{ failure() }}
