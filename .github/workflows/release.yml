@@ -139,16 +139,19 @@ jobs:
           ./che/make-release.sh
       - name: Create GH Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1.8.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
-          tag_name: ${{ github.event.inputs.version}}
-          release_name: Eclipse Che ${{ github.event.inputs.version}}
-          body: |
-            Eclipse Che ${{ github.event.inputs.version}}
+          allowUpdates: true
+          body: Eclipse Che ${{ github.event.inputs.version}}
           draft: false
+          name: Eclipse Che ${{ github.event.inputs.version}}
+          omitBodyDuringUpdate: false
+          omitNameDuringUpdate: false
           prerelease: false
+          tag: ${{ github.event.inputs.version}}
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
       - name: Create failure MM message
         if: ${{ failure() }}
         run: |
