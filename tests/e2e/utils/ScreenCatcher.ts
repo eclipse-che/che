@@ -52,7 +52,7 @@ export class ScreenCatcher {
     async catchScreen(screenshotPath: string) {
         const screenshot: string = await this.driverHelper.getDriver().takeScreenshot();
         const screenshotStream = fs.createWriteStream(screenshotPath);
-        screenshotStream.write(new Buffer(screenshot, 'base64'));
+        screenshotStream.write(Buffer.from(screenshot, 'base64'));
         screenshotStream.end();
     }
 
@@ -61,7 +61,7 @@ export class ScreenCatcher {
 
         if (err.stack) {
             const screenshotStream = fs.createWriteStream(errorLogPath);
-            screenshotStream.write(new Buffer(err.stack, 'utf8'));
+            screenshotStream.write(Buffer.from(err.stack, 'utf8'));
             screenshotStream.end();
         }
     }
