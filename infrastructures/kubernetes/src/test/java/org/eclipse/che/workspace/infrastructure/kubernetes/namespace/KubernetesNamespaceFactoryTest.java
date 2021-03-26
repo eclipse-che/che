@@ -34,6 +34,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -78,8 +80,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesCl
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -108,6 +115,7 @@ public class KubernetesNamespaceFactoryTest {
   private KubernetesClient k8sClient;
   @Mock private UserManager userManager;
   @Mock private PreferenceManager preferenceManager;
+  @Mock Appender mockedAppender;
 
   @Mock
   private NonNamespaceOperation<
@@ -1284,6 +1292,105 @@ public class KubernetesNamespaceFactoryTest {
             .normalizeNamespaceName(
                 "looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong")
             .length());
+  }
+
+  @Test
+  public void shouldPrintWarnMessageAboutLegacyNamespaceName() {
+
+    // run your test
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            "legacy",
+            "",
+            "",
+            "<userid>-che",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    assertEqualsMessage(
+        "'che.infra.kubernetes.namespace' configuration parameter has been deprecated and is subject to remove in future releases.  Current value `{}`. Legacy workspaces located in this namespace may become unreachable in future releases. Please refer to the documentation about possible next steps.");
+  }
+
+  @Test
+  public void shouldPrintWarnMessageAboutMissingRequiredPlaceholders() {
+
+    // run your test
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            null,
+            "",
+            "",
+            "che-che",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    assertEqualsMessage(
+        "Namespace strategies other than 'per user' has been deprecated and are subject to remove in  in future releases. Usage of one placeholder from `{}` is required in 'che.infra.kubernetes.namespace.default' parameter. Current value `{}`.");
+  }
+
+  @Test
+  public void shouldPrintWarnMessageAboutLegacyNamespaceNamePlaceholders() {
+
+    // run your test
+    namespaceFactory =
+        new KubernetesNamespaceFactory(
+            null,
+            "",
+            "",
+            "<workspaceid>-che",
+            false,
+            true,
+            true,
+            NAMESPACE_LABELS,
+            NAMESPACE_ANNOTATIONS,
+            clientFactory,
+            cheClientFactory,
+            userManager,
+            preferenceManager,
+            pool);
+
+    assertEqualsMessage(
+        "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` placeholder has been deprecated and is subject to remove in  future releases. Current value `{}`. Please refer to the documentation about possible next steps.");
+  }
+
+  public void assertEqualsMessage(String message) {
+    // verify using ArgumentCaptor
+    ArgumentCaptor<Appender> argumentCaptor = ArgumentCaptor.forClass(Appender.class);
+    Mockito.verify(mockedAppender).doAppend(argumentCaptor.capture());
+
+    // assert against argumentCaptor.getAllValues()
+    Assert.assertEquals(1, argumentCaptor.getAllValues().size());
+    Assert.assertEquals(
+        ((LoggingEvent) argumentCaptor.getAllValues().get(0)).getMessage(), message);
+  }
+
+  @BeforeMethod
+  public void addMockedAppender() {
+    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME))
+        .addAppender(mockedAppender);
+  }
+
+  @AfterMethod
+  public void detachMockedAppender() {
+    // remove the mock appender from static context
+    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME))
+        .detachAppender(mockedAppender);
   }
 
   @DataProvider
