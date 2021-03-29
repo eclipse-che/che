@@ -69,7 +69,7 @@ export class Ide {
         await this.driverHelper.waitVisibility(notificationLocator, timeout);
     }
 
-    async waitTaskExitCodeNotificationBoolean(exitCode: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) : Promise<boolean> {
+    async waitTaskExitCodeNotificationBoolean(exitCode: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT): Promise<boolean> {
         Logger.debug(`Ide.waitTaskExitCodeNotification "has exited with code ${exitCode}."`);
 
         const exitCodeNotificationLocator: By = By.xpath(this.getNotificationXpathLocator(`has exited with code`));
