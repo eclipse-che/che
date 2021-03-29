@@ -192,7 +192,7 @@ public class KubernetesNamespaceFactory {
     if (!isNullOrEmpty(legacyNamespaceName)) {
       LOG.warn(
           "'che.infra.kubernetes.namespace' configuration parameter has been deprecated "
-              + "and is subject to remove in future releases.  Current value `{}`. Legacy workspaces located "
+              + "and is subject to removal in future releases.  Current value is: `{}`. Legacy workspaces located "
               + "in this namespace may become unreachable in future releases. "
               + "Please refer to the documentation about possible next steps.",
           legacyNamespaceName);
@@ -200,8 +200,8 @@ public class KubernetesNamespaceFactory {
     if (LEGACY_NAMESPACE_NAME_PLACEHOLDERS.stream().anyMatch(defaultNamespaceName::contains)) {
       LOG.warn(
           "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` "
-              + "placeholder has been deprecated and is subject to remove in  future releases."
-              + " Current value `{}`. Please refer to the documentation about "
+              + "placeholder has been deprecated and is subject to removal in  future releases."
+              + " Current value is: `{}`. Please refer to the documentation about "
               + "possible next steps.",
           LEGACY_NAMESPACE_NAME_PLACEHOLDERS,
           defaultNamespaceName);
@@ -209,9 +209,9 @@ public class KubernetesNamespaceFactory {
         .stream()
         .noneMatch(defaultNamespaceName::contains)) {
       LOG.warn(
-          "Namespace strategies other than 'per user' has been deprecated and are subject to remove in  in future releases. "
-              + "Usage of one placeholder from `{}` is required in 'che.infra.kubernetes.namespace.default' parameter."
-              + " Current value `{}`.",
+          "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. "
+              + "Using the or placeholder `{}` is required in 'che.infra.kubernetes.namespace.default' parameter."
+              + " Current value is: `{}`.",
           REQUIRED_NAMESPACE_NAME_PLACEHOLDERS,
           defaultNamespaceName);
     }

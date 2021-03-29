@@ -1316,7 +1316,7 @@ public class KubernetesNamespaceFactoryTest {
             pool);
 
     assertEqualsMessage(
-        "'che.infra.kubernetes.namespace' configuration parameter has been deprecated and is subject to remove in future releases.  Current value `{}`. Legacy workspaces located in this namespace may become unreachable in future releases. Please refer to the documentation about possible next steps.");
+        "'che.infra.kubernetes.namespace' configuration parameter has been deprecated and is subject to removal in future releases.  Current value is: `{}`. Legacy workspaces located in this namespace may become unreachable in future releases. Please refer to the documentation about possible next steps.");
   }
 
   @Test
@@ -1341,7 +1341,7 @@ public class KubernetesNamespaceFactoryTest {
             pool);
 
     assertEqualsMessage(
-        "Namespace strategies other than 'per user' has been deprecated and are subject to remove in  in future releases. Usage of one placeholder from `{}` is required in 'che.infra.kubernetes.namespace.default' parameter. Current value `{}`.");
+        "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. Using the or placeholder `{}` is required in 'che.infra.kubernetes.namespace.default' parameter. Current value is: `{}`.");
   }
 
   @Test
@@ -1366,7 +1366,7 @@ public class KubernetesNamespaceFactoryTest {
             pool);
 
     assertEqualsMessage(
-        "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` placeholder has been deprecated and is subject to remove in  future releases. Current value `{}`. Please refer to the documentation about possible next steps.");
+        "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` placeholder has been deprecated and is subject to removal in  future releases. Current value is: `{}`. Please refer to the documentation about possible next steps.");
   }
 
   public void assertEqualsMessage(String message) {
