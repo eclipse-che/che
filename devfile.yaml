@@ -1,4 +1,4 @@
-apiVersion: 1.0.0
+apiVersion: 2.1.0-alpha
 metadata:
   name: che-server-in-che
 components:
