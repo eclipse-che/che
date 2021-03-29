@@ -16,19 +16,13 @@ import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
-import { KubernetesPlugin } from '../../pageobjects/ide/plugins/KubernetesPlugin';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import { error, Key } from 'selenium-webdriver';
+import { Key } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
-
-
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
-const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
@@ -40,7 +34,6 @@ const subRootFolder: string = 'src';
 
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
-
 
 suite(`The 'JavaPlugin' test`, async () => {
     suite('Create workspace', async () => {
