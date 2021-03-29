@@ -213,7 +213,7 @@ public class KubernetesNamespaceFactory {
           "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. "
               + "Using the {} placeholder is required in 'che.infra.kubernetes.namespace.default' parameter."
               + " Current value is: `{}`.",
-              Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS),
+          Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS),
           defaultNamespaceName);
     }
   }
