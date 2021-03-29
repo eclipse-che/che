@@ -23,6 +23,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kub
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.METADATA_NAME_MAX_LENGTH;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -210,9 +211,9 @@ public class KubernetesNamespaceFactory {
         .noneMatch(defaultNamespaceName::contains)) {
       LOG.warn(
           "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. "
-              + "Using the or placeholder `{}` is required in 'che.infra.kubernetes.namespace.default' parameter."
+              + "Using the {} placeholder is required in 'che.infra.kubernetes.namespace.default' parameter."
               + " Current value is: `{}`.",
-          REQUIRED_NAMESPACE_NAME_PLACEHOLDERS,
+              Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS),
           defaultNamespaceName);
     }
   }
