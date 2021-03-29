@@ -28,19 +28,19 @@ repositories:
        url: https://github.com/eclipse/che/tree/master/tests
        description: >-
          source code of our integration tests.
-  - url: https://github.com/eclipse/che-theia
+  - url: https://github.com/eclipse-che/che-theia
     name: che-theia
     description: >-
       Theia IDE integrated in Che.
-    devfile: https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml
-    doc: https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/eclipse-che/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml
+    doc: https://github.com/eclipse-che/che-theia/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
     components:
      - name: generator
-       url: https://github.com/eclipse/che-theia/tree/master/generator
+       url: https://github.com/eclipse-che/che-theia/tree/master/generator
        description: >-
          `che:theia init` CLI to prepare and build che-theia
-       doc: https://github.com/eclipse/che-theia/blob/master/generator/CONTRIBUTING.md
+       doc: https://github.com/eclipse-che/che-theia/blob/master/generator/CONTRIBUTING.md
   - url: https://github.com/che-incubator/chectl
     name: chectl
     description: >-

@@ -18,8 +18,8 @@ Repository | Component | Description | Devfile | Documentation
 ---| [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | |
 ---| [wsmaster](https://github.com/eclipse/che/tree/master/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
 ---| [tests](https://github.com/eclipse/che/tree/master/tests) | source code of our integration tests. | | |
-[che-theia](https://github.com/eclipse/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md)
----| [generator](https://github.com/eclipse/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | |
+[che-theia](https://github.com/eclipse-che/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse-che/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse-che/che-theia/blob/master/CONTRIBUTING.md)
+---| [generator](https://github.com/eclipse-che/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | |
 [chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
 [dashboard](https://github.com/eclipse/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [devfile-registry](https://github.com/eclipse/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 

@@ -270,7 +270,7 @@ suite('Validation of debug functionality', async () => {
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote');
+        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
         await debugView.clickOnRunDebugButton();
 
         try {
