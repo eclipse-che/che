@@ -26,7 +26,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/devfiles/Java11PluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/Java11PluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const codeNavigationClassName: string = 'String.class';
 const sampleName: string = 'console-java-simple';
