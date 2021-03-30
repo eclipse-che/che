@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2020 Red Hat, Inc.
+ * Copyright (c) 2021 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -89,7 +89,7 @@ suite(`The 'JavaPlugin' test`, async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
 
-        test(`Stop and remowe workspace`, async () => {
+        test(`Stop and remove workspace`, async () => {
             await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
