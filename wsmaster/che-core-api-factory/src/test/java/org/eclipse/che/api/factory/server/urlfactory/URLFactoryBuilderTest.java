@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.ApiException;
@@ -173,8 +174,10 @@ public class URLFactoryBuilderTest {
     when(devfileVersionDetector.devfileMajorVersion(devfile)).thenReturn(2);
 
     RemoteFactoryUrl githubLikeRemoteUrl =
-        () ->
-            Collections.singletonList(
+        new RemoteFactoryUrl() {
+          @Override
+          public List<DevfileLocation> devfileFileLocations() {
+            return Collections.singletonList(
                 new DevfileLocation() {
                   @Override
                   public Optional<String> filename() {
@@ -186,6 +189,18 @@ public class URLFactoryBuilderTest {
                     return myLocation;
                   }
                 });
+          }
+
+          @Override
+          public String rawFileLocation(String filename) {
+            return null;
+          }
+
+          @Override
+          public String getHostName() {
+            return null;
+          }
+        };
 
     FactoryMetaDto factory =
         urlFactoryBuilder
