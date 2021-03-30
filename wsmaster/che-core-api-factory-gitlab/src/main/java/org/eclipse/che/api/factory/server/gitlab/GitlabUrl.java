@@ -11,8 +11,9 @@
  */
 package org.eclipse.che.api.factory.server.gitlab;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.net.URLEncoder.encode;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
@@ -185,15 +186,23 @@ public class GitlabUrl implements RemoteFactoryUrl {
    * @return location of specified file in a repository
    */
   public String rawFileLocation(String fileName) {
-    StringJoiner joiner = new StringJoiner("/").add(hostName).add(username).add(project);
-    if (repository != null) {
-      joiner.add(repository);
+    String resultUrl =
+        new StringJoiner("/")
+            .add(hostName)
+            .add("api/v4/projects")
+            // use URL-encoded path to the project as a selector instead of id
+            .add(encode(username + "/" + project, Charsets.UTF_8))
+            .add("repository")
+            .add("files")
+            .add(fileName)
+            .add("raw")
+            .toString();
+    if (branch != null) {
+      resultUrl = resultUrl + "?ref=" + branch;
+    } else {
+      resultUrl = resultUrl + "?ref=master";
     }
-    joiner.add("-").add("raw").add(firstNonNull(branch, "master"));
-    if (subfolder != null) {
-      joiner.add(subfolder);
-    }
-    return joiner.add(fileName).toString();
+    return resultUrl;
   }
 
   /**
