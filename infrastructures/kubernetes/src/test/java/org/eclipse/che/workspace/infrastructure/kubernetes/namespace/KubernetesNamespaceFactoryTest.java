@@ -1382,7 +1382,7 @@ public class KubernetesNamespaceFactoryTest {
 
   @BeforeMethod
   public void addMockedAppender() {
-    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME))
+    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(KubernetesNamespaceFactory.class))
         .addAppender(mockedAppender);
   }
 
