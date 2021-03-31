@@ -11,7 +11,7 @@ components:
   - type: cheEditor
     id: eclipse/che-theia/next
     memoryLimit: 512Mi
-  - id: che-incubator/typescript/latest
+  - id: vscode/typescript-language-features/latest
     type: chePlugin
   - id: ms-vscode/node-debug2/latest
     preferences:
