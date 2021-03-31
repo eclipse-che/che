@@ -55,7 +55,7 @@ repositories:
     devfile: https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-devfile-registry
+  - url: https://github.com/eclipse-che/che-devfile-registry
     name: devfile-registry
     description: >-
       The default set of devfiles that would be made available on the Che dashboard stacks.
@@ -87,7 +87,7 @@ repositories:
     devfile: https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse/che-plugin-registry
+  - url: https://github.com/eclipse-che/che-plugin-registry
     name: plugin-registry
     description: >-
       The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces.
