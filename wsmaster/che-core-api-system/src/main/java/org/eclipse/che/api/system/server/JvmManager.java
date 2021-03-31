@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.system.server;
 
-import com.google.common.io.Files;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -22,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -130,7 +130,7 @@ public class JvmManager {
 
   /** Create a file with a zipped hprof heap dump. */
   public File createZippedHeapDump() throws IOException {
-    File tmpFolder = Files.createTempDir();
+    File tmpFolder = Files.createTempDirectory("heapdump").toFile();
     File heapFile = new File(tmpFolder, "heapdump.hprof");
     hotSpotMxBean.dumpHeap(heapFile.getAbsolutePath(), false);
     File zip = File.createTempFile("heapdump", ".zip");
