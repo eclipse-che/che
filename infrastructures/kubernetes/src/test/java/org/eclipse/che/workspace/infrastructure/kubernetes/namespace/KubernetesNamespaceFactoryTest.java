@@ -1366,7 +1366,7 @@ public class KubernetesNamespaceFactoryTest {
             pool);
 
     assertEqualsMessage(
-        "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` placeholder has been deprecated and is subject to removal in  future releases. Current value is: `{}`. Please refer to the documentation about possible next steps.");
+        "'che.infra.kubernetes.namespace.default' configuration parameter with `{}` placeholder has been deprecated and is subject to removal in future releases. Current value is: `{}`. Please refer to the documentation about possible next steps.");
   }
 
   public void assertEqualsMessage(String message) {
