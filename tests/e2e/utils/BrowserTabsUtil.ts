@@ -15,34 +15,34 @@ import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
 
 @injectable()
-export class BrowserWindowsUtil {
+export class BrowserTabsUtil {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async switchToWindow(windowHandle: string) {
-        Logger.debug('BrowserWindowsUtil.switchToWindow')
+        Logger.debug('BrowserTabsUtil.switchToWindow')
         await this.driverHelper.getDriver().switchTo().window(windowHandle);
     }
 
     async getAllWindowHandles(): Promise<string[]> {
-        Logger.debug('BrowserWindowsUtil.getAllWindowHandles')
+        Logger.debug('BrowserTabsUtil.getAllWindowHandles')
 
         return (await this.driverHelper.getDriver()).getAllWindowHandles();
     }
 
     async getCurrentWindowHandle(): Promise<string> {
-        Logger.debug('BrowserWindowsUtil.getCurrentWindowHandle')
+        Logger.debug('BrowserTabsUtil.getCurrentWindowHandle')
 
         return await this.driverHelper.getDriver().getWindowHandle();
     }
 
     async navigateTo(url: string) {
-        Logger.debug(`BrowserWindowsUtil.navigateTo ${url}`)
+        Logger.debug(`BrowserTabsUtil.navigateTo ${url}`)
 
         await this.driverHelper.navigateAndWaitToUrl(url);
     }
 
     async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number) {
-        Logger.debug('BrowserWindowsUtil.waitAndSwitchToAnotherWindow')
+        Logger.debug('BrowserTabsUtil.waitAndSwitchToAnotherWindow')
 
         await this.driverHelper.waitUntilTrue(async () => {
             const windowHandles: string[] = await this.getAllWindowHandles();
@@ -61,8 +61,14 @@ export class BrowserWindowsUtil {
     }
 
     async waitContentAvailableInTheNewTab(contentLocator: By, timeout: number) {
-        Logger.debug('BrowserWindowsUtil.waitContentAvailableInTheNewTab')
+        Logger.debug('BrowserTabsUtil.waitContentAvailableInTheNewTab')
 
         await this.driverHelper.waitVisibility(contentLocator, timeout);
+    }
+
+    async refreshPage() {
+        Logger.debug('BrowserTabsUtil.refreshPage')
+
+        await (await this.driverHelper.getDriver()).navigate().refresh();
     }
 }

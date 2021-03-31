@@ -17,12 +17,12 @@ import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Key, By } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { Terminal } from '../../pageobjects/ide/Terminal';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -31,16 +31,17 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/e972965b5f5e64e79a5c627ee0a034bd/raw/a85cd44b3bb4201527487d713333538112c0e875/typescript-node-debug2.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/TypescriptNodeDebug2PluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const codeNavigationClassName: string = 'OpenDefinition.ts';
-const sampleName: string = 'nodejs-web-app';
+const projectName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
 const sampleBodyLocator: By = By.xpath(`//body[text()='Hello World!']`);
 
-const fileFolderPath: string = `${sampleName}`;
-const debugFileFolderPath: string = `${sampleName}/app`
+const fileFolderPath: string = `${projectName}`;
+const debugFileFolderPath: string = `${projectName}/app`
 const debugFile: string = 'app.js'
 const tabTitle: string = 'typescript-node-debug.ts';
 
@@ -54,16 +55,16 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(sampleName, subRootFolder);
+            await projectTree.waitProjectImported(projectName, subRootFolder);
         });
     });
 
-    suite('Test opening file', async () => {
-        // opening file that soon should give time for LS to initialize
-        projectAndFileTests.openFile(fileFolderPath, tabTitle);
-    });
-
     suite('The Typescript plugin test', async () => {
+        test('Open file', async () => {
+            await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
+            await editor.selectTab(tabTitle);
+        });
+
         test('Wait until JS/Typescript LS is initialised', async () => {
             await ide.checkLsInitializationStart('Initializing');
             await ide.waitStatusBarTextAbsence('Initializing', 900_000);
@@ -89,45 +90,65 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await editor.performKeyCombination(tabTitle, Key.chord(Key.CONTROL, Key.F12));
             await editor.waitEditorAvailable(codeNavigationClassName, 60_000);
         });
-
     });
 
     suite(`The 'Node-debug' plugin test`, async () => {
-        test('test', async () => {
+        let currentWindow: string = '';
+        let applicationPreviewWindow: string = '';
+
+        test('Run application in debug mode', async () => {
             await topMenu.runTask('run the web app (debugging enabled)');
             await ide.waitNotification('Process nodejs is now listening on port 3000.');
 
-            const currentWindow = await (await driverHelper.getDriver()).getWindowHandle();
+            currentWindow = await browserTabsUtil.getCurrentWindowHandle();
+        });
+
+        test('Open application in the new editor window', async () => {
             await ide.clickOnNotificationButton('Process nodejs is now listening on port 3000.', 'Open In New Tab')
+            await browserTabsUtil.waitAndSwitchToAnotherWindow(currentWindow, 60_000);
+            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000)
 
-            await driverHelper.DefaultWindow
-            await driverHelper.waitVisibility(sampleBodyLocator, 60_000)
-            const applicationPreviewWindow: string = await (await driverHelper.getDriver()).getWindowHandle();
+            applicationPreviewWindow = await browserTabsUtil.getCurrentWindowHandle();
+        });
 
-            await (await driverHelper.getDriver()).switchTo().window(currentWindow);
-            await ide.waitAndSwitchToIdeFrame(60000);
+        test('Switch back to the IDE window', async () => {
+            await browserTabsUtil.switchToWindow(currentWindow);
+            await ide.waitAndSwitchToIdeFrame(60_000);
+        });
 
+        test('Activate breakpoint', async () => {
             await projectTree.expandPathAndOpenFile(debugFileFolderPath, debugFile);
             await editor.activateBreakpoint(debugFile, 19)
+        });
 
+        test('Run debug', async () => {
             await topMenu.selectOption('View', 'Debug');
             await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
             await debugView.clickOnDebugConfigurationDropDown();
             await debugView.clickOnDebugConfigurationItem('Attach to Remote (nodejs-web-app)');
             await debugView.clickOnRunDebugButton();
-            await waitDebugConnected()
-
-
-            await (await driverHelper.getDriver()).switchTo().window(applicationPreviewWindow);
-            await driverHelper.waitVisibility(sampleBodyLocator, 60_000)
-            await (await driverHelper.getDriver()).navigate().refresh()
-
-
-            await (await driverHelper.getDriver()).switchTo().window(currentWindow);
-            await ide.waitAndSwitchToIdeFrame(60000);
-            await editor.waitStoppedDebugBreakpoint(debugFile, 19, 60_000);
         });
 
+        test('Wait debug connected', async () => {
+            await terminal.waitTab('Debug Console', 60_000);
+
+            // for make sure that debug really start
+            // (inner processes may not be displayed) 
+            await driverHelper.wait(10_000)
+        });
+
+        test('Refresh application sample window', async () => {
+            await browserTabsUtil.switchToWindow(applicationPreviewWindow);
+            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000)
+            await browserTabsUtil.refreshPage();
+        });
+
+        test('Check breakpoint stopped', async () => {
+            await browserTabsUtil.switchToWindow(currentWindow);
+            await ide.waitAndSwitchToIdeFrame(60000);
+
+            await editor.waitStoppedDebugBreakpoint(debugFile, 19, 60_000);
+        });
     });
 
     suite('Stopping and deleting the workspace', async () => {
@@ -140,30 +161,4 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
-
 });
-
-async function waitDebugConnected() {
-    await terminal.waitTab('Debug Console', 60_000);
-
-    // for make sure that debug really start 
-    await driverHelper.wait(10_000)
-}
-
-
-async function waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number) {
-    await driverHelper.waitUntilTrue(async () => {
-        const windowHandles: string[] = await (await driverHelper.getDriver()).getAllWindowHandles();
-
-        return windowHandles.length > 1;
-    }, timeout);
-
-    const windowHandles: string[] = await (await driverHelper.getDriver()).getAllWindowHandles();
-
-    windowHandles.forEach(async windowHandle => {
-        if (windowHandle !== currentWindowHandle) {
-            await driverHelper.getDriver().getWindowHandle();
-            return;
-        }
-    });
-}
