@@ -54,7 +54,7 @@
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
-        <com.google.guava.version>27.0.1-jre</com.google.guava.version>
+        <com.google.guava.version>29.0-jre</com.google.guava.version>
         <com.google.http-client.version>1.27.0</com.google.http-client.version>
         <com.google.oauth-client.version>1.27.0</com.google.oauth-client.version>
         <com.googlecode.gson.version>2.8.5</com.googlecode.gson.version>
