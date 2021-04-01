@@ -13,6 +13,7 @@ import { Key, By, error } from 'selenium-webdriver';
 import { CLASSES } from '../inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
+import { TimeoutConstants } from '../TimeoutConstants';
 
 @injectable()
 export class BrowserTabsUtil {
@@ -38,7 +39,14 @@ export class BrowserTabsUtil {
     async navigateTo(url: string) {
         Logger.debug(`BrowserTabsUtil.navigateTo ${url}`)
 
-        await this.driverHelper.navigateAndWaitToUrl(url);
+        await this.driverHelper.getDriver().navigate().to(url);
+    }
+
+    async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL) {
+        Logger.trace(`BrowserTabsUtil.navigateAndWaitToUrl ${url}`);
+
+        await this.navigateTo(url);
+        await this.waitURL(url, timeout);
     }
 
     async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number) {
@@ -71,4 +79,28 @@ export class BrowserTabsUtil {
 
         await (await this.driverHelper.getDriver()).navigate().refresh();
     }
+
+    async getCurrentUrl(): Promise<string> {
+        return await this.driverHelper.getDriver().getCurrentUrl();
+    }
+
+    async waitURL(expectedUrl: string, timeout: number) {
+        Logger.trace(`BrowserTabsUtil.waitURL ${expectedUrl}`);
+
+        await this.driverHelper.getDriver().wait(async () => {
+            const currentUrl: string = await this.driverHelper.getDriver().getCurrentUrl();
+            const urlEquals: boolean = currentUrl === expectedUrl;
+
+            if (urlEquals) {
+                return true;
+            }
+        }, timeout);
+    }
+
+    public async maximize() {
+        Logger.trace(`BrowserTabsUtil.maximize`);
+
+        await this.driverHelper.getDriver().manage().window().maximize();
+    }
+
 }
