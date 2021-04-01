@@ -20,7 +20,7 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class Dashboard {
     private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Workspaces']`;
-    private static readonly GET_STARTED_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Get Started Page']`;
+    private static readonly GET_STARTED_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Get Started']`;
     private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
 
