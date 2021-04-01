@@ -54,7 +54,8 @@ const CLASSES = {
     GetStarted: 'GetStarted',
     OpenDialogWidget: 'OpenDialogWidget',
     UpdateAccountInformationPage: 'UpdateAccountInformationPage',
-    KubernetesPlugin: 'KubernetesPlugin'
+    KubernetesPlugin: 'KubernetesPlugin',
+    BrowserTabsUtil: 'BrowserTabsUtil'
 };
 
 export { TYPES, CLASSES };
