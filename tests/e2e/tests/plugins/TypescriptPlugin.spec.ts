@@ -41,8 +41,8 @@ const subRootFolder: string = 'app';
 const sampleBodyLocator: By = By.xpath(`//body[text()='Hello World!']`);
 
 const fileFolderPath: string = `${projectName}`;
-const debugFileFolderPath: string = `${projectName}/app`
-const debugFile: string = 'app.js'
+const debugFileFolderPath: string = `${projectName}/app`;
+const debugFile: string = 'app.js';
 const tabTitle: string = 'typescript-node-debug.ts';
 
 suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
@@ -104,9 +104,9 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         });
 
         test('Open application in the new editor window', async () => {
-            await ide.clickOnNotificationButton('Process nodejs is now listening on port 3000.', 'Open In New Tab')
+            await ide.clickOnNotificationButton('Process nodejs is now listening on port 3000.', 'Open In New Tab');
             await browserTabsUtil.waitAndSwitchToAnotherWindow(currentWindow, 60_000);
-            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000)
+            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000);
 
             applicationPreviewWindow = await browserTabsUtil.getCurrentWindowHandle();
         });
@@ -118,7 +118,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
 
         test('Activate breakpoint', async () => {
             await projectTree.expandPathAndOpenFile(debugFileFolderPath, debugFile);
-            await editor.activateBreakpoint(debugFile, 19)
+            await editor.activateBreakpoint(debugFile, 19);
         });
 
         test('Run debug', async () => {
@@ -133,13 +133,13 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await terminal.waitTab('Debug Console', 60_000);
 
             // for make sure that debug really start
-            // (inner processes may not be displayed) 
-            await driverHelper.wait(10_000)
+            // (inner processes may not be displayed)
+            await driverHelper.wait(10_000);
         });
 
         test('Refresh application sample window', async () => {
             await browserTabsUtil.switchToWindow(applicationPreviewWindow);
-            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000)
+            await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000);
             await browserTabsUtil.refreshPage();
         });
 
