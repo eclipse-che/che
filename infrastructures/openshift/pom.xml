@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.28.2-SNAPSHOT</version>
+        <version>7.28.1</version>
     </parent>
     <artifactId>infrastructure-openshift</artifactId>
     <name>Infrastructure :: OpenShift</name>
