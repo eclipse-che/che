@@ -14,6 +14,8 @@ package org.eclipse.che.api.factory.server.bitbucket;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,14 +51,14 @@ public class BitbucketServerAuthorizingFileContentProviderTest {
     PersonalAccessToken token = new PersonalAccessToken(TEST_HOSTNAME, "user1", "token");
     when(personalAccessTokenManager.get(any(Subject.class), anyString()))
         .thenReturn(Optional.of(token));
-
     String fileURL = "https://foo.bar/scm/repo/.devfile";
+    doThrow(IOException.class).when(urlFetcher).fetch(eq(fileURL));
 
     // when
     fileContentProvider.fetchContent(fileURL);
 
     // then
-    verify(urlFetcher).fetch(eq(fileURL), eq("Bearer token"));
+    verify(urlFetcher, atLeastOnce()).fetch(eq(fileURL), eq("Bearer token"));
   }
 
   @Test
@@ -100,6 +102,7 @@ public class BitbucketServerAuthorizingFileContentProviderTest {
         new BitbucketServerAuthorizingFileContentProvider(
             url, urlFetcher, gitCredentialManager, personalAccessTokenManager);
     PersonalAccessToken token = new PersonalAccessToken(TEST_HOSTNAME, "user1", "token");
+    doThrow(IOException.class).when(urlFetcher).fetch(anyString());
     when(personalAccessTokenManager.get(any(Subject.class), anyString()))
         .thenReturn(Optional.of(token));
 

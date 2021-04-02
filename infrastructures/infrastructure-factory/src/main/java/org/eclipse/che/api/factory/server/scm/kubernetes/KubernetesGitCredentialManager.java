@@ -34,7 +34,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
-import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
+import org.eclipse.che.api.factory.server.scm.ScmAuthenticationToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -81,7 +81,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
   }
 
   @Override
-  public void createOrReplace(PersonalAccessToken personalAccessToken)
+  public void createOrReplace(ScmAuthenticationToken scmAuthenticationToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       final String namespace = getFirstNamespace();
@@ -101,13 +101,13 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                   s ->
                       Boolean.parseBoolean(
                               s.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))
-                          && personalAccessToken
+                          && scmAuthenticationToken
                               .getScmProviderUrl()
                               .equals(s.getMetadata().getAnnotations().get(ANNOTATION_SCM_URL))
-                          && personalAccessToken
+                          && scmAuthenticationToken
                               .getCheUserId()
                               .equals(s.getMetadata().getAnnotations().get(ANNOTATION_CHE_USERID))
-                          && personalAccessToken
+                          && scmAuthenticationToken
                               .getScmUserName()
                               .equals(
                                   s.getMetadata().getAnnotations().get(ANNOTATION_SCM_USERNAME)))
@@ -117,21 +117,21 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
           existing.orElseGet(
               () -> {
                 Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
-                annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
-                annotations.put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName());
-                annotations.put(ANNOTATION_CHE_USERID, personalAccessToken.getCheUserId());
+                annotations.put(ANNOTATION_SCM_URL, scmAuthenticationToken.getScmProviderUrl());
+                annotations.put(ANNOTATION_SCM_USERNAME, scmAuthenticationToken.getScmUserName());
+                annotations.put(ANNOTATION_CHE_USERID, scmAuthenticationToken.getCheUserId());
                 ObjectMeta meta =
                     new ObjectMetaBuilder()
                         .withName(
                             NameGenerator.generate(
-                                String.format(NAME_PATTERN, personalAccessToken.getScmUserName()),
+                                String.format(NAME_PATTERN, scmAuthenticationToken.getScmUserName()),
                                 5))
                         .withAnnotations(annotations)
                         .withLabels(LABELS)
                         .build();
                 return new SecretBuilder().withMetadata(meta).build();
               });
-      URL scmUrl = new URL(personalAccessToken.getScmProviderUrl());
+      URL scmUrl = new URL(scmAuthenticationToken.getScmProviderUrl());
       secret.setData(
           Map.of(
               "credentials",
@@ -140,8 +140,8 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                       format(
                               "%s://%s:%s@%s%s",
                               scmUrl.getProtocol(),
-                              personalAccessToken.getScmUserName(),
-                              URLEncoder.encode(personalAccessToken.getToken(), UTF_8),
+                              scmAuthenticationToken.getScmUserName(),
+                              URLEncoder.encode(scmAuthenticationToken.getToken(), UTF_8),
                               scmUrl.getHost(),
                               scmUrl.getPort() != 80 && scmUrl.getPort() != -1
                                   ? ":" + scmUrl.getPort()

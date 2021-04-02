@@ -14,13 +14,9 @@ package org.eclipse.che.api.factory.server.scm;
 import java.util.Objects;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
-/**
- * Personal access token that can be used to authorise scm operations like api calls, git clone or
- * git push.
- */
-public class PersonalAccessToken extends ScmAuthenticationToken {
+public class OauthAuthenticationToken extends ScmAuthenticationToken {
 
-  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
+  public OauthAuthenticationToken(String scmProviderUrl, String scmUserName, String token) {
     super(
         scmProviderUrl,
         EnvironmentContext.getCurrent().getSubject().getUserId(),
@@ -31,22 +27,11 @@ public class PersonalAccessToken extends ScmAuthenticationToken {
         token);
   }
 
-  public PersonalAccessToken(
-      String scmProviderUrl,
-      String cheUserId,
-      String scmUserName,
-      String scmUserId,
-      String scmTokenName,
-      String scmTokenId,
-      String token) {
-    super(scmProviderUrl, cheUserId, scmUserName, scmUserId, scmTokenName, scmTokenId, token);
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    PersonalAccessToken that = (PersonalAccessToken) o;
+    OauthAuthenticationToken that = (OauthAuthenticationToken) o;
     return Objects.equals(scmProviderUrl, that.scmProviderUrl)
         && Objects.equals(scmUserName, that.scmUserName)
         && Objects.equals(scmUserId, that.scmUserId)
@@ -64,7 +49,7 @@ public class PersonalAccessToken extends ScmAuthenticationToken {
 
   @Override
   public String toString() {
-    return "PersonalAccessToken{"
+    return "OauthAuthenticationToken{"
         + "scmProviderUrl="
         + scmProviderUrl
         + ", scmUserName='"

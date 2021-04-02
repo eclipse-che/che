@@ -16,12 +16,12 @@ import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditi
 
 public interface GitCredentialManager {
   /**
-   * Persists PersonalAccessToken for the future usage.
+   * Persists ScmAuthenticationToken for the future usage.
    *
-   * @param personalAccessToken
+   * @param scmAuthenticationToken
    * @throws UnsatisfiedScmPreconditionException - some storage preconditions aren't met.
    * @throws ScmConfigurationPersistenceException
    */
-  void createOrReplace(PersonalAccessToken personalAccessToken)
+  void createOrReplace(ScmAuthenticationToken scmAuthenticationToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException;
 }
