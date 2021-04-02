@@ -54,10 +54,10 @@ suite(`The 'PythonPlugin' test`, async () => {
         });
 
         test('Autocomplete', async () => {
-            await editor.moveCursorToLineAndChar(tabTitle, 9, 3);
+            await editor.moveCursorToLineAndChar(tabTitle, 8, 2);
             await editor.pressControlSpaceCombination(tabTitle);
             await editor.waitSuggestionContainer();
-            await editor.waitSuggestion(tabTitle, 'print');
+            await editor.waitSuggestion(tabTitle, 'sum');
         });
 
         test('Error highlighting', async () => {
