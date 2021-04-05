@@ -1341,7 +1341,7 @@ public class KubernetesNamespaceFactoryTest {
             pool);
 
     assertEqualsMessage(
-        "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. Using the {} placeholder is required in 'che.infra.kubernetes.namespace.default' parameter. Current value is: `{}`.");
+        "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. Using the {} placeholder is required in the 'che.infra.kubernetes.namespace.default' parameter. The current value is: `{}`.");
   }
 
   @Test
