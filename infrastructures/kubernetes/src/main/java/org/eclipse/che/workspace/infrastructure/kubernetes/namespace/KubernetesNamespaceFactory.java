@@ -202,7 +202,7 @@ public class KubernetesNamespaceFactory {
       LOG.warn(
           "The 'che.infra.kubernetes.namespace.default' configuration parameter with the `{}` "
               + "placeholder has been deprecated and is subject to removal in future releases."
-              + " Current value is: `{}`. Please refer to the documentation about "
+              + " The current value is: `{}`. Please refer to the documentation about "
               + "possible next steps.",
           LEGACY_NAMESPACE_NAME_PLACEHOLDERS,
           defaultNamespaceName);
