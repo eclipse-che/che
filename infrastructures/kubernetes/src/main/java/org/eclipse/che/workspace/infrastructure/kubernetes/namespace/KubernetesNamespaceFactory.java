@@ -193,7 +193,7 @@ public class KubernetesNamespaceFactory {
     if (!isNullOrEmpty(legacyNamespaceName)) {
       LOG.warn(
           "The 'che.infra.kubernetes.namespace' configuration parameter has been deprecated "
-              + "and is subject to removal in future releases.  Current value is: `{}`. Legacy workspaces located "
+              + "and is subject to removal in future releases. The current value is: `{}`. Legacy workspaces located "
               + "in this namespace may become unreachable in future releases. "
               + "Please refer to the documentation about possible next steps.",
           legacyNamespaceName);
