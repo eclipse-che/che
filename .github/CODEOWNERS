@@ -38,7 +38,7 @@ deploy/openshift/templates/monitoring/** @skabashnyuk @metlos @nickboldt
 tests/legacy-e2e/** @musienko-maxim @dmytro-ndp @Ohrimenko1988 @rhopp @nickboldt
 
 # e2e tests
-tests/e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt
+tests/e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTSW
 
 # e2e tests infra
 tests/.infra/centos-ci/** @musienko-maxim @rhopp @nickboldt
