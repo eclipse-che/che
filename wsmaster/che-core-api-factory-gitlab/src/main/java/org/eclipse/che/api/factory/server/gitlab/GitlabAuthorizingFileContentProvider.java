@@ -18,6 +18,7 @@ import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.scm.ScmAuthenticationToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -26,14 +27,17 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvider<GitlabUrl> {
 
   private final PersonalAccessTokenManager personalAccessTokenManager;
+  private final GitlabApiClient gitlabApiClient;
 
   GitlabAuthorizingFileContentProvider(
       GitlabUrl githubUrl,
       URLFetcher urlFetcher,
       GitCredentialManager gitCredentialManager,
-      PersonalAccessTokenManager personalAccessTokenManager) {
+      PersonalAccessTokenManager personalAccessTokenManager,
+      GitlabApiClient gitlabApiClient) {
     super(githubUrl, urlFetcher, gitCredentialManager);
     this.personalAccessTokenManager = personalAccessTokenManager;
+    this.gitlabApiClient = gitlabApiClient;
   }
 
   @Override
@@ -47,12 +51,11 @@ class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvide
       if (token.isPresent()) {
         return token.get();
       } else {
-        // OAuth flow here
-        return null;
+        return gitlabApiClient.getOAuthToken(
+            EnvironmentContext.getCurrent().getSubject(), remoteFactoryUrl.getHostName());
       }
-    } catch (ScmConfigurationPersistenceException e) {
+    } catch (ScmUnauthorizedException | ScmConfigurationPersistenceException e) {
       throw new DevfileException(e.getMessage(), e);
     }
-
   }
 }

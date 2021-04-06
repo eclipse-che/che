@@ -14,9 +14,9 @@ package org.eclipse.che.api.factory.server.scm;
 import java.util.Objects;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
-public class OauthAuthenticationToken extends ScmAuthenticationToken {
+public class OAuthAuthenticationToken extends ScmAuthenticationToken {
 
-  public OauthAuthenticationToken(String scmProviderUrl, String scmUserName, String token) {
+  public OAuthAuthenticationToken(String scmProviderUrl, String scmUserName, String token) {
     super(
         scmProviderUrl,
         EnvironmentContext.getCurrent().getSubject().getUserId(),
@@ -31,7 +31,7 @@ public class OauthAuthenticationToken extends ScmAuthenticationToken {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    OauthAuthenticationToken that = (OauthAuthenticationToken) o;
+    OAuthAuthenticationToken that = (OAuthAuthenticationToken) o;
     return Objects.equals(scmProviderUrl, that.scmProviderUrl)
         && Objects.equals(scmUserName, that.scmUserName)
         && Objects.equals(scmUserId, that.scmUserId)

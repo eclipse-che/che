@@ -29,6 +29,7 @@ public class GitlabAuthorizingFileContentProviderTest {
 
   @Mock private GitCredentialManager gitCredentialsManager;
   @Mock private PersonalAccessTokenManager personalAccessTokenManager;
+  @Mock private GitlabApiClient gitlabApiClient;
 
   @Test
   public void shouldExpandRelativePaths() throws Exception {
@@ -40,7 +41,11 @@ public class GitlabAuthorizingFileContentProviderTest {
             .withProject("che");
     FileContentProvider fileContentProvider =
         new GitlabAuthorizingFileContentProvider(
-            gitlabUrl, urlFetcher, gitCredentialsManager, personalAccessTokenManager);
+            gitlabUrl,
+            urlFetcher,
+            gitCredentialsManager,
+            personalAccessTokenManager,
+            gitlabApiClient);
     fileContentProvider.fetchContent("devfile.yaml");
     verify(urlFetcher)
         .fetch(
@@ -55,7 +60,11 @@ public class GitlabAuthorizingFileContentProviderTest {
         new GitlabUrl().withHostName("gitlab.net").withUsername("eclipse").withProject("che");
     FileContentProvider fileContentProvider =
         new GitlabAuthorizingFileContentProvider(
-            gitlabUrl, urlFetcher, gitCredentialsManager, personalAccessTokenManager);
+            gitlabUrl,
+            urlFetcher,
+            gitCredentialsManager,
+            personalAccessTokenManager,
+            gitlabApiClient);
     String url =
         "https://gitlab.net/api/v4/projects/eclipse%2Fche/repository/files/devfile.yaml/raw?ref=master";
     fileContentProvider.fetchContent(url);
