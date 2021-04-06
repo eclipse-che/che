@@ -163,7 +163,7 @@ export class Workspaces {
     }
 
     private getWorkspaceListItemLocator(workspaceName: string): string {
-        return `//table[@aria-label='Workspaces List Table']//tbody//tr[//a[text()='${workspaceName}']]`;
+        return `//tr[td/span/a[text()='${workspaceName}']]`;
     }
 
     private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): By {
@@ -171,7 +171,7 @@ export class Workspaces {
     }
 
     private getActionsLocator(workspaceName: string): By {
-        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//button[@aria-label='Actions']`);
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}/td/div/button[@aria-label='Actions']`);
     }
 
     private getExpandedActionsLocator(workspaceName: string): By {

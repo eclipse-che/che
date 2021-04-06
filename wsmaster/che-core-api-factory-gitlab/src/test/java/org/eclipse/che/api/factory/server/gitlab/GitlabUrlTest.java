@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.gitlab;
 
+import static java.lang.String.format;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -57,30 +58,32 @@ public class GitlabUrlTest {
     GitlabUrl gitlabUrl = gitlabUrlParser.parse(repoUrl);
     assertEquals(gitlabUrl.devfileFileLocations().size(), 2);
     Iterator<DevfileLocation> iterator = gitlabUrl.devfileFileLocations().iterator();
-    assertEquals(iterator.next().location(), fileUrl + "devfile.yaml");
-
-    assertEquals(iterator.next().location(), fileUrl + "foo.bar");
+    assertEquals(iterator.next().location(), format(fileUrl, "devfile.yaml"));
+    assertEquals(iterator.next().location(), format(fileUrl, "foo.bar"));
   }
 
   @DataProvider
   public static Object[][] urlsProvider() {
     return new Object[][] {
-      {"https://gitlab.net/eclipse/che.git", "https://gitlab.net/eclipse/che/-/raw/master/"},
+      {
+        "https://gitlab.net/eclipse/che.git",
+        "https://gitlab.net/api/v4/projects/eclipse%%2Fche/repository/files/%s/raw?ref=master"
+      },
       {
         "https://gitlab.net/eclipse/fooproj/che.git",
-        "https://gitlab.net/eclipse/fooproj/che/-/raw/master/"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=master"
       },
       {
         "https://gitlab.net/eclipse/fooproj/-/tree/master/",
-        "https://gitlab.net/eclipse/fooproj/-/raw/master/"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=master"
       },
       {
         "https://gitlab.net/eclipse/fooproj/che/-/tree/foobranch/",
-        "https://gitlab.net/eclipse/fooproj/che/-/raw/foobranch/"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=foobranch"
       },
       {
         "https://gitlab.net/eclipse/fooproj/che/-/tree/foobranch/subfolder",
-        "https://gitlab.net/eclipse/fooproj/che/-/raw/foobranch/subfolder/"
+        "https://gitlab.net/api/v4/projects/eclipse%%2Ffooproj/repository/files/%s/raw?ref=foobranch"
       },
     };
   }

@@ -32,6 +32,10 @@ export class DriverHelper {
         return this.driver.actions();
     }
 
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.maximize()
+     */
     public async maximize() {
         Logger.trace(`DriverHelper.maximize`);
 
@@ -639,12 +643,20 @@ export class DriverHelper {
         await this.driver.wait(callback, timeout);
     }
 
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.refreshPage()
+     */
     public async reloadPage() {
         Logger.debug('DriverHelper.reloadPage');
 
         await this.driver.navigate().refresh();
     }
 
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.navigateAndWaitToUrl()
+     */
     public async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL) {
         Logger.trace(`DriverHelper.navigateAndWaitToUrl ${url}`);
 
@@ -652,12 +664,20 @@ export class DriverHelper {
         await this.waitURL(url, timeout);
     }
 
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.navigateTo()
+     */
     public async navigateToUrl(url: string) {
         Logger.debug(`DriverHelper.navigateToUrl ${url}`);
 
         await this.driver.navigate().to(url);
     }
 
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.waitURL()
+     */
     public async waitURL(expectedUrl: string, timeout: number) {
         Logger.trace(`DriverHelper.waitURL ${expectedUrl}`);
 
@@ -713,7 +733,11 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
     }
 
-    public async getCurrentUrl() : Promise<string> {
+    /**
+     * @deprecated Method deprecated. Use the next method instead.
+     * @see BrowserTabsUtil.getCurrentUrl()
+     */
+    public async getCurrentUrl(): Promise<string> {
         return await this.driver.getCurrentUrl();
     }
 

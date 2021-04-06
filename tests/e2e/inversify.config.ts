@@ -58,6 +58,7 @@ import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
 import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
+import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -81,6 +82,7 @@ if (TestConstants.TS_SELENIUM_MULTIUSER) {
     e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheSingleUserAuthorizationHeaderHandler);
 }
 
+e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);
 e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard);
