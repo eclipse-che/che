@@ -31,6 +31,9 @@ import org.eclipse.che.security.oauth.OAuthAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * GitLab OAuth token retriever.
+ */
 public class GitlabOAuthTokenProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(GitlabOAuthTokenProvider.class);
@@ -79,7 +82,7 @@ public class GitlabOAuthTokenProvider {
     }
   }
 
-  public String getLocalAuthenticateUrl() {
+  private String getLocalAuthenticateUrl() {
     return apiEndpoint
         + "/oauth/authenticate?oauth_provider="
         + OAUTH_PROVIDER_NAME
