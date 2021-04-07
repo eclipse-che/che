@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -101,15 +102,29 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
 
   @Override
   public Optional<Boolean> isValid(PersonalAccessToken personalAccessToken)
-      throws ScmCommunicationException, ScmItemNotFoundException {
+      throws ScmCommunicationException, ScmUnauthorizedException {
     LOG.info("Checking personalAccessToken {}", personalAccessToken);
     if (!bitbucketServerApiClient.isConnected(personalAccessToken.getScmProviderUrl())) {
       LOG.debug(
           "not a  valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
       return Optional.empty();
     }
-    return Optional.of(
-        bitbucketServerApiClient.isValidPersonalAccessToken(
-            personalAccessToken.getScmUserName(), personalAccessToken.getToken()));
+    try {
+      BitbucketPersonalAccessToken bitbucketPersonalAccessToken =
+          bitbucketServerApiClient.getPersonalAccessToken(
+              personalAccessToken.getScmUserName(),
+              Long.valueOf(personalAccessToken.getScmTokenId()));
+      LOG.info(
+          "SCM  personalAccessToken {} comparing with {} ",
+          bitbucketPersonalAccessToken,
+          personalAccessToken);
+      return Optional.of(
+          Sets.difference(
+                  ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"),
+                  bitbucketPersonalAccessToken.getPermissions())
+              .isEmpty());
+    } catch (ScmItemNotFoundException e) {
+      return Optional.of(Boolean.FALSE);
+    }
   }
 }

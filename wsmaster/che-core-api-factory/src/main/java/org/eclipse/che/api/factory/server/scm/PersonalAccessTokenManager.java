@@ -49,5 +49,6 @@ public interface PersonalAccessTokenManager {
    *     permanent storage.
    */
   Optional<PersonalAccessToken> get(Subject cheUser, String scmServerUrl)
-      throws ScmConfigurationPersistenceException;
+      throws ScmConfigurationPersistenceException, ScmUnauthorizedException,
+          ScmCommunicationException;
 }

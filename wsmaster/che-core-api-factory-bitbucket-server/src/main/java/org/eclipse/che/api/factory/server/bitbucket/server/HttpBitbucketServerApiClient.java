@@ -208,38 +208,6 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     }
   }
 
-  public boolean isValidPersonalAccessToken(String slug, String token)
-      throws ScmItemNotFoundException, ScmCommunicationException {
-    LOG.info("Check isValidPersonalAccessToken {} {}", slug, token);
-    URI uri = serverUri.resolve("/rest/api/1.0/users/" + slug);
-    HttpRequest request =
-        HttpRequest.newBuilder(uri)
-            .headers("Authorization", token)
-            .timeout(DEFAULT_HTTP_TIMEOUT)
-            .build();
-
-    try {
-      LOG.trace("executeRequest={}", request);
-      executeRequest(
-          httpClient,
-          request,
-          inputStream -> {
-            try {
-              return OM.readValue(inputStream, BitbucketUser.class);
-            } catch (IOException e) {
-              throw new UncheckedIOException(e);
-            }
-          });
-      LOG.info("Check isValidPersonalAccessToken ok");
-      return true;
-    } catch (ScmBadRequestException e) {
-      throw new ScmCommunicationException(e.getMessage(), e);
-    } catch (ScmUnauthorizedException e) {
-      LOG.info("Check isValidPersonalAccessToken notok");
-      return false;
-    }
-  }
-
   @Override
   public BitbucketPersonalAccessToken createPersonalAccessTokens(
       String userSlug, String tokenName, Set<String> permissions)
@@ -284,6 +252,35 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     try {
       return doGetItems(
           BitbucketPersonalAccessToken.class, "/rest/access-tokens/1.0/users/" + userSlug, null);
+    } catch (ScmBadRequestException e) {
+      throw new ScmCommunicationException(e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public BitbucketPersonalAccessToken getPersonalAccessToken(String userSlug, Long tokenId)
+      throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
+
+    URI uri = serverUri.resolve("/rest/access-tokens/1.0/users/" + userSlug + "/" + tokenId);
+    HttpRequest request =
+        HttpRequest.newBuilder(uri)
+            .headers(
+                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+            .timeout(DEFAULT_HTTP_TIMEOUT)
+            .build();
+
+    try {
+      LOG.trace("executeRequest={}", request);
+      return executeRequest(
+          httpClient,
+          request,
+          inputStream -> {
+            try {
+              return OM.readValue(inputStream, BitbucketPersonalAccessToken.class);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
     } catch (ScmBadRequestException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }
