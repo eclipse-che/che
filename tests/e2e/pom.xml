@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2019-2021 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-server</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>7.29.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <groupId>org.eclipse.che.e2e</groupId>
+    <artifactId>che-e2e</artifactId>
+    <name>Che e2e tests</name>
+    <build>
+        <finalName>e2e-war</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <useDefaultExcludes>false</useDefaultExcludes>
+                    <excludes>
+                        <exclude>**/.idea/**</exclude>
+                        <exclude>**/*.styl</exclude>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/*.ico</exclude>
+                        <exclude>**/*.ttf</exclude>
+                        <exclude>**/*.eot</exclude>
+                        <exclude>**/*.css</exclude>
+                        <exclude>**/*.woff</exclude>
+                        <exclude>src/app/colors/che-output-colors.constant.ts</exclude>
+                        <exclude>src/app/proxy/proxy-settings.constant.ts</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>remove-old-resources</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec dir="${basedir}" executable="docker" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="-v" />
+                                    <arg value="${basedir}/:/root/:Z" />
+                                    <arg value="node:10" />
+                                    <arg value="su" />
+                                    <arg value="-c" />
+                                    <arg value="cd /root; rm -rf dist node_modules" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-build-lint</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- build tests and test them for lint -->
+                                <exec dir="${basedir}" executable="docker" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="-v" />
+                                    <arg value="${basedir}/:/root/:Z" />
+                                    <arg value="node:10" />
+                                    <arg value="su" />
+                                    <arg value="-c" />
+                                    <arg value="cd /root/; npm i; npm install typescript; npm run tsc; npm run lint;" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>publish</id>
+            <activation>
+                <property>
+                    <!-- Run this profile if environment variable NPM_AUTH_TOKEN exists -->
+                    <name>env.NPM_AUTH_TOKEN</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>push</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- set version and tag, publish package -->
+                                        <exec dir="${basedir}" executable="docker" failonerror="true">
+                                            <arg value="run" />
+                                            <arg value="-v" />
+                                            <arg value="${basedir}/:/root/:Z" />
+                                            <arg value="-e" />
+                                            <arg value="CHE_VERSION=${che.version}" />
+                                            <arg value="node:10" />
+                                            <arg value="su" />
+                                            <arg value="-c" />
+                                            <arg value="cd /root; npm run publish-with-tag; " />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

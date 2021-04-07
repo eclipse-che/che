@@ -25,7 +25,8 @@
     "tsc": "tsc -p .",
     "init-mocha-opts": "tsc && mocha --opts mocha-single-devfile.opts --spec dist/tests/login/Login.spec.js",
     "test-plugin": "npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
-    "test-all-plugins": "tsc && mocha --opts mocha-all-plugins.opts"
+    "test-all-plugins": "tsc && mocha --opts mocha-all-plugins.opts",
+    "publish-with-tag": "./publish.sh"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
@@ -37,14 +38,14 @@
     "@types/selenium-webdriver": "3.0.16",
     "axios": "0.21.1",
     "chai": "4.2.0",
-    "chromedriver": "80.0.1",
+    "chromedriver": "89.0.0",
     "mocha": "7.1.1",
     "rimraf": "2.6.2",
     "selenium-webdriver": "3.6.0",
     "ts-node": "8.0.3",
     "tslint": "5.10.0",
     "typed-rest-client": "1.2.0",
-    "typescript": "3.4.3"
+    "typescript": "3.9.9"
   },
   "dependencies": {
     "@eclipse-che/api": "7.5.0-SNAPSHOT",

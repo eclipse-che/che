@@ -31,6 +31,7 @@
         <module>infrastructures</module>
         <module>wsmaster/integration-tests</module>
         <module>assembly</module>
+        <module>tests/e2e</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
