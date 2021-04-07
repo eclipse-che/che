@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.bitbucket.server;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.time.Duration.ofSeconds;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -207,6 +208,38 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     }
   }
 
+  public boolean isValidPersonalAccessToken(String slug, String token)
+      throws ScmItemNotFoundException, ScmCommunicationException {
+    LOG.info("Check isValidPersonalAccessToken {} {}", slug, token);
+    URI uri = serverUri.resolve("/rest/api/1.0/users/" + slug);
+    HttpRequest request =
+        HttpRequest.newBuilder(uri)
+            .headers("Authorization", token)
+            .timeout(DEFAULT_HTTP_TIMEOUT)
+            .build();
+
+    try {
+      LOG.trace("executeRequest={}", request);
+      executeRequest(
+          httpClient,
+          request,
+          inputStream -> {
+            try {
+              return OM.readValue(inputStream, BitbucketUser.class);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
+      LOG.info("Check isValidPersonalAccessToken ok");
+      return true;
+    } catch (ScmBadRequestException e) {
+      throw new ScmCommunicationException(e.getMessage(), e);
+    } catch (ScmUnauthorizedException e) {
+      LOG.info("Check isValidPersonalAccessToken notok");
+      return false;
+    }
+  }
+
   @Override
   public BitbucketPersonalAccessToken createPersonalAccessTokens(
       String userSlug, String tokenName, Set<String> permissions)
@@ -345,6 +378,8 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
       } else {
         String body = CharStreams.toString(new InputStreamReader(response.body(), Charsets.UTF_8));
         switch (response.statusCode()) {
+          case HTTP_UNAUTHORIZED:
+            throw new ScmUnauthorizedException(body, "?", "?", "?");
           case HTTP_BAD_REQUEST:
             throw new ScmBadRequestException(body);
           case HTTP_NOT_FOUND:

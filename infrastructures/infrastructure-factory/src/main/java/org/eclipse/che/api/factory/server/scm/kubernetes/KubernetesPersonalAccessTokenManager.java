@@ -41,10 +41,16 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Manages personal access token secrets used for private repositories authentication. */
 @Singleton
 public class KubernetesPersonalAccessTokenManager implements PersonalAccessTokenManager {
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KubernetesPersonalAccessTokenManager.class);
+
   public static final Map<String, String> SECRET_LABELS =
       ImmutableMap.of(
           "app.kubernetes.io/part-of", "che.eclipse.org",
@@ -144,7 +150,8 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
           Map<String, String> annotations = secret.getMetadata().getAnnotations();
           if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUser.getUserId())
               && annotations.get(ANNOTATION_SCM_URL).equals(scmServerUrl)) {
-            return Optional.of(
+            LOG.info("Secret found {}", secret);
+            PersonalAccessToken token =
                 new PersonalAccessToken(
                     annotations.get(ANNOTATION_SCM_URL),
                     annotations.get(ANNOTATION_CHE_USERID),
@@ -152,11 +159,20 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
                     annotations.get(ANNOTATION_SCM_USERID),
                     annotations.get(ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_ID),
                     annotations.get(ANNOTATION_SCM_PERSONAL_ACCESS_TOKEN_NAME),
-                    new String(Base64.getDecoder().decode(secret.getData().get("token")))));
+                    new String(Base64.getDecoder().decode(secret.getData().get("token"))));
+            LOG.info("Checking token {}", token);
+            if (scmPersonalAccessTokenFetcher.isValid(token)) {
+              LOG.info("Checking token ok");
+              return Optional.of(token);
+            } else {
+              LOG.info("Removing {} from {}", secret, namespaceMeta.getName());
+              clientFactory.create().secrets().inNamespace(namespaceMeta.getName()).delete(secret);
+              LOG.info("Checking token not ok, continue");
+            }
           }
         }
       }
-    } catch (InfrastructureException e) {
+    } catch (InfrastructureException | UnknownScmProviderException e) {
       throw new ScmConfigurationPersistenceException(e.getMessage(), e);
     }
     return Optional.empty();

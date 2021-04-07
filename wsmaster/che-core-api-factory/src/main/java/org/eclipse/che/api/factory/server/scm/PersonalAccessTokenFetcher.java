@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.api.factory.server.scm;
 
+import java.util.Optional;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.subject.Subject;
 
@@ -30,4 +32,7 @@ public interface PersonalAccessTokenFetcher {
    */
   PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException;
+
+  Optional<Boolean> isValid(PersonalAccessToken personalAccessToken)
+      throws ScmCommunicationException, ScmUnauthorizedException, ScmItemNotFoundException;
 }

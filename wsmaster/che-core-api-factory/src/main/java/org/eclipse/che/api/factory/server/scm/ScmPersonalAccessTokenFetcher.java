@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.api.factory.server.scm;
 
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderException;
 import org.eclipse.che.commons.subject.Subject;
@@ -41,5 +43,26 @@ public class ScmPersonalAccessTokenFetcher {
     }
     throw new UnknownScmProviderException(
         "No PersonalAccessTokenFetcher configured for " + scmServerUrl, scmServerUrl);
+  }
+
+  public boolean isValid(PersonalAccessToken personalAccessToken)
+      throws UnknownScmProviderException {
+    for (PersonalAccessTokenFetcher fetcher : personalAccessTokenFetchers) {
+      try {
+        Optional<Boolean> isValid = fetcher.isValid(personalAccessToken);
+        if (isValid.isPresent()) {
+          return isValid.get();
+        }
+      } catch (ScmCommunicationException e) {
+        e.printStackTrace();
+      } catch (ScmUnauthorizedException e) {
+        e.printStackTrace();
+      } catch (ScmItemNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+    throw new UnknownScmProviderException(
+        "No PersonalAccessTokenFetcher configured for " + personalAccessToken.getScmProviderUrl(),
+        personalAccessToken.getScmProviderUrl());
   }
 }

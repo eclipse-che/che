@@ -128,6 +128,7 @@ public class KubernetesPersonalAccessTokenManagerTest {
     KubernetesSecrets secrets = Mockito.mock(KubernetesSecrets.class);
     when(namespaceFactory.access(eq(null), eq(meta.getName()))).thenReturn(kubernetesnamespace);
     when(kubernetesnamespace.secrets()).thenReturn(secrets);
+    when(scmPersonalAccessTokenFetcher.isValid(any(PersonalAccessToken.class))).thenReturn(true);
 
     Map<String, String> data1 =
         Map.of("token", Base64.getEncoder().encodeToString("token1".getBytes(UTF_8)));

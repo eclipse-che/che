@@ -105,4 +105,7 @@ public interface BitbucketServerApiClient {
    */
   List<BitbucketPersonalAccessToken> getPersonalAccessTokens(String userSlug)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException;
+
+  boolean isValidPersonalAccessToken(String slug, String token)
+      throws ScmItemNotFoundException, ScmCommunicationException;
 }
