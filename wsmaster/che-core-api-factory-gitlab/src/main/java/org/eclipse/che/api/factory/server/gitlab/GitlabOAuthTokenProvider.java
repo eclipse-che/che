@@ -1,0 +1,88 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.api.factory.server.gitlab;
+
+import com.google.inject.assistedinject.Assisted;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.factory.server.scm.OAuthAuthenticationToken;
+import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.security.oauth.OAuthAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class GitlabOAuthTokenProvider {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GitlabOAuthTokenProvider.class);
+  private static final String OAUTH_PROVIDER_NAME = "gitlab";
+
+  private final OAuthAPI oAuthAPI;
+  private final String apiEndpoint;
+  private final GitlabApiClient gitlabApiClient;
+
+  @Inject
+  public GitlabOAuthTokenProvider(
+      @Assisted String serverUrl, @Named("che.api") String apiEndpoint, OAuthAPI oAuthAPI) {
+    this.apiEndpoint = apiEndpoint;
+    this.oAuthAPI = oAuthAPI;
+    this.gitlabApiClient = new GitlabApiClient(serverUrl);
+  }
+
+  public OAuthAuthenticationToken getOAuthToken(Subject cheSubject, String scmUrl)
+      throws ScmUnauthorizedException, ScmItemNotFoundException, ScmCommunicationException,
+          ScmBadRequestException {
+    OAuthToken oAuthToken;
+    try {
+      oAuthToken = oAuthAPI.getToken(OAUTH_PROVIDER_NAME);
+      if (!oAuthToken.getScope().contains("read_user")) {
+        throw new ScmCommunicationException(
+            "Current token doesn't have the 'read_user' privileges. Please make sure Che app scopes are correct and containing it.");
+      }
+      GitlabUser user = gitlabApiClient.getUser(oAuthToken.getToken());
+      return new OAuthAuthenticationToken(scmUrl, user.getUsername(), oAuthToken.getToken());
+    } catch (UnauthorizedException e) {
+      throw new ScmUnauthorizedException(
+          cheSubject.getUserName()
+              + " is not authorized in "
+              + OAUTH_PROVIDER_NAME
+              + " OAuth provider.",
+          OAUTH_PROVIDER_NAME,
+          "2.0",
+          getLocalAuthenticateUrl());
+    } catch (NotFoundException
+        | ServerException
+        | ForbiddenException
+        | BadRequestException
+        | ConflictException e) {
+      LOG.warn(e.getMessage());
+      throw new ScmCommunicationException(e.getMessage(), e);
+    }
+  }
+
+  public String getLocalAuthenticateUrl() {
+    return apiEndpoint
+        + "/oauth/authenticate?oauth_provider="
+        + OAUTH_PROVIDER_NAME
+        + "&request_method=POST&signature_method=rsa";
+  }
+}

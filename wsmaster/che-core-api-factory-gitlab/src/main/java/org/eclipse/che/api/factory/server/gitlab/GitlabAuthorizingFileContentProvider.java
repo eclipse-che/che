@@ -17,7 +17,10 @@ import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.scm.ScmAuthenticationToken;
+import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
+import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
@@ -27,17 +30,17 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvider<GitlabUrl> {
 
   private final PersonalAccessTokenManager personalAccessTokenManager;
-  private final GitlabApiClient gitlabApiClient;
+  private final GitlabOAuthTokenProvider oAuthTokenProvider;
 
   GitlabAuthorizingFileContentProvider(
-      GitlabUrl githubUrl,
+      GitlabUrl gitlabUrl,
       URLFetcher urlFetcher,
       GitCredentialManager gitCredentialManager,
       PersonalAccessTokenManager personalAccessTokenManager,
-      GitlabApiClient gitlabApiClient) {
-    super(githubUrl, urlFetcher, gitCredentialManager);
+      GitlabOAuthTokenProviderFactory oAuthTokenProviderFactory) {
+    super(gitlabUrl, urlFetcher, gitCredentialManager);
     this.personalAccessTokenManager = personalAccessTokenManager;
-    this.gitlabApiClient = gitlabApiClient;
+    this.oAuthTokenProvider = oAuthTokenProviderFactory.create(gitlabUrl.getHostName());
   }
 
   @Override
@@ -51,10 +54,14 @@ class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvide
       if (token.isPresent()) {
         return token.get();
       } else {
-        return gitlabApiClient.getOAuthToken(
+        return oAuthTokenProvider.getOAuthToken(
             EnvironmentContext.getCurrent().getSubject(), remoteFactoryUrl.getHostName());
       }
-    } catch (ScmUnauthorizedException | ScmConfigurationPersistenceException e) {
+    } catch (ScmUnauthorizedException
+        | ScmCommunicationException
+        | ScmItemNotFoundException
+        | ScmBadRequestException
+        | ScmConfigurationPersistenceException e) {
       throw new DevfileException(e.getMessage(), e);
     }
   }

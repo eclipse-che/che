@@ -160,6 +160,7 @@ public class WsMasterModule extends AbstractModule {
 
     install(new org.eclipse.che.api.factory.server.scm.KubernetesScmModule());
     install(new org.eclipse.che.api.factory.server.bitbucket.BitbucketServerModule());
+    install(new org.eclipse.che.api.factory.server.gitlab.GitlabModule());
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);

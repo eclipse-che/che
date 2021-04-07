@@ -30,23 +30,10 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.factory.server.scm.OAuthAuthenticationToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
-import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.security.oauth.OAuthAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,18 +41,14 @@ public class GitlabApiClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(GitlabApiClient.class);
 
-  private final OAuthAPI oAuthAPI;
-  private final String apiEndpoint;
   private final HttpClient httpClient;
+  private final String serverUrl;
 
-  private static final String OAUTH_PROVIDER_NAME = "gitlab";
   private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  @Inject
-  public GitlabApiClient(@Named("che.api") String apiEndpoint, OAuthAPI oAuthAPI) {
-    this.apiEndpoint = apiEndpoint;
-    this.oAuthAPI = oAuthAPI;
+  public GitlabApiClient(String serverUrl) {
+    this.serverUrl = serverUrl;
     this.httpClient =
         HttpClient.newBuilder()
             .executor(
@@ -79,16 +62,15 @@ public class GitlabApiClient {
             .build();
   }
 
-  public GitlabUser getUser(String scmUrl, String oauthToken)
-      throws ScmItemNotFoundException, ScmCommunicationException, ScmBadRequestException,
-          ScmUnauthorizedException {
-    final URI uri = URI.create(scmUrl + "/api/v4/user");
+  public GitlabUser getUser(String authenticationToken)
+      throws ScmItemNotFoundException, ScmCommunicationException, ScmBadRequestException {
+    final URI uri = URI.create(serverUrl + "/api/v4/user");
     HttpRequest request =
         HttpRequest.newBuilder(uri)
-            .headers("Authorization", "Bearer " + oauthToken)
+            .headers("Authorization", "Bearer " + authenticationToken)
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
-    // LOG.trace("executeRequest={}", request);
+    LOG.trace("executeRequest={}", request);
     return executeRequest(
         httpClient,
         request,
@@ -99,41 +81,6 @@ public class GitlabApiClient {
             throw new UncheckedIOException(e);
           }
         });
-  }
-
-  public OAuthAuthenticationToken getOAuthToken(Subject cheSubject, String scmUrl)
-      throws ScmUnauthorizedException {
-    OAuthToken oAuthToken;
-    try {
-      oAuthToken = oAuthAPI.getToken(OAUTH_PROVIDER_NAME);
-      GitlabUser user = getUser(scmUrl, oAuthToken.getToken());
-      return new OAuthAuthenticationToken(scmUrl, user.getUsername(), oAuthToken.getToken());
-    } catch (UnauthorizedException e) {
-      throw new ScmUnauthorizedException(
-          cheSubject.getUserName()
-              + " is not authorized in "
-              + OAUTH_PROVIDER_NAME
-              + " OAuth provider.",
-          OAUTH_PROVIDER_NAME,
-          "2.0",
-          getLocalAuthenticateUrl());
-    } catch (NotFoundException
-        | ServerException
-        | ForbiddenException
-        | BadRequestException
-        | ConflictException e) {
-      LOG.warn(e.getMessage());
-    } catch (ScmItemNotFoundException | ScmCommunicationException | ScmBadRequestException e) {
-      LOG.warn(e.getMessage());
-    }
-    return null;
-  }
-
-  public String getLocalAuthenticateUrl() {
-    return apiEndpoint
-        + "/oauth/authenticate?oauth_provider="
-        + OAUTH_PROVIDER_NAME
-        + "&request_method=POST&signature_method=rsa";
   }
 
   private <T> T executeRequest(
