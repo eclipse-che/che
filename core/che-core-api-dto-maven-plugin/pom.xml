@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.28.3-SNAPSHOT</version>
+        <version>7.28.2</version>
     </parent>
     <artifactId>che-core-api-dto-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
