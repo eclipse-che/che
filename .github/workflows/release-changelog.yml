@@ -37,10 +37,13 @@ jobs:
         name: Prepare
         id: prepare
         run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
-          elif [[ ${{ github.event.inputs.version }} != "" ]]; then
+          if [[ ${{ github.event.inputs.version }} != "" ]]; then
             echo ::set-output name=release_version::${{ github.event.inputs.version }}
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
+          else
+            echo "No version set, and no tag triggered this action, so nothing to do!"
+            exit 1
           fi
       - name: Create changelog
         id: generate-release-changelog
@@ -59,7 +62,7 @@ jobs:
           maxIssues: 100
           verbose: true
           releaseBranch: master # TODO: change to main
-          dueTag: ${{ github.event.prepare.release_version }} # all issues up to the current release tag
+          dueTag: "${{ github.event.prepare.release_version }}" # all issues up to the current release tag
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
@@ -85,9 +88,9 @@ jobs:
           allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
-          name: Eclipse Che ${{ github.event.prepare.release_version }}
+          name: "Eclipse Che ${{ github.event.prepare.release_version }}"
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: ${{ github.event.prepare.release_version }}
+          tag: "${{ github.event.prepare.release_version }}"
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
