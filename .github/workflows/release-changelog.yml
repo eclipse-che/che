@@ -39,12 +39,22 @@ jobs:
         run: |
           if [[ ${{ github.event.inputs.version }} != "" ]]; then
             echo ::set-output name=release_version::${{ github.event.inputs.version }}
+            release_version=${{ github.event.inputs.version }}
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
             echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
+            release_version=${GITHUB_REF#refs/tags/}
           else
             echo "No version set, and no tag triggered this action, so nothing to do!"
             exit 1
           fi
+
+          [[ $release_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && XX=${BASH_REMATCH[1]}; YY=${BASH_REMATCH[2]}; ZZ=${BASH_REMATCH[3]}
+          # roll back from 7.28.2 -> 7.28.1; for 7.28.0 -> 7.27.2
+          # TODO or do we want 7.28.0 -> 7.27.0 to roll up all issues since last .0 release?
+          (( ZZ=ZZ-1 )); if [[ $ZZ -lt 0 ]]; then (( ZZ=ZZ+3 )); (( YY=YY-1 )); fi
+          previous_version="${XX}.${YY}.${ZZ}"
+          echo "For release_version = $release_version, got previous_version = $previous_version"
+          echo ::set-output name=previous_version::${previous_version}
       - name: Create changelog
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
@@ -62,7 +72,8 @@ jobs:
           maxIssues: 100
           verbose: true
           releaseBranch: master # TODO: change to main
-          dueTag: "${{ github.event.prepare.release_version }}" # all issues up to the current release tag
+          sinceTag: "${{ github.event.prepare.previous_version }}" # issues since the previous tag
+          dueTag: "${{ github.event.prepare.release_version }}" # issues up to the current release tag
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
