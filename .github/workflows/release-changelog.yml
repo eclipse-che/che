@@ -72,8 +72,8 @@ jobs:
           verbose: true
           releaseBranch: master # TODO: change to main
           onlyLastTag: "false" # must set false, else dueTag=null and sinceTag=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)")
-          dueTag: "${{ github.event.prepare.release_version }}" # issues up to the current release tag
-          sinceTag: "${{ github.event.prepare.previous_version }}" # issues since the previous tag
+          dueTag: "${{ steps.prepare.outputs.release_version }}" # issues up to the current release tag
+          sinceTag: "${{ steps.prepare.outputs.previous_version }}" # issues since the previous tag
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
@@ -99,9 +99,9 @@ jobs:
           allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
-          name: "Eclipse Che ${{ github.event.prepare.release_version }}"
+          name: "Eclipse Che ${{ steps.prepare.outputs.release_version }}"
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: "${{ github.event.prepare.release_version }}"
+          tag: "${{ steps.prepare.outputs.release_version }}"
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
