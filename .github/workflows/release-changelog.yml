@@ -33,6 +33,15 @@ jobs:
           git config --global push.default matching
           export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      -
+        name: Prepare
+        id: prepare
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
+          elif [[ ${{ github.event.inputs.version }} != "" ]]; then
+            echo ::set-output name=release_version::${{ github.event.inputs.version }}
+          fi
       - name: Create changelog
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
@@ -47,10 +56,10 @@ jobs:
           onlyLastTag: "true"
           stripHeaders: "true"
           stripGeneratorNotice: "true"
-          maxIssues: 200
+          maxIssues: 100
           verbose: true
           releaseBranch: master # TODO: change to main
-          dueTag: ${{ github.event.inputs.version }} # all issues up to the current release tag
+          dueTag: ${{ github.event.prepare.release_version }} # all issues up to the current release tag
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
@@ -58,7 +67,7 @@ jobs:
           # issueLineLabels: "ALL" # doesn't work - /usr/local/bundle/gems/github_changelog_generator-1.15.2/lib/github_changelog_generator/generator/section.rb:52:in `get_string_for_issue': undefined method `line_labels_for' for #<GitHubChangelogGenerator::Section:0x00005608809a9988> (NoMethodError)
           compareLink: false
           unreleased: true # show unreleased, but closed items
-          addSections: '{"sprint/current-sprint":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current-sprint"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
+          addSections: '{"sprint/current":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
           excludeTags: '' # comma,delimited,list,of,tags
           # includeLabels: ''
           excludeLabels: "kind/release"
@@ -76,9 +85,9 @@ jobs:
           allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
-          name: Eclipse Che ${{ github.event.inputs.version }}
+          name: Eclipse Che ${{ github.event.prepare.release_version }}
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: ${{ github.event.inputs.version }}
+          tag: ${{ github.event.prepare.release_version }}
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
