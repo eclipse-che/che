@@ -37,10 +37,10 @@ jobs:
         name: Prepare
         id: prepare
         run: |
-          if [[ ${{ github.event.inputs.version }} != "" ]]; then
+          if [[ "${{ github.event.inputs.version }}" != "" ]]; then
             echo ::set-output name=release_version::${{ github.event.inputs.version }}
             release_version=${{ github.event.inputs.version }}
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+          elif [[ "$GITHUB_REF" == "refs/tags/"* ]]; then
             echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
             release_version=${GITHUB_REF#refs/tags/}
           else
