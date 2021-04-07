@@ -68,7 +68,7 @@ jobs:
           dateFormat: "%Y-%m-%d"
           stripHeaders: "true"
           stripGeneratorNotice: "true"
-          maxIssues: 100
+          maxIssues: 150
           verbose: true
           releaseBranch: master # TODO: change to main
           onlyLastTag: "false" # must set false, else dueTag=null and sinceTag=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)")
@@ -77,17 +77,18 @@ jobs:
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
-          issues: true
+          issues: true # closed issues
           # issueLineLabels: "ALL" # doesn't work - /usr/local/bundle/gems/github_changelog_generator-1.15.2/lib/github_changelog_generator/generator/section.rb:52:in `get_string_for_issue': undefined method `line_labels_for' for #<GitHubChangelogGenerator::Section:0x00005608809a9988> (NoMethodError)
           compareLink: false
           unreleased: true # show unreleased, but closed items
-          addSections: '{"sprint/current":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
-          excludeTags: '' # comma,delimited,list,of,tags
+          configureSections: '{
+            "enh-epic-ux":{"prefix":"**Enhancements, Epics, and UX**","labels":["kind/enhancement,kind/epic,kind/ux"]}, 
+            "sprint-current":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current"]}, 
+            "new-noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
+          excludeTags: 'sprint/next,roadmap/3-months,roadmap/6-months,roadmap/1-year,kind/planning,status/duplicate,status/in-progress,status/need-triage' # comma,delimited,list,of,tags
           # includeLabels: ''
           excludeLabels: "kind/release"
-          enhancementLabel: "Enhancements, Epics, and UX"
-          enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
-          bugsLabel: "Bugs fixed"
+          bugsLabel: "**Bugs fixed**"
           bugLabels: "kind/bug"
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
       - name: Create GH Release
