@@ -33,6 +33,28 @@ jobs:
           git config --global push.default matching
           export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           export CHE_BOT_GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      -
+        name: Prepare
+        id: prepare
+        run: |
+          if [[ "${{ github.event.inputs.version }}" != "" ]]; then
+            echo ::set-output name=release_version::${{ github.event.inputs.version }}
+            release_version=${{ github.event.inputs.version }}
+          elif [[ "$GITHUB_REF" == "refs/tags/"* ]]; then
+            echo ::set-output name=release_version::${GITHUB_REF#refs/tags/}
+            release_version=${GITHUB_REF#refs/tags/}
+          else
+            echo "No version set, and no tag triggered this action, so nothing to do!"
+            exit 1
+          fi
+
+          [[ $release_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && XX=${BASH_REMATCH[1]}; YY=${BASH_REMATCH[2]}; ZZ=${BASH_REMATCH[3]}
+          # roll back from 7.28.2 -> 7.28.1; for 7.28.0 -> 7.27.2
+          # TODO or do we want 7.28.0 -> 7.27.0 to roll up all issues since last .0 release?
+          (( ZZ=ZZ-1 )); if [[ $ZZ -lt 0 ]]; then (( ZZ=ZZ+3 )); (( YY=YY-1 )); fi
+          previous_version="${XX}.${YY}.${ZZ}"
+          echo "For release_version = $release_version, got previous_version = $previous_version"
+          echo ::set-output name=previous_version::${previous_version}
       - name: Create changelog
         id: generate-release-changelog
         # wrapper for https://github.com/github-changelog-generator/github-changelog-generator
@@ -44,13 +66,14 @@ jobs:
           repo: eclipse/che 
           # output: CHANGELOG-next.md
           dateFormat: "%Y-%m-%d"
-          onlyLastTag: "true"
           stripHeaders: "true"
           stripGeneratorNotice: "true"
-          maxIssues: 200
+          maxIssues: 100
           verbose: true
           releaseBranch: master # TODO: change to main
-          dueTag: ${{ github.event.inputs.version }} # all issues up to the current release tag
+          onlyLastTag: "false" # must set false, else dueTag=null and sinceTag=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)")
+          dueTag: "${{ steps.prepare.outputs.release_version }}" # issues up to the current release tag
+          sinceTag: "${{ steps.prepare.outputs.previous_version }}" # issues since the previous tag
           filterByMilestone: false # this requires that we get good at setting milestone when something is actually DONE rather than when we think it'll be done
           pullRequests: false # only include issues, not PRs, since PRs span multiple repos and are too noisy to include
           issuesWoLabels: false # no labels? no logged change
@@ -58,13 +81,13 @@ jobs:
           # issueLineLabels: "ALL" # doesn't work - /usr/local/bundle/gems/github_changelog_generator-1.15.2/lib/github_changelog_generator/generator/section.rb:52:in `get_string_for_issue': undefined method `line_labels_for' for #<GitHubChangelogGenerator::Section:0x00005608809a9988> (NoMethodError)
           compareLink: false
           unreleased: true # show unreleased, but closed items
-          addSections: '{"sprint/current-sprint":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current-sprint"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
+          addSections: '{"sprint/current":{"prefix":"**Issues in Current Sprint:**","labels":["sprint/current"]}, "new&noteworthy":{"prefix":"**New and Noteworthy Issues:**","labels":["new&noteworthy"]}}'
           excludeTags: '' # comma,delimited,list,of,tags
           # includeLabels: ''
-          excludeLabels: "kind/release"
-          enhancementLabel: "Enhancements, Epics, and UX"
+          excludeLabels: "kind/release,sprint/next,roadmap/3-months,roadmap/6-months,roadmap/1-year,kind/planning,status/duplicate,status/in-progress,status/need-triage"
+          enhancementLabel: "**Enhancements, Epics, and UX:**"
           enhancementLabels: "kind/enhancement,kind/epic,kind/ux"
-          bugsLabel: "Bugs fixed"
+          bugsLabel: "**Fixed Bugs:**"
           bugLabels: "kind/bug"
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
       - name: Create GH Release
@@ -76,9 +99,9 @@ jobs:
           allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
-          name: Eclipse Che ${{ github.event.inputs.version }}
+          name: "Eclipse Che ${{ steps.prepare.outputs.release_version }}"
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: ${{ github.event.inputs.version }}
+          tag: "${{ steps.prepare.outputs.release_version }}"
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
