@@ -37,8 +37,6 @@ const subRootFolder: string = 'README.md';
 const fileFolderPath: string = `${projectName}`;
 const tabTitle: string = 'index.php';
 
-let workspaceName = 'not defined';
-
 suite(`The 'PhpPlugin' tests`, async () => {
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
@@ -50,8 +48,6 @@ suite(`The 'PhpPlugin' tests`, async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, subRootFolder);
-
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
     });
 
@@ -98,6 +94,11 @@ suite(`The 'PhpPlugin' tests`, async () => {
 
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {
+            let workspaceName = 'not defined';
+            suiteSetup(async () => {
+                workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            });
+
             await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
         });
     });
