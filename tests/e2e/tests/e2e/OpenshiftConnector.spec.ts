@@ -24,6 +24,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { PreferencesHandler, TerminalRendererType } from '../../utils/PreferencesHandler';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -40,6 +41,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const projectName: string = 'node-js';
 const selectSugestionSuffix: string = '(Press \'Enter\' to confirm your input or \'Escape\' to cancel)';
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 suite('Openshift connector user story', async () => {
   const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
@@ -66,15 +68,14 @@ suite('Openshift connector user story', async () => {
         }
       ];
 
-    await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+    await await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
     await loginPage.login();
     await testWorkspaceUtils.createWsFromDevFile(wsConfig);
   });
 
   test('Login into workspace and open plugin', async () => {
-    await driverHelper.reloadPage();
-    await dashboard.waitPage();
-    await driverHelper.navigateToUrl(workspacePrefixUrl + wsName);
+    await dashboard.openDashboard();
+    await browserTabsUtil.navigateTo(workspacePrefixUrl + wsName);
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');

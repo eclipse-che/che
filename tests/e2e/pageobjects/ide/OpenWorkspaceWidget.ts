@@ -31,9 +31,14 @@ export class OpenWorkspaceWidget {
         const pathNodes: string[] = path.split('/');
         let buildPath: string = '';
 
-        const promises = pathNodes.map(async currentPath => {
+        const promises = pathNodes.map(async (currentPath, index) => {
             buildPath += `/${currentPath}`;
-            await  this.driverHelper.waitAndClick(By.id(buildPath), timeout);
+
+            if (index === 0) {
+                await  this.driverHelper.waitAndClick(By.id(buildPath), timeout);
+            } else {
+                await  this.driverHelper.waitAndClick(By.xpath(`(//div[@id='${buildPath}'])[position()=2]`), timeout);
+            }
         });
 
         return Promise.all(promises);
