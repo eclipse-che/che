@@ -68,7 +68,7 @@ suite('Openshift connector user story', async () => {
         }
       ];
 
-    await await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
+    await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
     await loginPage.login();
     await testWorkspaceUtils.createWsFromDevFile(wsConfig);
   });
