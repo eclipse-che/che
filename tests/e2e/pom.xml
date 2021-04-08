@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2019-2021 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -56,14 +56,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <exec dir="${basedir}" executable="docker" failonerror="true">
-                                    <arg value="run" />
-                                    <arg value="-v" />
-                                    <arg value="${basedir}/:/root/:Z" />
-                                    <arg value="node:10" />
-                                    <arg value="su" />
+                                <exec dir="${basedir}" executable="bash" failonerror="true">
                                     <arg value="-c" />
-                                    <arg value="cd /root; rm -rf dist node_modules" />
+                                    <arg value="rm -rf dist node_modules" />
                                 </exec>
                             </target>
                         </configuration>
@@ -81,10 +76,10 @@
                                     <arg value="run" />
                                     <arg value="-v" />
                                     <arg value="${basedir}/:/root/:Z" />
-                                    <arg value="node:10" />
+                                    <arg value="node:15" />
                                     <arg value="su" />
                                     <arg value="-c" />
-                                    <arg value="cd /root/; npm i; npm install typescript; npm run tsc; npm run lint;" />
+                                    <arg value="cd /root/; npm ci; npm run tsc; npm run lint;" />
                                 </exec>
                             </target>
                         </configuration>
@@ -122,7 +117,7 @@
                                             <arg value="${basedir}/:/root/:Z" />
                                             <arg value="-e" />
                                             <arg value="CHE_VERSION=${che.version}" />
-                                            <arg value="node:10" />
+                                            <arg value="node:15" />
                                             <arg value="su" />
                                             <arg value="-c" />
                                             <arg value="cd /root; npm run publish-with-tag; " />
