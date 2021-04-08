@@ -30,11 +30,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-dashboard-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-root-war</artifactId>
             <type>war</type>
         </dependency>
@@ -95,13 +90,6 @@
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency/assembly-che-tomcat8</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che</groupId>
-                                    <artifactId>assembly-dashboard-war</artifactId>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency/assembly-dashboard-war</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

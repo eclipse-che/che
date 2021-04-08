@@ -55,7 +55,6 @@ jobs:
         docker push quay.io/eclipse/che-postgres:nightly
         docker push quay.io/eclipse/che-dev:nightly
         docker push quay.io/eclipse/che-server:nightly
-        docker push quay.io/eclipse/che-dashboard-dev:nightly
         docker push quay.io/eclipse/che-e2e:nightly
     - name: Build ubi8 Che Server image
       run: 

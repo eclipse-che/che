@@ -64,10 +64,6 @@
                 <exclude>bin/*.bat</exclude>
             </excludes>
        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/assembly-dashboard-war</directory>
-            <outputDirectory>tomcat/webapps/dashboard</outputDirectory>
-        </fileSet>
        <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>

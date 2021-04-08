@@ -46,7 +46,6 @@ testImages() {
     dockerfiles/postgres
     dockerfiles/dev
     dockerfiles/che
-    dockerfiles/dashboard-dev
     dockerfiles/e2e
   )
 
@@ -56,7 +55,6 @@ testImages() {
     eclipse/che-postgres
     eclipse/che-dev
     eclipse/che-server
-    eclipse/che-dashboard-dev
     eclipse/che-e2e
   )
 
