@@ -23,6 +23,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.Kub
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.NamespaceNameValidator.METADATA_NAME_MAX_LENGTH;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -33,11 +34,13 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
@@ -55,6 +58,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
@@ -77,7 +81,8 @@ public class KubernetesNamespaceFactory {
 
   private static final Map<String, Function<NamespaceResolutionContext, String>>
       NAMESPACE_NAME_PLACEHOLDERS = new HashMap<>();
-
+  private static final Set<String> LEGACY_NAMESPACE_NAME_PLACEHOLDERS = new HashSet<>();
+  private static final Set<String> REQUIRED_NAMESPACE_NAME_PLACEHOLDERS = new HashSet<>();
   private static final String USERNAME_PLACEHOLDER = "<username>";
   private static final String USERID_PLACEHOLDER = "<userid>";
   private static final String WORKSPACEID_PLACEHOLDER = "<workspaceid>";
@@ -89,6 +94,9 @@ public class KubernetesNamespaceFactory {
     NAMESPACE_NAME_PLACEHOLDERS.put(USERID_PLACEHOLDER, NamespaceResolutionContext::getUserId);
     NAMESPACE_NAME_PLACEHOLDERS.put(
         WORKSPACEID_PLACEHOLDER, NamespaceResolutionContext::getWorkspaceId);
+    LEGACY_NAMESPACE_NAME_PLACEHOLDERS.add(WORKSPACEID_PLACEHOLDER);
+    REQUIRED_NAMESPACE_NAME_PLACEHOLDERS.add(USERNAME_PLACEHOLDER);
+    REQUIRED_NAMESPACE_NAME_PLACEHOLDERS.add(USERID_PLACEHOLDER);
   }
 
   private final String defaultNamespaceName;
@@ -159,6 +167,7 @@ public class KubernetesNamespaceFactory {
     } else {
       this.clusterRoleNames = Collections.emptySet();
     }
+    printLegacyWarningIfNeeded();
   }
 
   /**
@@ -177,6 +186,36 @@ public class KubernetesNamespaceFactory {
   KubernetesNamespace doCreateNamespaceAccess(String workspaceId, String name) {
     return new KubernetesNamespace(
         clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
+  }
+
+  @ScheduleRate(period = 1, initialDelay = 1, unit = TimeUnit.HOURS)
+  private void printLegacyWarningIfNeeded() {
+    if (!isNullOrEmpty(legacyNamespaceName)) {
+      LOG.warn(
+          "The 'che.infra.kubernetes.namespace' configuration parameter has been deprecated "
+              + "and is subject to removal in future releases. The current value is: `{}`. Legacy workspaces located "
+              + "in this namespace may become unreachable in future releases. "
+              + "Please refer to the documentation about possible next steps.",
+          legacyNamespaceName);
+    }
+    if (LEGACY_NAMESPACE_NAME_PLACEHOLDERS.stream().anyMatch(defaultNamespaceName::contains)) {
+      LOG.warn(
+          "The 'che.infra.kubernetes.namespace.default' configuration parameter with the `{}` "
+              + "placeholder has been deprecated and is subject to removal in future releases."
+              + " The current value is: `{}`. Please refer to the documentation about "
+              + "possible next steps.",
+          LEGACY_NAMESPACE_NAME_PLACEHOLDERS,
+          defaultNamespaceName);
+    } else if (REQUIRED_NAMESPACE_NAME_PLACEHOLDERS
+        .stream()
+        .noneMatch(defaultNamespaceName::contains)) {
+      LOG.warn(
+          "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. "
+              + "Using the {} placeholder is required in the 'che.infra.kubernetes.namespace.default' parameter."
+              + " The current value is: `{}`.",
+          Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS),
+          defaultNamespaceName);
+    }
   }
 
   /**
