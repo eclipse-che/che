@@ -13,5 +13,5 @@ package org.eclipse.che.api.factory.server.gitlab;
 
 public interface GitlabOAuthTokenProviderFactory {
 
-  GitlabOAuthTokenProvider create(String serverUrl);
+  GitlabOAuthTokenFetcher create(String serverUrl);
 }

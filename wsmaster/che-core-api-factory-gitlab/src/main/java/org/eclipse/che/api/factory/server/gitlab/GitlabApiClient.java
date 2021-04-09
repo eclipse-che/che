@@ -37,10 +37,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-/**
- * GitLab API operations helper.
- */
+/** GitLab API operations helper. */
 public class GitlabApiClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(GitlabApiClient.class);

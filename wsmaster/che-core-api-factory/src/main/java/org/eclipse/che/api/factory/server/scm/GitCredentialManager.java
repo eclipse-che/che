@@ -22,6 +22,6 @@ public interface GitCredentialManager {
    * @throws UnsatisfiedScmPreconditionException - some storage preconditions aren't met.
    * @throws ScmConfigurationPersistenceException
    */
-  void createOrReplace(ScmAuthenticationToken scmAuthenticationToken)
+  void createOrReplace(PersonalAccessToken scmAuthenticationToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException;
 }

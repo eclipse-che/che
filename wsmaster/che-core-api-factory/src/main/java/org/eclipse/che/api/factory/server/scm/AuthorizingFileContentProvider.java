@@ -57,7 +57,7 @@ public abstract class AuthorizingFileContentProvider<T extends RemoteFactoryUrl>
         return urlFetcher.fetch(requestURL);
       } catch (IOException exception) {
         // unable to determine exact cause, so let's just try to authorize...
-        ScmAuthenticationToken scmAuthenticationToken = getScmAuthenticationToken(requestURL);
+        PersonalAccessToken scmAuthenticationToken = getScmAuthenticationToken(requestURL);
         String content =
             urlFetcher.fetch(requestURL, "Bearer " + scmAuthenticationToken.getToken());
         gitCredentialManager.createOrReplace(scmAuthenticationToken);
@@ -68,6 +68,6 @@ public abstract class AuthorizingFileContentProvider<T extends RemoteFactoryUrl>
     }
   }
 
-  protected abstract ScmAuthenticationToken getScmAuthenticationToken(String requestURL)
+  protected abstract PersonalAccessToken getScmAuthenticationToken(String requestURL)
       throws DevfileException;
 }

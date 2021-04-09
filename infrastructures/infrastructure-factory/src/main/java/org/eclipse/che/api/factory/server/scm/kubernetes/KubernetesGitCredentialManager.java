@@ -34,7 +34,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
-import org.eclipse.che.api.factory.server.scm.ScmAuthenticationToken;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -81,7 +81,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
   }
 
   @Override
-  public void createOrReplace(ScmAuthenticationToken scmAuthenticationToken)
+  public void createOrReplace(PersonalAccessToken scmAuthenticationToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       final String namespace = getFirstNamespace();

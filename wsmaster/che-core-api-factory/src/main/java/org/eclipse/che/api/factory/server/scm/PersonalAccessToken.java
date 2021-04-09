@@ -18,18 +18,15 @@ import org.eclipse.che.commons.env.EnvironmentContext;
  * Personal access token that can be used to authorise scm operations like api calls, git clone or
  * git push.
  */
-public class PersonalAccessToken extends ScmAuthenticationToken {
+public class PersonalAccessToken {
 
-  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
-    super(
-        scmProviderUrl,
-        EnvironmentContext.getCurrent().getSubject().getUserId(),
-        scmUserName,
-        null,
-        null,
-        null,
-        token);
-  }
+  protected final String scmProviderUrl;
+  protected final String scmUserName;
+  protected final String scmUserId;
+  protected final String scmTokenName;
+  protected final String scmTokenId;
+  protected final String token;
+  protected final String cheUserId;
 
   public PersonalAccessToken(
       String scmProviderUrl,
@@ -39,7 +36,52 @@ public class PersonalAccessToken extends ScmAuthenticationToken {
       String scmTokenName,
       String scmTokenId,
       String token) {
-    super(scmProviderUrl, cheUserId, scmUserName, scmUserId, scmTokenName, scmTokenId, token);
+    this.scmProviderUrl = scmProviderUrl;
+    this.scmUserName = scmUserName;
+    this.scmUserId = scmUserId;
+    this.scmTokenName = scmTokenName;
+    this.scmTokenId = scmTokenId;
+    this.token = token;
+    this.cheUserId = cheUserId;
+  }
+
+  public String getScmProviderUrl() {
+    return scmProviderUrl;
+  }
+
+  public String getScmTokenName() {
+    return scmTokenName;
+  }
+
+  public String getScmTokenId() {
+    return scmTokenId;
+  }
+
+  public String getScmUserName() {
+    return scmUserName;
+  }
+
+  public String getScmUserId() {
+    return scmUserId;
+  }
+
+  public String getToken() {
+    return token;
+  }
+
+  public String getCheUserId() {
+    return cheUserId;
+  }
+
+  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
+    this(
+        scmProviderUrl,
+        EnvironmentContext.getCurrent().getSubject().getUserId(),
+        scmUserName,
+        null,
+        null,
+        null,
+        token);
   }
 
   @Override

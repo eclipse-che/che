@@ -16,7 +16,6 @@ import org.eclipse.che.api.factory.server.scm.AuthorizingFileContentProvider;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessToken;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
-import org.eclipse.che.api.factory.server.scm.ScmAuthenticationToken;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersistenceException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
@@ -45,7 +44,7 @@ public class BitbucketServerAuthorizingFileContentProvider
   }
 
   @Override
-  protected ScmAuthenticationToken getScmAuthenticationToken(String requestURL)
+  protected PersonalAccessToken getScmAuthenticationToken(String requestURL)
       throws DevfileException {
     try {
       Optional<PersonalAccessToken> token =
