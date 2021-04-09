@@ -56,7 +56,6 @@ public class PersonalAccessToken {
         token);
   }
 
-
   public String getScmProviderUrl() {
     return scmProviderUrl;
   }
