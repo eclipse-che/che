@@ -12,12 +12,15 @@
 package org.eclipse.che.api.factory.server.gitlab;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenFetcher;
 
 public class GitlabModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new FactoryModuleBuilder().build(GitlabOAuthTokenProviderFactory.class));
+    Multibinder<PersonalAccessTokenFetcher> tokenFetcherMultibinder =
+        Multibinder.newSetBinder(binder(), PersonalAccessTokenFetcher.class);
+    tokenFetcherMultibinder.addBinding().to(GitlabOAuthTokenFetcher.class);
   }
 }

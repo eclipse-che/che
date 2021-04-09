@@ -41,7 +41,6 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 public class GitlabFactoryParametersResolver extends DefaultFactoryParameterResolver {
 
   private final GitlabUrlParser gitlabURLParser;
-  private final GitlabOAuthTokenProviderFactory gitlabOAuthTokenProviderFactory;
   private final GitCredentialManager gitCredentialManager;
   private final PersonalAccessTokenManager personalAccessTokenManager;
 
@@ -50,14 +49,12 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
       URLFactoryBuilder urlFactoryBuilder,
       URLFetcher urlFetcher,
       GitlabUrlParser gitlabURLParser,
-      GitlabOAuthTokenProviderFactory gitlabOAuthTokenProviderFactory,
       GitCredentialManager gitCredentialManager,
       PersonalAccessTokenManager personalAccessTokenManager) {
     super(urlFactoryBuilder, urlFetcher);
     this.gitlabURLParser = gitlabURLParser;
     this.gitCredentialManager = gitCredentialManager;
     this.personalAccessTokenManager = personalAccessTokenManager;
-    this.gitlabOAuthTokenProviderFactory = gitlabOAuthTokenProviderFactory;
   }
 
   /**
@@ -93,8 +90,7 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
                 gitlabUrl,
                 urlFetcher,
                 gitCredentialManager,
-                personalAccessTokenManager,
-                gitlabOAuthTokenProviderFactory),
+                personalAccessTokenManager),
             extractOverrideParams(factoryParameters))
         .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
         .acceptVisitor(new GitlabFactoryVisitor(gitlabUrl));

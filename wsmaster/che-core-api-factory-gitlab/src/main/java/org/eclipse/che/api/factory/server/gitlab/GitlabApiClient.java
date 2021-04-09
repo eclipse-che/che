@@ -43,13 +43,13 @@ public class GitlabApiClient {
   private static final Logger LOG = LoggerFactory.getLogger(GitlabApiClient.class);
 
   private final HttpClient httpClient;
-  private final String serverUrl;
+  private final URI serverUrl;
 
   private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public GitlabApiClient(String serverUrl) {
-    this.serverUrl = serverUrl;
+    this.serverUrl = URI.create(serverUrl);
     this.httpClient =
         HttpClient.newBuilder()
             .executor(
@@ -65,7 +65,7 @@ public class GitlabApiClient {
 
   public GitlabUser getUser(String authenticationToken)
       throws ScmItemNotFoundException, ScmCommunicationException, ScmBadRequestException {
-    final URI uri = URI.create(serverUrl + "/api/v4/user");
+    final URI uri = serverUrl.resolve("/api/v4/user");
     HttpRequest request =
         HttpRequest.newBuilder(uri)
             .headers("Authorization", "Bearer " + authenticationToken)
@@ -110,5 +110,9 @@ public class GitlabApiClient {
     } catch (IOException | InterruptedException | UncheckedIOException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }
+  }
+
+  public boolean isConnected(String scmServerUrl) {
+    return serverUrl.equals(URI.create(scmServerUrl));
   }
 }
