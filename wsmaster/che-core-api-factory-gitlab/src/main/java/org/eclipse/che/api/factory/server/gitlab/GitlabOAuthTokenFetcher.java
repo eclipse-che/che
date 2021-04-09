@@ -62,7 +62,7 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
   @Override
   public PersonalAccessToken fetchPersonalAccessToken(Subject cheSubject, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException {
-    if (gitlabApiClient != null && !gitlabApiClient.isConnected(scmServerUrl)) {
+    if (gitlabApiClient == null || !gitlabApiClient.isConnected(scmServerUrl)) {
       LOG.debug("not a  valid url {} for current fetcher ", scmServerUrl);
       return null;
     }

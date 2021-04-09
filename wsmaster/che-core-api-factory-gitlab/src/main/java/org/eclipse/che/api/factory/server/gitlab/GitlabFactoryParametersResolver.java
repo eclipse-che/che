@@ -41,6 +41,7 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 public class GitlabFactoryParametersResolver extends DefaultFactoryParameterResolver {
 
   private final GitlabUrlParser gitlabURLParser;
+
   private final GitCredentialManager gitCredentialManager;
   private final PersonalAccessTokenManager personalAccessTokenManager;
 

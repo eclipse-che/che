@@ -49,6 +49,7 @@ public class BitbucketServerAuthorizingFileContentProviderTest {
     PersonalAccessToken token = new PersonalAccessToken(TEST_HOSTNAME, "user1", "token");
     when(personalAccessTokenManager.get(any(Subject.class), anyString()))
         .thenReturn(Optional.of(token));
+
     String fileURL = "https://foo.bar/scm/repo/.devfile";
 
     // when
