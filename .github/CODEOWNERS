@@ -34,9 +34,6 @@ wsmaster/che-core-api-workspace/**  @skabashnyuk @mshaposhnik @metlos @nickboldt
 deploy/** @tolusha @nickboldt
 deploy/openshift/templates/monitoring/** @skabashnyuk @metlos @nickboldt
 
-# selenium tests
-tests/legacy-e2e/** @musienko-maxim @dmytro-ndp @Ohrimenko1988 @rhopp @nickboldt
-
 # e2e tests
 tests/e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTSW
 

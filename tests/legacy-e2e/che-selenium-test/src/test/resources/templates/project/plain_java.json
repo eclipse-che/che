@@ -1,9 +1,0 @@
-{
-  "name": "replaced_name",
-  "attributes": {
-    "java.source.folder": ["/src"],
-    "java.library.folder": [""]
-  },
-  "type": "javac",
-  "path": "/replaced_name"
-}
