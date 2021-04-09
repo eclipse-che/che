@@ -81,7 +81,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
   }
 
   @Override
-  public void createOrReplace(PersonalAccessToken scmAuthenticationToken)
+  public void createOrReplace(PersonalAccessToken personalAccessToken)
       throws UnsatisfiedScmPreconditionException, ScmConfigurationPersistenceException {
     try {
       final String namespace = getFirstNamespace();
@@ -101,13 +101,13 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                   s ->
                       Boolean.parseBoolean(
                               s.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))
-                          && scmAuthenticationToken
+                          && personalAccessToken
                               .getScmProviderUrl()
                               .equals(s.getMetadata().getAnnotations().get(ANNOTATION_SCM_URL))
-                          && scmAuthenticationToken
+                          && personalAccessToken
                               .getCheUserId()
                               .equals(s.getMetadata().getAnnotations().get(ANNOTATION_CHE_USERID))
-                          && scmAuthenticationToken
+                          && personalAccessToken
                               .getScmUserName()
                               .equals(
                                   s.getMetadata().getAnnotations().get(ANNOTATION_SCM_USERNAME)))
@@ -117,21 +117,21 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
           existing.orElseGet(
               () -> {
                 Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
-                annotations.put(ANNOTATION_SCM_URL, scmAuthenticationToken.getScmProviderUrl());
-                annotations.put(ANNOTATION_SCM_USERNAME, scmAuthenticationToken.getScmUserName());
-                annotations.put(ANNOTATION_CHE_USERID, scmAuthenticationToken.getCheUserId());
+                annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
+                annotations.put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName());
+                annotations.put(ANNOTATION_CHE_USERID, personalAccessToken.getCheUserId());
                 ObjectMeta meta =
                     new ObjectMetaBuilder()
                         .withName(
                             NameGenerator.generate(
-                                String.format(NAME_PATTERN, scmAuthenticationToken.getScmUserName()),
+                                String.format(NAME_PATTERN, personalAccessToken.getScmUserName()),
                                 5))
                         .withAnnotations(annotations)
                         .withLabels(LABELS)
                         .build();
                 return new SecretBuilder().withMetadata(meta).build();
               });
-      URL scmUrl = new URL(scmAuthenticationToken.getScmProviderUrl());
+      URL scmUrl = new URL(personalAccessToken.getScmProviderUrl());
       secret.setData(
           Map.of(
               "credentials",
@@ -140,8 +140,8 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                       format(
                               "%s://%s:%s@%s%s",
                               scmUrl.getProtocol(),
-                              scmAuthenticationToken.getScmUserName(),
-                              URLEncoder.encode(scmAuthenticationToken.getToken(), UTF_8),
+                              personalAccessToken.getScmUserName(),
+                              URLEncoder.encode(personalAccessToken.getToken(), UTF_8),
                               scmUrl.getHost(),
                               scmUrl.getPort() != 80 && scmUrl.getPort() != -1
                                   ? ":" + scmUrl.getPort()
