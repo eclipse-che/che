@@ -19,9 +19,8 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Dashboard {
-    private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Workspaces']`;
-    private static readonly GET_STARTED_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Get Started']`;
-    private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
+    private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Workspaces ([0-9]+)']`;
+    private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create workspace']`;
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -79,7 +78,6 @@ export class Dashboard {
         Logger.debug('Dashboard.waitPage');
 
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.WORKSPACES_BUTTON_XPATH), timeout);
-        await this.driverHelper.waitVisibility(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
@@ -93,12 +91,6 @@ export class Dashboard {
         Logger.debug('Dashboard.clickCreateWorkspaceButton');
 
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
-    }
-
-    async clickGetStartedButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug('Dashboard.clickGetStartedButton');
-
-        await this.driverHelper.waitAndClick(By.xpath(Dashboard.GET_STARTED_BUTTON_XPATH), timeout);
     }
 
     async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
