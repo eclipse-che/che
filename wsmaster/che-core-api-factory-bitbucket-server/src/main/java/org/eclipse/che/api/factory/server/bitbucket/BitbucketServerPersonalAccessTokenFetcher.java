@@ -103,7 +103,6 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
   @Override
   public Optional<Boolean> isValid(PersonalAccessToken personalAccessToken)
       throws ScmCommunicationException, ScmUnauthorizedException {
-    LOG.info("Checking personalAccessToken {}", personalAccessToken);
     if (!bitbucketServerApiClient.isConnected(personalAccessToken.getScmProviderUrl())) {
       LOG.debug(
           "not a  valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
@@ -114,10 +113,6 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
           bitbucketServerApiClient.getPersonalAccessToken(
               personalAccessToken.getScmUserName(),
               Long.valueOf(personalAccessToken.getScmTokenId()));
-      LOG.info(
-          "SCM  personalAccessToken {} comparing with {} ",
-          bitbucketPersonalAccessToken,
-          personalAccessToken);
       return Optional.of(
           Sets.difference(
                   ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"),

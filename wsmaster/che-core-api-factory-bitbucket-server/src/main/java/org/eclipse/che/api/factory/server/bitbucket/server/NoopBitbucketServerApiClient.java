@@ -80,6 +80,6 @@ public class NoopBitbucketServerApiClient implements BitbucketServerApiClient {
   @Override
   public BitbucketPersonalAccessToken getPersonalAccessToken(String userSlug, Long tokenId)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
-    return null;
+    throw new RuntimeException("Invalid usage of BitbucketServerApi");
   }
 }
