@@ -45,11 +45,15 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
   private final GitlabApiClient gitlabApiClient;
 
   @Inject
-  public GitlabOAuthTokenFetcher(@Nullable @Named("che.integration.gitlab.server_endpoints") String bitbucketEndpoints, @Named("che.api") String apiEndpoint, OAuthAPI oAuthAPI) {
+  public GitlabOAuthTokenFetcher(
+      @Nullable @Named("che.integration.gitlab.server_endpoints") String bitbucketEndpoints,
+      @Named("che.api") String apiEndpoint,
+      OAuthAPI oAuthAPI) {
     this.apiEndpoint = apiEndpoint;
     this.oAuthAPI = oAuthAPI;
     if (bitbucketEndpoints != null) {
-    this.gitlabApiClient = new GitlabApiClient(Splitter.on(",").splitToList(bitbucketEndpoints).get(0));
+      this.gitlabApiClient =
+          new GitlabApiClient(Splitter.on(",").splitToList(bitbucketEndpoints).get(0));
     } else {
       this.gitlabApiClient = null;
     }
@@ -70,9 +74,14 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
             "Current token doesn't have the 'read_user' privileges. Please make sure Che app scopes are correct and containing it.");
       }
       GitlabUser user = gitlabApiClient.getUser(oAuthToken.getToken());
-      return new PersonalAccessToken(scmServerUrl, cheSubject.getUserId(), user.getUsername(),
-          Long.toString(user.getId()), NameGenerator.generate("oauth2-", 5),
-          NameGenerator.generate("id-", 5), oAuthToken.getToken());
+      return new PersonalAccessToken(
+          scmServerUrl,
+          cheSubject.getUserId(),
+          user.getUsername(),
+          Long.toString(user.getId()),
+          NameGenerator.generate("oauth2-", 5),
+          NameGenerator.generate("id-", 5),
+          oAuthToken.getToken());
     } catch (UnauthorizedException e) {
       throw new ScmUnauthorizedException(
           cheSubject.getUserName()

@@ -87,10 +87,7 @@ public class GitlabFactoryParametersResolver extends DefaultFactoryParameterReso
         .createFactoryFromDevfile(
             gitlabUrl,
             new GitlabAuthorizingFileContentProvider(
-                gitlabUrl,
-                urlFetcher,
-                gitCredentialManager,
-                personalAccessTokenManager),
+                gitlabUrl, urlFetcher, gitCredentialManager, personalAccessTokenManager),
             extractOverrideParams(factoryParameters))
         .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo"))
         .acceptVisitor(new GitlabFactoryVisitor(gitlabUrl));
