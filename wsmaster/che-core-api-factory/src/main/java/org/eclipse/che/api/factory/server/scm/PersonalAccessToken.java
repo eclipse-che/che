@@ -20,13 +20,13 @@ import org.eclipse.che.commons.env.EnvironmentContext;
  */
 public class PersonalAccessToken {
 
-  protected final String scmProviderUrl;
-  protected final String scmUserName;
-  protected final String scmUserId;
-  protected final String scmTokenName;
-  protected final String scmTokenId;
-  protected final String token;
-  protected final String cheUserId;
+  private final String scmProviderUrl;
+  private final String scmUserName;
+  private final String scmUserId;
+  private final String scmTokenName;
+  private final String scmTokenId;
+  private final String token;
+  private final String cheUserId;
 
   public PersonalAccessToken(
       String scmProviderUrl,
@@ -44,6 +44,18 @@ public class PersonalAccessToken {
     this.token = token;
     this.cheUserId = cheUserId;
   }
+
+  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
+    this(
+        scmProviderUrl,
+        EnvironmentContext.getCurrent().getSubject().getUserId(),
+        scmUserName,
+        null,
+        null,
+        null,
+        token);
+  }
+
 
   public String getScmProviderUrl() {
     return scmProviderUrl;
@@ -71,17 +83,6 @@ public class PersonalAccessToken {
 
   public String getCheUserId() {
     return cheUserId;
-  }
-
-  public PersonalAccessToken(String scmProviderUrl, String scmUserName, String token) {
-    this(
-        scmProviderUrl,
-        EnvironmentContext.getCurrent().getSubject().getUserId(),
-        scmUserName,
-        null,
-        null,
-        null,
-        token);
   }
 
   @Override

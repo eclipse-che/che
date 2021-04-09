@@ -33,13 +33,14 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 public class AuthorizingFileContentProvider<T extends RemoteFactoryUrl>
     implements FileContentProvider {
 
-  protected final T remoteFactoryUrl;
+  private final T remoteFactoryUrl;
   private final URLFetcher urlFetcher;
   private final PersonalAccessTokenManager personalAccessTokenManager;
   private final GitCredentialManager gitCredentialManager;
 
   public AuthorizingFileContentProvider(
-      T remoteFactoryUrl, URLFetcher urlFetcher,
+      T remoteFactoryUrl,
+      URLFetcher urlFetcher,
       PersonalAccessTokenManager personalAccessTokenManager,
       GitCredentialManager gitCredentialManager) {
     this.remoteFactoryUrl = remoteFactoryUrl;
