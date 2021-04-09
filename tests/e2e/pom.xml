@@ -49,21 +49,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>remove-old-resources</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <exec dir="${basedir}" executable="bash" failonerror="true">
-                                    <arg value="-c" />
-                                    <arg value="rm -rf dist node_modules" />
-                                </exec>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>install-build-lint</id>
                         <phase>compile</phase>
                         <goals>
@@ -94,7 +79,7 @@
             <activation>
                 <property>
                     <!-- Run this profile if environment variable NPM_AUTH_TOKEN exists -->
-                    <name>env.NPM_AUTH_TOKEN</name>
+                    <name>env.CHE_NPM_AUTH_TOKEN</name>
                 </property>
             </activation>
             <build>
@@ -104,7 +89,7 @@
                         <executions>
                             <execution>
                                 <id>push</id>
-                                <phase>install</phase>
+                                <phase>deploy</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
@@ -115,12 +100,10 @@
                                             <arg value="run" />
                                             <arg value="-v" />
                                             <arg value="${basedir}/:/root/:Z" />
-                                            <arg value="-e" />
-                                            <arg value="CHE_VERSION=${che.version}" />
                                             <arg value="node:15" />
                                             <arg value="su" />
                                             <arg value="-c" />
-                                            <arg value="cd /root; npm run publish-with-tag; " />
+                                            <arg value="cd /root; npm publish --tag 'latest' " />
                                         </exec>
                                     </target>
                                 </configuration>

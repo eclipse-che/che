@@ -432,6 +432,11 @@ bumpVersion() {
             sed -i -e "s#<version>.*<\/version>#<version>${1}<\/version>#" dto-pom.xml
         popd >/dev/null
 
+        pushd tests/e2e >/dev/null
+            sed -i -e "s#\"version\": \".*\",#\"version\": \"${1}\",#" package.json
+            sed -i -e "0,/\"version\".*/s/\"version\": \".*\",/\"version\": \"${1}\"/"  package-lock.json
+        popd >/dev/null
+
         commitChangeOrCreatePR $1 $2 "pr-${2}-to-${1}"
     popd >/dev/null
     set +x
