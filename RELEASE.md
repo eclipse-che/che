@@ -34,7 +34,7 @@ Then by script:
 - [ ] che
 - [ ] che-operator _(depends on all of the above)_
 - [ ] chectl _(depends on all of the above)_
-- [ ] community operator PRs _(depends on all of the above)_
+- [ ] [community operator PRs](https://github.com/operator-framework/community-operators/pulls/che-incubator-bot) _(depends on all of the above)
   - [ ] https://github.com/operator-framework/community-operators/pull/ ???
   - [ ] https://github.com/operator-framework/community-operators/pull/ ???
 
@@ -61,53 +61,19 @@ If this is a .0 release:
 RELEASE-TEMPLATE-END
 -->
 
-##### 1. Create branch for release preparation and next bugfixes:
+# Automated release workflow
+Release is performed with GitHub Actions workflow [release.yml](https://github.com/eclipse/che/actions/workflows/release.yml).
+It is also used to release [Che Parent](https://github.com/eclipse/che-parent), if appropriate input paramater `releaseParent` is set to true.
+The release will perform the build and deployment of Maven Artifacts, build and push of all nesessary docker images, and bumping up development version.
 
-```
-git branch {branchname} # e.g 7.7.x
-git push --set-upstream origin {branchname}
-```
+[make-release.sh](https://github.com/eclipse/che/blob/master/make-release.sh) is the script that can be used for standalone release outside of GitHub Actions. However, ensure that all environment variables are set in place before invoking `./make-release.sh`, similarly to how it is outlined in [release.yml](https://github.com/eclipse/che/actions/workflows/release.yml):
 
-##### 2. Create PR for switch master to the next development version:
+RELEASE_CHE_PARENT - if `true`, will perform the release of Che Parent as well.
+VERSION_CHE_PARENT - if RELEASE_CHE_PARENT is `true`, here the version of Che Parent must be provided.
+DEPLOY_TO_NEXUS - if `true`, will deploy Maven artifacts to Nexus. Set `false`, if this step needs to be skipped.
+AUTORELEASE_ON_NEXUS - if `true`, after deploying Maven artifacts to staging repository, they will be automatically closed and release. Set `false`, if you want to inspect the staging repository, before artifacts will be released.
+REBUILD_FROM_EXISTING_TAGS - if `true`, release will not create new tag, but instead checkout to existing one. Use this to rerun failed attempts, without having to recreate the tag.
+BUILD_AND_PUSH_IMAGES - if `true`, will build all asociated images in [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) directory. Set `false`, if this step needs to be skipped.
+BUMP_NEXT_VERSION - if `true`, will increase the development versions in main and bugfix branches. Set false, if this step needs to be skipped
 
-```
-  git branch set_next_version_in_master_{next_version} # e.g 7.8.0-SNAPSHOT
-  # Update parent version
-  mvn versions:update-parent  versions:commit -DallowSnapshots=true -DparentVersion={next_version}
 
-  # Update dependencies
-  sed -i -e "s#{version_old}#{next_version}#" pom.xml
-  git commit
-  git push --set-upstream origin set_next_version_in_master_{next_version}
-  ```
-
-* Create PR
-##### 3. In release branch of Che need to set up released version of plugin registry and plugins:
-    1 Update deploy_che.sh (should be deprecated soon - https://github.com/eclipse/che/issues/14069) default environment variables
-    2 Update default version of plugins and editors in che.properties to released tag e.g `7.7.0`
-    3 Update Helm charts with released tag e.g `7.7.0`
-
-  To do this execute commands:
-  ```
-  cd .ci
-  set_tag_version_images.sh 7.25.0
-  git commit
-  git push
-  ```
-##### 4. Start pre-release testing.
-##### 5. If pre-release test passed need to merge branch to the `release` branch and push changes, release process will start by webhook:
-* Set released parent version
-* Update dependencies in pom.xml, then:
-  ```
-  git checkout release
-  git merge -X theirs {branchname}
-  git push -f
-  ```
-
-##### 6. Close/release repository on Nexus
- https://oss.sonatype.org/#stagingRepositories
-
- > **Note:** For bugfix release procedure will be similar except creating new branch on first step and update version in master branch.
-
-# Script
-`make-release.sh` is a script that performs these actions, use --prerelease-testing flag to prepare "RC" release for QE testing, and --trigger-release to perform a release after that

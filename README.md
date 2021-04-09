@@ -6,7 +6,6 @@ https://www.eclipse.org/che/)
 **Next-generation container development platform, developer workspace server and cloud IDE**
 
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
-[![Build Status](https://ci.centos.org/buildStatus/icon?job=devtools-che-che-build-master)](https://ci.centos.org/view/Devtools/job/devtools-che-che-build-master/)
 <a href="https://sonarcloud.io/dashboard?id=org.eclipse.che%3Ache-parent%3Amaster">
 <img src="https://sonarcloud.io/images/project_badges/sonarcloud-black.svg" width="94" height="20" href="" />
 </a>
@@ -75,11 +74,10 @@ If you are interested in fixing issues and contributing directly to the code bas
 We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open way. We welcome anyone to ask question and contribute to the roadmap by joining our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings).
 
 ## CI
-The following [CentOS CI jobs](https://ci.centos.org/) are associated with the repository:
+There are several [GitHub Actions](https://github.com/eclipse/che/actions) workflows implemented for this repository:
 
-- [`master`](https://ci.centos.org/view/Devtools/job/devtools-che-che-build-master/) - builds and push Maven artifacts on each commit to the [`master`](https://github.com/eclipse/che/tree/master).
-- [`nightly`](https://ci.centos.org/view/Devtools/job/devtools-che-che-nightly/) - builds and push Maven artifacts, builds CentOS images and pushes them to [quay.io](https://quay.io/organization/eclipse) on a daily basis from the [`master`](https://github.com/eclipse/che/tree/master) branch.
-- [`release`](https://ci.centos.org/view/Devtools/job/devtools-che-che-release/) - builds and push Maven artifacts, builds images from the [`release`](https://github.com/eclipse/che/tree/release) branch. CentOS images are public and pushed to [quay.io](https://quay.io/organization/eclipse).
+- [`nightly`](https://github.com/eclipse/che/actions/workflows/nightly-build.yml) - builds and push Maven artifacts, builds container images and pushes them to [quay.io](https://quay.io/organization/eclipse) on a daily basis from the [`master`](https://github.com/eclipse/che/tree/master) branch.
+- [`release`](https://github.com/eclipse/che/actions/workflows/release.yml) - builds and push Maven artifacts and container images. Images are public and pushed to [quay.io](https://quay.io/organization/eclipse). See [RELEASE.md](https://github.com/eclipse/che/blob/master/RELEASE.md) for more information about this workflow.
 
 ### License
 Che is open sourced under the Eclipse Public License 2.0.
