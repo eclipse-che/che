@@ -87,6 +87,7 @@ requirements.lock
 tests/e2e/dist/
 tests/e2e/node_modules/
 tests/e2e/report/
+tests/e2e/load-test-folder
 
 # Cypress modules #
 ###################

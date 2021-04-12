@@ -73,8 +73,6 @@ import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
-import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.authentication.commons.token.ChainedTokenExtractor;
 import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenExtractor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
@@ -365,8 +363,6 @@ public class WsMasterModule extends AbstractModule {
     persistenceProperties.put(
         PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
         "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
-
-    bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
     install(new org.eclipse.che.multiuser.api.permission.server.jpa.SystemPermissionsJpaModule());

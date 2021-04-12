@@ -21,7 +21,6 @@ import org.eclipse.che.multiuser.api.permission.shared.model.PermissionsDomain;
 import org.eclipse.che.multiuser.organization.api.listener.MemberEventsPublisher;
 import org.eclipse.che.multiuser.organization.api.listener.OrganizationEventsWebsocketBroadcaster;
 import org.eclipse.che.multiuser.organization.api.listener.RemoveOrganizationOnLastUserRemovedEventSubscriber;
-import org.eclipse.che.multiuser.organization.api.notification.OrganizationNotificationEmailSender;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationDomain;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationPermissionsFilter;
 import org.eclipse.che.multiuser.organization.api.permissions.OrganizationRemoteSubscriptionPermissionsChecks;
@@ -79,7 +78,5 @@ public class OrganizationApiModule extends AbstractModule {
             Names.named(SuperPrivilegesChecker.SUPER_PRIVILEGED_DOMAINS))
         .addBinding()
         .to(OrganizationDomain.class);
-
-    bind(OrganizationNotificationEmailSender.class).asEagerSingleton();
   }
 }
