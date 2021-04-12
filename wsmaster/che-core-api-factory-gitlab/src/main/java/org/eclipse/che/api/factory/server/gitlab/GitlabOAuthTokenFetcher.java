@@ -46,14 +46,14 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
 
   @Inject
   public GitlabOAuthTokenFetcher(
-      @Nullable @Named("che.integration.gitlab.server_endpoints") String bitbucketEndpoints,
+      @Nullable @Named("che.integration.gitlab.server_endpoints") String gitlabEndpoints,
       @Named("che.api") String apiEndpoint,
       OAuthAPI oAuthAPI) {
     this.apiEndpoint = apiEndpoint;
     this.oAuthAPI = oAuthAPI;
-    if (bitbucketEndpoints != null) {
+    if (gitlabEndpoints != null) {
       this.gitlabApiClient =
-          new GitlabApiClient(Splitter.on(",").splitToList(bitbucketEndpoints).get(0));
+          new GitlabApiClient(Splitter.on(",").splitToList(gitlabEndpoints).get(0));
     } else {
       this.gitlabApiClient = null;
     }
