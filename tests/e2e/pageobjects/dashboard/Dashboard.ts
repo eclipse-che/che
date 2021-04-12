@@ -19,8 +19,8 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Dashboard {
-    private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Workspaces ([0-9]+)']`;
-    private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create workspace']`;
+    private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`;
+    private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,

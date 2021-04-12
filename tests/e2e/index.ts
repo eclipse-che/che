@@ -6,6 +6,7 @@ export * from './TimeoutConstants';
 
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
+export * from './utils/BrowserTabsUtil';
 export * from './utils/DriverHelper';
 export * from './utils/Logger';
 export * from './utils/PreferencesHandler';
@@ -22,8 +23,8 @@ export * from './utils/workspace/ITestWorkspaceUtil';
 export * from './utils/WorkspaceNameHandler';
 export * from './utils/workspace/TestWorkspaceUtil';
 export * from './utils/workspace/WorkspaceStatus';
-export * from './pageobjects/dashboard/Dashboard';
 export * from './pageobjects/dashboard/CreateWorkspace';
+export * from './pageobjects/dashboard/Dashboard';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetails';
 export * from './pageobjects/dashboard/Workspaces';
