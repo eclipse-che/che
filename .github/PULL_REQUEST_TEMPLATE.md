@@ -31,7 +31,7 @@ Pull Request Policy: https://github.com/eclipse/che/wiki/Development-Workflow#pu
 - [ ] [The Eclipse Contributor Agreement is valid](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#the-eclipse-contributor-agreement-is-valid)
 - [ ] [Code produced is complete](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#code-produced-is-complete)
 - [ ] [Code builds without errors](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#code-builds-without-errors)
-- [ ] [Tests are covering the bugfix](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#tests-are-covering-the-bugfix)
+- [ ] [Tests are covering the bugfix or new feature ](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#tests-are-covering-the-bugfix-or-new-feature)
 - [ ] [The repository devfile is up to date and works](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#the-repository-devfile-is-up-to-date-and-works)
 - [ ] [Sections `What issues does this PR fix or reference` and `How to test this PR` completed](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#sections-what-issues-does-this-pr-fix-or-reference-and-how-to-test-this-pr-completed)
 - [ ] [Relevant user documentation updated](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#relevant-contributing-documentation-updated)
