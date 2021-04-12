@@ -10,22 +10,22 @@
 
 import { CLASSES, Dashboard } from '..';
 import { e2eContainer } from '../inversify.config';
-import { GetStarted } from '../pageobjects/dashboard/GetStarted';
+import { CreateWorkspace as CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { Logger } from '../utils/Logger';
 
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const getStarted: GetStarted = e2eContainer.get(CLASSES.GetStarted);
+const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 
 export function createAndOpenWorkspace(stack: string) {
     test(`Open 'New Workspace' page`, async () => {
         Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace wait for dashboard`);
         await dashboard.waitPage();
-        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace click get started button`);
-        await dashboard.clickGetStartedButton();
+        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace click Create workspace button`);
+        await dashboard.clickCreateWorkspaceButton();
         Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace wait for getting started page`);
-        await getStarted.waitPage();
+        await createWorkspace.waitPage();
         Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace click on sample ${stack}`);
-        await getStarted.clickOnSample(stack);
+        await createWorkspace.clickOnSample(stack);
     });
 }
 
