@@ -128,9 +128,11 @@ No `TODO` comments left in the PR source code.
 
 The author has verified that code builds, tests pass and linters are happy.
 
-### Tests are covering the bugfix
+### Tests are covering the bugfix or new feature 
 
-If the Pull Request fixes a bug it must includes a new automated test. The test validates the fix and protect against future regressions.
+If the Pull Request fixes a bug, it must includes a new automated test. The test validates the fix and protect against future regressions.
+
+If the Pull Request is for a new feature, it must include a new automated test. The test(s) validate the feature and protect against future regressions.
 
 ### The repository devfile is up to date and works
 
