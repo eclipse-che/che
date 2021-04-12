@@ -85,7 +85,7 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_v2_simple-devfile.yaml"},
       {"devfile/devfile_v2_spring-boot-http-booster-devfile.yaml"},
       {"devfile/devfile_v2-1-0-alpha_just_schemaVersion.yaml"},
-      {"devfile/schema_test/devfile/devfile_v2-1-0-alpha_simple-devfile.yaml"},
+      {"devfile/devfile_v2-1-0-alpha_simple-devfile.yaml"},
     };
   }
 
