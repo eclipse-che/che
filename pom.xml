@@ -31,7 +31,6 @@
         <module>infrastructures</module>
         <module>wsmaster/integration-tests</module>
         <module>assembly</module>
-        <module>tests/legacy-e2e</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -54,12 +53,12 @@
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
-        <com.google.guava.version>27.0.1-jre</com.google.guava.version>
-        <com.google.http-client.version>1.27.0</com.google.http-client.version>
+        <com.google.guava.version>30.1.1-jre</com.google.guava.version>
+        <com.google.http-client.version>1.39.1</com.google.http-client.version>
         <com.google.oauth-client.version>1.27.0</com.google.oauth-client.version>
         <com.googlecode.gson.version>2.8.5</com.googlecode.gson.version>
         <com.h2database.version>1.4.196</com.h2database.version>
-        <com.jayway.restassured.version>2.4.0</com.jayway.restassured.version>
+        <com.jayway.restassured.version>2.6.0</com.jayway.restassured.version>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
         <com.squareup.okhttp3.version>3.12.6</com.squareup.okhttp3.version>
         <com.squareup.okio.version>1.15.0</com.squareup.okio.version>
@@ -99,10 +98,12 @@
         <net.java.dev.jna.version>4.1.0</net.java.dev.jna.version>
         <org.antlr.st4.version>4.0.7</org.antlr.st4.version>
         <org.apache.commons.lang3.version>3.8.1</org.apache.commons.lang3.version>
+        <org.apache.httpcomponents.httpclient.version>4.5.13</org.apache.httpcomponents.httpclient.version>
+        <org.apache.httpcomponents.httpcore.version>4.4.14</org.apache.httpcomponents.httpcore.version>
         <org.apache.maven.plugin-testing.maven-plugin-testing-harness.version>3.3.0</org.apache.maven.plugin-testing.maven-plugin-testing-harness.version>
         <org.apache.maven.plugin-tools.plugin-annotations.version>3.2</org.apache.maven.plugin-tools.plugin-annotations.version>
         <org.apache.maven.verson>3.3.3</org.apache.maven.verson>
-        <org.apache.tomcat.version>8.5.61</org.apache.tomcat.version>
+        <org.apache.tomcat.version>8.5.64</org.apache.tomcat.version>
         <org.codehaus.plexus.utils.version>3.0.20</org.codehaus.plexus.utils.version>
         <org.eclipse.persistence.eclipselink.version>2.7.5</org.eclipse.persistence.eclipselink.version>
         <org.eclipse.persistence.version>2.2.0</org.eclipse.persistence.version>
@@ -112,13 +113,11 @@
         <org.hamcrest.version>1.3</org.hamcrest.version>
         <org.jgroups.kubernetes.version>1.0.13.Final</org.jgroups.kubernetes.version>
         <org.jgroups.version>4.1.9.Final</org.jgroups.version>
-        <org.kohsuke.github-api.version>1.90</org.kohsuke.github-api.version>
         <org.leadpony.justify.version>3.1.0</org.leadpony.justify.version>
         <org.mockito.mockito-testng.version>0.1.1</org.mockito.mockito-testng.version>
         <org.mockito.version>2.21.0</org.mockito.version>
         <org.postgresql.version>42.2.2</org.postgresql.version>
         <org.reflections.version>0.9.9</org.reflections.version>
-        <org.seleniumhq.selenium.version>3.0.1</org.seleniumhq.selenium.version>
         <org.slf4j.version>1.7.24</org.slf4j.version>
         <org.testng.version>7.0.0</org.testng.version>
     </properties>
@@ -579,6 +578,16 @@
                 <version>${org.apache.commons.lang3.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${org.apache.httpcomponents.httpclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${org.apache.httpcomponents.httpcore.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-artifact</artifactId>
                 <version>${org.apache.maven.verson}</version>
@@ -939,11 +948,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-commons-mail</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-observability</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1231,16 +1235,6 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.selenium</groupId>
-                <artifactId>che-selenium-core</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.selenium</groupId>
-                <artifactId>che-selenium-test</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.persistence</groupId>
                 <artifactId>javax.persistence</artifactId>
                 <version>${org.eclipse.persistence.version}</version>
@@ -1316,11 +1310,6 @@
                 <version>${org.jgroups.kubernetes.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.kohsuke</groupId>
-                <artifactId>github-api</artifactId>
-                <version>${org.kohsuke.github-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.leadpony.justify</groupId>
                 <artifactId>justify</artifactId>
                 <version>${org.leadpony.justify.version}</version>
@@ -1370,26 +1359,6 @@
                         <groupId>com.google.code.findbugs</groupId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-api</artifactId>
-                <version>${org.seleniumhq.selenium.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-chrome-driver</artifactId>
-                <version>${org.seleniumhq.selenium.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-remote-driver</artifactId>
-                <version>${org.seleniumhq.selenium.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>selenium-support</artifactId>
-                <version>${org.seleniumhq.selenium.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
