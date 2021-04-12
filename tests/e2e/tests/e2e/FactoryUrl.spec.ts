@@ -13,7 +13,7 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../..';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);

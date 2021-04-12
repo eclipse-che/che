@@ -57,4 +57,4 @@ export * from './pageobjects/openshift/OcpLoginPage';
 export * from './testsLibrary/CodeExecutionTests';
 export * from './testsLibrary/LsTests';
 export * from './testsLibrary/ProjectAndFileTests';
-export * from './testsLibrary/WorksapceHandlingTests';
+export * from './testsLibrary/WorkspaceHandlingTests';
