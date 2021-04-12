@@ -9,7 +9,7 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';

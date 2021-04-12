@@ -13,7 +13,7 @@ import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 
 const workspaceStack: string = 'Python';
 const workspaceSampleName: string = 'python-hello-world';
