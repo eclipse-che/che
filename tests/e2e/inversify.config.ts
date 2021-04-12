@@ -52,7 +52,7 @@ import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
-import { GetStarted } from './pageobjects/dashboard/GetStarted';
+import { CreateWorkspace } from './pageobjects/dashboard/CreateWorkspace';
 import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
@@ -111,7 +111,7 @@ e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiR
 e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi);
 e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
 e2eContainer.bind<OpenshiftPlugin>(CLASSES.OpenshiftPlugin).to(OpenshiftPlugin);
-e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
+e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);

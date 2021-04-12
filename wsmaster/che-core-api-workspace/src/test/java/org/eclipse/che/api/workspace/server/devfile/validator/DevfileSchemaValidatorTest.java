@@ -83,7 +83,9 @@ public class DevfileSchemaValidatorTest {
       {"devfile/devfile_v2_just_schemaVersion.yaml"},
       {"devfile/devfile_v2_sample-devfile.yaml"},
       {"devfile/devfile_v2_simple-devfile.yaml"},
-      {"devfile/devfile_v2_spring-boot-http-booster-devfile.yaml"}
+      {"devfile/devfile_v2_spring-boot-http-booster-devfile.yaml"},
+      {"devfile/devfile_v2-1-0-alpha_just_schemaVersion.yaml"},
+      {"devfile/devfile_v2-1-0-alpha_simple-devfile.yaml"},
     };
   }
 
@@ -261,11 +263,19 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "devfile/devfile_v2_invalid_schemaVersion.yaml",
-        "Version 'a.b.c' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+        "Version 'a.b.c' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0, 2.1.0-alpha]'."
       },
       {
         "devfile/devfile_v2_unsupported_schemaVersion.yaml",
-        "Version '22.33.44' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0]'."
+        "Version '22.33.44' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0, 2.1.0-alpha]'."
+      },
+      {
+        "devfile/devfile_v2-1-0-alpha_unsupported_schemaVersion.yaml",
+        "Version '2.1.0-beta' of the devfile is not supported. Supported versions are '[1.0.0, 2.0.0, 2.1.0-alpha]'."
+      },
+      {
+        "devfile/devfile_v2-1-0-alpha_with_invalid_plugin_definition.yaml",
+        "(/components/0/plugin):The object must not have a property whose name is \"plugin\".(/components/0):The object must have a property whose name is \"name\".Exactly one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"container\".(/components/0):The object must have a property whose name is \"kubernetes\".(/components/0):The object must have a property whose name is \"openshift\".(/components/0):The object must have a property whose name is \"volume\".]"
       }
     };
   }

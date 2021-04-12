@@ -385,48 +385,10 @@ function setupEnvs() {
 
 }
 
-function configureGithubTestUser() {
-  echo "======== Configure GitHub test users ========"
-  cd /root/payload
-  mkdir -p che_local_conf_dir
-  export CHE_LOCAL_CONF_DIR=/root/payload/che_local_conf_dir/
-  rm -f che_local_conf_dir/selenium.properties
-  echo "github.username=che6ocpmulti" >> che_local_conf_dir/selenium.properties
-  echo "github.password=CheMain2017" >> che_local_conf_dir/selenium.properties
-  echo "github.auxiliary.username=iedexmain1" >> che_local_conf_dir/selenium.properties
-  echo "github.auxiliary.password=CodenvyMain15" >> che_local_conf_dir/selenium.properties
-}
-
 function installDockerCompose() {
   echo "Install docker compose"
   sudo curl -L "https://github.com/docker/compose/releases/download/1.25.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
-}
-
-function seleniumTestsSetup() {
-  echo "======== Start selenium tests ========"
-  cd /root/payload
-
-  export CHE_INFRASTRUCTURE=openshift
-  export CHE_OPENSHIFT_PROJECT=eclipse-che
-
-  defineCheRoute
-
-  mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
-  configureGithubTestUser
-}
-
-function saveSeleniumTestResult() {
-  mkdir -p /root/payload/report
-  mkdir -p /root/payload/report/site
-  cp -r /root/payload/tests/legacy-e2e/che-selenium-test/target/site report
-}
-
-function createIndentityProvider() {
-  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
-  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
-  keycloakPodName=$(oc get pod --namespace=eclipse-che | grep keycloak | awk '{print $1}')
-  /tmp/oc exec $keycloakPodName --namespace=eclipse-che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
 }
 
 function runDevfileTestSuite() {

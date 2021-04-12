@@ -1,7 +1,0 @@
-p1.A4
-p1.A4.Q
-p1.A4.a
-r.r.r.Bla
-"p1.A4"
-//p1.A4
-A4.a
