@@ -34,6 +34,7 @@ import com.google.common.net.HttpHeaders;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
+import org.eclipse.che.api.factory.server.bitbucket.server.AuthorizationHeaderSupplier;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
@@ -66,7 +67,20 @@ public class HttpBitbucketServerApiClientTest {
     wireMock = new WireMock("localhost", httpPort);
     bitbucketServer =
         new HttpBitbucketServerApiClient(
-            wireMockServer.url("/"), (requestMethod, requestUrl) -> AUTHORIZATION_TOKEN);
+            wireMockServer.url("/"),
+            new AuthorizationHeaderSupplier() {
+              @Override
+              public String computeAuthorizationHeader(String requestMethod, String requestUrl)
+                  throws ScmUnauthorizedException, ScmCommunicationException {
+                return AUTHORIZATION_TOKEN;
+              }
+
+              @Override
+              public ScmUnauthorizedException buildScmUnauthorizedException(String userName) {
+                return new ScmUnauthorizedException(
+                    userName + " is not authorized in ", "", "", "");
+              }
+            });
   }
 
   @AfterMethod

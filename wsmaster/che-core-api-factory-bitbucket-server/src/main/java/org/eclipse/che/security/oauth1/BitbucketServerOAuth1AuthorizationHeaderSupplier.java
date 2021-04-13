@@ -41,18 +41,20 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplier
       String authorizationHeader =
           authenticator.computeAuthorizationHeader(subject.getUserId(), requestMethod, requestUrl);
       if (Strings.isNullOrEmpty(authorizationHeader)) {
-        throw new ScmUnauthorizedException(
-            subject.getUserName()
-                + " is not authorized in "
-                + authenticator.getOAuthProvider()
-                + " OAuth1 provider",
-            authenticator.getOAuthProvider(),
-            "1.0",
-            authenticator.getLocalAuthenticateUrl());
+        throw buildScmUnauthorizedException(subject.getUserName());
       }
       return authorizationHeader;
     } catch (OAuthAuthenticationException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }
+  }
+
+  @Override
+  public ScmUnauthorizedException buildScmUnauthorizedException(String userName) {
+    return new ScmUnauthorizedException(
+        userName + " is not authorized in " + authenticator.getOAuthProvider() + " OAuth1 provider",
+        authenticator.getOAuthProvider(),
+        "1.0",
+        authenticator.getLocalAuthenticateUrl());
   }
 }
