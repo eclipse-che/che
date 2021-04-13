@@ -15,7 +15,7 @@ repositories:
     devfile: https://github.com/eclipse/che/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master
     useCheReleaseLifecycle: true
-    components: 
+    components:
      - name: dockerfiles
        url: https://github.com/eclipse/che/tree/master/dockerfiles
        description: >-
@@ -28,19 +28,19 @@ repositories:
        url: https://github.com/eclipse/che/tree/master/tests
        description: >-
          source code of our integration tests.
-  - url: https://github.com/eclipse/che-theia
+  - url: https://github.com/eclipse-che/che-theia
     name: che-theia
-    description: >- 
+    description: >-
       Theia IDE integrated in Che.
-    devfile: https://github.com/eclipse/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml
-    doc: https://github.com/eclipse/che-theia/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/eclipse-che/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml
+    doc: https://github.com/eclipse-che/che-theia/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
-    components: 
+    components:
      - name: generator
-       url: https://github.com/eclipse/che-theia/tree/master/generator
+       url: https://github.com/eclipse-che/che-theia/tree/master/generator
        description: >-
          `che:theia init` CLI to prepare and build che-theia
-       doc: https://github.com/eclipse/che-theia/blob/master/generator/CONTRIBUTING.md
+       doc: https://github.com/eclipse-che/che-theia/blob/master/generator/CONTRIBUTING.md
   - url: https://github.com/che-incubator/chectl
     name: chectl
     description: >-
@@ -55,7 +55,7 @@ repositories:
     devfile: https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-devfile-registry
+  - url: https://github.com/eclipse-che/che-devfile-registry
     name: devfile-registry
     description: >-
       The default set of devfiles that would be made available on the Che dashboard stacks.
@@ -67,18 +67,18 @@ repositories:
     devfile: https://github.com/eclipse/che-docs/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-machine-exec
+  - url: https://github.com/eclipse-che/che-machine-exec
     name: machine-exec
     description: >-
       Interface to execute tasks and terminals on other containers within a workspace.
-    devfile: https://github.com/eclipse/che-machine-exec/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che-machine-exec/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml
+    doc: https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-operator
+  - url: https://github.com/eclipse-che/che-operator
     name: operator
     description: >-
       Che operator to deploy, update and manage K8S/OpenShift resources of Che.
-    devfile: https://github.com/eclipse/che-operator/blob/master/devfile.yaml
+    devfile: https://github.com/eclipse-che/che-operator/blob/master/devfile.yaml
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse/che-plugin-broker
     name: plugin-broker
@@ -87,7 +87,7 @@ repositories:
     devfile: https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml
     doc: https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse/che-plugin-registry
+  - url: https://github.com/eclipse-che/che-plugin-registry
     name: plugin-registry
     description: >-
       The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces.
@@ -209,7 +209,7 @@ repositories:
     useCheReleaseLifecycle: false
   - url: https://github.com/che-dockerfiles/build-action
     name: build-action
-    description: >- 
+    description: >-
       Custom GitHub Action for building sidecar Dockerfiles
     useCheReleaseLifecycle: false
   - url: https://github.com/che-dockerfiles/che-sidecar-podman

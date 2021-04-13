@@ -1,0 +1,47 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: php-plugin-test
+projects:
+- name: php-web-simple
+  source:
+    type: git
+    location: "https://github.com/che-samples/web-php-simple"
+components:
+- type: chePlugin
+  id: bmewburn/vscode-intelephense-client/latest
+- type: chePlugin
+  id: felixfbecker/php-debug/latest
+- type: dockerimage
+  alias: php
+  image: quay.io/eclipse/che-php-7:nightly
+  memoryLimit: 512Mi
+  mountSources: true
+  endpoints:
+    - name: '8080-tcp'
+      port: 8080
+  volumes:
+    - name: composer
+      containerPath: "/home/user/.composer"
+    - name: symfony
+      containerPath: "/home/user/.symfony"
+commands:
+- name: Debug current file
+  actions:
+  - type: vscode-launch
+    referenceContent: |
+      {
+        "version": "0.2.0",
+        "configurations": [
+          {
+            "name": "Launch currently open script",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "stopOnEntry": true,
+            "cwd": "${fileDirname}",
+            "port": 9000,
+            "runtimeExecutable": "php"
+          }
+        ]
+      }

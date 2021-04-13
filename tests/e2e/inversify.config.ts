@@ -52,12 +52,13 @@ import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
-import { GetStarted } from './pageobjects/dashboard/GetStarted';
+import { CreateWorkspace } from './pageobjects/dashboard/CreateWorkspace';
 import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
 import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
+import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -81,6 +82,7 @@ if (TestConstants.TS_SELENIUM_MULTIUSER) {
     e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheSingleUserAuthorizationHeaderHandler);
 }
 
+e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);
 e2eContainer.bind<ContextMenu>(CLASSES.ContextMenu).to(ContextMenu);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard);
@@ -109,7 +111,7 @@ e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiR
 e2eContainer.bind<CheGitApi>(CLASSES.CheGitApi).to(CheGitApi);
 e2eContainer.bind<GitHubUtil>(CLASSES.GitHubUtil).to(GitHubUtil);
 e2eContainer.bind<OpenshiftPlugin>(CLASSES.OpenshiftPlugin).to(OpenshiftPlugin);
-e2eContainer.bind<GetStarted>(CLASSES.GetStarted).to(GetStarted);
+e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);

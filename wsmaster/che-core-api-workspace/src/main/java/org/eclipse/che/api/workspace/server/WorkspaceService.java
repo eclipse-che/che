@@ -137,7 +137,7 @@ public class WorkspaceService extends Service {
       @Named(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES) String availableStorageTypes,
       @Named(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE) String preferredStorageType,
       @Named(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY) String defaultEditor,
-      @Named(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY) String defaultPlugins,
+      @Named(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY) @Nullable String defaultPlugins,
       @Named(CHE_DEVWORKSPACES_ENABLED_PROPERTY) boolean cheDevWorkspacesEnabled) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
@@ -464,7 +464,9 @@ public class WorkspaceService extends Service {
       settings.put("cheWorkspaceDevfileRegistryInternalUrl", devfileRegistryInternalUrl);
     }
 
-    settings.put(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY, defaultPlugins);
+    if (defaultPlugins != null) {
+      settings.put(CHE_FACTORY_DEFAULT_PLUGINS_PROPERTY, defaultPlugins);
+    }
     settings.put(CHE_FACTORY_DEFAULT_EDITOR_PROPERTY, defaultEditor);
     settings.put(CHE_WORKSPACE_STORAGE_AVAILABLE_TYPES, availableStorageTypes);
     settings.put(CHE_WORKSPACE_STORAGE_PREFERRED_TYPE, preferredStorageType);

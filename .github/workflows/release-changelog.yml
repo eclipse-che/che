@@ -76,9 +76,9 @@ jobs:
           allowUpdates: true
           body: ${{ steps.generate-release-changelog.outputs.changelog }}
           draft: false
-          name: Eclipse Che ${{ github.event.inputs.version}}
+          name: Eclipse Che ${{ github.event.inputs.version }}
           omitBodyDuringUpdate: false
           omitNameDuringUpdate: false
           prerelease: false
-          tag: ${{ github.event.inputs.version}}
+          tag: ${{ github.event.inputs.version }}
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}

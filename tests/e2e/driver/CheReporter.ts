@@ -56,7 +56,7 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_LOG_LEVEL: ${TestConstants.TS_SELENIUM_LOG_LEVEL}
 `;
 
-      if ( TestConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES ) {
+      if (TestConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES) {
         launchInformation += `\n      TS_SELENIUM_PRINT_TIMEOUT_VARIABLES is set to true: \n`;
         Object.entries(TimeoutConstants).forEach(
           ([key, value]) => launchInformation += `\n         ${key}: ${value}`);
@@ -95,16 +95,16 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('pass', async (test: mocha.Test) => {
-      if (TestConstants.TEST_SUITE === 'load-test') {
+      if (TestConstants.TS_LOAD_TESTS) {
         const loadTestReportFolder: string = TestConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
         const loadTestFilePath: string = loadTestReportFolder + '/load-test-results.txt';
         const report = test.title + ': ' + test.duration + '\r';
         if (!fs.existsSync(loadTestReportFolder)) {
-            fs.mkdirSync(loadTestReportFolder);
-          }
-          fs.appendFileSync(loadTestFilePath, report);
+          fs.mkdirSync(loadTestReportFolder);
         }
-      });
+        fs.appendFileSync(loadTestFilePath, report);
+      }
+    });
 
 
     runner.on('end', async function (test: mocha.Test) {
@@ -151,13 +151,13 @@ class CheReporter extends mocha.reporters.Spec {
       // take screenshot and write to file
       const screenshot: string = await driver.get().takeScreenshot();
       const screenshotStream = fs.createWriteStream(screenshotFileName);
-      screenshotStream.write(new Buffer(screenshot, 'base64'));
+      screenshotStream.write(Buffer.from(screenshot, 'base64'));
       screenshotStream.end();
 
       // take pagesource and write to file
       const pageSource: string = await driver.get().getPageSource();
       const pageSourceStream = fs.createWriteStream(pageSourceFileName);
-      pageSourceStream.write(new Buffer(pageSource));
+      pageSourceStream.write(Buffer.from(pageSource));
       pageSourceStream.end();
 
       // take browser console logs and write to file
@@ -169,7 +169,7 @@ class CheReporter extends mocha.reporters.Spec {
       });
 
       const browserLogsStream = fs.createWriteStream(browserLogsFileName);
-      browserLogsStream.write(new Buffer(browserLogs));
+      browserLogsStream.write(Buffer.from(browserLogs));
       browserLogsStream.end();
 
       // stop and remove running workspace

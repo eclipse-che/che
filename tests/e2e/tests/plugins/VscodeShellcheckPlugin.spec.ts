@@ -9,7 +9,7 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
@@ -34,7 +34,8 @@ const subRootFolder: string = 'app';
 const pathToFile: string = `${sampleName}`;
 const fileName: string = 'test.sh';
 
-suite(`The 'VscodeShellcheckPlugin' test`, async () => {
+// skipped until issue: https://github.com/eclipse/che/issues/19376 resolved
+suite.skip(`The 'VscodeShellcheckPlugin' test`, async () => {
     suite('Create workspace', async () => {
         test('Set shellcheck path', async () => {
             const shellcheckExecutablePathPropertyName: string = 'shellcheck.executablePath';

@@ -12,7 +12,7 @@ import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
 import { e2eContainer } from '../../inversify.config';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);

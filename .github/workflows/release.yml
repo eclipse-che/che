@@ -66,7 +66,7 @@ jobs:
           fetch-depth: 0
       - name: Check existing tag
         run: |
-          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version}}) ]]; then
+          if [[ "$FORCE_RECREATE_TAGS" == "false" ]] && [[ $(cd che && git ls-remote --exit-code origin refs/tags/${{ github.event.inputs.version }}) ]]; then
             echo "cannot create release, when tag already exists"
             exit 1
           fi
@@ -139,21 +139,29 @@ jobs:
           ./che/make-release.sh
       - name: Create GH Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1.8.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }} 
         with:
-          tag_name: ${{ github.event.inputs.version}}
-          release_name: Eclipse Che ${{ github.event.inputs.version}}
-          body: |
-            Eclipse Che ${{ github.event.inputs.version}}
+          allowUpdates: true
+          body: Eclipse Che ${{ github.event.inputs.version }}
           draft: false
+          name: Eclipse Che ${{ github.event.inputs.version }}
+          omitBodyDuringUpdate: false
+          omitNameDuringUpdate: false
           prerelease: false
-      - name: Create MM message
+          tag: ${{ github.event.inputs.version }}
+          token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+      - name: Create failure MM message
+        if: ${{ failure() }}
         run: |
-          echo "{\"text\":\":building_construction: Che Server ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-server:${{ github.event.inputs.version }}\"}" > mattermost.json
+          echo "{\"text\":\":no_entry_sign: Che Server ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse/che/actions/workflows/release.yml\"}" > mattermost.json
+      - name: Create success MM message
+        run: |
+          echo "{\"text\":\":white_check_mark: Che Server ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-server:${{ github.event.inputs.version }}\"}" > mattermost.json
       - name: Send MM message
-        uses: mattermost/action-mattermost-notify@master
+        if: ${{ success() }} || ${{ failure() }}
+        uses: mattermost/action-mattermost-notify@1.0.2
         env:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           MATTERMOST_CHANNEL: eclipse-che-releases

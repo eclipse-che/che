@@ -333,13 +333,11 @@ createTestWorkspaceAndRunTest() {
   ### Run tests
   docker run --shm-size=1g --net=host  --ipc=host -v $REPORT_FOLDER:/tmp/e2e/report:Z \
   -e TS_SELENIUM_BASE_URL="https://$CHE_ROUTE" \
-  -e TS_SELENIUM_LOG_LEVEL=DEBUG \
   -e TS_SELENIUM_MULTIUSER=true \
   -e TS_SELENIUM_USERNAME="admin" \
   -e TS_SELENIUM_PASSWORD="admin" \
-  -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \
-  -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
-  -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=420000 \
+  -e TS_SELENIUM_LOG_LEVEL=TRACE \
+  -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
   quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
 }
@@ -387,48 +385,10 @@ function setupEnvs() {
 
 }
 
-function configureGithubTestUser() {
-  echo "======== Configure GitHub test users ========"
-  cd /root/payload
-  mkdir -p che_local_conf_dir
-  export CHE_LOCAL_CONF_DIR=/root/payload/che_local_conf_dir/
-  rm -f che_local_conf_dir/selenium.properties
-  echo "github.username=che6ocpmulti" >> che_local_conf_dir/selenium.properties
-  echo "github.password=CheMain2017" >> che_local_conf_dir/selenium.properties
-  echo "github.auxiliary.username=iedexmain1" >> che_local_conf_dir/selenium.properties
-  echo "github.auxiliary.password=CodenvyMain15" >> che_local_conf_dir/selenium.properties
-}
-
 function installDockerCompose() {
   echo "Install docker compose"
   sudo curl -L "https://github.com/docker/compose/releases/download/1.25.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
-}
-
-function seleniumTestsSetup() {
-  echo "======== Start selenium tests ========"
-  cd /root/payload
-
-  export CHE_INFRASTRUCTURE=openshift
-  export CHE_OPENSHIFT_PROJECT=eclipse-che
-
-  defineCheRoute
-
-  mvn clean install -pl :che-selenium-test -am -DskipTests=true -U
-  configureGithubTestUser
-}
-
-function saveSeleniumTestResult() {
-  mkdir -p /root/payload/report
-  mkdir -p /root/payload/report/site
-  cp -r /root/payload/tests/legacy-e2e/che-selenium-test/target/site report
-}
-
-function createIndentityProvider() {
-  CHE_MULTI_USER_GITHUB_CLIENTID_OCP=04cbc0f8172109322223
-  CHE_MULTI_USER_GITHUB_SECRET_OCP=a0a9b8602bb0916d322223e71b7ed92036563b7a
-  keycloakPodName=$(oc get pod --namespace=eclipse-che | grep keycloak | awk '{print $1}')
-  /tmp/oc exec $keycloakPodName --namespace=eclipse-che -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che -s alias=github -s providerId=github -s enabled=true -s storeToken=true -s addReadTokenRoleOnCreate=true -s 'config.useJwksUrl="true"' -s config.clientId=$CHE_MULTI_USER_GITHUB_CLIENTID_OCP -s config.clientSecret=$CHE_MULTI_USER_GITHUB_SECRET_OCP -s 'config.defaultScope="repo,user,write:public_key"' --no-config --server http://localhost:8080/auth --user admin --password admin --realm master
 }
 
 function runDevfileTestSuite() {

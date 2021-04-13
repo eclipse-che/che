@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.singletonList;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,16 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
             return devfileFileLocation;
           }
         });
+  }
+
+  @Override
+  public String rawFileLocation(String filename) {
+    return URI.create(devfileFileLocation).resolve(filename).toString();
+  }
+
+  @Override
+  public String getHostName() {
+    return URI.create(devfileFileLocation).getHost();
   }
 
   public DefaultFactoryUrl withDevfileFileLocation(String devfileFileLocation) {

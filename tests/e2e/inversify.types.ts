@@ -48,14 +48,14 @@ const CLASSES = {
     GitHubUtil: 'GitHubUtil',
     CheGitApi: 'CheGitApi',
     GitPlugin: 'GitPlugin',
-    TestWorkspaceUtil: 'TestWorkspaceUtil',
     NotificationCenter: 'NotificationCenter',
     PreferencesHandler: 'PreferencesHandler',
     CheApiRequestHandler: 'CheApiRequestHandler',
-    GetStarted: 'GetStarted',
+    CreateWorkspace: 'CreateWorkspace',
     OpenDialogWidget: 'OpenDialogWidget',
     UpdateAccountInformationPage: 'UpdateAccountInformationPage',
-    KubernetesPlugin: 'KubernetesPlugin'
+    KubernetesPlugin: 'KubernetesPlugin',
+    BrowserTabsUtil: 'BrowserTabsUtil'
 };
 
 export { TYPES, CLASSES };

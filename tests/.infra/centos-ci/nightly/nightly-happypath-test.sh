@@ -13,6 +13,9 @@ source tests/.infra/centos-ci/functional_tests_utils.sh
 function prepareCustomResourcePatchFile() {
   cat > /tmp/custom-resource-patch.yaml <<EOL
 spec:
+  server:
+    customCheProperties:
+      CHE_INFRA_KUBERNETES_WORKSPACE_START_TIMEOUT_MIN: '12'
   auth:
     updateAdminPassword: false
     openShiftoAuth: false
