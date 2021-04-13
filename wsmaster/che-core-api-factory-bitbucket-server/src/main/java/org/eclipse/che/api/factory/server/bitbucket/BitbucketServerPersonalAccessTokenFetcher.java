@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -47,6 +48,8 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
       LoggerFactory.getLogger(BitbucketServerPersonalAccessTokenFetcher.class);
 
   private static final String TOKEN_NAME_TEMPLATE = "che-token-<%s>-<%s>";
+  public static final Set<String> DEFAULT_TOKEN_SCOPE =
+      ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE");
   private final BitbucketServerApiClient bitbucketServerApiClient;
   private final URL apiEndpoint;
 
@@ -85,7 +88,7 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
 
       BitbucketPersonalAccessToken token =
           bitbucketServerApiClient.createPersonalAccessTokens(
-              user.getSlug(), tokenName, ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"));
+              user.getSlug(), tokenName, DEFAULT_TOKEN_SCOPE);
       LOG.debug("Token created = {} for {}", token.getId(), token.getUser());
       return new PersonalAccessToken(
           scmServerUrl,
@@ -114,9 +117,7 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
               personalAccessToken.getScmUserName(),
               Long.valueOf(personalAccessToken.getScmTokenId()));
       return Optional.of(
-          Sets.difference(
-                  ImmutableSet.of("PROJECT_WRITE", "REPO_WRITE"),
-                  bitbucketPersonalAccessToken.getPermissions())
+          Sets.difference(DEFAULT_TOKEN_SCOPE, bitbucketPersonalAccessToken.getPermissions())
               .isEmpty());
     } catch (ScmItemNotFoundException e) {
       return Optional.of(Boolean.FALSE);

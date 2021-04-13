@@ -45,7 +45,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 /** Manages personal access token secrets used for private repositories authentication. */
 @Singleton
 public class KubernetesPersonalAccessTokenManager implements PersonalAccessTokenManager {
-
   public static final Map<String, String> SECRET_LABELS =
       ImmutableMap.of(
           "app.kubernetes.io/part-of", "che.eclipse.org",
