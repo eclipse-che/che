@@ -31,9 +31,15 @@ export class OpenWorkspaceWidget {
         const pathNodes: string[] = path.split('/');
         let buildPath: string = '';
 
-        const promises = pathNodes.map(async currentPath => {
+        const promises = pathNodes.map(async (currentPath, index) => {
             buildPath += `/${currentPath}`;
-            await  this.driverHelper.waitAndClick(By.id(buildPath), timeout);
+
+            // the first item (index=0 -> /<item-1>) has locator which can be found 'By.id', but next (index=1 -> /<item-1>/<item-2>) requires another - 'By.xpath'.
+            if (index === 0) {
+                await  this.driverHelper.waitAndClick(By.id(buildPath), timeout);
+            } else {
+                await  this.driverHelper.waitAndClick(By.xpath(`(//div[@id='${buildPath}'])[position()=2]`), timeout);
+            }
         });
 
         return Promise.all(promises);
