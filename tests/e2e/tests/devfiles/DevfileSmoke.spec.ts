@@ -10,7 +10,7 @@
 import 'reflect-metadata';
 import { WorkspaceNameHandler} from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';

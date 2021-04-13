@@ -16,11 +16,11 @@ import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
-export class GetStarted {
+export class CreateWorkspace {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
-        Logger.debug(`GetStarted.waitTitleContains text: "${expectedText}"`);
+        Logger.debug(`CreateWorkspace.waitTitleContains text: "${expectedText}"`);
 
         const pageTitleLocator: By = By.xpath(`//h1[contains(text(), '${expectedText}')]`);
 
@@ -28,13 +28,13 @@ export class GetStarted {
     }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        Logger.debug('GetStarted.waitPage');
+        Logger.debug('CreateWorkspace.waitPage');
 
         await this.waitTitleContains('Getting Started', timeout);
     }
 
     async waitSample(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
-        Logger.debug(`GetStarted.waitSample sampleName: "${sampleName}"`);
+        Logger.debug(`CreateWorkspace.waitSample sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
 
@@ -42,7 +42,7 @@ export class GetStarted {
     }
 
     async clickOnSample(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
-        Logger.debug(`GetStarted.clickOnSample sampleName: "${sampleName}"`);
+        Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
 
@@ -50,7 +50,7 @@ export class GetStarted {
     }
 
     private getSampleLocator(sampleName: string): By {
-        Logger.trace(`GetStarted.getSampleLocator sampleName: ${sampleName}`);
+        Logger.trace(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}`);
 
         return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
     }
