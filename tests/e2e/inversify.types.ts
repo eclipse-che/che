@@ -51,7 +51,7 @@ const CLASSES = {
     NotificationCenter: 'NotificationCenter',
     PreferencesHandler: 'PreferencesHandler',
     CheApiRequestHandler: 'CheApiRequestHandler',
-    GetStarted: 'GetStarted',
+    CreateWorkspace: 'CreateWorkspace',
     OpenDialogWidget: 'OpenDialogWidget',
     UpdateAccountInformationPage: 'UpdateAccountInformationPage',
     KubernetesPlugin: 'KubernetesPlugin',

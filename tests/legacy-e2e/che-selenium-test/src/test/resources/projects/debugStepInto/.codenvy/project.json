@@ -1,1 +1,0 @@
-{"builders":{"configs":{},"default":"maven"},"mixinTypes":[],"runners":{"configs":{"recommend":{"options":{},"ram":256,"variables":{}}},"default":"system:/java/web/tomcat7"},"type":"maven","attributes":{"languageVersion":["1.6"],"language":["java"]}}
