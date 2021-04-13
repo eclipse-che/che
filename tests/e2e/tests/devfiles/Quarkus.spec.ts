@@ -11,7 +11,7 @@ import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 
 const workspaceStack: string = 'Quarkus CLI';
