@@ -80,7 +80,7 @@ suite('Git with ssh workflow', async () => {
         const publicSshKey = await cheGitAPI.getPublicSSHKey();
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
-        // workaround for issue: https://github.com/eclipse/che/issues/19101
+        // workaround for issue: https://github.com/eclipse/che/issues/19544
         await ide.waitNotificationAndClickOnButton('Would you like to open the cloned repository?', 'Open');
         await ide.waitIde();
     });
@@ -118,7 +118,7 @@ suite('Git with ssh workflow', async () => {
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
-        // workaround for issue: https://github.com/eclipse/che/issues/19101
+        // workaround for issue: https://github.com/eclipse/che/issues/19544
         await ide.waitNotificationAndClickOnButton('Would you like to open the cloned repository?', 'Open');
         await ide.waitIde();
         await waitClonedProject();
@@ -142,7 +142,7 @@ async function cloneTestRepo() {
     await gitPlugin.clickOnSelectRepositoryButton();
 }
 
-// workaround related to multi-root, issue: https://github.com/eclipse/che/issues/19101
+// workaround related to multi-root, issue: https://github.com/eclipse/che/issues/19544
 async function waitClonedProject() {
     const pathToClonedProjectLocator : By = By.css(`span[title='/projects/Spoon-Knife']`);
 
