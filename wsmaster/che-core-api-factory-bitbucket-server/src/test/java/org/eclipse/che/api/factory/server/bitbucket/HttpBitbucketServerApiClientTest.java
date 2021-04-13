@@ -14,9 +14,11 @@ package org.eclipse.che.api.factory.server.bitbucket;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.unauthorized;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -218,5 +220,54 @@ public class HttpBitbucketServerApiClientTest {
     // then
     assertNotNull(result);
     assertEquals(result.getToken(), "MTU4OTEwNTMyOTA5Ohc88HcY8k7gWOzl2mP5TtdtY5Qs");
+  }
+
+  @Test
+  public void shouldBeAbleToGetExistedPAT()
+      throws ScmCommunicationException, ScmUnauthorizedException, ScmItemNotFoundException {
+
+    // given
+    stubFor(
+        get(urlPathEqualTo("/rest/access-tokens/1.0/users/ksmster/5"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo(AUTHORIZATION_TOKEN))
+            .withHeader(HttpHeaders.ACCEPT, equalTo(MediaType.APPLICATION_JSON))
+            .willReturn(
+                ok().withBodyFile("bitbucket/rest/access-tokens/1.0/users/ksmster/newtoken.json")));
+
+    // when
+    BitbucketPersonalAccessToken result = bitbucketServer.getPersonalAccessToken("ksmster", 5L);
+    // then
+    assertNotNull(result);
+    assertEquals(result.getToken(), "MTU4OTEwNTMyOTA5Ohc88HcY8k7gWOzl2mP5TtdtY5Qs");
+  }
+
+  @Test(expectedExceptions = ScmItemNotFoundException.class)
+  public void shouldBeAbleToThrowNotFoundOnGePAT()
+      throws ScmCommunicationException, ScmUnauthorizedException, ScmItemNotFoundException {
+
+    // given
+    stubFor(
+        get(urlPathEqualTo("/rest/access-tokens/1.0/users/ksmster/5"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo(AUTHORIZATION_TOKEN))
+            .withHeader(HttpHeaders.ACCEPT, equalTo(MediaType.APPLICATION_JSON))
+            .willReturn(notFound()));
+
+    // when
+    bitbucketServer.getPersonalAccessToken("ksmster", 5L);
+  }
+
+  @Test(expectedExceptions = ScmUnauthorizedException.class)
+  public void shouldBeAbleToThrowScmUnauthorizedExceptionOnGePAT()
+      throws ScmCommunicationException, ScmUnauthorizedException, ScmItemNotFoundException {
+
+    // given
+    stubFor(
+        get(urlPathEqualTo("/rest/access-tokens/1.0/users/ksmster/5"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo(AUTHORIZATION_TOKEN))
+            .withHeader(HttpHeaders.ACCEPT, equalTo(MediaType.APPLICATION_JSON))
+            .willReturn(unauthorized()));
+
+    // when
+    bitbucketServer.getPersonalAccessToken("ksmster", 5L);
   }
 }

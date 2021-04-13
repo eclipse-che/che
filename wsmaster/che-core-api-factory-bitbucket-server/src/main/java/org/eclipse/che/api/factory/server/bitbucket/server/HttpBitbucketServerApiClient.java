@@ -265,7 +265,10 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     HttpRequest request =
         HttpRequest.newBuilder(uri)
             .headers(
-                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+                "Authorization",
+                headerProvider.computeAuthorizationHeader("GET", uri.toString()),
+                HttpHeaders.ACCEPT,
+                MediaType.APPLICATION_JSON)
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
 
