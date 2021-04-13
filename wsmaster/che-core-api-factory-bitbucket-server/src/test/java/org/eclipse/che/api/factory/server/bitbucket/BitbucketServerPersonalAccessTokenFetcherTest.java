@@ -15,14 +15,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Optional;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
@@ -47,6 +50,7 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
   String someBitbucketURL = "https://some.bitbucketserver.com";
   Subject subject;
   @Mock BitbucketServerApiClient bitbucketServerApiClient;
+  @Mock PersonalAccessToken personalAccessToken;
   BitbucketUser bitbucketUser;
   BitbucketServerPersonalAccessTokenFetcher fetcher;
   BitbucketPersonalAccessToken bitbucketPersonalAccessToken;
@@ -179,6 +183,39 @@ public class BitbucketServerPersonalAccessTokenFetcherTest {
     // when
 
     fetcher.fetchPersonalAccessToken(subject, someBitbucketURL);
+  }
+
+  @Test
+  public void shouldSkipToValidateTokensWithUnknownUrls()
+      throws ScmUnauthorizedException, ScmCommunicationException {
+    // given
+    when(personalAccessToken.getScmProviderUrl()).thenReturn(someNotBitbucketURL);
+    when(bitbucketServerApiClient.isConnected(eq(someNotBitbucketURL))).thenReturn(false);
+    // when
+    Optional<Boolean> result = fetcher.isValid(personalAccessToken);
+    // then
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void shouldBeAbleToValidateToken()
+      throws ScmUnauthorizedException, ScmCommunicationException, ScmItemNotFoundException {
+    // given
+    when(personalAccessToken.getScmProviderUrl()).thenReturn(someBitbucketURL);
+    when(personalAccessToken.getScmTokenId())
+        .thenReturn(Long.toString(bitbucketPersonalAccessToken.getId()));
+    when(personalAccessToken.getScmUserName())
+        .thenReturn((bitbucketPersonalAccessToken.getUser().getSlug()));
+    when(bitbucketServerApiClient.isConnected(eq(someBitbucketURL))).thenReturn(true);
+    when(bitbucketServerApiClient.getPersonalAccessToken(
+            eq(bitbucketPersonalAccessToken.getUser().getSlug()),
+            eq(bitbucketPersonalAccessToken.getId())))
+        .thenReturn(bitbucketPersonalAccessToken);
+    // when
+    Optional<Boolean> result = fetcher.isValid(personalAccessToken);
+    // then
+    assertFalse(result.isEmpty());
+    assertTrue(result.get());
   }
 
   @DataProvider
