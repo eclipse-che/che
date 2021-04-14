@@ -76,8 +76,8 @@ We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in th
 ## CI
 There are several [GitHub Actions](https://github.com/eclipse/che/actions) workflows implemented for this repository:
 
-- [`nightly`](https://github.com/eclipse/che/actions/workflows/nightly-build.yml) - builds and push Maven artifacts, builds container images and pushes them to [quay.io](https://quay.io/organization/eclipse) on a daily basis from the [`master`](https://github.com/eclipse/che/tree/master) branch.
-- [`release`](https://github.com/eclipse/che/actions/workflows/release.yml) - builds and push Maven artifacts and container images. Images are public and pushed to [quay.io](https://quay.io/organization/eclipse). See [RELEASE.md](https://github.com/eclipse/che/blob/master/RELEASE.md) for more information about this workflow.
+- [`nightly`](https://github.com/eclipse/che/actions/workflows/nightly-build.yml) - builds Maven artifacts, builds container images and pushes them to [quay.io](https://quay.io/organization/eclipse) on a daily basis from the [`master`](https://github.com/eclipse/che/tree/master) branch.
+- [`release`](https://github.com/eclipse/che/actions/workflows/release.yml) - builds Maven artifacts and container images. Images are public and pushed to [quay.io](https://quay.io/organization/eclipse). See [RELEASE.md](https://github.com/eclipse/che/blob/master/RELEASE.md) for more information about this workflow.
 
 ### License
 Che is open sourced under the Eclipse Public License 2.0.
