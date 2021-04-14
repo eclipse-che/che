@@ -26,6 +26,8 @@ import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { By } from 'selenium-webdriver';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -39,6 +41,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 
 suite('Git with ssh workflow', async () => {
@@ -50,15 +53,15 @@ suite('Git with ssh workflow', async () => {
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
-        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
         await loginPage.login();
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);
     });
 
     test('Login into workspace and open tree container', async () => {
-        await driverHelper.reloadPage();
+        await dashboard.openDashboard();
         await dashboard.waitPage();
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckGeneratingKeys);
+        await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
@@ -72,19 +75,24 @@ suite('Git with ssh workflow', async () => {
         await editor.waitText('Untitled-0', 'ssh-rsa');
     });
 
-
     test('Add a SSH key to GitHub side and clone by ssh link', async () => {
         const sshName: string = WorkspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
         const publicSshKey = await cheGitAPI.getPublicSSHKey();
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
-
+        // workaround for issue: https://github.com/eclipse/che/issues/19544
+        await ide.waitNotificationAndClickOnButton('Would you like to open the cloned repository?', 'Open');
+        await ide.waitIde();
     });
 
     test('Change commit and push', async function changeCommitAndPushFunc() {
         const currentDate: string = Date.now().toString();
-        await projectTree.expandPathAndOpenFile('Spoon-Knife', committedFile);
+        await projectTree.clickOnItem('Spoon-Knife/' + committedFile);
+        await editor.waitEditorOpened(committedFile);
+        await editor.waitTab(committedFile);
+        await editor.type(committedFile, 'D' + '\n', 1);
         await editor.type(committedFile, currentDate + '\n', 1);
+        await editor.waitText(committedFile, currentDate);
         await gitPlugin.openGitPluginContainer();
         await gitPlugin.waitChangedFileInChagesList(committedFile);
         await gitPlugin.stageAllChanges(committedFile);
@@ -93,6 +101,7 @@ suite('Git with ssh workflow', async () => {
         await gitPlugin.commitFromCommandMenu();
         await gitPlugin.pushChangesFromCommandMenu();
         await gitPlugin.waitDataIsSynchronized();
+        await driverHelper.wait(TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
         const rawDataFromFile: string = await gitHubUtils.getRawContentFromFile(TestConstants.TS_GITHUB_TEST_REPO + '/master/' + committedFile);
         assert.isTrue(rawDataFromFile.includes(currentDate));
         await testWorkspaceUtils.cleanUpAllWorkspaces();
@@ -103,15 +112,16 @@ suite('Git with ssh workflow', async () => {
 
         data.metadata!.name = wsNameCheckPropagatingKeys;
         await testWorkspaceUtils.createWsFromDevFile(data);
-        // update view of dashboard, it's related to https://github.com/eclipse/che/issues/19020
-        await driverHelper.reloadPage();
-        await dashboard.waitPage();
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameCheckPropagatingKeys);
+        await dashboard.openDashboard();
+        await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
-        await projectTree.waitItem('Spoon-Knife');
+        // workaround for issue: https://github.com/eclipse/che/issues/19544
+        await ide.waitNotificationAndClickOnButton('Would you like to open the cloned repository?', 'Open');
+        await ide.waitIde();
+        await waitClonedProject();
     });
 
 });
@@ -130,4 +140,11 @@ async function cloneTestRepo() {
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
     await gitPlugin.clickOnSelectRepositoryButton();
+}
+
+// workaround related to multi-root, issue: https://github.com/eclipse/che/issues/19544
+async function waitClonedProject() {
+    const pathToClonedProjectLocator : By = By.css(`span[title='/projects/Spoon-Knife']`);
+
+    await driverHelper.waitVisibility(pathToClonedProjectLocator, TimeoutConstants.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
 }
