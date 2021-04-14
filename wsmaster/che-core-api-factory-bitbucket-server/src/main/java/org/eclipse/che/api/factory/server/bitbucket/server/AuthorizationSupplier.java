@@ -14,8 +14,8 @@ package org.eclipse.che.api.factory.server.bitbucket.server;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 
-/** Compute the Authorization header to sign the OAuth 1 request. */
-public interface AuthorizationHeaderSupplier {
+public interface AuthorizationSupplier {
+  /** Compute the Authorization header to sign the OAuth 1 request. */
   String computeAuthorizationHeader(final String requestMethod, final String requestUrl)
       throws ScmUnauthorizedException, ScmCommunicationException;
 

@@ -13,22 +13,21 @@ package org.eclipse.che.security.oauth1;
 
 import com.google.common.base.Strings;
 import javax.inject.Inject;
-import org.eclipse.che.api.factory.server.bitbucket.server.AuthorizationHeaderSupplier;
+import org.eclipse.che.api.factory.server.bitbucket.server.AuthorizationSupplier;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 
 /**
- * Implementation of @{@link AuthorizationHeaderSupplier} that is used @{@link
+ * Implementation of @{@link AuthorizationSupplier} that is used @{@link
  * BitbucketServerOAuthAuthenticator} to compute authorization headers.
  */
-public class BitbucketServerOAuth1AuthorizationHeaderSupplier
-    implements AuthorizationHeaderSupplier {
+public class BitbucketServerOAuth1AuthorizationSupplier implements AuthorizationSupplier {
   private final BitbucketServerOAuthAuthenticator authenticator;
 
   @Inject
-  public BitbucketServerOAuth1AuthorizationHeaderSupplier(
+  public BitbucketServerOAuth1AuthorizationSupplier(
       BitbucketServerOAuthAuthenticator authenticator) {
     this.authenticator = authenticator;
   }

@@ -77,7 +77,7 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApiCl
           }
           return new HttpBitbucketServerApiClient(
               bitbucketOauth1Endpoint,
-              new BitbucketServerOAuth1AuthorizationHeaderSupplier(
+              new BitbucketServerOAuth1AuthorizationSupplier(
                   (BitbucketServerOAuthAuthenticator) authenticator.get()));
         } else {
           throw new ConfigurationException(

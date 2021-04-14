@@ -28,9 +28,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
-public class BitbucketServerOAuth1AuthorizationHeaderSupplierTest {
+public class BitbucketServerOAuth1AuthorizationSupplierTest {
   @Mock BitbucketServerOAuthAuthenticator authenticator;
-  @InjectMocks BitbucketServerOAuth1AuthorizationHeaderSupplier supplier;
+  @InjectMocks BitbucketServerOAuth1AuthorizationSupplier supplier;
 
   Subject subject = new SubjectImpl("user", "234234", "t234234", false);
 

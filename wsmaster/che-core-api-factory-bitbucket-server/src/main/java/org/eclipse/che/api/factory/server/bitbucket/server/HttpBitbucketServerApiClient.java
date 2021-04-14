@@ -62,13 +62,13 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   private static final Logger LOG = LoggerFactory.getLogger(HttpBitbucketServerApiClient.class);
   private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private final URI serverUri;
-  private final AuthorizationHeaderSupplier headerProvider;
+  private final AuthorizationSupplier authorizationSupplier;
   private final HttpClient httpClient;
 
   public HttpBitbucketServerApiClient(
-      String serverUrl, AuthorizationHeaderSupplier authorizationHeaderSupplier) {
+      String serverUrl, AuthorizationSupplier authorizationSupplier) {
     this.serverUri = URI.create(serverUrl);
-    this.headerProvider = authorizationHeaderSupplier;
+    this.authorizationSupplier = authorizationSupplier;
     this.httpClient =
         HttpClient.newBuilder()
             .executor(
@@ -133,7 +133,8 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     HttpRequest request =
         HttpRequest.newBuilder(uri)
             .headers(
-                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+                "Authorization",
+                authorizationSupplier.computeAuthorizationHeader("GET", uri.toString()))
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
 
@@ -183,7 +184,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
             .DELETE()
             .headers(
                 HttpHeaders.AUTHORIZATION,
-                headerProvider.computeAuthorizationHeader("DELETE", uri.toString()),
+                authorizationSupplier.computeAuthorizationHeader("DELETE", uri.toString()),
                 HttpHeaders.ACCEPT,
                 MediaType.APPLICATION_JSON,
                 HttpHeaders.CONTENT_TYPE,
@@ -223,7 +224,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
                           new BitbucketPersonalAccessToken(tokenName, permissions))))
               .headers(
                   HttpHeaders.AUTHORIZATION,
-                  headerProvider.computeAuthorizationHeader("PUT", uri.toString()),
+                  authorizationSupplier.computeAuthorizationHeader("PUT", uri.toString()),
                   HttpHeaders.ACCEPT,
                   MediaType.APPLICATION_JSON,
                   HttpHeaders.CONTENT_TYPE,
@@ -266,7 +267,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
         HttpRequest.newBuilder(uri)
             .headers(
                 "Authorization",
-                headerProvider.computeAuthorizationHeader("GET", uri.toString()),
+                authorizationSupplier.computeAuthorizationHeader("GET", uri.toString()),
                 HttpHeaders.ACCEPT,
                 MediaType.APPLICATION_JSON)
             .timeout(DEFAULT_HTTP_TIMEOUT)
@@ -345,7 +346,8 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     HttpRequest request =
         HttpRequest.newBuilder(uri)
             .headers(
-                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+                "Authorization",
+                authorizationSupplier.computeAuthorizationHeader("GET", uri.toString()))
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
     LOG.trace("executeRequest={}", request);
@@ -379,7 +381,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
         String body = CharStreams.toString(new InputStreamReader(response.body(), Charsets.UTF_8));
         switch (response.statusCode()) {
           case HTTP_UNAUTHORIZED:
-            throw headerProvider.buildScmUnauthorizedException();
+            throw authorizationSupplier.buildScmUnauthorizedException();
           case HTTP_BAD_REQUEST:
             throw new ScmBadRequestException(body);
           case HTTP_NOT_FOUND:
