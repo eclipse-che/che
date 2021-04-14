@@ -77,8 +77,6 @@ evaluateCheVariables() {
     echo "Basebranch: ${BASEBRANCH}" 
     echo "Release che-parent: ${RELEASE_CHE_PARENT}"
     echo "Version che-parent: ${VERSION_CHE_PARENT}"
-    echo "Deploy to nexus: ${DEPLOY_TO_NEXUS}"
-    echo "Autorelease on nexus: ${AUTORELEASE_ON_NEXUS}"
 }
 
 checkoutProjects() {
@@ -258,29 +256,6 @@ releaseCheServer() {
         if [ $EXIT_CODE -eq 0 ]; then
             checkLogForErrors $tmpmvnlog
             echo 'Build of che-parent: Success!'
-            if [[ ${DEPLOY_TO_NEXUS} == "true" ]]; then
-                echo 'Deploy che-parent artifacts to nexus'
-                rm -f $tmpmvnlog || true
-                set +e
-                mvn clean deploy -ntp -Pcodenvy-release -DcreateChecksum=true -DautoReleaseAfterClose=$AUTORELEASE_ON_NEXUS -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE | tee $tmpmvnlog
-                EXIT_CODE=$?
-                set -e
-                # try maven build again if Nexus dies
-                if grep -q -E "502 - Bad Gateway|Nexus connection problem" $tmpmvnlog; then
-                    rm -f $tmpmvnlog || true
-                    mvn clean deploy -ntp -Pcodenvy-release -DcreateChecksum=true -DautoReleaseAfterClose=$AUTORELEASE_ON_NEXUS -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE | tee $tmpmvnlog
-                    EXIT_CODE=$?
-                fi
-                # check log for errors if build successful; if failed, no need to check (already failed)
-                if [[ $EXIT_CODE -eq 0 ]]; then
-                    checkLogForErrors $tmpmvnlog
-                else
-                    echo '[ERROR] 1. Build of che-parent: Failed!'
-                    exit $EXIT_CODE
-                fi
-            else
-                echo "[WARN] No deployment to Nexus as DEPLOY_TO_NEXUS = ${DEPLOY_TO_NEXUS}"
-            fi
         else
             echo '[ERROR] 2. Build of che-parent: Failed!'
             exit $EXIT_CODE
@@ -305,28 +280,6 @@ releaseCheServer() {
     if [ $EXIT_CODE -eq 0 ]; then
         checkLogForErrors $tmpmvnlog
         echo 'Build of che-server: Success!'
-        if [[ ${DEPLOY_TO_NEXUS} == "true" ]]; then
-            echo 'Deploy che-server artifacts to nexus'
-            rm -f $tmpmvnlog || true
-            set +e
-            mvn clean deploy -Pcodenvy-release -DcreateChecksum=true -DautoReleaseAfterClose=$AUTORELEASE_ON_NEXUS -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE | tee $tmpmvnlog
-            EXIT_CODE=$?
-            set -e
-            # try maven build again if Nexus dies
-            if grep -q -E "502 - Bad Gateway|Nexus connection problem" $tmpmvnlog; then
-                rm -f $tmpmvnlog || true
-                mvn clean deploy -Pcodenvy-release -DcreateChecksum=true -DautoReleaseAfterClose=$AUTORELEASE_ON_NEXUS -Dgpg.passphrase=$CHE_OSS_SONATYPE_PASSPHRASE | tee $tmpmvnlog
-                EXIT_CODE=$?
-            fi
-            if [[ $EXIT_CODE -eq 0 ]]; then
-                checkLogForErrors $tmpmvnlog
-            else
-                echo '[ERROR] 1. Build of che-server: Failed!'
-                exit $EXIT_CODE
-            fi
-        else
-            echo "[WARN] No deployment to Nexus as DEPLOY_TO_NEXUS = ${DEPLOY_TO_NEXUS}"
-        fi
     else
         echo '[ERROR] 2. Build of che-server: Failed!'
         exit $EXIT_CODE

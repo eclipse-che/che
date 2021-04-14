@@ -28,14 +28,6 @@ on:
         description: 'If true, tags will be overriden and regenerated. Use with caution.'
         required: false
         default: 'false'
-      autoReleaseOnNexus:
-        description: 'If true, artifacts will be automatically released when deployed to Nexus, but only if *deployOnNexus* is also true.'
-        required: false
-        default: 'true'
-      deployOnNexus:
-        description: 'If true, artifacts will be deployed to Nexus.'
-        required: false
-        default: 'true'
       rebuildFromExistingTags:
         description: 'If true, and *forceRecreateTags* is false, a checkout to existing tags will be performed.'
         required: false
