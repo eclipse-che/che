@@ -41,7 +41,7 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplier
       String authorizationHeader =
           authenticator.computeAuthorizationHeader(subject.getUserId(), requestMethod, requestUrl);
       if (Strings.isNullOrEmpty(authorizationHeader)) {
-        throw buildScmUnauthorizedException(subject.getUserName());
+        throw buildScmUnauthorizedException();
       }
       return authorizationHeader;
     } catch (OAuthAuthenticationException e) {
@@ -50,9 +50,12 @@ public class BitbucketServerOAuth1AuthorizationHeaderSupplier
   }
 
   @Override
-  public ScmUnauthorizedException buildScmUnauthorizedException(String userName) {
+  public ScmUnauthorizedException buildScmUnauthorizedException() {
     return new ScmUnauthorizedException(
-        userName + " is not authorized in " + authenticator.getOAuthProvider() + " OAuth1 provider",
+        EnvironmentContext.getCurrent().getSubject().getUserName()
+            + " is not authorized in "
+            + authenticator.getOAuthProvider()
+            + " OAuth1 provider",
         authenticator.getOAuthProvider(),
         "1.0",
         authenticator.getLocalAuthenticateUrl());

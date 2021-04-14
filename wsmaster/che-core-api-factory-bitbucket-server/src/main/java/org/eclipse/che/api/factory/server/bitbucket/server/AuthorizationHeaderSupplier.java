@@ -19,6 +19,6 @@ public interface AuthorizationHeaderSupplier {
   String computeAuthorizationHeader(final String requestMethod, final String requestUrl)
       throws ScmUnauthorizedException, ScmCommunicationException;
 
-  /** Construct ScmUnauthorizedException for given user linked to authorization method. */
-  ScmUnauthorizedException buildScmUnauthorizedException(String userName);
+  /** Construct ScmUnauthorizedException linked to authorization method. */
+  ScmUnauthorizedException buildScmUnauthorizedException();
 }

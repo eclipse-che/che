@@ -379,7 +379,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
         String body = CharStreams.toString(new InputStreamReader(response.body(), Charsets.UTF_8));
         switch (response.statusCode()) {
           case HTTP_UNAUTHORIZED:
-            throw new ScmUnauthorizedException(body, "?", "?", "?");
+            throw headerProvider.buildScmUnauthorizedException();
           case HTTP_BAD_REQUEST:
             throw new ScmBadRequestException(body);
           case HTTP_NOT_FOUND:

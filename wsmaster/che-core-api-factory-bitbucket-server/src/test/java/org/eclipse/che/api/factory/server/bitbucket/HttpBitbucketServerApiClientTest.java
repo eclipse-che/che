@@ -76,9 +76,8 @@ public class HttpBitbucketServerApiClientTest {
               }
 
               @Override
-              public ScmUnauthorizedException buildScmUnauthorizedException(String userName) {
-                return new ScmUnauthorizedException(
-                    userName + " is not authorized in ", "", "", "");
+              public ScmUnauthorizedException buildScmUnauthorizedException() {
+                return new ScmUnauthorizedException("Not authorized in ", "", "", "");
               }
             });
   }
