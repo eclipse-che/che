@@ -1,0 +1,32 @@
+apiVersion: 1.0.0
+metadata:
+  name: che-docs-test
+projects:
+  - name: che-docs
+    source:
+      location: 'https://github.com/eclipse/che-docs.git'
+      type: git
+      branch: master
+components:
+  - mountSources: true
+    endpoints:
+      - name: Open-Livereload
+        port: 35729
+      - attributes:
+          path: /che-7/overview/introduction-to-eclipse-che/
+        name: Open-Preview-server
+        port: 4000
+    command:
+      - tail
+    args:
+      - '-f'
+      - /dev/null
+    memoryLimit: 512M
+    type: dockerimage
+    alias: che-docs
+    image: 'quay.io/eclipse/che-docs:latest'
+  - type: chePlugin
+    reference: 'https://che-plugin-registry-main.surge.sh/v3/plugins/errata-ai/vale-server/latest/meta.yaml'
+    alias: vale-server
+    preferences:
+      vale.core.useCLI: true
