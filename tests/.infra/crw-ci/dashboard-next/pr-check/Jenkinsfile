@@ -22,7 +22,7 @@ pipeline {
 
         LOGS_AND_CONFIGS ="${WORKSPACE}/logs-and-configs"
 
-        mutableCheImageTag = ""
+        mutableDashboardImageTag = ""
         pathToChectl = ""
 
         UPSTREAM_DASHBOARD_REPO_URL="https://github.com/eclipse-che/che-dashboard.git"
@@ -31,11 +31,19 @@ pipeline {
     parameters {
         booleanParam(name: 'cheSingleHost',
                defaultValue: false,
-               description: 'Configuration Che server strategy')
+               description: 'Configuration Che Server Exposure strategy')
 
         string(name: 'cheImageRepo',
                 defaultValue: "quay.io/crw_pr/che-server",
                 description: 'Repo of Che server image')
+
+        string(name: 'cheImageTag',
+                defaultValue: "nightly",
+                description: 'Tag of Che server image')
+
+        string(name: 'dashboardImageRepo',
+                defaultValue: "quay.io/crw_pr/che-dashboard",
+                description: 'Repo of Che dashboard image')
 
         string(name: 'testWorkspaceDevfileUrl',
                 defaultValue: "",
@@ -67,7 +75,7 @@ pipeline {
         stage("Setup environment") {
             steps {
                 script { 
-                    mutableCheImageTag = ghprbPullId
+                    mutableDashboardImageTag = ghprbPullId
                 }
             }
         }
@@ -137,32 +145,6 @@ pipeline {
                     }
                 }
 
-                stage("Build Che including upstream projects") {
-                    steps {
-                        echo "Build branch ${ghprbSourceBranch} of upstream projects"
-                        sh """
-                            project_list=(
-                                eclipse/che-parent
-                            )
-                            
-                            for project in \${project_list[@]};
-                            do
-                                result=\$(git ls-remote --heads https://github.com/\${project}.git ${ghprbSourceBranch})
-                                if [[ \$result == *"refs"* ]]; then
-                                    echo "[PRE-BUILD CHECK] found upstream project: \${project} with same branch name: ${ghprbSourceBranch}"
-                                    git clone -b ${ghprbSourceBranch} https://github.com/\${project} \${project}
-                                    mvn clean install -f ${WORKSPACE}/\${project}/pom.xml -DskipTests
-                                else
-                                    echo "[PRE-BUILD CHECK] skip build upstream project: \$project, unable to find branch: ${ghprbSourceBranch}."
-                                fi
-                            done
-                        """
-
-                        echo "Build Che"
-                        sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
-                    }
-                }
-
                 stage("Pull test images") {
                     steps {
                         script {
@@ -198,9 +180,8 @@ pipeline {
                     sh """
                         echo "Build 'che-dashboard' image"
                         echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
-                        
                         cd ${WORKSPACE}/che-dashboard
-                        docker build . -f apache.Dockerfile -t quay.io/crw_pr/che-dashboard:${mutableCheImageTag}
+                        docker build . -f apache.Dockerfile -t ${dashboardImageRepo}:${mutableDashboardImageTag}
                     """
                 }
 
@@ -209,30 +190,7 @@ pipeline {
                         echo "Push 'che-dashboard' image"
                         echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
 
-                        echo y | docker push quay.io/crw_pr/che-dashboard:${mutableCheImageTag}
-                    """
-                }
-            }
-        }
-
-        stage("Build and push 'che-server' image") {
-            steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    sh """
-                        echo "Build 'che-server' image"
-                        echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
-
-                        ${WORKSPACE}/dockerfiles/che/build.sh --organization:eclipseche --tag:${mutableCheImageTag} --dockerfile:Dockerfile
-                    """
-                }
-
-                withCredentials([string(credentialsId: 'quay.io-crw_pr+crw_pr_bot_user_token', variable: 'QUAY_TOKEN')]) {
-                    sh """
-                        echo "Push 'che-server' image"
-                        echo "${QUAY_TOKEN}" | docker login -u="crw_pr+crw_pr_bot" --password-stdin quay.io/crw_pr
-
-                        docker tag eclipseche/che-server:${mutableCheImageTag} ${cheImageRepo}:${mutableCheImageTag}
-                        echo y | docker push ${cheImageRepo}:${mutableCheImageTag}
+                        echo y | docker push ${dashboardImageRepo}:${mutableDashboardImageTag}
                     """
                 }
             }
@@ -246,9 +204,7 @@ pipeline {
                         sh """
                             eval \$(minikube docker-env)
 
-                            docker pull ${cheImageRepo}:${mutableCheImageTag}
-
-                            docker login -u maxura -p ${maxura_docker_password}
+                            echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
                             docker pull docker.io/traefik:v2.2.8 || true
                         """
                     }
@@ -260,7 +216,8 @@ pipeline {
 spec:
   server:
     cheImage: '${cheImageRepo}'
-    cheImageTag: '${mutableCheImageTag}'
+    cheImageTag: '${cheImageTag}'
+    dashboardImage: ${dashboardImageRepo}:${mutableDashboardImageTag}
     serverExposureStrategy: 'single-host'
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
@@ -279,7 +236,8 @@ EOL"""
 spec:
   server:
     cheImage: '${cheImageRepo}'
-    cheImageTag: '${mutableCheImageTag}'
+    cheImageTag: '${cheImageTag}'
+    dashboardImage: ${dashboardImageRepo}:${mutableDashboardImageTag}
     customCheProperties:
       CHE_LIMITS_USER_WORKSPACES_RUN_COUNT: '-1'
       CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY: IfNotPresent
