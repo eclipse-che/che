@@ -27,7 +27,7 @@ const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.Preferen
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/f8ea2b4ae1eada70d7072df43de22dd5/raw/d7d448a38ffd9668506f232a1eb41bdf48278d15/shellcheckPlugin.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeShellcheckPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
