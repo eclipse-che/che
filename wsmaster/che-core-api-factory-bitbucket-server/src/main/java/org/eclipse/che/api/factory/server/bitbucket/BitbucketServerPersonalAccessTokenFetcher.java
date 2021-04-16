@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -107,8 +106,7 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
   public Optional<Boolean> isValid(PersonalAccessToken personalAccessToken)
       throws ScmCommunicationException, ScmUnauthorizedException {
     if (!bitbucketServerApiClient.isConnected(personalAccessToken.getScmProviderUrl())) {
-      LOG.debug(
-          "not a valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
+      LOG.debug("not a valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
       return Optional.empty();
     }
     try {
@@ -116,9 +114,7 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
           bitbucketServerApiClient.getPersonalAccessToken(
               personalAccessToken.getScmUserName(),
               Long.valueOf(personalAccessToken.getScmTokenId()));
-      return Optional.of(
-          Sets.difference(DEFAULT_TOKEN_SCOPE, bitbucketPersonalAccessToken.getPermissions())
-              .isEmpty());
+      return Optional.of(DEFAULT_TOKEN_SCOPE.equals(bitbucketPersonalAccessToken.getPermissions()));
     } catch (ScmItemNotFoundException e) {
       return Optional.of(Boolean.FALSE);
     }
