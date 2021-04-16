@@ -29,7 +29,7 @@ Repository | Component | Description | Devfile | Documentation
 [plugin-broker](https://github.com/eclipse/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md)
 [plugin-registry](https://github.com/eclipse-che/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. |  | 
 [website](https://github.com/eclipse/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse/che-website/blob/master/devfile.yaml) | 
-[workspace-client](https://github.com/eclipse/che-workspace-client) | | JS library to interact with a che-server. |  | 
+[workspace-client](https://github.com/eclipse-che/che-workspace-client) | | JS library to interact with a che-server. |  | 
 [che-sidecar-bazel](https://github.com/che-dockerfiles/che-sidecar-bazel) | | Eclipse Che Sidecar container for Bazel tooling |  | 
 [che-sidecar-protobuf](https://github.com/che-dockerfiles/che-sidecar-protobuf) | | Eclipse Che Sidecar container for Protobuf tooling |  | 
 [che-sidecar-tekton](https://github.com/che-dockerfiles/che-sidecar-tekton) | | Eclipse Che Sidecar container for Tekton tooling |  | 

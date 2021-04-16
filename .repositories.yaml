@@ -98,7 +98,7 @@ repositories:
       https://eclipse.org/che website source code.
     devfile: https://github.com/eclipse/che-website/blob/master/devfile.yaml
     useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse/che-workspace-client
+  - url: https://github.com/eclipse-che/che-workspace-client
     name: workspace-client
     description: >-
       JS library to interact with a che-server.
