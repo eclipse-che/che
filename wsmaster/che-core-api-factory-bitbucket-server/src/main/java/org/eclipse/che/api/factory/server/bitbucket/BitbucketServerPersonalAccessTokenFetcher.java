@@ -108,7 +108,7 @@ public class BitbucketServerPersonalAccessTokenFetcher implements PersonalAccess
       throws ScmCommunicationException, ScmUnauthorizedException {
     if (!bitbucketServerApiClient.isConnected(personalAccessToken.getScmProviderUrl())) {
       LOG.debug(
-          "not a  valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
+          "not a valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
       return Optional.empty();
     }
     try {
