@@ -242,11 +242,6 @@ repositories:
     description: >-
       Eclipse Che Sidecar container for node tooling
     useCheReleaseLifecycle: false
-  - url: https://github.com/che-incubator/che-dashboard-next
-    name: che-dashboard-next
-    description: >-
-      New dashboard for Eclipse CHE
-    useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/che-theia-openshift-auth
     name: che-theia-openshift-auth
     description: >-

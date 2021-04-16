@@ -58,7 +58,6 @@ Repository | Component | Description | Devfile | Documentation
 [che-sidecar-java](https://github.com/che-dockerfiles/che-sidecar-java) | | Eclipse Che Sidecar container for java tooling |  | 
 [che-sidecar-dependency-analytics](https://github.com/che-dockerfiles/che-sidecar-dependency-analytics) | | Eclipse Che Sidecar container for dependency analytics tooling |  | 
 [che-sidecar-node](https://github.com/che-dockerfiles/che-sidecar-node) | | Eclipse Che Sidecar container for node tooling |  | 
-[che-dashboard-next](https://github.com/che-incubator/che-dashboard-next) | | New dashboard for Eclipse CHE |  | 
 [che-theia-openshift-auth](https://github.com/che-incubator/che-theia-openshift-auth) | | OpenShift authentication plugin |  | 
 [configbump](https://github.com/che-incubator/configbump) | | Simple Kubernetes controller that is able to quickly synchronize a set of config maps |  | 
 [workspace-data-sync](https://github.com/che-incubator/workspace-data-sync) | | Provides the ability to increase I/O performance for a developer workspaces |  | 

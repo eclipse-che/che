@@ -181,7 +181,7 @@ pipeline {
         stage("Build and push 'che-dashboard' image"){
             steps {
                 sh """
-                    echo "Download the 'dashboard-next' project and checkout to branch"
+                    echo "Download the 'che-dashboard' project and checkout to branch"
 
                     git clone $ghprbAuthorRepoGitUrl
                     cd che-dashboard
