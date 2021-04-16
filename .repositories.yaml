@@ -48,11 +48,11 @@ repositories:
     devfile: https://github.com/che-incubator/chectl/blob/master/devfile.yaml
     doc: https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-dashboard
+  - url: https://github.com/eclipse-che/che-dashboard
     name: dashboard
     description: >-
      UI to manage workspaces, devfiles, etc.
-    devfile: https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml
+    devfile: https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-devfile-registry

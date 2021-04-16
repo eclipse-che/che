@@ -21,7 +21,7 @@ Repository | Component | Description | Devfile | Documentation
 [che-theia](https://github.com/eclipse-che/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse-che/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse-che/che-theia/blob/master/CONTRIBUTING.md)
 ---| [generator](https://github.com/eclipse-che/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | |
 [chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
-[dashboard](https://github.com/eclipse/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
+[dashboard](https://github.com/eclipse-che/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [devfile-registry](https://github.com/eclipse-che/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 
 [docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md)
@@ -89,12 +89,12 @@ Let's cover the developer flow for theses projects:
 
 ### Dashboard
 
-Dashboard source code is located in [https://github.com/eclipse/che-dashboard](https://github.com/eclipse/che-dashboard) repository.
+Dashboard source code is located in [https://github.com/eclipse-che/che-dashboard](https://github.com/eclipse-che/che-dashboard) repository.
 It is an AngularJS application. Here is the developer workflow if you want to contribute to it:
 
 #### Devfile for dashboard development
 
-The devfile: [https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml](https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml)
+The devfile: [https://github.com/eclipse-che/che-dashboard/blob/master/devfile.yaml](https://github.com/eclipse-che/che-dashboard/blob/master/devfile.yaml)
 
 In this section, we show how to setup a Che environment to work on the Che dashboard, and how to use it.
 For the whole workflows, we will need a workspace with such containers:
@@ -118,7 +118,7 @@ In this section we are going to start a new workspace to work on che-theia. The 
 The devfile could be started using `chectl`:
 
 ```bash
-$ chectl workspace:start -f https://raw.githubusercontent.com/eclipse/che-dashboard/master/devfile.yaml
+$ chectl workspace:start -f https://raw.githubusercontent.com/eclipse-che/che-dashboard/master/devfile.yaml
 ```
 
 #### Step 2: Build
