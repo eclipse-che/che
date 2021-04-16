@@ -31,7 +31,7 @@ const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 
 let workspaceName: string = '';
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/d88057c847fb75b03791d8a9926ebb07/raw/994cb6a923ccf08dfa0a12b007eed84088b6a5af/valePluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeValePlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'che-docs';
 const pathToFile: string = `${projectName}/modules/administration-guide/partials`;

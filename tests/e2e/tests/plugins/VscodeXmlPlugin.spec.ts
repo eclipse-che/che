@@ -29,7 +29,7 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 let workspaceName: string = '';
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/3479628d5bcd3a4ec7135e228a12457e/raw/8883e4d038a0ebc2718ed1b1919ed802cabdd142/xmlPluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeXmlPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
