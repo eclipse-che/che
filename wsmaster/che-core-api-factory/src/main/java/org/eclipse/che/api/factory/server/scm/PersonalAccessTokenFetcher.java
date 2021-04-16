@@ -37,8 +37,8 @@ public interface PersonalAccessTokenFetcher {
    * permissions.
    *
    * @param personalAccessToken - personal access token to check.
-   * @return - empty optional if @{@link PersonalAccessTokenFetcher} is not able to confirm or deny
-   *     that token is valid or @{@link Boolean} value if it can.
+   * @return - empty optional if {@link PersonalAccessTokenFetcher} is not able to confirm or deny
+   *     that token is valid or {@link Boolean} value if it can.
    * @throws ScmUnauthorizedException - in case if user are not authorized che server to create new
    *     token. Further user interaction is needed before calling next time this method.
    * @throws ScmCommunicationException - Some unexpected problem occurred during communication with
