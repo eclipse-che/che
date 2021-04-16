@@ -34,7 +34,6 @@ import com.google.common.net.HttpHeaders;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
-import org.eclipse.che.api.factory.server.bitbucket.server.AuthorizationSupplier;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketPersonalAccessToken;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketUser;
@@ -43,6 +42,8 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.security.oauth1.BitbucketServerOAuthAuthenticator;
+import org.eclipse.che.security.oauth1.OAuthAuthenticationException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,6 +57,7 @@ public class HttpBitbucketServerApiClientTest {
   WireMockServer wireMockServer;
   WireMock wireMock;
   BitbucketServerApiClient bitbucketServer;
+  BitbucketServerOAuthAuthenticator authenticator;
 
   @BeforeMethod
   void start() {
@@ -68,16 +70,12 @@ public class HttpBitbucketServerApiClientTest {
     bitbucketServer =
         new HttpBitbucketServerApiClient(
             wireMockServer.url("/"),
-            new AuthorizationSupplier() {
+            new BitbucketServerOAuthAuthenticator("", "", "", "") {
               @Override
-              public String computeAuthorizationHeader(String requestMethod, String requestUrl)
-                  throws ScmUnauthorizedException, ScmCommunicationException {
+              public String computeAuthorizationHeader(
+                  String userId, String requestMethod, String requestUrl)
+                  throws OAuthAuthenticationException {
                 return AUTHORIZATION_TOKEN;
-              }
-
-              @Override
-              public ScmUnauthorizedException buildScmUnauthorizedException() {
-                return new ScmUnauthorizedException("Not authorized in ", "", "", "");
               }
             });
   }
