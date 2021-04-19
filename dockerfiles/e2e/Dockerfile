@@ -1,4 +1,4 @@
-FROM selenium/standalone-chrome:87.0
+FROM selenium/standalone-chrome:89.0
 
 ENV DISPLAY=':20'
 
