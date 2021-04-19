@@ -157,6 +157,10 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
             if (scmPersonalAccessTokenFetcher.isValid(token)) {
               return Optional.of(token);
             } else {
+              // Removing token that is no longer valid. If several tokens exist the next one could
+              // be valid. If no valid token can be found, the caller should react in the same way
+              // as it reacts if no token exists. Usually, that means that process of new token
+              // retrieval would be initiated.
               clientFactory.create().secrets().inNamespace(namespaceMeta.getName()).delete(secret);
             }
           }
