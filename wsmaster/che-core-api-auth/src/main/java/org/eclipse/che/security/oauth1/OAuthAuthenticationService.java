@@ -74,8 +74,15 @@ public class OAuthAuthenticationService extends Service {
     final String providerName = getParameter(parameters, "oauth_provider");
     final String redirectAfterLogin = getParameter(parameters, "redirect_after_login");
 
-    getAuthenticator(providerName).callback(requestUrl);
-
+    try {
+      getAuthenticator(providerName).callback(requestUrl);
+    } catch (OAuthAuthenticationException e) {
+      if (e.getMessage().equalsIgnoreCase("Authorization denied"))
+      {
+        return Response.temporaryRedirect(URI.create("/dashboard")).build();
+      }
+      throw e;
+    }
     return Response.temporaryRedirect(URI.create(redirectAfterLogin)).build();
   }
 
