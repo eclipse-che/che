@@ -195,8 +195,7 @@ public abstract class OAuthAuthenticator {
         getAccessToken.signer =
             getOAuthHmacSigner(clientSecret, sharedTokenSecrets.remove(oauthTemporaryToken));
       }
-      if (getAccessToken.verifier.equalsIgnoreCase("denied"))
-      {
+      if (getAccessToken.verifier.equalsIgnoreCase("denied")) {
         throw new OAuthAuthenticationException("Authorization denied");
       }
 

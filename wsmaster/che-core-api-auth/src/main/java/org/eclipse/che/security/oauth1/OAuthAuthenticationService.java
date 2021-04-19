@@ -77,8 +77,7 @@ public class OAuthAuthenticationService extends Service {
     try {
       getAuthenticator(providerName).callback(requestUrl);
     } catch (OAuthAuthenticationException e) {
-      if (e.getMessage().equalsIgnoreCase("Authorization denied"))
-      {
+      if (e.getMessage().equalsIgnoreCase("Authorization denied")) {
         return Response.temporaryRedirect(URI.create("/dashboard")).build();
       }
       throw e;
