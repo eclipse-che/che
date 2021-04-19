@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-api</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.29.0-SNAPSHOT</version>
+        <version>7.30.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-api-organization-shared</artifactId>
     <packaging>jar</packaging>

@@ -25,7 +25,7 @@ pipeline {
         mutableCheImageTag = ""
         pathToChectl = ""
 
-        UPSTREAM_DASHBOARD_REPO_URL="https://github.com/eclipse/che-dashboard.git"
+        UPSTREAM_DASHBOARD_REPO_URL="https://github.com/eclipse-che/che-dashboard.git"
     }
 
     parameters {
@@ -42,10 +42,10 @@ pipeline {
                 description: 'URL of devfile of test workspace')
 
         string(name: 'ghprbSourceBranch',
-                defaultValue: "master")
+                defaultValue: "main")
 
         string(name: 'ghprbAuthorRepoGitUrl',
-                defaultValue: "https://github.com/eclipse/che-dashboard.git")
+                defaultValue: "https://github.com/eclipse-che/che-dashboard.git")
 
         string(name: 'e2eTestParameters',
                 defaultValue: "")
@@ -181,14 +181,14 @@ pipeline {
         stage("Build and push 'che-dashboard' image"){
             steps {
                 sh """
-                    echo "Download the 'che-dashboard-next' project and checkout to branch"
+                    echo "Download the 'che-dashboard' project and checkout to branch"
 
                     git clone $ghprbAuthorRepoGitUrl
                     cd che-dashboard
 
                     if [[ "$UPSTREAM_DASHBOARD_REPO_URL" != "$ghprbAuthorRepoGitUrl" ]]; then
                         echo "Using fork $ghprbAuthorRepoGitUrl"
-                        git fetch -f $UPSTREAM_DASHBOARD_REPO_URL master:$ghprbSourceBranch
+                        git fetch -f $UPSTREAM_DASHBOARD_REPO_URL main:$ghprbSourceBranch
                     fi
 
                     git checkout $ghprbSourceBranch
