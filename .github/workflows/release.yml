@@ -139,8 +139,8 @@ jobs:
           body: Eclipse Che ${{ github.event.inputs.version }}
           draft: false
           name: Eclipse Che ${{ github.event.inputs.version }}
-          omitBodyDuringUpdate: false
-          omitNameDuringUpdate: false
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
           prerelease: false
           tag: ${{ github.event.inputs.version }}
           token: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
