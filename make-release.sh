@@ -222,10 +222,8 @@ prepareRelease() {
         # TODO pull parent pom version from VERSION file, instead of being hardcoded
         pushd typescript-dto >/dev/null
             sed -i -e "s#<che.version>.*<\/che.version>#<che.version>${CHE_VERSION}<\/che.version>#" dto-pom.xml
-            # Do not change the version of the parent pom, which is fixed
-            # TODO is this correct? seems like we're setting parent to a version that doesn't exist, rather than hardcoding to VERSION_CHE_PARENT value
-            sed -i -e "/<version>${VERSION_CHE_PARENT}<\/version>/ ! s#<version>.*<\/version>#<version>${CHE_VERSION}<\/version>#" dto-pom.xml
-            echo "[INFO] Dependencies updated in che typescript DTO (should have parent = ${VERSION_CHE_PARENT}, not ${CHE_VERSION})"
+            sed -i -e "/<groupId>org.eclipse.che.parent<\/groupId>/ { n; s#<version>.*<\/version>#<version>${VERSION_CHE_PARENT}<\/version>#}" dto-pom.xml
+            echo "[INFO] Dependencies updated in che typescript DTO (parent = ${VERSION_CHE_PARENT}, che server = ${CHE_VERSION})"
         popd >/dev/null
 
         # TODO more elegant way to execute these scripts
@@ -288,6 +286,11 @@ releaseCheServer() {
     popd >/dev/null
 }
 
+releaseTypescriptDto() {
+    pushd che/typescript-dto >/dev/null
+    ./build.sh
+    popd >/dev/null
+}
 
 buildImages() {
     echo "Going to build docker images"
@@ -382,7 +385,7 @@ bumpVersion() {
         sed -i -e "s#<che.version>.*<\/che.version>#<che.version>$1<\/che.version>#" pom.xml
         pushd typescript-dto >/dev/null
             sed -i -e "s#<che.version>.*<\/che.version>#<che.version>${1}<\/che.version>#" dto-pom.xml
-            sed -i -e "s#<version>.*<\/version>#<version>${1}<\/version>#" dto-pom.xml
+            sed -i -e "/<groupId>org.eclipse.che.parent<\/groupId>/ { n; s#<version>.*<\/version>#<version>${VERSION_CHE_PARENT}<\/version>#}" dto-pom.xml
         popd >/dev/null
 
         commitChangeOrCreatePR $1 $2 "pr-${2}-to-${1}"
@@ -426,6 +429,7 @@ else
     createTags
 fi
 releaseCheServer
+releaseTypescriptDto
 
 if [[ "${BUILD_AND_PUSH_IMAGES}" = "true" ]]; then
     buildImages  ${CHE_VERSION}
