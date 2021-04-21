@@ -51,7 +51,6 @@ public class GitlabOAuthTokenFetcherTest {
   WireMockServer wireMockServer;
   WireMock wireMock;
 
-
   @BeforeMethod
   void start() {
 
@@ -69,9 +68,10 @@ public class GitlabOAuthTokenFetcherTest {
     wireMockServer.stop();
   }
 
-
-  @Test(expectedExceptions = ScmCommunicationException.class,
-  expectedExceptionsMessageRegExp = "Current token doesn't have the 'read_user' privileges. Please make sure Che app scopes are correct and containing it.")
+  @Test(
+      expectedExceptions = ScmCommunicationException.class,
+      expectedExceptionsMessageRegExp =
+          "Current token doesn't have the 'read_user' privileges. Please make sure Che app scopes are correct and containing it.")
   public void shouldThrowExceptionOnInsufficientTokenScopes() throws Exception {
     Subject subject = new SubjectImpl("Username", "id1", "token", false);
     OAuthToken oAuthToken = newDto(OAuthToken.class).withToken("oauthtoken").withScope("api repo");
@@ -80,8 +80,8 @@ public class GitlabOAuthTokenFetcherTest {
     oAuthTokenFetcher.fetchPersonalAccessToken(subject, wireMockServer.url("/"));
   }
 
-
-  @Test(expectedExceptions = ScmUnauthorizedException.class,
+  @Test(
+      expectedExceptions = ScmUnauthorizedException.class,
       expectedExceptionsMessageRegExp = "Username is not authorized in gitlab OAuth provider.")
   public void shouldThrowUnauthorizedExceptionWhenUserNotLoggedIn() throws Exception {
     Subject subject = new SubjectImpl("Username", "id1", "token", false);
@@ -93,7 +93,8 @@ public class GitlabOAuthTokenFetcherTest {
   @Test
   public void shouldReturnToken() throws Exception {
     Subject subject = new SubjectImpl("Username", "id1", "token", false);
-    OAuthToken oAuthToken = newDto(OAuthToken.class).withToken("oauthtoken").withScope("api read_user");
+    OAuthToken oAuthToken =
+        newDto(OAuthToken.class).withToken("oauthtoken").withScope("api read_user");
     when(oAuthAPI.getToken(anyString())).thenReturn(oAuthToken);
 
     stubFor(
@@ -104,7 +105,8 @@ public class GitlabOAuthTokenFetcherTest {
                     .withHeader("Content-Type", "application/json; charset=utf-8")
                     .withBodyFile("gitlab/rest/api/v4/user/response.json")));
 
-    PersonalAccessToken token = oAuthTokenFetcher.fetchPersonalAccessToken(subject, wireMockServer.url("/"));
+    PersonalAccessToken token =
+        oAuthTokenFetcher.fetchPersonalAccessToken(subject, wireMockServer.url("/"));
     assertNotNull(token);
   }
 }

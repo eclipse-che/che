@@ -84,6 +84,31 @@ public class GitlabApiClient {
         });
   }
 
+  public GitlabOauthTokenInfo tokenInfo(String authenticationToken)
+      throws ScmItemNotFoundException, ScmCommunicationException {
+    final URI uri = serverUrl.resolve("/oauth/token/info");
+    HttpRequest request =
+        HttpRequest.newBuilder(uri)
+            .headers("Authorization", "Bearer " + authenticationToken)
+            .timeout(DEFAULT_HTTP_TIMEOUT)
+            .build();
+    LOG.trace("executeRequest={}", request);
+    try {
+      return executeRequest(
+          httpClient,
+          request,
+          inputStream -> {
+            try {
+              return OBJECT_MAPPER.readValue(inputStream, GitlabOauthTokenInfo.class);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
+    } catch (ScmBadRequestException e) {
+      throw new ScmCommunicationException(e.getMessage(), e);
+    }
+  }
+
   private <T> T executeRequest(
       HttpClient httpClient, HttpRequest request, Function<InputStream, T> bodyConverter)
       throws ScmBadRequestException, ScmItemNotFoundException, ScmCommunicationException {
