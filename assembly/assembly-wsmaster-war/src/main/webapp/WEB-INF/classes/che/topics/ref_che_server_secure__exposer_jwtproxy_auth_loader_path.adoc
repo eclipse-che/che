@@ -4,10 +4,10 @@
 Optional authentication page path to route unsigned requests to.
 
 
-.Default value for `+che_server_secure__exposer_jwtproxy_auth_loader_path+`
+.Default value for `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_AUTH_LOADER_PATH+`
 ====
 ----
-`+/_app/loader.html+`
+/_app/loader.html
 ----
 ====
 

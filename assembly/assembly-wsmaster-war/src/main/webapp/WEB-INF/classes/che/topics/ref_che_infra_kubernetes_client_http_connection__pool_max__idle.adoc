@@ -4,10 +4,10 @@
 Max number of idle connections in the connection pool of the Kubernetes-client shared HTTP client.
 
 
-.Default value for `+che_infra_kubernetes_client_http_connection__pool_max__idle+`
+.Default value for `+CHE_INFRA_KUBERNETES_CLIENT_HTTP_CONNECTION__POOL_MAX__IDLE+`
 ====
 ----
-`+5+`
+5
 ----
 ====
 

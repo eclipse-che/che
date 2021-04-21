@@ -4,10 +4,10 @@
 Specifies optional, additional cluster roles to use with the workspace service account. the {prod-short} Operator that the cluster role names must already exist, and the {prod-short} service account needs to be able to create a Role Binding to associate these cluster roles with the workspace service account. The names are comma separated. This property deprecates `che.infra.kubernetes.cluster_role_name`.
 
 
-.Default value for `+che_infra_kubernetes_workspace__sa__cluster__roles+`
+.Default value for `+CHE_INFRA_KUBERNETES_WORKSPACE__SA__CLUSTER__ROLES+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

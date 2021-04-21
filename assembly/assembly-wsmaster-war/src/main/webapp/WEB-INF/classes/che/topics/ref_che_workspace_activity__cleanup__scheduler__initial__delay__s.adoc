@@ -4,10 +4,10 @@
 The delay after server startup to start the first activity clean up job.
 
 
-.Default value for `+che_workspace_activity__cleanup__scheduler__initial__delay__s+`
+.Default value for `+CHE_WORKSPACE_ACTIVITY__CLEANUP__SCHEDULER__INITIAL__DELAY__S+`
 ====
 ----
-`+60+`
+60
 ----
 ====
 

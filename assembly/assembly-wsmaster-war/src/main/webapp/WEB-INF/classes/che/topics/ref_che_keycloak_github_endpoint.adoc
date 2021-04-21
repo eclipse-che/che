@@ -4,10 +4,10 @@
 URL to access Github oauth tokens
 
 
-.Default value for `+che_keycloak_github_endpoint+`
+.Default value for `+CHE_KEYCLOAK_GITHUB_ENDPOINT+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

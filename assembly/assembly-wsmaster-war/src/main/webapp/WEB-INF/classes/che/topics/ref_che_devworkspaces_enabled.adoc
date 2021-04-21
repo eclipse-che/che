@@ -4,10 +4,10 @@
 Specifies whether {prod-short} is deployed with DevWorkspaces enabled. This property is set by the {prod-short} Operator if it also installed the support for DevWorkspaces. This property is used to advertise this fact to the {prod-short} dashboard. It does not make sense to change the value of this property manually.
 
 
-.Default value for `+che_devworkspaces_enabled+`
+.Default value for `+CHE_DEVWORKSPACES_ENABLED+`
 ====
 ----
-`+false+`
+false
 ----
 ====
 

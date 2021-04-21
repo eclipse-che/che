@@ -4,10 +4,10 @@
 RAM request for each container that has no explicit RAM settings in its environment. This amount is allocated when the workspace container is created. This property may not be supported by all infrastructure implementations. Currently it is supported by {orch-name}. A memory request exceeding the memory limit is ignored, and only the limit size is used. Value less or equal to 0 is interpreted as disabling the limit.
 
 
-.Default value for `+che_workspace_default__memory__request__mb+`
+.Default value for `+CHE_WORKSPACE_DEFAULT__MEMORY__REQUEST__MB+`
 ====
 ----
-`+200+`
+200
 ----
 ====
 

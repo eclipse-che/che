@@ -4,10 +4,10 @@
 Keycloak client id in che.keycloak.realm that is used by dashboard, ide and cli to authenticate users
 
 
-.Default value for `+che_keycloak_client__id+`
+.Default value for `+CHE_KEYCLOAK_CLIENT__ID+`
 ====
 ----
-`+che-public+`
+che-public
 ----
 ====
 

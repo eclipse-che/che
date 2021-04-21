@@ -4,10 +4,10 @@
 GitHub OAuth redirect URIs. Separate multiple values with comma, for example: URI,URI,URI
 
 
-.Default value for `+che_oauth_github_redirecturis+`
+.Default value for `+CHE_OAUTH_GITHUB_REDIRECTURIS+`
 ====
 ----
-`+http://localhost:${CHE_PORT}/api/oauth/callback+`
+http://localhost:${CHE_PORT}/api/oauth/callback
 ----
 ====
 

@@ -4,10 +4,10 @@
 Defines labels which will be set to ConfigMaps configuring single-host gateway.
 
 
-.Default value for `+che_infra_kubernetes_singlehost_gateway_configmap__labels+`
+.Default value for `+CHE_INFRA_KUBERNETES_SINGLEHOST_GATEWAY_CONFIGMAP__LABELS+`
 ====
 ----
-`+app=che,component=che-gateway-config+`
+app=che,component=che-gateway-config
 ----
 ====
 

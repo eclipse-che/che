@@ -4,10 +4,10 @@
 {prod-short} WebSocket major endpoint. Provides basic communication endpoint for major WebSocket interactions and messaging.
 
 
-.Default value for `+che_websocket_endpoint+`
+.Default value for `+CHE_WEBSOCKET_ENDPOINT+`
 ====
 ----
-`+ws://${CHE_HOST}:${CHE_PORT}/api/websocket+`
+ws://${CHE_HOST}:${CHE_PORT}/api/websocket
 ----
 ====
 

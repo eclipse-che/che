@@ -4,10 +4,10 @@
 HTTP proxy setting for workspace JVM.
 
 
-.Default value for `+che_workspace_http__proxy__java__options+`
+.Default value for `+CHE_WORKSPACE_HTTP__PROXY__JAVA__OPTIONS+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

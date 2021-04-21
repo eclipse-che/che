@@ -4,10 +4,10 @@
 Url to keycloak identity provider server Can be set to NULL only if `che.keycloak.oidcProvider` is used
 
 
-.Default value for `+che_keycloak_auth__server__url+`
+.Default value for `+CHE_KEYCLOAK_AUTH__SERVER__URL+`
 ====
 ----
-`+http://${CHE_HOST}:5050/auth+`
+http://${CHE_HOST}:5050/auth
 ----
 ====
 

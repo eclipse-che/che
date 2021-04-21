@@ -4,10 +4,10 @@
 Name of the ConfigMap in a workspace namespace with additional CA TLS certificates. Holds the copy of `che.infra.kubernetes.trusted_ca.src_configmap` but in a workspace namespace. Content of this ConfigMap is mounted into all workspace containers including plugin brokers. Do not change the ConfigMap name unless it conflicts with the already existing ConfigMap. the {prod-short} Operator that the resulting ConfigMap name can be adjusted eventually to make it unique in {orch-namespace}. The original name would be stored in `che.original_name` label.
 
 
-.Default value for `+che_infra_kubernetes_trusted__ca_dest__configmap+`
+.Default value for `+CHE_INFRA_KUBERNETES_TRUSTED__CA_DEST__CONFIGMAP+`
 ====
 ----
-`+ca-certs+`
+ca-certs
 ----
 ====
 

@@ -4,10 +4,10 @@
 API service internal network URL. Back-end services should initiate REST communications to {prod-short} server with this URL
 
 
-.Default value for `+che_api_internal+`
+.Default value for `+CHE_API_INTERNAL+`
 ====
 ----
-`+http://${CHE_HOST}:${CHE_PORT}/api+`
+http://${CHE_HOST}:${CHE_PORT}/api
 ----
 ====
 

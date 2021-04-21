@@ -4,10 +4,10 @@
 `Jwtproxy` issuer string, token lifetime, and optional auth page path to route unsigned requests to.
 
 
-.Default value for `+che_server_secure__exposer_jwtproxy_token_issuer+`
+.Default value for `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_TOKEN_ISSUER+`
 ====
 ----
-`+wsmaster+`
+wsmaster
 ----
 ====
 

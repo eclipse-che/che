@@ -4,10 +4,10 @@
 Optionally configures node selector for workspace Pod. Format is comma-separated key=value pairs, for example: `disktype=ssd,cpu=xlarge,foo=bar`
 
 
-.Default value for `+che_workspace_pod_node__selector+`
+.Default value for `+CHE_WORKSPACE_POD_NODE__SELECTOR+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

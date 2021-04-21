@@ -4,10 +4,10 @@
 The maximum number of workspaces that a organization is allowed to own. The organization will be presented an error message if they try to create additional workspaces. This applies to the total number of both running and stopped workspaces.
 
 
-.Default value for `+che_limits_organization_workspaces_count+`
+.Default value for `+CHE_LIMITS_ORGANIZATION_WORKSPACES_COUNT+`
 ====
 ----
-`+-1+`
+-1
 ----
 ====
 

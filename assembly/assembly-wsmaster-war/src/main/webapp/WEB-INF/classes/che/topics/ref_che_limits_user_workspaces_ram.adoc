@@ -4,10 +4,10 @@
 The total amount of RAM that a single user is allowed to allocate to running workspaces. A user can allocate this RAM to a single workspace or spread it across multiple workspaces.
 
 
-.Default value for `+che_limits_user_workspaces_ram+`
+.Default value for `+CHE_LIMITS_USER_WORKSPACES_RAM+`
 ====
 ----
-`+-1+`
+-1
 ----
 ====
 

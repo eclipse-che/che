@@ -4,7 +4,7 @@
 Used to generate domain for a server in a workspace in case property `che.infra.kubernetes.server_strategy` is set to `multi-host`
 
 
-.Default value for `+che_infra_kubernetes_ingress_domain+`
+.Default value for `+CHE_INFRA_KUBERNETES_INGRESS_DOMAIN+`
 ====
 ----
 

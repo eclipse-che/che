@@ -4,10 +4,10 @@
 Defines the size of Persistent Volume Claim of {prod-short} workspace. Format described here: https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources
 
 
-.Default value for `+che_infra_kubernetes_pvc_quantity+`
+.Default value for `+CHE_INFRA_KUBERNETES_PVC_QUANTITY+`
 ====
 ----
-`+10Gi+`
+10Gi
 ----
 ====
 

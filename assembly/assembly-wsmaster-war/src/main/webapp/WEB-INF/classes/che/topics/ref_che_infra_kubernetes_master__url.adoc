@@ -4,7 +4,7 @@
 Configuration of Kubernetes client master URL that Infra will use.
 
 
-.Default value for `+che_infra_kubernetes_master__url+`
+.Default value for `+CHE_INFRA_KUBERNETES_MASTER__URL+`
 ====
 ----
 

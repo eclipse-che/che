@@ -4,10 +4,10 @@
 GitLab endpoints used for factory integrations. Comma separated list of GitLab server URLs or NULL if no integration expected.
 
 
-.Default value for `+che_integration_gitlab_server__endpoints+`
+.Default value for `+CHE_INTEGRATION_GITLAB_SERVER__ENDPOINTS+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

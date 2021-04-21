@@ -4,10 +4,10 @@
 Username claim to be used as user display name when parsing JWT token if not defined the fallback value is 'preferred_username'
 
 
-.Default value for `+che_keycloak_username__claim+`
+.Default value for `+CHE_KEYCLOAK_USERNAME__CLAIM+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

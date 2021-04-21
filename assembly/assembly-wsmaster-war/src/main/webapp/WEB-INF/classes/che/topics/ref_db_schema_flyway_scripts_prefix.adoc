@@ -4,7 +4,7 @@
 Prefix of migration scripts.
 
 
-.Default value for `+db_schema_flyway_scripts_prefix+`
+.Default value for `+DB_SCHEMA_FLYWAY_SCRIPTS_PREFIX+`
 ====
 ----
 

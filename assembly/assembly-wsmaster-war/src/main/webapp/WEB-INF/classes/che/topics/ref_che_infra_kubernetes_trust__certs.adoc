@@ -4,10 +4,10 @@
 Boolean to configure Kubernetes client to use trusted certificates.
 
 
-.Default value for `+che_infra_kubernetes_trust__certs+`
+.Default value for `+CHE_INFRA_KUBERNETES_TRUST__CERTS+`
 ====
 ----
-`+false+`
+false
 ----
 ====
 

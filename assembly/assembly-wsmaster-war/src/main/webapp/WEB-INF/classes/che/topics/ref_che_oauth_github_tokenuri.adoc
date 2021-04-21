@@ -4,10 +4,10 @@
 GitHub OAuth token URI.
 
 
-.Default value for `+che_oauth_github_tokenuri+`
+.Default value for `+CHE_OAUTH_GITHUB_TOKENURI+`
 ====
 ----
-`+https://github.com/login/oauth/access_token+`
+https://github.com/login/oauth/access_token
 ----
 ====
 

@@ -4,10 +4,10 @@
 Delay before first workspace idleness check job started to avoid mass suspend if ws master was unavailable for period close to inactivity timeout.
 
 
-.Default value for `+che_workspace_activity__check__scheduler__delay__s+`
+.Default value for `+CHE_WORKSPACE_ACTIVITY__CHECK__SCHEDULER__DELAY__S+`
 ====
 ----
-`+180+`
+180
 ----
 ====
 

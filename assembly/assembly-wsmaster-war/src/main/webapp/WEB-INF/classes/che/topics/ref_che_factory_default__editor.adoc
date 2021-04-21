@@ -4,10 +4,10 @@
 Editor that will be used for factories that are created from a remote Git repository which does not contain any {prod-short}-specific workspace descriptor.
 
 
-.Default value for `+che_factory_default__editor+`
+.Default value for `+CHE_FACTORY_DEFAULT__EDITOR+`
 ====
 ----
-`+eclipse/che-theia/next+`
+eclipse/che-theia/next
 ----
 ====
 

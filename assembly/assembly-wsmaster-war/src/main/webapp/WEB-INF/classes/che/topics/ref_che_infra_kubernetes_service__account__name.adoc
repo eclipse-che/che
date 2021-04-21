@@ -4,10 +4,10 @@
 Defines Kubernetes Service Account name which should be specified to be bound to all workspaces Pods. the {prod-short} Operator that Kubernetes Infrastructure will not create the service account and it should exist. OpenShift infrastructure will check if project is predefined(if `che.infra.openshift.project` is not empty):  - if it is predefined then service account must exist there  - if it is 'NULL' or empty string then infrastructure will create new OpenShift project per workspace    and prepare workspace service account with needed roles there
 
 
-.Default value for `+che_infra_kubernetes_service__account__name+`
+.Default value for `+CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

@@ -4,10 +4,10 @@
 Configuration of Bitbucket Server OAuth1 client. Used to obtain Personal access tokens. Location of the file with Bitbucket Server application consumer key (equivalent to a username).
 
 
-.Default value for `+che_oauth1_bitbucket_consumerkeypath+`
+.Default value for `+CHE_OAUTH1_BITBUCKET_CONSUMERKEYPATH+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

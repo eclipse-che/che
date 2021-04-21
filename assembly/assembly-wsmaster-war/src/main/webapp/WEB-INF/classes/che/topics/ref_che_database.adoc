@@ -4,10 +4,10 @@
 Folder where {prod-short} stores internal data objects.
 
 
-.Default value for `+che_database+`
+.Default value for `+CHE_DATABASE+`
 ====
 ----
-`+${che.home}/storage+`
+${che.home}/storage
 ----
 ====
 

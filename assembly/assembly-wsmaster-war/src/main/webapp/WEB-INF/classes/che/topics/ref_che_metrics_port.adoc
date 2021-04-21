@@ -4,10 +4,10 @@
 Port the HTTP server endpoint that would be exposed with Prometheus metrics.
 
 
-.Default value for `+che_metrics_port+`
+.Default value for `+CHE_METRICS_PORT+`
 ====
 ----
-`+8087+`
+8087
 ----
 ====
 

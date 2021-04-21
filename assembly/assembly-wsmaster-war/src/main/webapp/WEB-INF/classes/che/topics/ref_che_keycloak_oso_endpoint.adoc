@@ -4,10 +4,10 @@
 URL to access OSO oauth tokens
 
 
-.Default value for `+che_keycloak_oso_endpoint+`
+.Default value for `+CHE_KEYCLOAK_OSO_ENDPOINT+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

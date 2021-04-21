@@ -4,10 +4,10 @@
 The maximum number of running workspaces that a single user is allowed to have. If the user has reached this threshold and they try to start an additional workspace, they will be prompted with an error message. The user will need to stop a running workspace to activate another.
 
 
-.Default value for `+che_limits_user_workspaces_run_count+`
+.Default value for `+CHE_LIMITS_USER_WORKSPACES_RUN_COUNT+`
 ====
 ----
-`+1+`
+1
 ----
 ====
 

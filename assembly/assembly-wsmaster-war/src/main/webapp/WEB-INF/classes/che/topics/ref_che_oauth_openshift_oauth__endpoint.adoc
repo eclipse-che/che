@@ -4,10 +4,10 @@
 ConfigurationofOpenShift OAuth client. Used to obtain OpenShift OAuth token. OpenShift OAuth client ID. OpenShift OAuth client secret. OpenShift OAuth endpoint.
 
 
-.Default value for `+che_oauth_openshift_oauth__endpoint+`
+.Default value for `+CHE_OAUTH_OPENSHIFT_OAUTH__ENDPOINT+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

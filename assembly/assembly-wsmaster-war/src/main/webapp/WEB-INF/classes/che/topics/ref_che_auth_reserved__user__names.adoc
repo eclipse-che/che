@@ -4,7 +4,7 @@
 Reserved user names
 
 
-.Default value for `+che_auth_reserved__user__names+`
+.Default value for `+CHE_AUTH_RESERVED__USER__NAMES+`
 ====
 ----
 

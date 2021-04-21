@@ -4,10 +4,10 @@
 The length of time that a user is idle with their workspace when the system will suspend the workspace and then stopping it. Idleness is the length of time that the user has not interacted with the workspace, meaning that one of our agents has not received interaction. Leaving a browser window open counts toward idleness.
 
 
-.Default value for `+che_limits_workspace_idle_timeout+`
+.Default value for `+CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT+`
 ====
 ----
-`+1800000+`
+1800000
 ----
 ====
 

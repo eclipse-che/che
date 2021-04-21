@@ -4,10 +4,10 @@
 Default Editor that should be provisioned into Devfile if there is no specified Editor Format is `editorPublisher/editorName/editorVersion` value. `NULL` or absence of value means that default editor should not be provisioned.
 
 
-.Default value for `+che_workspace_devfile_default__editor+`
+.Default value for `+CHE_WORKSPACE_DEVFILE_DEFAULT__EDITOR+`
 ====
 ----
-`+eclipse/che-theia/next+`
+eclipse/che-theia/next
 ----
 ====
 

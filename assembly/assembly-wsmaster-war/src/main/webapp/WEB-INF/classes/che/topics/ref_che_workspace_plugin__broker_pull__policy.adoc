@@ -4,10 +4,10 @@
 Docker image of {prod-short} plugin broker app that resolves workspace tools configuration and copies plugins dependencies to a workspace
 
 
-.Default value for `+che_workspace_plugin__broker_pull__policy+`
+.Default value for `+CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY+`
 ====
 ----
-`+Always+`
+Always
 ----
 ====
 

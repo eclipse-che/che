@@ -4,10 +4,10 @@
 Maximum size of the JSON RPC processing pool in case if pool size would be exceeded message execution will be rejected
 
 
-.Default value for `+che_core_jsonrpc_processor__max__pool__size+`
+.Default value for `+CHE_CORE_JSONRPC_PROCESSOR__MAX__POOL__SIZE+`
 ====
 ----
-`+50+`
+50
 ----
 ====
 

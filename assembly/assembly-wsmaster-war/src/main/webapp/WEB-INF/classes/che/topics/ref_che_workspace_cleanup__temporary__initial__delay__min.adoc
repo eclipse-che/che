@@ -4,10 +4,10 @@
 Time period to delay the first execution of temporary workspaces cleanup job.
 
 
-.Default value for `+che_workspace_cleanup__temporary__initial__delay__min+`
+.Default value for `+CHE_WORKSPACE_CLEANUP__TEMPORARY__INITIAL__DELAY__MIN+`
 ====
 ----
-`+5+`
+5
 ----
 ====
 

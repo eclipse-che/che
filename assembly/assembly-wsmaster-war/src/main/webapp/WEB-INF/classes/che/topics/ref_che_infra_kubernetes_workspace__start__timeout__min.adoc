@@ -4,10 +4,10 @@
 Defines time frame that limits the Kubernetes workspace start time
 
 
-.Default value for `+che_infra_kubernetes_workspace__start__timeout__min+`
+.Default value for `+CHE_INFRA_KUBERNETES_WORKSPACE__START__TIMEOUT__MIN+`
 ====
 ----
-`+8+`
+8
 ----
 ====
 

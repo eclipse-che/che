@@ -4,10 +4,10 @@
 Workspace threads pool configuration. This pool is used for workspace-related operations that require asynchronous execution, for example, starting and stopping. Possible values are `fixed` and `cached`.
 
 
-.Default value for `+che_workspace_pool_type+`
+.Default value for `+CHE_WORKSPACE_POOL_TYPE+`
 ====
 ----
-`+fixed+`
+fixed
 ----
 ====
 

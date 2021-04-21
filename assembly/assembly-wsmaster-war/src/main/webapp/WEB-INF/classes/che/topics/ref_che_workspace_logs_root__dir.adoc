@@ -4,10 +4,10 @@
 Defines the directory inside the machine where all the workspace logs are placed. Provide this value into the machine, for example, as an environment variable. This is to ensure that agent developers can use this directory to back up agent logs.
 
 
-.Default value for `+che_workspace_logs_root__dir+`
+.Default value for `+CHE_WORKSPACE_LOGS_ROOT__DIR+`
 ====
 ----
-`+/workspace_logs+`
+/workspace_logs
 ----
 ====
 

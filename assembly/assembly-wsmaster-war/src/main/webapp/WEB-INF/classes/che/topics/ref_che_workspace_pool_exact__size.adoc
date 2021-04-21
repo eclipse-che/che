@@ -4,10 +4,10 @@
 This property is ignored when pool type is different from `fixed`. It configures the exact size of the pool. When set, the `multiplier` property is ignored. If this property is not set (`0`, `<0`, `NULL`), then the pool size equals the number of cores. See also `che.workspace.pool.cores_multiplier`.
 
 
-.Default value for `+che_workspace_pool_exact__size+`
+.Default value for `+CHE_WORKSPACE_POOL_EXACT__SIZE+`
 ====
 ----
-`+30+`
+30
 ----
 ====
 

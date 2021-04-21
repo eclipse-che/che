@@ -4,10 +4,10 @@
 Authentication error page address
 
 
-.Default value for `+che_auth_access__denied__error__page+`
+.Default value for `+CHE_AUTH_ACCESS__DENIED__ERROR__PAGE+`
 ====
 ----
-`+/error-oauth+`
+/error-oauth
 ----
 ====
 

@@ -4,10 +4,10 @@
 Indicates which request origins are allowed. CORS filter on WS Master is turned off by default. Use environment variable "CHE_CORS_ENABLED=true" to turn it on.
 
 
-.Default value for `+che_cors_allowed__origins+`
+.Default value for `+CHE_CORS_ALLOWED__ORIGINS+`
 ====
 ----
-`+*+`
+*
 ----
 ====
 

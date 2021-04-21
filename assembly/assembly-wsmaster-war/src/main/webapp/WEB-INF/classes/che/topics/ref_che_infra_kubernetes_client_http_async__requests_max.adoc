@@ -4,10 +4,10 @@
 Number of maximum concurrent asynchronous web requests (HTTP requests or ongoing  WebSocket calls) supported in the underlying shared HTTP client of the `KubernetesClient` instances. Default values: `max=64`, and `max_per_host:5`. Default values are not suitable for multi-user scenarios, as {prod-short} keeps open connections, for example for command or ws-agent logs.
 
 
-.Default value for `+che_infra_kubernetes_client_http_async__requests_max+`
+.Default value for `+CHE_INFRA_KUBERNETES_CLIENT_HTTP_ASYNC__REQUESTS_MAX+`
 ====
 ----
-`+1000+`
+1000
 ----
 ====
 

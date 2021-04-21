@@ -4,10 +4,10 @@
 Scripts with version up to this are ignored. Note that scripts with version equal to baseline version are also ignored.
 
 
-.Default value for `+db_schema_flyway_baseline_version+`
+.Default value for `+DB_SCHEMA_FLYWAY_BASELINE_VERSION+`
 ====
 ----
-`+5.0.0.8.1+`
+5.0.0.8.1
 ----
 ====
 

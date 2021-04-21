@@ -4,10 +4,10 @@
 Limit size of the logs collected from single container that can be observed by che-server when debugging workspace startup. default 10MB=10485760
 
 
-.Default value for `+che_workspace_startup__debug__log__limit__bytes+`
+.Default value for `+CHE_WORKSPACE_STARTUP__DEBUG__LOG__LIMIT__BYTES+`
 ====
 ----
-`+10485760+`
+10485760
 ----
 ====
 

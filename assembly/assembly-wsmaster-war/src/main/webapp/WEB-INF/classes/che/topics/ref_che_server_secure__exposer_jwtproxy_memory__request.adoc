@@ -4,10 +4,10 @@
 JWTProxy memory request.
 
 
-.Default value for `+che_server_secure__exposer_jwtproxy_memory__request+`
+.Default value for `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_MEMORY__REQUEST+`
 ====
 ----
-`+15mb+`
+15mb
 ----
 ====
 

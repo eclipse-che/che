@@ -4,10 +4,10 @@
 Docker image of Che plugin artifacts broker. This broker runs as an init container on the workspace Pod. Its job is to take in a list of plugin identifiers (either references to a plugin in the registry or a link to a plugin meta.yaml) and ensure that the correct .vsix and .theia extensions are downloaded into the /plugins directory, for each plugin requested for the workspace.
 
 
-.Default value for `+che_workspace_plugin__broker_artifacts_image+`
+.Default value for `+CHE_WORKSPACE_PLUGIN__BROKER_ARTIFACTS_IMAGE+`
 ====
 ----
-`+quay.io/eclipse/che-plugin-artifacts-broker:v3.4.0+`
+quay.io/eclipse/che-plugin-artifacts-broker:v3.4.0
 ----
 ====
 

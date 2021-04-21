@@ -4,10 +4,10 @@
 Defines annotations for ingresses which are used for servers exposing. Value depends on the kind of ingress controller. OpenShift infrastructure ignores this property because it uses Routes rather than Ingresses. the {prod-short} Operator that for a single-host deployment strategy to work, a controller supporting URL rewriting has to be used (so that URLs can point to different servers while the servers do not need to support changing the app root). The `che.infra.kubernetes.ingress.path.rewrite_transform` property defines how the path of the ingress should be transformed to support the URL rewriting and this property defines the set of annotations on the ingress itself that instruct the chosen ingress controller to actually do the URL rewriting, potentially building on the path transformation (if required by the chosen ingress controller). For example for Nginx ingress controller 0.22.0 and later the following value is recommended: `{"ingress.kubernetes.io/rewrite-target": "/$1","ingress.kubernetes.io/ssl-redirect": "false",\     "ingress.kubernetes.io/proxy-connect-timeout": "3600","ingress.kubernetes.io/proxy-read-timeout": "3600"}` and the `che.infra.kubernetes.ingress.path.rewrite_transform` should be set to `"%s(.*)"`. For nginx ingress controller older than 0.22.0, the rewrite-target should be set to merely `/` and the path transform to `%s` (see the `che.infra.kubernetes.ingress.path.rewrite_transform` property). See the Nginx ingress controller documentation for the explanation of how the ingress controller uses the regular expression present in the ingress path and how it achieves the URL rewriting.
 
 
-.Default value for `+che_infra_kubernetes_ingress_annotations__json+`
+.Default value for `+CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

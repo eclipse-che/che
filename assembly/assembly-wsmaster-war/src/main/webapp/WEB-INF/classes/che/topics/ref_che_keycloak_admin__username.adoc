@@ -4,10 +4,10 @@
 Keycloak admin username. Will be used for deleting user from Keycloak on removing user from Che database. Make sense only in case $++{che.keycloak.cascade_user_removal_enabled}++ set to 'true'
 
 
-.Default value for `+che_keycloak_admin__username+`
+.Default value for `+CHE_KEYCLOAK_ADMIN__USERNAME+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

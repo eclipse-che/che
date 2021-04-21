@@ -4,10 +4,10 @@
 Configuration of queue used to process JSON RPC messages.
 
 
-.Default value for `+che_core_jsonrpc_processor__queue__capacity+`
+.Default value for `+CHE_CORE_JSONRPC_PROCESSOR__QUEUE__CAPACITY+`
 ====
 ----
-`+100000+`
+100000
 ----
 ====
 

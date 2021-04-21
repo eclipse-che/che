@@ -4,10 +4,10 @@
 CPU limit default for each sidecar that has no CPU settings in the {prod-short} plug-in configuration. Specify either in floating point cores number, for example, `0.125`, or using the Kubernetes format, integer millicores, for example, `125m`. Value less or equal to 0 is interpreted as disabling the limit.
 
 
-.Default value for `+che_workspace_sidecar_default__cpu__limit__cores+`
+.Default value for `+CHE_WORKSPACE_SIDECAR_DEFAULT__CPU__LIMIT__CORES+`
 ====
 ----
-`+-1+`
+-1
 ----
 ====
 

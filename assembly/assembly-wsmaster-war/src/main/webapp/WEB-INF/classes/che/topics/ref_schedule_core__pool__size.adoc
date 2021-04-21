@@ -4,10 +4,10 @@
 {prod-short} extensions can be scheduled executions on a time basis. This configures the size of the thread pool allocated to extensions that are launched on a recurring schedule.
 
 
-.Default value for `+schedule_core__pool__size+`
+.Default value for `+SCHEDULE_CORE__POOL__SIZE+`
 ====
 ----
-`+10+`
+10
 ----
 ====
 

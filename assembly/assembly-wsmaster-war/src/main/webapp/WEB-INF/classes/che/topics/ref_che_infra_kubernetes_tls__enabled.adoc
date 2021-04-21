@@ -4,10 +4,10 @@
 Creates Ingresses with Transport Layer Security (TLS) enabled. In OpenShift infrastructure, Routes will be TLS-enabled.
 
 
-.Default value for `+che_infra_kubernetes_tls__enabled+`
+.Default value for `+CHE_INFRA_KUBERNETES_TLS__ENABLED+`
 ====
 ----
-`+false+`
+false
 ----
 ====
 

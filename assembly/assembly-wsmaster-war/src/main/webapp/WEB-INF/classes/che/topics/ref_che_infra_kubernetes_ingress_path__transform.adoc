@@ -4,10 +4,10 @@
 Defines a "recipe" on how to declare the path of the ingress that should expose a server. The "%s" represents the base public URL of the server and is guaranteed to end with a forward slash. This property must be a valid input to the String.format() method and contain exactly one reference to "%s". See the description of the `che.infra.kubernetes.ingress.annotations_json` property to see how these two properties interplay when specifying the ingress annotations and path. If not defined, this property defaults to "%s" (without the quotes) which means that the path is not transformed in any way for use with the ingress controller.
 
 
-.Default value for `+che_infra_kubernetes_ingress_path__transform+`
+.Default value for `+CHE_INFRA_KUBERNETES_INGRESS_PATH__TRANSFORM+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

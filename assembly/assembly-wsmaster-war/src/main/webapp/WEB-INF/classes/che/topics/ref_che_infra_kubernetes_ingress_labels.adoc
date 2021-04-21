@@ -4,10 +4,10 @@
 Additional labels to add into every Ingress created by {prod-short} server to allow clear identification.
 
 
-.Default value for `+che_infra_kubernetes_ingress_labels+`
+.Default value for `+CHE_INFRA_KUBERNETES_INGRESS_LABELS+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

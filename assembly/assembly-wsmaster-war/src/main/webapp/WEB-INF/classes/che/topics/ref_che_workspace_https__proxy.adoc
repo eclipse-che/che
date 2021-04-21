@@ -4,7 +4,7 @@
 Configures environment variable HTTPS_PROXY to a specified value in containers powering workspaces.
 
 
-.Default value for `+che_workspace_https__proxy+`
+.Default value for `+CHE_WORKSPACE_HTTPS__PROXY+`
 ====
 ----
 

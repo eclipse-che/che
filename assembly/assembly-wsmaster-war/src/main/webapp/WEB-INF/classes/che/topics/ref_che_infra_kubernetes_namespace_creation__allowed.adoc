@@ -4,10 +4,10 @@
 Indicates whether {prod-short} server is allowed to create {orch-namespace} for user workspaces, or they're intended to be created manually by cluster administrator. This property is also used by the OpenShift infra.
 
 
-.Default value for `+che_infra_kubernetes_namespace_creation__allowed+`
+.Default value for `+CHE_INFRA_KUBERNETES_NAMESPACE_CREATION__ALLOWED+`
 ====
 ----
-`+true+`
+true
 ----
 ====
 

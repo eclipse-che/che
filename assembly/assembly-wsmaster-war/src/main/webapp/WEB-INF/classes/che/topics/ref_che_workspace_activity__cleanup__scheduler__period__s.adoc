@@ -4,10 +4,10 @@
 The period of the cleanup of the activity table. The activity table can contain invalid or stale data if some unforeseen errors happen, as a server failure at a peculiar point in time. The default is to run the cleanup job every hour.
 
 
-.Default value for `+che_workspace_activity__cleanup__scheduler__period__s+`
+.Default value for `+CHE_WORKSPACE_ACTIVITY__CLEANUP__SCHEDULER__PERIOD__S+`
 ====
 ----
-`+3600+`
+3600
 ----
 ====
 

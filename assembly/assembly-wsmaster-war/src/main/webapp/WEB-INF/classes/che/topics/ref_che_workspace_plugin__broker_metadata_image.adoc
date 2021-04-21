@@ -4,10 +4,10 @@
 Docker image of {prod-short} plugin broker app that resolves workspace tools configuration and copies plugins dependencies to a workspace. The {prod-short} Operator overrides these images by default. Changing the images here will not have an effect if {prod-short} is installed using the Operator.
 
 
-.Default value for `+che_workspace_plugin__broker_metadata_image+`
+.Default value for `+CHE_WORKSPACE_PLUGIN__BROKER_METADATA_IMAGE+`
 ====
 ----
-`+quay.io/eclipse/che-plugin-metadata-broker:v3.4.0+`
+quay.io/eclipse/che-plugin-metadata-broker:v3.4.0
 ----
 ====
 

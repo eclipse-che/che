@@ -4,10 +4,10 @@
 Additional labels to add into every Route created by {prod-short} server to allow clear identification.
 
 
-.Default value for `+che_infra_openshift_route_labels+`
+.Default value for `+CHE_INFRA_OPENSHIFT_ROUTE_LABELS+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

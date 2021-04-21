@@ -4,10 +4,10 @@
 The length of time in milliseconds that a workspace will run, regardless of activity, before the system will suspend it.  Set this property if you want to automatically stop workspaces after a period of time.  The default is zero, meaning that there is no run timeout.
 
 
-.Default value for `+che_limits_workspace_run_timeout+`
+.Default value for `+CHE_LIMITS_WORKSPACE_RUN_TIMEOUT+`
 ====
 ----
-`+0+`
+0
 ----
 ====
 

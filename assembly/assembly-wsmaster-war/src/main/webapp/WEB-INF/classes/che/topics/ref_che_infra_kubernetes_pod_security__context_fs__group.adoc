@@ -4,10 +4,10 @@
 Defines security context for Pods that will be created by Kubernetes Infra. A special supplemental group that applies to all containers in a Pod. This is ignored by OpenShift infra.
 
 
-.Default value for `+che_infra_kubernetes_pod_security__context_fs__group+`
+.Default value for `+CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

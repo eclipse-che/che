@@ -4,10 +4,10 @@
 Defines Persistent Volume Claim access mode. the {prod-short} Operator that for common PVC strategy changing of access mode affects the number of simultaneously running workspaces. If the OpenShift instance running {prod-short} is using Persistent Volumes with RWX access mode, then a limit of running workspaces at the same time is bounded only by {prod-short} limits configuration: RAM, CPU, and so on. Detailed information about access mode is described here: https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/storage.html#pv-access-modes
 
 
-.Default value for `+che_infra_kubernetes_pvc_access__mode+`
+.Default value for `+CHE_INFRA_KUBERNETES_PVC_ACCESS__MODE+`
 ====
 ----
-`+ReadWriteOnce+`
+ReadWriteOnce
 ----
 ====
 

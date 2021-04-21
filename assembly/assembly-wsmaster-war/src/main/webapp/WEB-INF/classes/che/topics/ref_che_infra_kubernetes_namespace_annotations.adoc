@@ -4,10 +4,10 @@
 List of annotations to find {orch-namespace} prepared for {prod-short} users workspaces. Only {orch-namespace} matching the `che.infra.kubernetes.namespace.labels` will be matched against these annotations. {orch-namespace} that matches both `che.infra.kubernetes.namespace.labels` and `che.infra.kubernetes.namespace.annotations` will be preferentially used for User's workspaces. It's possible to use `<username>` placeholder to specify the {orch-namespace} to concrete user.
 
 
-.Default value for `+che_infra_kubernetes_namespace_annotations+`
+.Default value for `+CHE_INFRA_KUBERNETES_NAMESPACE_ANNOTATIONS+`
 ====
 ----
-`+che.eclipse.org/username=<username>+`
+che.eclipse.org/username=<username>
 ----
 ====
 

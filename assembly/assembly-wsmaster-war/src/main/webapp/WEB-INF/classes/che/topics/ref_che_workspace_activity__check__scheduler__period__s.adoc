@@ -4,10 +4,10 @@
 Period of inactive workspaces suspend job execution.
 
 
-.Default value for `+che_workspace_activity__check__scheduler__period__s+`
+.Default value for `+CHE_WORKSPACE_ACTIVITY__CHECK__SCHEDULER__PERIOD__S+`
 ====
 ----
-`+60+`
+60
 ----
 ====
 

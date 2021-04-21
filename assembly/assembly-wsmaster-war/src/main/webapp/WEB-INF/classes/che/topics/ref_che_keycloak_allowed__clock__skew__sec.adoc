@@ -4,10 +4,10 @@
 The number of seconds to tolerate for clock skew when verifying exp or nbf claims.
 
 
-.Default value for `+che_keycloak_allowed__clock__skew__sec+`
+.Default value for `+CHE_KEYCLOAK_ALLOWED__CLOCK__SKEW__SEC+`
 ====
 ----
-`+3+`
+3
 ----
 ====
 

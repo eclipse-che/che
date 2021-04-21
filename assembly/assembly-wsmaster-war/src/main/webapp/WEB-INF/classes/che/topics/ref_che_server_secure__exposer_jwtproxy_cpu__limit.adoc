@@ -4,10 +4,10 @@
 JWTProxy CPU limit.
 
 
-.Default value for `+che_server_secure__exposer_jwtproxy_cpu__limit+`
+.Default value for `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_CPU__LIMIT+`
 ====
 ----
-`+0.5+`
+0.5
 ----
 ====
 

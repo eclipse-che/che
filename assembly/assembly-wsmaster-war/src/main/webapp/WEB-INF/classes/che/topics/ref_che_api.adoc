@@ -4,10 +4,10 @@
 API service. Browsers initiate REST communications to {prod-short} server with this URL.
 
 
-.Default value for `+che_api+`
+.Default value for `+CHE_API+`
 ====
 ----
-`+http://${CHE_HOST}:${CHE_PORT}/api+`
+http://${CHE_HOST}:${CHE_PORT}/api
 ----
 ====
 

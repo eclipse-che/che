@@ -4,10 +4,10 @@
 Configuration for enabling removing user from Keycloak server on removing user from Che database. By default it's disabled. Can be enabled in some special cases when deleting a user in Che database should execute removing related-user from Keycloak. For correct work need to set admin username $++{che.keycloak.admin_username}++ and password $++{che.keycloak.admin_password}++.
 
 
-.Default value for `+che_keycloak_cascade__user__removal__enabled+`
+.Default value for `+CHE_KEYCLOAK_CASCADE__USER__REMOVAL__ENABLED+`
 ====
 ----
-`+false+`
+false
 ----
 ====
 

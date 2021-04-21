@@ -4,10 +4,10 @@
 Use the OIDC optional `nonce` feature to increase security.
 
 
-.Default value for `+che_keycloak_use__nonce+`
+.Default value for `+CHE_KEYCLOAK_USE__NONCE+`
 ====
 ----
-`+true+`
+true
 ----
 ====
 

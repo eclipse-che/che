@@ -4,10 +4,10 @@
 GitHub OAuth authorization URI.
 
 
-.Default value for `+che_oauth_github_authuri+`
+.Default value for `+CHE_OAUTH_GITHUB_AUTHURI+`
 ====
 ----
-`+https://github.com/login/oauth/authorize+`
+https://github.com/login/oauth/authorize
 ----
 ====
 

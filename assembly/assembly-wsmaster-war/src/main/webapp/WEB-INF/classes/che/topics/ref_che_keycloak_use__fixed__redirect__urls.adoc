@@ -4,10 +4,10 @@
 Set to true when using an alternate OIDC provider that only supports fixed redirect Urls This property is ignored when `che.keycloak.oidc_provider` is NULL
 
 
-.Default value for `+che_keycloak_use__fixed__redirect__urls+`
+.Default value for `+CHE_KEYCLOAK_USE__FIXED__REDIRECT__URLS+`
 ====
 ----
-`+false+`
+false
 ----
 ====
 

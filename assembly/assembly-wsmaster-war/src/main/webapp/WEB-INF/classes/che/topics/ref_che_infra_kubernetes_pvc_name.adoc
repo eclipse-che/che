@@ -4,10 +4,10 @@
 Defines the settings of PVC name for {prod-short} workspaces. Each PVC strategy supplies this value differently. See documentation for `che.infra.kubernetes.pvc.strategy` property
 
 
-.Default value for `+che_infra_kubernetes_pvc_name+`
+.Default value for `+CHE_INFRA_KUBERNETES_PVC_NAME+`
 ====
 ----
-`+claim-che-workspace+`
+claim-che-workspace
 ----
 ====
 

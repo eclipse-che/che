@@ -4,10 +4,10 @@
 URL to the Keycloak Javascript adapter we want to use. if set to NULL, then the default used value is `$++{che.keycloak.auth_server_url}++/js/keycloak.js`, or `<che-server>/api/keycloak/OIDCKeycloak.js` if an alternate `oidc_provider` is used
 
 
-.Default value for `+che_keycloak_js__adapter__url+`
+.Default value for `+CHE_KEYCLOAK_JS__ADAPTER__URL+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

@@ -4,10 +4,10 @@
 Defines the period with which runtimes consistency checks will be performed. If runtime has inconsistent state then runtime will be stopped automatically. Value must be more than 0 or `-1`, where `-1` means that checks won't be performed at all. It is disabled by default because there is possible {prod-short} Server configuration when {prod-short} Server doesn't have an ability to interact with Kubernetes API when operation is not invoked by user. It DOES work on the following configurations: - workspaces objects are created in the same namespace where {prod-short} Server is located; - `cluster-admin` service account token is mounted to {prod-short} Server Pod. It DOES NOT work on the following configurations: - {prod-short} Server communicates with Kubernetes API using token from OAuth provider.
 
 
-.Default value for `+che_infra_kubernetes_runtimes__consistency__check__period__min+`
+.Default value for `+CHE_INFRA_KUBERNETES_RUNTIMES__CONSISTENCY__CHECK__PERIOD__MIN+`
 ====
 ----
-`+-1+`
+-1
 ----
 ====
 

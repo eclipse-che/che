@@ -4,10 +4,10 @@
 Defines the way in which the workspace plugins and editors are exposed in the single-host mode. Supported exposures: `native`:: Exposes servers using Kubernetes Ingresses. Works only on Kubernetes. `gateway`:: Exposes servers using reverse-proxy gateway.
 
 
-.Default value for `+che_infra_kubernetes_singlehost_workspace_exposure+`
+.Default value for `+CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_EXPOSURE+`
 ====
 ----
-`+native+`
+native
 ----
 ====
 

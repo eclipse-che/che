@@ -4,10 +4,10 @@
 If true, 'stop-workspace' role with the edit privileges will be granted to the 'che' ServiceAccount if OpenShift OAuth is enabled. This configuration is mainly required for workspace idling when the OpenShift OAuth is enabled.
 
 
-.Default value for `+che_workspace_stop_role_enabled+`
+.Default value for `+CHE_WORKSPACE_STOP_ROLE_ENABLED+`
 ====
 ----
-`+true+`
+true
 ----
 ====
 

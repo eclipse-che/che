@@ -4,10 +4,10 @@
 Internal network service Url to keycloak identity provider server
 
 
-.Default value for `+che_keycloak_auth__internal__server__url+`
+.Default value for `+CHE_KEYCLOAK_AUTH__INTERNAL__SERVER__URL+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 

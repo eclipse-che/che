@@ -4,10 +4,10 @@
 Grant system permission for 'che.admin.name' user. If the user already exists it'll happen on component startup, if not - during the first login when user is persisted in the database.
 
 
-.Default value for `+che_system_admin__name+`
+.Default value for `+CHE_SYSTEM_ADMIN__NAME+`
 ====
 ----
-`+admin+`
+admin
 ----
 ====
 

@@ -4,10 +4,10 @@
 Defines the way how to expose devfile endpoints, as end-user's applications, in single-host server strategy. They can either follow the single-host strategy and be exposed on subpaths, or they can be exposed on subdomains. `multi-host`:: expose on subdomains `single-host`:: expose on subpaths
 
 
-.Default value for `+che_infra_kubernetes_singlehost_workspace_devfile__endpoint__exposure+`
+.Default value for `+CHE_INFRA_KUBERNETES_SINGLEHOST_WORKSPACE_DEVFILE__ENDPOINT__EXPOSURE+`
 ====
 ----
-`+multi-host+`
+multi-host
 ----
 ====
 

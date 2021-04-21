@@ -4,10 +4,10 @@
 Locations where to search migration scripts.
 
 
-.Default value for `+db_schema_flyway_scripts_locations+`
+.Default value for `+DB_SCHEMA_FLYWAY_SCRIPTS_LOCATIONS+`
 ====
 ----
-`+classpath:che-schema+`
+classpath:che-schema
 ----
 ====
 

@@ -4,10 +4,10 @@
 Separator of version from the other part of script name.
 
 
-.Default value for `+db_schema_flyway_scripts_version__separator+`
+.Default value for `+DB_SCHEMA_FLYWAY_SCRIPTS_VERSION__SEPARATOR+`
 ====
 ----
-`+__+`
+__
 ----
 ====
 

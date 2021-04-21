@@ -4,10 +4,10 @@
 Base URL of an alternate OIDC provider that provides a discovery endpoint as detailed in the following specification https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
 
 
-.Default value for `+che_keycloak_oidc__provider+`
+.Default value for `+CHE_KEYCLOAK_OIDC__PROVIDER+`
 ====
 ----
-`+NULL+`
+NULL
 ----
 ====
 
