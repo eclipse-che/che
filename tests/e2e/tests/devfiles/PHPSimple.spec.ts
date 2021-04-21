@@ -9,7 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';

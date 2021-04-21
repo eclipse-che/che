@@ -13,7 +13,7 @@ import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
+import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.scm;
 
+import java.util.Optional;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.subject.Subject;
@@ -30,4 +31,19 @@ public interface PersonalAccessTokenFetcher {
    */
   PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException;
+
+  /**
+   * Checks whether the provided personal access token is valid and has expected scope of
+   * permissions.
+   *
+   * @param personalAccessToken - personal access token to check.
+   * @return - empty optional if {@link PersonalAccessTokenFetcher} is not able to confirm or deny
+   *     that token is valid or {@link Boolean} value if it can.
+   * @throws ScmUnauthorizedException - in case if user did not authorized che server to create new
+   *     token. Further user interaction is needed before calling next time this method.
+   * @throws ScmCommunicationException - Some unexpected problem occurred during communication with
+   *     scm provider.
+   */
+  Optional<Boolean> isValid(PersonalAccessToken personalAccessToken)
+      throws ScmCommunicationException, ScmUnauthorizedException;
 }

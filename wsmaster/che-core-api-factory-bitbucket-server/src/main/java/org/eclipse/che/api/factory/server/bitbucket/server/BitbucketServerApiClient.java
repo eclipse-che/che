@@ -94,7 +94,7 @@ public interface BitbucketServerApiClient {
       throws ScmBadRequestException, ScmUnauthorizedException, ScmCommunicationException;
 
   /**
-   * Get all access tokens associated with the given user
+   * Get all personal access tokens associated with the given user
    *
    * @param userSlug
    * @return
@@ -104,5 +104,14 @@ public interface BitbucketServerApiClient {
    * @throws ScmCommunicationException
    */
   List<BitbucketPersonalAccessToken> getPersonalAccessTokens(String userSlug)
+      throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException;
+
+  /**
+   * @param userSlug - user's slug.
+   * @param tokenId - bitbucket personal access token id.
+   * @return - Bitbucket personal access token.
+   * @throws ScmCommunicationException
+   */
+  BitbucketPersonalAccessToken getPersonalAccessToken(String userSlug, Long tokenId)
       throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException;
 }

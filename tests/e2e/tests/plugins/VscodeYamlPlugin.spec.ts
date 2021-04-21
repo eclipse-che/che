@@ -31,7 +31,7 @@ const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.Preferen
 
 let workspaceName: string = '';
 
-const devfileUrl: string = 'https://gist.githubusercontent.com/Ohrimenko1988/010e3f198b3c2f4cc5e9d4fb45a849e2/raw/8832a2ffaed2e99022af19e6289d50fb8257b13f/vscodeYamlPlugin.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeYamlPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
