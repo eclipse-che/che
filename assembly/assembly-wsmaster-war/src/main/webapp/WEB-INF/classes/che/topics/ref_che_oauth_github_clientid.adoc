@@ -1,0 +1,13 @@
+[id="che_oauth_github_clientid_{context}"]
+= `+CHE_OAUTH_GITHUB_CLIENTID+`
+
+Configuration of GitHub OAuth client. You can setup GitHub OAuth to automate authentication to remote repositories. You need to first register this application with GitHub OAuth. GitHub OAuth client ID.
+
+
+.Default value for `+che_oauth_github_clientid+`
+====
+----
+`+NULL+`
+----
+====
+

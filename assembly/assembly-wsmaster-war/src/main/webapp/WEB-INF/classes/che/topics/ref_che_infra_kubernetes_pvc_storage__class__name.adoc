@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_storage__class__name_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_STORAGE__CLASS__NAME+`
+
+Defines the storage class of Persistent Volume Claim for the workspaces. Empty strings means "use default".
+
+
+.Default value for `+che_infra_kubernetes_pvc_storage__class__name+`
+====
+----
+
+----
+====
+

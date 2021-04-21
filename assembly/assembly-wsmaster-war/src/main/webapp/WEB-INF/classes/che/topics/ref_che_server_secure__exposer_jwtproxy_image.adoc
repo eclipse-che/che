@@ -1,0 +1,13 @@
+[id="che_server_secure__exposer_jwtproxy_image_{context}"]
+= `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_IMAGE+`
+
+JWTProxy image.
+
+
+.Default value for `+che_server_secure__exposer_jwtproxy_image+`
+====
+----
+`+quay.io/eclipse/che-jwtproxy:0.10.0+`
+----
+====
+

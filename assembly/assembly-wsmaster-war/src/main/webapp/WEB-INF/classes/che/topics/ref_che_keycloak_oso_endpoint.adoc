@@ -1,0 +1,13 @@
+[id="che_keycloak_oso_endpoint_{context}"]
+= `+CHE_KEYCLOAK_OSO_ENDPOINT+`
+
+URL to access OSO oauth tokens
+
+
+.Default value for `+che_keycloak_oso_endpoint+`
+====
+----
+`+NULL+`
+----
+====
+

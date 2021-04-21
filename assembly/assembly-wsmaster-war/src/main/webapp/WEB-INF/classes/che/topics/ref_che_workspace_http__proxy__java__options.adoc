@@ -1,0 +1,13 @@
+[id="che_workspace_http__proxy__java__options_{context}"]
+= `+CHE_WORKSPACE_HTTP__PROXY__JAVA__OPTIONS+`
+
+HTTP proxy setting for workspace JVM.
+
+
+.Default value for `+che_workspace_http__proxy__java__options+`
+====
+----
+`+NULL+`
+----
+====
+

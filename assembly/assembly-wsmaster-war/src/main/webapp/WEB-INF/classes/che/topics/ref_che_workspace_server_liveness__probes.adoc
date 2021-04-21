@@ -1,0 +1,13 @@
+[id="che_workspace_server_liveness__probes_{context}"]
+= `+CHE_WORKSPACE_SERVER_LIVENESS__PROBES+`
+
+List of servers names which require liveness probes
+
+
+.Default value for `+che_workspace_server_liveness__probes+`
+====
+----
+`+wsagent/http,exec-agent/http,terminal,theia,jupyter,dirigible,cloud-shell,intellij+`
+----
+====
+

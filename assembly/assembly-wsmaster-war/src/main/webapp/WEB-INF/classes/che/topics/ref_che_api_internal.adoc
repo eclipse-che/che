@@ -1,0 +1,13 @@
+[id="che_api_internal_{context}"]
+= `+CHE_API_INTERNAL+`
+
+API service internal network URL. Back-end services should initiate REST communications to {prod-short} server with this URL
+
+
+.Default value for `+che_api_internal+`
+====
+----
+`+http://${CHE_HOST}:${CHE_PORT}/api+`
+----
+====
+

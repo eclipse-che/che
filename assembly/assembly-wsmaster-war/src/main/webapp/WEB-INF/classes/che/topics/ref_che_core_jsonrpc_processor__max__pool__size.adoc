@@ -1,0 +1,13 @@
+[id="che_core_jsonrpc_processor__max__pool__size_{context}"]
+= `+CHE_CORE_JSONRPC_PROCESSOR__MAX__POOL__SIZE+`
+
+Maximum size of the JSON RPC processing pool in case if pool size would be exceeded message execution will be rejected
+
+
+.Default value for `+che_core_jsonrpc_processor__max__pool__size+`
+====
+----
+`+50+`
+----
+====
+

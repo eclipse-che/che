@@ -1,0 +1,13 @@
+[id="che_auth_user__self__creation_{context}"]
+= `+CHE_AUTH_USER__SELF__CREATION+`
+
+{prod-short} has a single identity implementation, so this does not change the user experience. If true, enables user creation at API level
+
+
+.Default value for `+che_auth_user__self__creation+`
+====
+----
+`+false+`
+----
+====
+

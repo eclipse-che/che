@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_client_http_connection__pool_keep__alive__min_{context}"]
+= `+CHE_INFRA_KUBERNETES_CLIENT_HTTP_CONNECTION__POOL_KEEP__ALIVE__MIN+`
+
+Keep-alive timeout of the connection pool of the Kubernetes-client shared HTTP client in minutes.
+
+
+.Default value for `+che_infra_kubernetes_client_http_connection__pool_keep__alive__min+`
+====
+----
+`+5+`
+----
+====
+

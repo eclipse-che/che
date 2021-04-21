@@ -1,0 +1,13 @@
+[id="che_server_secure__exposer_jwtproxy_token_ttl_{context}"]
+= `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_TOKEN_TTL+`
+
+JWTProxy issuer token lifetime.
+
+
+.Default value for `+che_server_secure__exposer_jwtproxy_token_ttl+`
+====
+----
+`+8800h+`
+----
+====
+

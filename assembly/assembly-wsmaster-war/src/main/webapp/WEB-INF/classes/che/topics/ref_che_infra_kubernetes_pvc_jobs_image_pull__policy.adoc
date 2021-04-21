@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_jobs_image_pull__policy_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE_PULL__POLICY+`
+
+Image pull policy of container that used for the maintenance jobs on {orch-name} cluster
+
+
+.Default value for `+che_infra_kubernetes_pvc_jobs_image_pull__policy+`
+====
+----
+`+IfNotPresent+`
+----
+====
+

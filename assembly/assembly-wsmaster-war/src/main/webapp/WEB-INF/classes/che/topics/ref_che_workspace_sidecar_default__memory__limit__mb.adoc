@@ -1,0 +1,13 @@
+[id="che_workspace_sidecar_default__memory__limit__mb_{context}"]
+= `+CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB+`
+
+RAM limit for each sidecar that has no RAM settings in the {prod-short} plug-in configuration. Value less or equal to 0 is interpreted as disabling the limit.
+
+
+.Default value for `+che_workspace_sidecar_default__memory__limit__mb+`
+====
+----
+`+128+`
+----
+====
+

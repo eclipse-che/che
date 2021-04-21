@@ -1,0 +1,13 @@
+[id="che_workspace_pod_tolerations__json_{context}"]
+= `+CHE_WORKSPACE_POD_TOLERATIONS__JSON+`
+
+Optionally configures tolerations for workspace Pod. Format is a string representing a JSON Array of taint tolerations, or `NULL` to disable it. The objects contained in the array have to follow this link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core[spec]. Example: `[{"effect":"NoExecute","key":"aNodeTaint","operator":"Equal","value":"aValue"}]`
+
+
+.Default value for `+che_workspace_pod_tolerations__json+`
+====
+----
+`+NULL+`
+----
+====
+

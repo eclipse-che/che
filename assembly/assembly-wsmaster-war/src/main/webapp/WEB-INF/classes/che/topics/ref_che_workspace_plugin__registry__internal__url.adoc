@@ -1,0 +1,13 @@
+[id="che_workspace_plugin__registry__internal__url_{context}"]
+= `+CHE_WORKSPACE_PLUGIN__REGISTRY__INTERNAL__URL+`
+
+Workspace plugins registry internal endpoint. Should be a valid HTTP URL. Example: ++http://devfile-registry.che.svc.cluster.local:8080++ In case {prod-short} plug-ins registry is not needed value 'NULL' should be used
+
+
+.Default value for `+che_workspace_plugin__registry__internal__url+`
+====
+----
+`+NULL+`
+----
+====
+

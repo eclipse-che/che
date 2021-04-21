@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_jobs_image_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_JOBS_IMAGE+`
+
+Pod that is launched when performing persistent volume claim maintenance jobs on OpenShift
+
+
+.Default value for `+che_infra_kubernetes_pvc_jobs_image+`
+====
+----
+`+registry.access.redhat.com/ubi8-minimal:8.3-230+`
+----
+====
+

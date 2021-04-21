@@ -1,0 +1,13 @@
+[id="che_oauth_github_redirecturis_{context}"]
+= `+CHE_OAUTH_GITHUB_REDIRECTURIS+`
+
+GitHub OAuth redirect URIs. Separate multiple values with comma, for example: URI,URI,URI
+
+
+.Default value for `+che_oauth_github_redirecturis+`
+====
+----
+`+http://localhost:${CHE_PORT}/api/oauth/callback+`
+----
+====
+

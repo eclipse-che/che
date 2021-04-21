@@ -1,0 +1,13 @@
+[id="db_schema_flyway_baseline_enabled_{context}"]
+= `+DB_SCHEMA_FLYWAY_BASELINE_ENABLED+`
+
+DB initialization and migration configuration If true, ignore scripts up to the version configured by baseline.version.
+
+
+.Default value for `+db_schema_flyway_baseline_enabled+`
+====
+----
+`+true+`
+----
+====
+

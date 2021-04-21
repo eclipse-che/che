@@ -1,0 +1,13 @@
+[id="che_keycloak_oidc__provider_{context}"]
+= `+CHE_KEYCLOAK_OIDC__PROVIDER+`
+
+Base URL of an alternate OIDC provider that provides a discovery endpoint as detailed in the following specification https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
+
+
+.Default value for `+che_keycloak_oidc__provider+`
+====
+----
+`+NULL+`
+----
+====
+

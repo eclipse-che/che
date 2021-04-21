@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_jobs_memorylimit_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_JOBS_MEMORYLIMIT+`
+
+Defines Pod memory limit for persistent volume claim maintenance jobs
+
+
+.Default value for `+che_infra_kubernetes_pvc_jobs_memorylimit+`
+====
+----
+`+250Mi+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_workspace_projects_storage_default_size_{context}"]
+= `+CHE_WORKSPACE_PROJECTS_STORAGE_DEFAULT_SIZE+`
+
+Used when {orch-name}-type components in a devfile request project PVC creation (Applied in case of `unique` and `per workspace` PVC strategy. In case of the `common` PVC strategy, it is rewritten with the value of the `che.infra.kubernetes.pvc.quantity` property.)
+
+
+.Default value for `+che_workspace_projects_storage_default_size+`
+====
+----
+`+1Gi+`
+----
+====
+

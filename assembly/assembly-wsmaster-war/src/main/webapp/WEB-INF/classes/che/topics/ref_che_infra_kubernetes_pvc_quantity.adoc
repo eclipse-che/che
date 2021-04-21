@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_quantity_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_QUANTITY+`
+
+Defines the size of Persistent Volume Claim of {prod-short} workspace. Format described here: https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources
+
+
+.Default value for `+che_infra_kubernetes_pvc_quantity+`
+====
+----
+`+10Gi+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_workspace_plugin__broker_wait__timeout__min_{context}"]
+= `+CHE_WORKSPACE_PLUGIN__BROKER_WAIT__TIMEOUT__MIN+`
+
+Defines the timeout in minutes that limits the max period of result waiting for plugin broker.
+
+
+.Default value for `+che_workspace_plugin__broker_wait__timeout__min+`
+====
+----
+`+3+`
+----
+====
+

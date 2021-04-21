@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pod_security__context_run__as__user_{context}"]
+= `+CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER+`
+
+Defines security context for Pods that will be created by Kubernetes Infra This is ignored by OpenShift infra
+
+
+.Default value for `+che_infra_kubernetes_pod_security__context_run__as__user+`
+====
+----
+`+NULL+`
+----
+====
+

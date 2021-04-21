@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_wait__bound_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_WAIT__BOUND+`
+
+Defines if {prod-short} Server should wait workspaces Persistent Volume Claims to become bound after creating. Default value is `true`. The parameter is used by all Persistent Volume Claim strategies. It should be set to `false` when `volumeBindingMode` is configured to `WaitForFirstConsumer` otherwise workspace starts will hangs up on phase of waiting PVCs.
+
+
+.Default value for `+che_infra_kubernetes_pvc_wait__bound+`
+====
+----
+`+true+`
+----
+====
+

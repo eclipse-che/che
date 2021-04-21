@@ -1,0 +1,13 @@
+[id="che_core_jsonrpc_processor__queue__capacity_{context}"]
+= `+CHE_CORE_JSONRPC_PROCESSOR__QUEUE__CAPACITY+`
+
+Configuration of queue used to process JSON RPC messages.
+
+
+.Default value for `+che_core_jsonrpc_processor__queue__capacity+`
+====
+----
+`+100000+`
+----
+====
+

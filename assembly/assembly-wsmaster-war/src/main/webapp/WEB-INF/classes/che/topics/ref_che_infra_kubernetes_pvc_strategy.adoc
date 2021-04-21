@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_strategy_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_STRATEGY+`
+
+Defined which strategy will be used while choosing PVC for workspaces. Supported strategies: `common`::        All workspaces in the same {orch-namespace} will reuse the same PVC.        Name of PVC may be configured with `che.infra.kubernetes.pvc.name`.        Existing PVC will be used or a new one will be created if it does not exist. `unique`::        Separate PVC for each workspace's volume will be used.        Name of PVC is evaluated as `'{che.infra.kubernetes.pvc.name} + '-' + {generated_8_chars}'`.        Existing PVC will be used or a new one will be created if it does not exist. `per-workspace`::        Separate PVC for each workspace will be used.        Name of PVC is evaluated as `'{che.infra.kubernetes.pvc.name} + '-' + {WORKSPACE_ID}'`.        Existing PVC will be used or a new one will be created if it doesn't exist.
+
+
+.Default value for `+che_infra_kubernetes_pvc_strategy+`
+====
+----
+`+common+`
+----
+====
+

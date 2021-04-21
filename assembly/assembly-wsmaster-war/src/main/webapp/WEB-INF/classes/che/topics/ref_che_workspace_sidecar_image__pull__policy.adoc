@@ -1,0 +1,13 @@
+[id="che_workspace_sidecar_image__pull__policy_{context}"]
+= `+CHE_WORKSPACE_SIDECAR_IMAGE__PULL__POLICY+`
+
+Defines image-pulling strategy for sidecars. Possible values are: `Always`, `Never`, `IfNotPresent`. For any other value, `Always` is assumed for images with the `:latest` tag, or `IfNotPresent` for all other cases.
+
+
+.Default value for `+che_workspace_sidecar_image__pull__policy+`
+====
+----
+`+Always+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_factory_default__plugins_{context}"]
+= `+CHE_FACTORY_DEFAULT__PLUGINS+`
+
+Editor and plugin which will be used for factories that are created from a remote Git repository which does not contain any {prod-short}-specific workspace descriptor Multiple plugins must be comma-separated, for example: `pluginFooPublisher/pluginFooName/pluginFooVersion,pluginBarPublisher/pluginBarName/pluginBarVersion`
+
+
+.Default value for `+che_factory_default__plugins+`
+====
+----
+`+NULL+`
+----
+====
+

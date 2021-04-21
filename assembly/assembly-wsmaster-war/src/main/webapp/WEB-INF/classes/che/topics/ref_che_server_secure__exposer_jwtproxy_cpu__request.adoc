@@ -1,0 +1,13 @@
+[id="che_server_secure__exposer_jwtproxy_cpu__request_{context}"]
+= `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_CPU__REQUEST+`
+
+JWTProxy CPU request.
+
+
+.Default value for `+che_server_secure__exposer_jwtproxy_cpu__request+`
+====
+----
+`+0.03+`
+----
+====
+

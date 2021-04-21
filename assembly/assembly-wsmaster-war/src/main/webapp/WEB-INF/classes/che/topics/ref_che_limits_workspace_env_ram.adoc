@@ -1,0 +1,13 @@
+[id="che_limits_workspace_env_ram_{context}"]
+= `+CHE_LIMITS_WORKSPACE_ENV_RAM+`
+
+Workspaces are the fundamental runtime for users when doing development. You can set parameters that limit how workspaces are created and the resources that are consumed. The maximum amount of RAM that a user can allocate to a workspace when they create a new workspace. The RAM slider is adjusted to this maximum value.
+
+
+.Default value for `+che_limits_workspace_env_ram+`
+====
+----
+`+16gb+`
+----
+====
+

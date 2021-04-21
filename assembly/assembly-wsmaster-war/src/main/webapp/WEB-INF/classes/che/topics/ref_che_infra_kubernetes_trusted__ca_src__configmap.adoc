@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_trusted__ca_src__configmap_{context}"]
+= `+CHE_INFRA_KUBERNETES_TRUSTED__CA_SRC__CONFIGMAP+`
+
+Name of the ConfigMap in {prod-short} server namespace with additional CA TLS certificates to be propagated into all user's workspaces. If the property is set on OpenShift 4 infrastructure, and `che.infra.openshift.trusted_ca.dest_configmap_labels` includes the `config.openshift.io/inject-trusted-cabundle=true` label, then cluster CA bundle will be propagated too.
+
+
+.Default value for `+che_infra_kubernetes_trusted__ca_src__configmap+`
+====
+----
+`+NULL+`
+----
+====
+

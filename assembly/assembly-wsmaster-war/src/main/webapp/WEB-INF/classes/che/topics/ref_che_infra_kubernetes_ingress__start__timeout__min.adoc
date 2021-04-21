@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_ingress__start__timeout__min_{context}"]
+= `+CHE_INFRA_KUBERNETES_INGRESS__START__TIMEOUT__MIN+`
+
+Defines the timeout in minutes that limits the period for which Kubernetes Ingress become ready
+
+
+.Default value for `+che_infra_kubernetes_ingress__start__timeout__min+`
+====
+----
+`+5+`
+----
+====
+

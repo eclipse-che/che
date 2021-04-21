@@ -1,0 +1,13 @@
+[id="che_workspace_devfile_default__editor_{context}"]
+= `+CHE_WORKSPACE_DEVFILE_DEFAULT__EDITOR+`
+
+Default Editor that should be provisioned into Devfile if there is no specified Editor Format is `editorPublisher/editorName/editorVersion` value. `NULL` or absence of value means that default editor should not be provisioned.
+
+
+.Default value for `+che_workspace_devfile_default__editor+`
+====
+----
+`+eclipse/che-theia/next+`
+----
+====
+

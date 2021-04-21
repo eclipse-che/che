@@ -1,0 +1,13 @@
+[id="che_integration_gitlab_server__endpoints_{context}"]
+= `+CHE_INTEGRATION_GITLAB_SERVER__ENDPOINTS+`
+
+GitLab endpoints used for factory integrations. Comma separated list of GitLab server URLs or NULL if no integration expected.
+
+
+.Default value for `+che_integration_gitlab_server__endpoints+`
+====
+----
+`+NULL+`
+----
+====
+

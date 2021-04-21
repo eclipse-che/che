@@ -1,0 +1,13 @@
+[id="che_oauth_openshift_verify__token__url_{context}"]
+= `+CHE_OAUTH_OPENSHIFT_VERIFY__TOKEN__URL+`
+
+ConfigurationofOpenShiftOAuth client. Used to obtain OpenShift OAuth token. OpenShift OAuth client ID. OpenShift OAuth client secret. OpenShift OAuth endpoint. OpenShift OAuth verification token URL.
+
+
+.Default value for `+che_oauth_openshift_verify__token__url+`
+====
+----
+`+NULL+`
+----
+====
+

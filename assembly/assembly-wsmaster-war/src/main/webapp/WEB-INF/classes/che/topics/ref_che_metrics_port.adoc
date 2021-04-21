@@ -1,0 +1,13 @@
+[id="che_metrics_port_{context}"]
+= `+CHE_METRICS_PORT+`
+
+Port the HTTP server endpoint that would be exposed with Prometheus metrics.
+
+
+.Default value for `+che_metrics_port+`
+====
+----
+`+8087+`
+----
+====
+

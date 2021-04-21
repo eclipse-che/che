@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pod_termination__grace__period__sec_{context}"]
+= `+CHE_INFRA_KUBERNETES_POD_TERMINATION__GRACE__PERIOD__SEC+`
+
+Defines grace termination period for Pods that will be created by {orch-name} infrastructures. Default value: `0`. It allows to stop Pods quickly and significantly decrease the time required for stopping a workspace. the {prod-short} Operator: if `terminationGracePeriodSeconds` have been explicitly set in {orch-name} recipe it will not be overridden.
+
+
+.Default value for `+che_infra_kubernetes_pod_termination__grace__period__sec+`
+====
+----
+`+0+`
+----
+====
+

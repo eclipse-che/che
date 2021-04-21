@@ -1,0 +1,13 @@
+[id="che_workspace_default__cpu__request__cores_{context}"]
+= `+CHE_WORKSPACE_DEFAULT__CPU__REQUEST__CORES+`
+
+CPU request for each container that has no CPU settings in environment. A CPU request exceeding the CPU limit is ignored, and only limit number is used. Value less or equal to 0 is interpreted as disabling the limit.
+
+
+.Default value for `+che_workspace_default__cpu__request__cores+`
+====
+----
+`+-1+`
+----
+====
+

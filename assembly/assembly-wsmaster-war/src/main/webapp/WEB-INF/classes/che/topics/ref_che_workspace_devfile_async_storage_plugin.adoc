@@ -1,0 +1,13 @@
+[id="che_workspace_devfile_async_storage_plugin_{context}"]
+= `+CHE_WORKSPACE_DEVFILE_ASYNC_STORAGE_PLUGIN+`
+
+Plugin is added in case asynchronous storage feature will be enabled in workspace configuration and supported by environment
+
+
+.Default value for `+che_workspace_devfile_async_storage_plugin+`
+====
+----
+`+eclipse/che-async-pv-plugin/latest+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_workspace_probe__pool__size_{context}"]
+= `+CHE_WORKSPACE_PROBE__POOL__SIZE+`
+
+This property specifies how many threads to use for workspace server liveness probes.
+
+
+.Default value for `+che_workspace_probe__pool__size+`
+====
+----
+`+10+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_server_secure__exposer_{context}"]
+= `+CHE_SERVER_SECURE__EXPOSER+`
+
+Configures in which way secure servers will be protected with authentication. Suitable values:   - `default`: `jwtproxy` is configured in a pass-through mode. Servers should authenticate requests themselves.   - `jwtproxy`: `jwtproxy` will authenticate requests. Servers will receive only authenticated requests.
+
+
+.Default value for `+che_server_secure__exposer+`
+====
+----
+`+jwtproxy+`
+----
+====
+

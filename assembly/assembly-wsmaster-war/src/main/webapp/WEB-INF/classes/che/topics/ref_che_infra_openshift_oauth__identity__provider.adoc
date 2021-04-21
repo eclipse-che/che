@@ -1,0 +1,13 @@
+[id="che_infra_openshift_oauth__identity__provider_{context}"]
+= `+CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER+`
+
+Alias of the Openshift identity provider registered in Keycloak, that should be used to create workspace OpenShift resources in Openshift namespaces owned by the current Che user. Should be set to NULL if `che.infra.openshift.project` is set to a non-empty value. For more information see the following documentation: https://www.keycloak.org/docs/3.3/server_admin/topics/identity-broker/social/openshift.html
+
+
+.Default value for `+che_infra_openshift_oauth__identity__provider+`
+====
+----
+`+NULL+`
+----
+====
+

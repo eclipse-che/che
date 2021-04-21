@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_namespace_label_{context}"]
+= `+CHE_INFRA_KUBERNETES_NAMESPACE_LABEL+`
+
+Defines whether che-server should try to label the workspace namespaces.
+
+
+.Default value for `+che_infra_kubernetes_namespace_label+`
+====
+----
+`+true+`
+----
+====
+

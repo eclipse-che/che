@@ -1,0 +1,13 @@
+[id="che_oauth_service__mode_{context}"]
+= `+CHE_OAUTH_SERVICE__MODE+`
+
+Configuration of OAuth Authentication Service that can be used in "embedded" or "delegated" mode. If set to "embedded", then the service work as a wrapper to Che's OAuthAuthenticator ( as in Single User mode). If set to "delegated", then the service will use Keycloak IdentityProvider mechanism. Runtime Exception wii be thrown, in case if this property is not set properly.
+
+
+.Default value for `+che_oauth_service__mode+`
+====
+----
+`+delegated+`
+----
+====
+

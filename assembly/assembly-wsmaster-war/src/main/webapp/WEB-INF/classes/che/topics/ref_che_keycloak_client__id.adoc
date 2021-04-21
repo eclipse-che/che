@@ -1,0 +1,13 @@
+[id="che_keycloak_client__id_{context}"]
+= `+CHE_KEYCLOAK_CLIENT__ID+`
+
+Keycloak client id in che.keycloak.realm that is used by dashboard, ide and cli to authenticate users
+
+
+.Default value for `+che_keycloak_client__id+`
+====
+----
+`+che-public+`
+----
+====
+

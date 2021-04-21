@@ -1,0 +1,13 @@
+[id="che_keycloak_realm_{context}"]
+= `+CHE_KEYCLOAK_REALM+`
+
+Keycloak realm is used to authenticate users Can be set to NULL only if `che.keycloak.oidcProvider` is used
+
+
+.Default value for `+che_keycloak_realm+`
+====
+----
+`+che+`
+----
+====
+

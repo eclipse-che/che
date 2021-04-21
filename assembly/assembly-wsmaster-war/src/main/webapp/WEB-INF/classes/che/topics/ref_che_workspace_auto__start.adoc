@@ -1,0 +1,13 @@
+[id="che_workspace_auto__start_{context}"]
+= `+CHE_WORKSPACE_AUTO__START+`
+
+By default, when users access a workspace with its URL, the workspace automatically starts (if currently stopped). Set this to `false` to disable this behavior.
+
+
+.Default value for `+che_workspace_auto__start+`
+====
+----
+`+true+`
+----
+====
+

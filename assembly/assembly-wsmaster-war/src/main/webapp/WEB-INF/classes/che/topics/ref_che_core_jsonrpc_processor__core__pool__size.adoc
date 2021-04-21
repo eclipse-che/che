@@ -1,0 +1,13 @@
+[id="che_core_jsonrpc_processor__core__pool__size_{context}"]
+= `+CHE_CORE_JSONRPC_PROCESSOR__CORE__POOL__SIZE+`
+
+Initial JSON processing pool. Minimum number of threads that used to process major JSON RPC messages.
+
+
+.Default value for `+che_core_jsonrpc_processor__core__pool__size+`
+====
+----
+`+5+`
+----
+====
+

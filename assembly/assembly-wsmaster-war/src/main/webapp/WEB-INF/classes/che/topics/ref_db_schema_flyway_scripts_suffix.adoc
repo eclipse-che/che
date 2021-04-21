@@ -1,0 +1,13 @@
+[id="db_schema_flyway_scripts_suffix_{context}"]
+= `+DB_SCHEMA_FLYWAY_SCRIPTS_SUFFIX+`
+
+Suffix of migration scripts.
+
+
+.Default value for `+db_schema_flyway_scripts_suffix+`
+====
+----
+`+.sql+`
+----
+====
+

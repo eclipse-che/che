@@ -1,0 +1,13 @@
+[id="che_workspace_storage_preferred__type_{context}"]
+= `+CHE_WORKSPACE_STORAGE_PREFERRED__TYPE+`
+
+The configuration property that defines a default value for storage type that clients such as the Dashboard should propose to users during workspace creation and update. The `async` value is an experimental feature, not recommended as default type.
+
+
+.Default value for `+che_workspace_storage_preferred__type+`
+====
+----
+`+persistent+`
+----
+====
+

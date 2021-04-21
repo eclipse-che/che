@@ -1,0 +1,13 @@
+[id="che_workspace_server_ping__success__threshold_{context}"]
+= `+CHE_WORKSPACE_SERVER_PING__SUCCESS__THRESHOLD+`
+
+Number of sequential successful pings to server after which it is treated as available. the {prod-short} Operator: the property is common for all servers, for example, workspace agent, terminal, exec.
+
+
+.Default value for `+che_workspace_server_ping__success__threshold+`
+====
+----
+`+1+`
+----
+====
+

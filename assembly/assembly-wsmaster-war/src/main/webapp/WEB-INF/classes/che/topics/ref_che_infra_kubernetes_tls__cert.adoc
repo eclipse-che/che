@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_tls__cert_{context}"]
+= `+CHE_INFRA_KUBERNETES_TLS__CERT+`
+
+Certificate data for TLS Secret that should be used for workspaces Ingresses. Certificate should be encoded with Base64 algorithm. This property is ignored by OpenShift infrastructure.
+
+
+.Default value for `+che_infra_kubernetes_tls__cert+`
+====
+----
+`+NULL+`
+----
+====
+

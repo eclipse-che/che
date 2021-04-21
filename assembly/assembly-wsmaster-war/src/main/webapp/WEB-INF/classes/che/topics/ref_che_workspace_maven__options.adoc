@@ -1,0 +1,13 @@
+[id="che_workspace_maven__options_{context}"]
+= `+CHE_WORKSPACE_MAVEN__OPTIONS+`
+
+Maven command-line options added to JVMs running agents in workspaces.
+
+
+.Default value for `+che_workspace_maven__options+`
+====
+----
+`+-XX:MaxRAM=150m-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom+`
+----
+====
+

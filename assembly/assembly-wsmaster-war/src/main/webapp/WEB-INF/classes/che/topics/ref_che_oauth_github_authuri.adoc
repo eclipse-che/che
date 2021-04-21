@@ -1,0 +1,13 @@
+[id="che_oauth_github_authuri_{context}"]
+= `+CHE_OAUTH_GITHUB_AUTHURI+`
+
+GitHub OAuth authorization URI.
+
+
+.Default value for `+che_oauth_github_authuri+`
+====
+----
+`+https://github.com/login/oauth/authorize+`
+----
+====
+

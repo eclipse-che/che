@@ -1,0 +1,13 @@
+[id="che_workspace_pool_cores__multiplier_{context}"]
+= `+CHE_WORKSPACE_POOL_CORES__MULTIPLIER+`
+
+This property is ignored when pool type is not set to `fixed`, `che.workspace.pool.exact_size` is set. When set, the pool size is `N_CORES * multiplier`.
+
+
+.Default value for `+che_workspace_pool_cores__multiplier+`
+====
+----
+`+2+`
+----
+====
+

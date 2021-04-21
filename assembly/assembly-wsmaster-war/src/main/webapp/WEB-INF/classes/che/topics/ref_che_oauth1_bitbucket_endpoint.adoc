@@ -1,0 +1,13 @@
+[id="che_oauth1_bitbucket_endpoint_{context}"]
+= `+CHE_OAUTH1_BITBUCKET_ENDPOINT+`
+
+ConfigurationofBitbucket Server OAuth1 client. Used to obtain Personal access tokens. Location of the file with Bitbucket Server application consumer key (equivalent to a username). Location of the file with Bitbucket Server application private key Bitbucket Server URL. To work correctly with factories the same URL has to be part of `che.integration.bitbucket.server_endpoints` too.
+
+
+.Default value for `+che_oauth1_bitbucket_endpoint+`
+====
+----
+`+NULL+`
+----
+====
+

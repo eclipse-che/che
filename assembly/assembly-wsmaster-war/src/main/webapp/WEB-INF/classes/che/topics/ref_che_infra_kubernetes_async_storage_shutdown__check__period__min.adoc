@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_async_storage_shutdown__check__period__min_{context}"]
+= `+CHE_INFRA_KUBERNETES_ASYNC_STORAGE_SHUTDOWN__CHECK__PERIOD__MIN+`
+
+Defines the period with which the Asynchronous Storage Pod stopping ability will be performed (once in 30 minutes by default)
+
+
+.Default value for `+che_infra_kubernetes_async_storage_shutdown__check__period__min+`
+====
+----
+`+30+`
+----
+====
+

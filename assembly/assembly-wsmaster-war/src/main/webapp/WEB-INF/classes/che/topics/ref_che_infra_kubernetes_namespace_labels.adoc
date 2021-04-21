@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_namespace_labels_{context}"]
+= `+CHE_INFRA_KUBERNETES_NAMESPACE_LABELS+`
+
+List of labels to find {orch-namespace} that are used for {prod-short} Workspaces. They are used to:  - find prepared {orch-namespace} for users in combination with `che.infra.kubernetes.namespace.annotations`.  - actively label {orch-namespace} with any workspace.
+
+
+.Default value for `+che_infra_kubernetes_namespace_labels+`
+====
+----
+`+app.kubernetes.io/part-of=che.eclipse.org,app.kubernetes.io/component=workspaces-namespace+`
+----
+====
+

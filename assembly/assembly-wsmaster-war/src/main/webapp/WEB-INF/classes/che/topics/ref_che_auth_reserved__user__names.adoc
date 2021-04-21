@@ -1,0 +1,13 @@
+[id="che_auth_reserved__user__names_{context}"]
+= `+CHE_AUTH_RESERVED__USER__NAMES+`
+
+Reserved user names
+
+
+.Default value for `+che_auth_reserved__user__names+`
+====
+----
+
+----
+====
+

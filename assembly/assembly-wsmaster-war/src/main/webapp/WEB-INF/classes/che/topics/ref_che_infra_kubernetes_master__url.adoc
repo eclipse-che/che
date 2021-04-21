@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_master__url_{context}"]
+= `+CHE_INFRA_KUBERNETES_MASTER__URL+`
+
+Configuration of Kubernetes client master URL that Infra will use.
+
+
+.Default value for `+che_infra_kubernetes_master__url+`
+====
+----
+
+----
+====
+

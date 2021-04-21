@@ -1,0 +1,13 @@
+[id="che_limits_organization_workspaces_ram_{context}"]
+= `+CHE_LIMITS_ORGANIZATION_WORKSPACES_RAM+`
+
+The total amount of RAM that a single organization (team) is allowed to allocate to running workspaces. An organization owner can allocate this RAM however they see fit across the team's workspaces.
+
+
+.Default value for `+che_limits_organization_workspaces_ram+`
+====
+----
+`+-1+`
+----
+====
+

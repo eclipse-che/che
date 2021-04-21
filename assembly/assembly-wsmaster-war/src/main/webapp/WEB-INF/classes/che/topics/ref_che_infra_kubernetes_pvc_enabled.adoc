@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_enabled_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_ENABLED+`
+
+Defines whether use the Persistent Volume Claim for {prod-short} workspace needs, for example: backup projects, logs, or disable it.
+
+
+.Default value for `+che_infra_kubernetes_pvc_enabled+`
+====
+----
+`+true+`
+----
+====
+

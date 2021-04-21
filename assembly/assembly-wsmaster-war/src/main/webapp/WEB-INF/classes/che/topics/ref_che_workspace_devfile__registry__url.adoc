@@ -1,0 +1,13 @@
+[id="che_workspace_devfile__registry__url_{context}"]
+= `+CHE_WORKSPACE_DEVFILE__REGISTRY__URL+`
+
+Devfile Registry endpoint. Should be a valid HTTP URL. Example: ++http://che-devfile-registry-eclipse-che.192.168.65.2.nip.io++ In case {prod-short} plug-ins registry is not needed value 'NULL' should be used
+
+
+.Default value for `+che_workspace_devfile__registry__url+`
+====
+----
+`+https://che-devfile-registry.prod-preview.openshift.io/+`
+----
+====
+

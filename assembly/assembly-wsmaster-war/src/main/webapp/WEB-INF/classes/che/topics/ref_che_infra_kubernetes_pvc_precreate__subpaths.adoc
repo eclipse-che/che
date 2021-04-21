@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_pvc_precreate__subpaths_{context}"]
+= `+CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS+`
+
+Defines whether to run a job that creates workspace's subpath directories in persistent volume for the `common` strategy before launching a workspace. Necessary in some versions of {orch-name} as workspace subpath volume mounts are created with root permissions, and therefore cannot be modified by workspaces running as a user (presents an error importing projects into a workspace in {prod-short}). The default is `true`, but should be set to `false` if the version of {orch-name} creates subdirectories with user permissions. Relevant issue: https://github.com/kubernetes/kubernetes/issues/41638 the {prod-short} Operator that this property has effect only if the `common` PVC strategy used.
+
+
+.Default value for `+che_infra_kubernetes_pvc_precreate__subpaths+`
+====
+----
+`+true+`
+----
+====
+

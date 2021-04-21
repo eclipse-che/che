@@ -1,0 +1,13 @@
+[id="che_auth_access__denied__error__page_{context}"]
+= `+CHE_AUTH_ACCESS__DENIED__ERROR__PAGE+`
+
+Authentication error page address
+
+
+.Default value for `+che_auth_access__denied__error__page+`
+====
+----
+`+/error-oauth+`
+----
+====
+

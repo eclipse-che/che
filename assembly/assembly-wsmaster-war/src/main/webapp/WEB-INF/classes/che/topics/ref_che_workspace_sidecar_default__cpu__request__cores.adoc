@@ -1,0 +1,13 @@
+[id="che_workspace_sidecar_default__cpu__request__cores_{context}"]
+= `+CHE_WORKSPACE_SIDECAR_DEFAULT__CPU__REQUEST__CORES+`
+
+CPU request default for each sidecar that has no CPU settings in the {prod-short} plug-in configuration. Specify either in floating point cores number, for example, `0.125`, or using the Kubernetes format, integer millicores, for example, `125m`.
+
+
+.Default value for `+che_workspace_sidecar_default__cpu__request__cores+`
+====
+----
+`+-1+`
+----
+====
+

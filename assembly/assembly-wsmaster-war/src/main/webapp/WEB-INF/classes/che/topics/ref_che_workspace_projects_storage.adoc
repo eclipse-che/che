@@ -1,0 +1,13 @@
+[id="che_workspace_projects_storage_{context}"]
+= `+CHE_WORKSPACE_PROJECTS_STORAGE+`
+
+Your projects are synchronized from the {prod-short} server into the machine running each workspace. This is the directory in the machine where your projects are placed.
+
+
+.Default value for `+che_workspace_projects_storage+`
+====
+----
+`+/projects+`
+----
+====
+

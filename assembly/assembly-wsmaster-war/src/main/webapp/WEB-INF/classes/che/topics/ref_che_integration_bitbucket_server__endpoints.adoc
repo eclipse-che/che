@@ -1,0 +1,13 @@
+[id="che_integration_bitbucket_server__endpoints_{context}"]
+= `+CHE_INTEGRATION_BITBUCKET_SERVER__ENDPOINTS+`
+
+Bitbucket endpoints used for factory integrations. Comma separated list of Bitbucket server URLs or NULL if no integration expected.
+
+
+.Default value for `+che_integration_bitbucket_server__endpoints+`
+====
+----
+`+NULL+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_trusted__ca_mount__path_{context}"]
+= `+CHE_INFRA_KUBERNETES_TRUSTED__CA_MOUNT__PATH+`
+
+Configures path on workspace containers where the CA bundle should be mounted. Content of ConfigMap specified by `che.infra.kubernetes.trusted_ca.dest_configmap` is mounted.
+
+
+.Default value for `+che_infra_kubernetes_trusted__ca_mount__path+`
+====
+----
+`+/public-certs+`
+----
+====
+

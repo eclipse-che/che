@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_server__strategy_{context}"]
+= `+CHE_INFRA_KUBERNETES_SERVER__STRATEGY+`
+
+Defines the way how servers are exposed to the world in Kubernetes infra. List of strategies implemented in {prod-short}: `default-host`, `multi-host`, `single-host`.
+
+
+.Default value for `+che_infra_kubernetes_server__strategy+`
+====
+----
+`+multi-host+`
+----
+====
+

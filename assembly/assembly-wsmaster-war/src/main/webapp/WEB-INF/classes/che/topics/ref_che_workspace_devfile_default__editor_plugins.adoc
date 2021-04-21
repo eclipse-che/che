@@ -1,0 +1,13 @@
+[id="che_workspace_devfile_default__editor_plugins_{context}"]
+= `+CHE_WORKSPACE_DEVFILE_DEFAULT__EDITOR_PLUGINS+`
+
+Default Plug-ins which should be provisioned for Default Editor. All the plugins from this list that are not explicitly mentioned in the user-defined devfile will be provisioned but only when the default editor is used or if the user-defined editor is the same as the default one (even if in different version). Format is comma-separated `pluginPublisher/pluginName/pluginVersion` values, and URLs. For example: `eclipse/che-theia-exec-plugin/0.0.1,eclipse/che-theia-terminal-plugin/0.0.1,https://cdn.pluginregistry.com/vi-mode/meta.yaml` If the plugin is a URL, the plugin's `meta.yaml` is retrieved from that URL.
+
+
+.Default value for `+che_workspace_devfile_default__editor_plugins+`
+====
+----
+`+NULL+`
+----
+====
+

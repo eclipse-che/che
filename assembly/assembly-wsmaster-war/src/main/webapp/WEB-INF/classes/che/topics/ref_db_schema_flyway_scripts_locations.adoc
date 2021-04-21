@@ -1,0 +1,13 @@
+[id="db_schema_flyway_scripts_locations_{context}"]
+= `+DB_SCHEMA_FLYWAY_SCRIPTS_LOCATIONS+`
+
+Locations where to search migration scripts.
+
+
+.Default value for `+db_schema_flyway_scripts_locations+`
+====
+----
+`+classpath:che-schema+`
+----
+====
+

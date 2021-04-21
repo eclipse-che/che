@@ -1,0 +1,13 @@
+[id="db_schema_flyway_scripts_prefix_{context}"]
+= `+DB_SCHEMA_FLYWAY_SCRIPTS_PREFIX+`
+
+Prefix of migration scripts.
+
+
+.Default value for `+db_schema_flyway_scripts_prefix+`
+====
+----
+
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_keycloak_use__nonce_{context}"]
+= `+CHE_KEYCLOAK_USE__NONCE+`
+
+Use the OIDC optional `nonce` feature to increase security.
+
+
+.Default value for `+che_keycloak_use__nonce+`
+====
+----
+`+true+`
+----
+====
+

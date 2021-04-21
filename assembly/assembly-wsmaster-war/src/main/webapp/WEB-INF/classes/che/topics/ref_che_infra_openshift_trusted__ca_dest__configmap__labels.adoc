@@ -1,0 +1,13 @@
+[id="che_infra_openshift_trusted__ca_dest__configmap__labels_{context}"]
+= `+CHE_INFRA_OPENSHIFT_TRUSTED__CA_DEST__CONFIGMAP__LABELS+`
+
+Comma separated list of labels to add to the CA certificates ConfigMap in user workspace. See `che.infra.kubernetes.trusted_ca.dest_configmap` property. This default value is used for automatic cluster CA bundle injection in OpenShift 4.
+
+
+.Default value for `+che_infra_openshift_trusted__ca_dest__configmap__labels+`
+====
+----
+`+config.openshift.io/inject-trusted-cabundle=true+`
+----
+====
+

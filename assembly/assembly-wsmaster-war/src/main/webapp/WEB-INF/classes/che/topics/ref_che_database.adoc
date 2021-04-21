@@ -1,0 +1,13 @@
+[id="che_database_{context}"]
+= `+CHE_DATABASE+`
+
+Folder where {prod-short} stores internal data objects.
+
+
+.Default value for `+che_database+`
+====
+----
+`+${che.home}/storage+`
+----
+====
+

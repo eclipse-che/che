@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_workspace__unrecoverable__events_{context}"]
+= `+CHE_INFRA_KUBERNETES_WORKSPACE__UNRECOVERABLE__EVENTS+`
+
+If during workspace startup an unrecoverable event defined in the property occurs, stop the workspace immediately rather than waiting until timeout. the {prod-short} Operator that this SHOULD NOT include a mere "Failed" reason, because that might catch events that are not unrecoverable. A failed container startup is handled explicitly by {prod-short} server.
+
+
+.Default value for `+che_infra_kubernetes_workspace__unrecoverable__events+`
+====
+----
+`+FailedMount,FailedScheduling,MountVolume.SetUpfailed,Failed to pull image,FailedCreate,ReplicaSetCreateError+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_trust__certs_{context}"]
+= `+CHE_INFRA_KUBERNETES_TRUST__CERTS+`
+
+Boolean to configure Kubernetes client to use trusted certificates.
+
+
+.Default value for `+che_infra_kubernetes_trust__certs+`
+====
+----
+`+false+`
+----
+====
+

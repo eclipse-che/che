@@ -1,0 +1,13 @@
+[id="che_workspace_server_ping__interval__milliseconds_{context}"]
+= `+CHE_WORKSPACE_SERVER_PING__INTERVAL__MILLISECONDS+`
+
+Interval, in milliseconds, between successive pings to workspace server.
+
+
+.Default value for `+che_workspace_server_ping__interval__milliseconds+`
+====
+----
+`+3000+`
+----
+====
+

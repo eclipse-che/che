@@ -1,0 +1,13 @@
+[id="che_workspace_plugin__broker_default__merge__plugins_{context}"]
+= `+CHE_WORKSPACE_PLUGIN__BROKER_DEFAULT__MERGE__PLUGINS+`
+
+Configures the default behavior of the plugin brokers when provisioning plugins into a workspace. If set to true, the plugin brokers will attempt to merge plugins when possible: they run in the same sidecar image and do not have conflicting settings. This value is the default setting used when the devfile does not specify the `mergePlugins` attribute.
+
+
+.Default value for `+che_workspace_plugin__broker_default__merge__plugins+`
+====
+----
+`+false+`
+----
+====
+

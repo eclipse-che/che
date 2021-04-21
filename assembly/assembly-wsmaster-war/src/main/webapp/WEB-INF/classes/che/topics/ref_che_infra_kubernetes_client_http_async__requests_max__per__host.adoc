@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_client_http_async__requests_max__per__host_{context}"]
+= `+CHE_INFRA_KUBERNETES_CLIENT_HTTP_ASYNC__REQUESTS_MAX__PER__HOST+`
+
+Number of maximum concurrent asynchronous web requests per host.
+
+
+.Default value for `+che_infra_kubernetes_client_http_async__requests_max__per__host+`
+====
+----
+`+1000+`
+----
+====
+

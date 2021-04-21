@@ -1,0 +1,13 @@
+[id="che_system_super__privileged__mode_{context}"]
+= `+CHE_SYSTEM_SUPER__PRIVILEGED__MODE+`
+
+System Super Privileged Mode. Grants users with the manageSystem permission additional permissions for getByKey, getByNameSpace, stopWorkspaces, and getResourcesInformation. These are not given to admins by default and these permissions allow admins gain visibility to any workspace along with naming themselves with admin privileges to those workspaces.
+
+
+.Default value for `+che_system_super__privileged__mode+`
+====
+----
+`+false+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_server_secure__exposer_jwtproxy_cpu__limit_{context}"]
+= `+CHE_SERVER_SECURE__EXPOSER_JWTPROXY_CPU__LIMIT+`
+
+JWTProxy CPU limit.
+
+
+.Default value for `+che_server_secure__exposer_jwtproxy_cpu__limit+`
+====
+----
+`+0.5+`
+----
+====
+

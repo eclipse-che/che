@@ -1,0 +1,13 @@
+[id="che_workspace_activity__check__scheduler__period__s_{context}"]
+= `+CHE_WORKSPACE_ACTIVITY__CHECK__SCHEDULER__PERIOD__S+`
+
+Period of inactive workspaces suspend job execution.
+
+
+.Default value for `+che_workspace_activity__check__scheduler__period__s+`
+====
+----
+`+60+`
+----
+====
+

@@ -1,0 +1,13 @@
+[id="che_oauth_github_tokenuri_{context}"]
+= `+CHE_OAUTH_GITHUB_TOKENURI+`
+
+GitHub OAuth token URI.
+
+
+.Default value for `+che_oauth_github_tokenuri+`
+====
+----
+`+https://github.com/login/oauth/access_token+`
+----
+====
+

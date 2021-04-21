@@ -1,0 +1,13 @@
+[id="che_infra_openshift_route_host_domain__suffix_{context}"]
+= `+CHE_INFRA_OPENSHIFT_ROUTE_HOST_DOMAIN__SUFFIX+`
+
+The hostname that should be used as a suffix for the workspace routes. For example: Using `domain_suffix=__<{che-host}>__`, the route resembles: `routed3qrtk.__<{che-host}>__`. It has to be a valid DNS name.
+
+
+.Default value for `+che_infra_openshift_route_host_domain__suffix+`
+====
+----
+`+NULL+`
+----
+====
+

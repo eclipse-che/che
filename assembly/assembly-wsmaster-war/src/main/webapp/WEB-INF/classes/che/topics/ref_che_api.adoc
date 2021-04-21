@@ -1,0 +1,13 @@
+[id="che_api_{context}"]
+= `+CHE_API+`
+
+API service. Browsers initiate REST communications to {prod-short} server with this URL.
+
+
+.Default value for `+che_api+`
+====
+----
+`+http://${CHE_HOST}:${CHE_PORT}/api+`
+----
+====
+

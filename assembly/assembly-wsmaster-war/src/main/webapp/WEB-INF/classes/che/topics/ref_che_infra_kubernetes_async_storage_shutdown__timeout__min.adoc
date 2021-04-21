@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_async_storage_shutdown__timeout__min_{context}"]
+= `+CHE_INFRA_KUBERNETES_ASYNC_STORAGE_SHUTDOWN__TIMEOUT__MIN+`
+
+The timeout for the Asynchronous Storage Pod shutdown after stopping the last used workspace. Value less or equal to 0 interpreted as disabling shutdown ability.
+
+
+.Default value for `+che_infra_kubernetes_async_storage_shutdown__timeout__min+`
+====
+----
+`+120+`
+----
+====
+

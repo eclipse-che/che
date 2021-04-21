@@ -1,0 +1,13 @@
+[id="che_factory_default__devfile__filenames_{context}"]
+= `+CHE_FACTORY_DEFAULT__DEVFILE__FILENAMES+`
+
+Devfile filenames to look on repository-based factories (for example GitHub). Factory will try to locate those files in the order they enumerated in the property.
+
+
+.Default value for `+che_factory_default__devfile__filenames+`
+====
+----
+`+devfile.yaml,.devfile.yaml+`
+----
+====
+

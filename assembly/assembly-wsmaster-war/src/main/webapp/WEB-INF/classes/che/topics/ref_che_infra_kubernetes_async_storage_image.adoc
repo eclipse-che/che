@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_async_storage_image_{context}"]
+= `+CHE_INFRA_KUBERNETES_ASYNC_STORAGE_IMAGE+`
+
+Docker image for the {prod-short} asynchronous storage
+
+
+.Default value for `+che_infra_kubernetes_async_storage_image+`
+====
+----
+`+quay.io/eclipse/che-workspace-data-sync-storage:0.0.1+`
+----
+====
+

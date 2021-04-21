@@ -1,0 +1,13 @@
+[id="che_infra_kubernetes_namespace_allow__user__defined_{context}"]
+= `+CHE_INFRA_KUBERNETES_NAMESPACE_ALLOW__USER__DEFINED+`
+
+Defines if a user is able to specify {orch-namespace} different from the default. It's NOT RECOMMENDED to configured true without OAuth configured. This property is also used by the OpenShift infra.
+
+
+.Default value for `+che_infra_kubernetes_namespace_allow__user__defined+`
+====
+----
+`+false+`
+----
+====
+

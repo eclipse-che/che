@@ -1,0 +1,13 @@
+[id="che_limits_organization_workspaces_run_count_{context}"]
+= `+CHE_LIMITS_ORGANIZATION_WORKSPACES_RUN_COUNT+`
+
+The maximum number of running workspaces that a single organization is allowed. If the organization has reached this threshold and they try to start an additional workspace, they will be prompted with an error message. The organization will need to stop a running workspace to activate another.
+
+
+.Default value for `+che_limits_organization_workspaces_run_count+`
+====
+----
+`+-1+`
+----
+====
+
