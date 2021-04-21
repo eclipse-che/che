@@ -247,7 +247,7 @@ public abstract class OAuthAuthenticator {
    *     id.
    * @throws OAuthAuthenticationException if authentication failed.
    */
-  String computeAuthorizationHeader(
+  public String computeAuthorizationHeader(
       final String userId, final String requestMethod, final String requestUrl)
       throws OAuthAuthenticationException {
     final OAuthCredentialsResponse credentials = new OAuthCredentialsResponse();

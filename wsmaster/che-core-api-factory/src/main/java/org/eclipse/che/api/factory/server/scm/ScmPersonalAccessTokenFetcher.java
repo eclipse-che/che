@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.scm;
 
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
@@ -31,6 +32,13 @@ public class ScmPersonalAccessTokenFetcher {
     this.personalAccessTokenFetchers = personalAccessTokenFetchers;
   }
 
+  /**
+   * Iterate over the Set<PersonalAccessTokenFetcher> declared in container and sequentially invoke
+   * {@link PersonalAccessTokenFetcher#fetchPersonalAccessToken(Subject, String)} method.
+   *
+   * @throws UnknownScmProviderException - if none of PersonalAccessTokenFetchers return a
+   *     meaningful result.
+   */
   public PersonalAccessToken fetchPersonalAccessToken(Subject cheUser, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException, UnknownScmProviderException {
     for (PersonalAccessTokenFetcher fetcher : personalAccessTokenFetchers) {
@@ -41,5 +49,26 @@ public class ScmPersonalAccessTokenFetcher {
     }
     throw new UnknownScmProviderException(
         "No PersonalAccessTokenFetcher configured for " + scmServerUrl, scmServerUrl);
+  }
+
+  /**
+   * Iterate over the Set<PersonalAccessTokenFetcher> declared in container and sequentially invoke
+   * {@link PersonalAccessTokenFetcher#isValid(PersonalAccessToken)} method.
+   *
+   * @throws UnknownScmProviderException - if none of PersonalAccessTokenFetchers return a
+   *     meaningful result.
+   */
+  public boolean isValid(PersonalAccessToken personalAccessToken)
+      throws UnknownScmProviderException, ScmUnauthorizedException, ScmCommunicationException {
+    for (PersonalAccessTokenFetcher fetcher : personalAccessTokenFetchers) {
+
+      Optional<Boolean> isValid = fetcher.isValid(personalAccessToken);
+      if (isValid.isPresent()) {
+        return isValid.get();
+      }
+    }
+    throw new UnknownScmProviderException(
+        "No PersonalAccessTokenFetcher configured for " + personalAccessToken.getScmProviderUrl(),
+        personalAccessToken.getScmProviderUrl());
   }
 }
