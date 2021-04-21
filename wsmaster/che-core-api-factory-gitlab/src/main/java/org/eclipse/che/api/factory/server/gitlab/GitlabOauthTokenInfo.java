@@ -64,10 +64,10 @@ public class GitlabOauthTokenInfo {
       return false;
     }
     GitlabOauthTokenInfo info = (GitlabOauthTokenInfo) o;
-    return resource_owner_id == info.resource_owner_id &&
-        expires_in == info.expires_in &&
-        created_at == info.created_at &&
-        Arrays.equals(scope, info.scope);
+    return resource_owner_id == info.resource_owner_id
+        && expires_in == info.expires_in
+        && created_at == info.created_at
+        && Arrays.equals(scope, info.scope);
   }
 
   @Override
@@ -79,11 +79,15 @@ public class GitlabOauthTokenInfo {
 
   @Override
   public String toString() {
-    return "GitlabOauthTokenInfo{" +
-        "resource_owner_id=" + resource_owner_id +
-        ", scope=" + Arrays.toString(scope) +
-        ", expires_in=" + expires_in +
-        ", created_at=" + created_at +
-        '}';
+    return "GitlabOauthTokenInfo{"
+        + "resource_owner_id="
+        + resource_owner_id
+        + ", scope="
+        + Arrays.toString(scope)
+        + ", expires_in="
+        + expires_in
+        + ", created_at="
+        + created_at
+        + '}';
   }
 }
