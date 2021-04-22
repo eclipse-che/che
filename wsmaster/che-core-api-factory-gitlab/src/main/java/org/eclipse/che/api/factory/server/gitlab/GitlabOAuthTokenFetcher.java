@@ -43,7 +43,7 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
 
   private static final Logger LOG = LoggerFactory.getLogger(GitlabOAuthTokenFetcher.class);
   private static final String OAUTH_PROVIDER_NAME = "gitlab";
-  public static final Set<String> DEFAULT_TOKEN_SCOPE =
+  public static final Set<String> DEFAULT_TOKEN_SCOPES =
       ImmutableSet.of("api", "write_repository", "openid");
 
   private final OAuthAPI oAuthAPI;
@@ -76,14 +76,22 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
     try {
       oAuthToken = oAuthAPI.getToken(OAUTH_PROVIDER_NAME);
       GitlabUser user = gitlabApiClient.getUser(oAuthToken.getToken());
-      return new PersonalAccessToken(
-          scmServerUrl,
-          cheSubject.getUserId(),
-          user.getUsername(),
-          Long.toString(user.getId()),
-          NameGenerator.generate("oauth2-", 5),
-          NameGenerator.generate("id-", 5),
-          oAuthToken.getToken());
+      PersonalAccessToken token =
+          new PersonalAccessToken(
+              scmServerUrl,
+              cheSubject.getUserId(),
+              user.getUsername(),
+              Long.toString(user.getId()),
+              NameGenerator.generate("oauth2-", 5),
+              NameGenerator.generate("id-", 5),
+              oAuthToken.getToken());
+      Optional<Boolean> valid = isValid(token);
+      if (valid.isEmpty() || !valid.get()) {
+        throw new ScmCommunicationException(
+            "Current token doesn't have the necessary  privileges. Please make sure Che app scopes are correct and containing at least: "
+                + DEFAULT_TOKEN_SCOPES.toString());
+      }
+      return token;
     } catch (UnauthorizedException e) {
       throw new ScmUnauthorizedException(
           cheSubject.getUserName()
@@ -115,9 +123,8 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
       return Optional.empty();
     }
     try {
-      GitlabOauthTokenInfo info = gitlabApiClient.tokenInfo(personalAccessToken.getToken());
-      return Optional.of(
-          Sets.difference(DEFAULT_TOKEN_SCOPE, Sets.newHashSet(info.getScope())).isEmpty());
+      GitlabOauthTokenInfo info = gitlabApiClient.getTokenInfo(personalAccessToken.getToken());
+      return Optional.of(Sets.newHashSet(info.getScope()).containsAll(DEFAULT_TOKEN_SCOPES));
     } catch (ScmItemNotFoundException | ScmCommunicationException e) {
       return Optional.of(Boolean.FALSE);
     }

@@ -71,11 +71,27 @@ public class GitlabOAuthTokenFetcherTest {
   @Test(
       expectedExceptions = ScmCommunicationException.class,
       expectedExceptionsMessageRegExp =
-          "Current token doesn't have the 'read_user' privileges. Please make sure Che app scopes are correct and containing it.")
+          "Current token doesn't have the necessary  privileges. Please make sure Che app scopes are correct and containing at least: \\[api, write_repository, openid\\]")
   public void shouldThrowExceptionOnInsufficientTokenScopes() throws Exception {
     Subject subject = new SubjectImpl("Username", "id1", "token", false);
     OAuthToken oAuthToken = newDto(OAuthToken.class).withToken("oauthtoken").withScope("api repo");
     when(oAuthAPI.getToken(anyString())).thenReturn(oAuthToken);
+
+    stubFor(
+        get(urlEqualTo("/api/v4/user"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer oauthtoken"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                    .withBodyFile("gitlab/rest/api/v4/user/response.json")));
+
+    stubFor(
+        get(urlEqualTo("/oauth/token/info"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer oauthtoken"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                    .withBodyFile("gitlab/rest/api/v4/user/token_info_lack_scopes.json")));
 
     oAuthTokenFetcher.fetchPersonalAccessToken(subject, wireMockServer.url("/"));
   }
@@ -94,8 +110,16 @@ public class GitlabOAuthTokenFetcherTest {
   public void shouldReturnToken() throws Exception {
     Subject subject = new SubjectImpl("Username", "id1", "token", false);
     OAuthToken oAuthToken =
-        newDto(OAuthToken.class).withToken("oauthtoken").withScope("api read_user");
+        newDto(OAuthToken.class).withToken("oauthtoken").withScope("api write_repository openid");
     when(oAuthAPI.getToken(anyString())).thenReturn(oAuthToken);
+
+    stubFor(
+        get(urlEqualTo("/oauth/token/info"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer oauthtoken"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                    .withBodyFile("gitlab/rest/api/v4/user/token_info.json")));
 
     stubFor(
         get(urlEqualTo("/api/v4/user"))

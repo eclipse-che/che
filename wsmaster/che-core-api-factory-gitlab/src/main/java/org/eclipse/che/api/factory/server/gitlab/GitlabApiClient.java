@@ -84,7 +84,7 @@ public class GitlabApiClient {
         });
   }
 
-  public GitlabOauthTokenInfo tokenInfo(String authenticationToken)
+  public GitlabOauthTokenInfo getTokenInfo(String authenticationToken)
       throws ScmItemNotFoundException, ScmCommunicationException {
     final URI uri = serverUrl.resolve("/oauth/token/info");
     HttpRequest request =
