@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-api</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.29.0-SNAPSHOT</version>
+        <version>7.30.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-api-authorization</artifactId>
     <packaging>jar</packaging>
@@ -33,10 +33,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>

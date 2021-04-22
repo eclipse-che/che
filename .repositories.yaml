@@ -48,11 +48,11 @@ repositories:
     devfile: https://github.com/che-incubator/chectl/blob/master/devfile.yaml
     doc: https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-dashboard
+  - url: https://github.com/eclipse-che/che-dashboard
     name: dashboard
     description: >-
      UI to manage workspaces, devfiles, etc.
-    devfile: https://github.com/eclipse/che-dashboard/blob/master/devfile.yaml
+    devfile: https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml
     doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-devfile-registry
@@ -98,7 +98,7 @@ repositories:
       https://eclipse.org/che website source code.
     devfile: https://github.com/eclipse/che-website/blob/master/devfile.yaml
     useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse/che-workspace-client
+  - url: https://github.com/eclipse-che/che-workspace-client
     name: workspace-client
     description: >-
       JS library to interact with a che-server.
@@ -241,11 +241,6 @@ repositories:
     name: che-sidecar-node
     description: >-
       Eclipse Che Sidecar container for node tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-incubator/che-dashboard-next
-    name: che-dashboard-next
-    description: >-
-      New dashboard for Eclipse CHE
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/che-theia-openshift-auth
     name: che-theia-openshift-auth

@@ -13,11 +13,11 @@ package org.eclipse.che.security.oauth1;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import com.google.inject.name.Named;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;

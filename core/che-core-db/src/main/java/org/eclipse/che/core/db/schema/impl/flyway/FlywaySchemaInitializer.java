@@ -13,12 +13,12 @@ package org.eclipse.che.core.db.schema.impl.flyway;
 
 import static org.eclipse.che.core.db.DBInitializer.BARE_DB_INIT_PROPERTY_NAME;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.sql.DataSource;
 import org.eclipse.che.core.db.schema.SchemaInitializationException;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
