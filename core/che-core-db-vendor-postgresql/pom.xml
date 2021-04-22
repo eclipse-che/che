@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.29.2-SNAPSHOT</version>
+        <version>7.29.1</version>
     </parent>
     <artifactId>che-core-db-vendor-postgresql</artifactId>
     <name>Che Core :: Commons :: DB :: Vendor PostgreSQL</name>
