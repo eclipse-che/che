@@ -37,12 +37,12 @@ import static java.util.stream.Collectors.toList;
  * It uses docker to launch TypeScript compiler and then launch JavaScript tests to ensure generator has worked correctly
  * @author Florent Benoit
  */
-public class TypeScriptDTOGeneratorMojoITest {
+public class TypeScriptDTOGeneratorMojoTST {
 
     /**
      * Logger.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(TypeScriptDTOGeneratorMojoITest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TypeScriptDTOGeneratorMojoTST.class);
 
     /**
      * DTO Generated file
@@ -99,7 +99,7 @@ public class TypeScriptDTOGeneratorMojoITest {
     @BeforeClass
     public void init() throws URISyntaxException, IOException, InterruptedException {
         // setup packages
-        this.packageJsonPath = new File(TypeScriptDTOGeneratorMojoITest.class.getClassLoader().getResource("package.json").toURI()).toPath();
+        this.packageJsonPath = new File(TypeScriptDTOGeneratorMojoTST.class.getClassLoader().getResource("package.json").toURI()).toPath();
 
         this.rootPath = this.packageJsonPath.getParent();
 
