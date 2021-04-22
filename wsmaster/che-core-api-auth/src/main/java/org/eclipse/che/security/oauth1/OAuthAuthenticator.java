@@ -26,6 +26,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.Base64;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -195,11 +196,13 @@ public abstract class OAuthAuthenticator {
         getAccessToken.signer =
             getOAuthHmacSigner(clientSecret, sharedTokenSecrets.remove(oauthTemporaryToken));
       }
-      if (getAccessToken.verifier.equalsIgnoreCase("denied")) {
+
+      final OAuthCredentialsResponse credentials;
+      try {
+        credentials = getAccessToken.execute();
+      } catch (IOException e) {
         throw new OAuthAuthenticationException("Authorization denied");
       }
-
-      final OAuthCredentialsResponse credentials = getAccessToken.execute();
 
       String userId = getParameterFromState(state, USER_ID_PARAM_KEY);
 
