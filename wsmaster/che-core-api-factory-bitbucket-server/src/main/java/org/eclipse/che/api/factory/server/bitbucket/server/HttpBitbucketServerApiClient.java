@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.bitbucket.server;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.time.Duration.ofSeconds;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,8 +46,11 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmBadRequestException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmCommunicationException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException;
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.security.oauth1.BitbucketServerOAuthAuthenticator;
+import org.eclipse.che.security.oauth1.OAuthAuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,13 +65,13 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
   private static final Logger LOG = LoggerFactory.getLogger(HttpBitbucketServerApiClient.class);
   private static final Duration DEFAULT_HTTP_TIMEOUT = ofSeconds(10);
   private final URI serverUri;
-  private final AuthorizationHeaderSupplier headerProvider;
+  private final BitbucketServerOAuthAuthenticator authenticator;
   private final HttpClient httpClient;
 
   public HttpBitbucketServerApiClient(
-      String serverUrl, AuthorizationHeaderSupplier authorizationHeaderSupplier) {
+      String serverUrl, BitbucketServerOAuthAuthenticator authenticator) {
     this.serverUri = URI.create(serverUrl);
-    this.headerProvider = authorizationHeaderSupplier;
+    this.authenticator = authenticator;
     this.httpClient =
         HttpClient.newBuilder()
             .executor(
@@ -131,8 +135,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     URI uri = serverUri.resolve("/rest/api/1.0/users/" + slug);
     HttpRequest request =
         HttpRequest.newBuilder(uri)
-            .headers(
-                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+            .headers("Authorization", computeAuthorizationHeader("GET", uri.toString()))
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
 
@@ -182,7 +185,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
             .DELETE()
             .headers(
                 HttpHeaders.AUTHORIZATION,
-                headerProvider.computeAuthorizationHeader("DELETE", uri.toString()),
+                computeAuthorizationHeader("DELETE", uri.toString()),
                 HttpHeaders.ACCEPT,
                 MediaType.APPLICATION_JSON,
                 HttpHeaders.CONTENT_TYPE,
@@ -222,7 +225,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
                           new BitbucketPersonalAccessToken(tokenName, permissions))))
               .headers(
                   HttpHeaders.AUTHORIZATION,
-                  headerProvider.computeAuthorizationHeader("PUT", uri.toString()),
+                  computeAuthorizationHeader("PUT", uri.toString()),
                   HttpHeaders.ACCEPT,
                   MediaType.APPLICATION_JSON,
                   HttpHeaders.CONTENT_TYPE,
@@ -251,6 +254,38 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     try {
       return doGetItems(
           BitbucketPersonalAccessToken.class, "/rest/access-tokens/1.0/users/" + userSlug, null);
+    } catch (ScmBadRequestException e) {
+      throw new ScmCommunicationException(e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public BitbucketPersonalAccessToken getPersonalAccessToken(String userSlug, Long tokenId)
+      throws ScmItemNotFoundException, ScmUnauthorizedException, ScmCommunicationException {
+
+    URI uri = serverUri.resolve("/rest/access-tokens/1.0/users/" + userSlug + "/" + tokenId);
+    HttpRequest request =
+        HttpRequest.newBuilder(uri)
+            .headers(
+                "Authorization",
+                computeAuthorizationHeader("GET", uri.toString()),
+                HttpHeaders.ACCEPT,
+                MediaType.APPLICATION_JSON)
+            .timeout(DEFAULT_HTTP_TIMEOUT)
+            .build();
+
+    try {
+      LOG.trace("executeRequest={}", request);
+      return executeRequest(
+          httpClient,
+          request,
+          inputStream -> {
+            try {
+              return OM.readValue(inputStream, BitbucketPersonalAccessToken.class);
+            } catch (IOException e) {
+              throw new UncheckedIOException(e);
+            }
+          });
     } catch (ScmBadRequestException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }
@@ -311,8 +346,7 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     URI uri = serverUri.resolve(suffix);
     HttpRequest request =
         HttpRequest.newBuilder(uri)
-            .headers(
-                "Authorization", headerProvider.computeAuthorizationHeader("GET", uri.toString()))
+            .headers("Authorization", computeAuthorizationHeader("GET", uri.toString()))
             .timeout(DEFAULT_HTTP_TIMEOUT)
             .build();
     LOG.trace("executeRequest={}", request);
@@ -345,6 +379,8 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
       } else {
         String body = CharStreams.toString(new InputStreamReader(response.body(), Charsets.UTF_8));
         switch (response.statusCode()) {
+          case HTTP_UNAUTHORIZED:
+            throw buildScmUnauthorizedException();
           case HTTP_BAD_REQUEST:
             throw new ScmBadRequestException(body);
           case HTTP_NOT_FOUND:
@@ -357,5 +393,31 @@ public class HttpBitbucketServerApiClient implements BitbucketServerApiClient {
     } catch (IOException | InterruptedException | UncheckedIOException e) {
       throw new ScmCommunicationException(e.getMessage(), e);
     }
+  }
+
+  private String computeAuthorizationHeader(String requestMethod, String requestUrl)
+      throws ScmUnauthorizedException, ScmCommunicationException {
+    try {
+      Subject subject = EnvironmentContext.getCurrent().getSubject();
+      String authorizationHeader =
+          authenticator.computeAuthorizationHeader(subject.getUserId(), requestMethod, requestUrl);
+      if (Strings.isNullOrEmpty(authorizationHeader)) {
+        throw buildScmUnauthorizedException();
+      }
+      return authorizationHeader;
+    } catch (OAuthAuthenticationException e) {
+      throw new ScmCommunicationException(e.getMessage(), e);
+    }
+  }
+
+  private ScmUnauthorizedException buildScmUnauthorizedException() {
+    return new ScmUnauthorizedException(
+        EnvironmentContext.getCurrent().getSubject().getUserName()
+            + " is not authorized in "
+            + authenticator.getOAuthProvider()
+            + " OAuth1 provider",
+        authenticator.getOAuthProvider(),
+        "1.0",
+        authenticator.getLocalAuthenticateUrl());
   }
 }

@@ -102,7 +102,10 @@ public class AuthorizingFileContentProvider<T extends RemoteFactoryUrl>
                   + " the file failed with the following error message: %s",
               fileURL, e.getMessage()),
           e);
-    } catch (ScmConfigurationPersistenceException | UnsatisfiedScmPreconditionException e) {
+    } catch (ScmConfigurationPersistenceException
+        | UnsatisfiedScmPreconditionException
+        | ScmUnauthorizedException
+        | ScmCommunicationException e) {
       throw new DevfileException(e.getMessage(), e);
     }
   }
