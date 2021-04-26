@@ -26,7 +26,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.Base64;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
@@ -189,6 +188,11 @@ public abstract class OAuthAuthenticator {
       getAccessToken.consumerKey = clientId;
       getAccessToken.temporaryToken = oauthTemporaryToken;
       getAccessToken.verifier = (String) callbackUrl.getFirst(OAUTH_VERIFIER_PARAM_KEY);
+
+      if ("denied".equals(getAccessToken.verifier)) {
+        throw new UserDeniedOAuthAuthenticationException("Authorization denied");
+      }
+
       getAccessToken.transport = httpTransport;
       if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         getAccessToken.signer = getOAuthRsaSigner();
@@ -197,13 +201,7 @@ public abstract class OAuthAuthenticator {
             getOAuthHmacSigner(clientSecret, sharedTokenSecrets.remove(oauthTemporaryToken));
       }
 
-      final OAuthCredentialsResponse credentials;
-      try {
-        credentials = getAccessToken.execute();
-      } catch (IOException e) {
-        throw new OAuthAuthenticationException("Authorization denied");
-      }
-
+      final OAuthCredentialsResponse credentials = getAccessToken.execute();
       String userId = getParameterFromState(state, USER_ID_PARAM_KEY);
 
       credentialsStoreLock.lock();
@@ -223,6 +221,8 @@ public abstract class OAuthAuthenticator {
 
       return userId;
 
+    } catch (OAuthAuthenticationException e) {
+      throw e;
     } catch (Exception e) {
       throw new OAuthAuthenticationException(e.getMessage());
     }

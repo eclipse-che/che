@@ -79,12 +79,10 @@ public class OAuthAuthenticationService extends Service {
 
     try {
       getAuthenticator(providerName).callback(requestUrl);
+    } catch (UserDeniedOAuthAuthenticationException e) {
+      redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "access_denied");
     } catch (OAuthAuthenticationException e) {
-      if (e.getMessage().equalsIgnoreCase("Authorization denied")) {
-        redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "access_denied");
-      } else {
-        redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "invalid_request");
-      }
+      redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "invalid_request");
     }
     return Response.temporaryRedirect(redirectUriBuilder.build()).build();
   }

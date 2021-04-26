@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.ServerException;
  * @author Kevin Pollet
  * @author Igor Vinokur
  */
-public final class OAuthAuthenticationException extends ServerException {
+public class OAuthAuthenticationException extends ServerException {
 
   /**
    * Constructs an instance of {@link OAuthAuthenticationException}.
