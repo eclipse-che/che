@@ -62,3 +62,13 @@ jobs:
     - name: Push ubi8 Che Server image
       run: 
         docker push quay.io/eclipse/che-server:rhel-nightly
+    - name: Create failure MM message
+      if: ${{ failure() }}
+      run: |
+        echo "{\"text\":\":no_entry_sign: Nightly Che Server build has failed: https://github.com/eclipse/che/actions/workflows/nightly-build.yml\"}" > mattermost.json
+      if: ${{ failure() }}
+      uses: mattermost/action-mattermost-notify@1.0.2
+      env:
+        MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+        MATTERMOST_CHANNEL: eclipse-che-ci
+        MATTERMOST_USERNAME: che-bot
