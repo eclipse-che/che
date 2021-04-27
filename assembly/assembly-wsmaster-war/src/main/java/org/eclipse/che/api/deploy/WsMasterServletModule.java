@@ -15,8 +15,7 @@ import com.google.inject.servlet.ServletModule;
 import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
-import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
+import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.TokenInitializationFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /** @author andrew00x */
@@ -41,7 +40,7 @@ public class WsMasterServletModule extends ServletModule {
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       configureMultiUserMode();
     } else {
-      configureSingleUserMode();
+//      configureSingleUserMode();
     }
 
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
@@ -64,7 +63,8 @@ public class WsMasterServletModule extends ServletModule {
   }
 
   private void configureMultiUserMode() {
-    filterRegex(".*").through(MachineLoginFilter.class);
-    install(new KeycloakServletModule());
+    filter("/*").through(TokenInitializationFilter.class);
+//    filterRegex(".*").through(MachineLoginFilter.class);
+//    install(new KeycloakServletModule());
   }
 }

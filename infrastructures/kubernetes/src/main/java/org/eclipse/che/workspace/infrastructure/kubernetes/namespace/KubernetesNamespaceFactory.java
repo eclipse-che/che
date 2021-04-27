@@ -370,6 +370,7 @@ public class KubernetesNamespaceFactory {
     Map<String, String> attributes = new HashMap<>(2);
     if (namespace.getStatus() != null && namespace.getStatus().getPhase() != null) {
       attributes.put(PHASE_ATTRIBUTE, namespace.getStatus().getPhase());
+      attributes.put(DEFAULT_ATTRIBUTE, "true");
     }
     return new KubernetesNamespaceMetaImpl(namespace.getMetadata().getName(), attributes);
   }

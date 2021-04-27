@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.ws.rs.core.HttpHeaders;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.EventListener;
@@ -116,12 +117,26 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
     return createOC(buildConfig(getDefaultConfig(), null));
   }
 
+  public OpenShiftClient createTokenAuthenticatedClient(String token) throws InfrastructureException {
+//    if (!configBuilder.isPersonalized()) {
+//      throw new InfrastructureException(
+//          "Not able to construct impersonating openshift API client.");
+//    }
+    Config c = buildConfig(getDefaultConfig(), null);
+    c.setOauthToken(token);
+
+    return createOC(c);
+  }
+
   @Override
-  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
-    if (!configBuilder.isPersonalized()) {
-      throw new InfrastructureException(
-          "Not able to construct impersonating openshift API client.");
-    }
+  public OkHttpClient getAuthenticatedHttpClient(String token) throws InfrastructureException {
+//    if (!configBuilder.isPersonalized()) {
+//      throw new InfrastructureException(
+//          "Not able to construct impersonating openshift API client.");
+//    }
+    Config c = buildConfig(getDefaultConfig(), null);
+    c.setOauthToken(token);
+//    c.setOauthToken(headers.getHeaderString("Authorization").substring(7));
     return clientForConfig(buildConfig(getDefaultConfig(), null));
   }
 

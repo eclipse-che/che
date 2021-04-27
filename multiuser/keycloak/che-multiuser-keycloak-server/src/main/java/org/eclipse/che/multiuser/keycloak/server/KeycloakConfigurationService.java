@@ -18,12 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 
 /**
@@ -46,8 +48,10 @@ public class KeycloakConfigurationService extends Service {
   @GET
   @Path("/settings")
   @Produces(APPLICATION_JSON)
-  public Map<String, String> settings() {
-    return keycloakSettings.get();
+  public Map<String, String> settings() throws NotFoundException {
+    throw new NotFoundException("Settings intentionally not found");
+//    return Collections.emptyMap();
+//    return keycloakSettings.get();
   }
 
   private String getKeycloakResource(String fileName) throws IOException {

@@ -68,6 +68,16 @@ public class UserService extends Service {
   private final UserValidator userValidator;
   private final boolean userSelfCreationAllowed;
 
+  public static final User dummyUser;
+
+  static {
+    UserImpl user = new UserImpl();
+    user.setEmail("user1@che");
+    user.setId("f3b20bc4-240f-481a-b63d-abc2efc02b15");
+    user.setName("User Jedna");
+    dummyUser = user;
+  }
+
   @Inject
   public UserService(
       UserManager userManager,
@@ -167,8 +177,7 @@ public class UserService extends Service {
   })
   public UserDto getById(@ApiParam("User identifier") @PathParam("id") String id)
       throws NotFoundException, ServerException {
-    final User user = userManager.getById(id);
-    return linksInjector.injectLinks(asDto(user), getServiceContext());
+    return linksInjector.injectLinks(asDto(dummyUser), getServiceContext());
   }
 
   @GET
@@ -193,8 +202,7 @@ public class UserService extends Service {
       throw new BadRequestException(
           "Expected either user's email or name, while both values received");
     }
-    final User user = name == null ? userManager.getByEmail(email) : userManager.getByName(name);
-    return linksInjector.injectLinks(asDto(user), getServiceContext());
+    return linksInjector.injectLinks(asDto(dummyUser), getServiceContext());
   }
 
   @DELETE

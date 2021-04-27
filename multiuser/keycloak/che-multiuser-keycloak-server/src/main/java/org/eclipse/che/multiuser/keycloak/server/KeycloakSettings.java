@@ -58,8 +58,7 @@ public class KeycloakSettings {
       @Named(USE_NONCE_SETTING) boolean useNonce,
       @Nullable @Named(OSO_ENDPOINT_SETTING) String osoEndpoint,
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
-      @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls,
-      OIDCInfo oidcInfo) {
+      @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
     this.oidcProviderUrl = oidcProviderUrl;
 
     Map<String, String> settings = Maps.newHashMap();
@@ -80,18 +79,18 @@ public class KeycloakSettings {
           serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
     }
 
-    if (oidcInfo.getEndSessionPublicEndpoint() != null) {
-      settings.put(LOGOUT_ENDPOINT_SETTING, oidcInfo.getEndSessionPublicEndpoint());
-    }
-    if (oidcInfo.getTokenPublicEndpoint() != null) {
-      settings.put(TOKEN_ENDPOINT_SETTING, oidcInfo.getTokenPublicEndpoint());
-    }
-    if (oidcInfo.getUserInfoPublicEndpoint() != null) {
-      settings.put(USERINFO_ENDPOINT_SETTING, oidcInfo.getUserInfoPublicEndpoint());
-    }
-    if (oidcInfo.getJwksPublicUri() != null) {
-      settings.put(JWKS_ENDPOINT_SETTING, oidcInfo.getJwksPublicUri());
-    }
+//    if (oidcInfo.getEndSessionPublicEndpoint() != null) {
+//      settings.put(LOGOUT_ENDPOINT_SETTING, oidcInfo.getEndSessionPublicEndpoint());
+//    }
+//    if (oidcInfo.getTokenPublicEndpoint() != null) {
+//      settings.put(TOKEN_ENDPOINT_SETTING, oidcInfo.getTokenPublicEndpoint());
+//    }
+//    if (oidcInfo.getUserInfoPublicEndpoint() != null) {
+//      settings.put(USERINFO_ENDPOINT_SETTING, oidcInfo.getUserInfoPublicEndpoint());
+//    }
+//    if (oidcInfo.getJwksPublicUri() != null) {
+//      settings.put(JWKS_ENDPOINT_SETTING, oidcInfo.getJwksPublicUri());
+//    }
 
     settings.put(OSO_ENDPOINT_SETTING, osoEndpoint);
     settings.put(GITHUB_ENDPOINT_SETTING, gitHubEndpoint);

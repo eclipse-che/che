@@ -21,6 +21,8 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.impl.DefaultJwtParser;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -40,10 +42,12 @@ import org.eclipse.che.api.infraproxy.server.InfraProxyModule;
 import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
+import org.eclipse.che.api.user.server.DummyProfileDao;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceEntityProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
@@ -108,6 +112,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.IdentityProviderConfigFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.OpenshiftUserDao;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -356,7 +361,7 @@ public class WsMasterModule extends AbstractModule {
     }
 
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
-      bind(OpenShiftClientConfigFactory.class).to(IdentityProviderConfigFactory.class);
+//      bind(OpenShiftClientConfigFactory.class).to(IdentityProviderConfigFactory.class);
     }
 
     persistenceProperties.put(
@@ -392,7 +397,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
 
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
-    bind(AdminPermissionInitializer.class).asEagerSingleton();
+//    bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
         org.eclipse.che.multiuser.permission.resource.filters.ResourceServicePermissionsFilter
             .class);
@@ -404,15 +409,19 @@ public class WsMasterModule extends AbstractModule {
     install(new OrganizationApiModule());
     install(new OrganizationJpaModule());
 
-    install(new KeycloakModule());
-    install(new KeycloakUserRemoverModule());
+//    install(new KeycloakModule());
+//    install(new KeycloakUserRemoverModule());
+    bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
+    bind(JwtParser.class).to(DefaultJwtParser.class);
+    bind(ProfileDao.class).to(DummyProfileDao.class);
+    bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
 
     install(new MachineAuthModule());
     bind(RequestTokenExtractor.class).to(ChainedTokenExtractor.class);
 
     // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
-    bind(UserDao.class).to(JpaUserDao.class);
+    bind(UserDao.class).to(OpenshiftUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 

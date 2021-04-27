@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.ws.rs.core.HttpHeaders;
 import okhttp3.Authenticator;
 import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
@@ -146,7 +147,7 @@ public class KubernetesClientFactory {
    * @throws InfrastructureException if it is not possible to build the client with authentication
    *     infromation
    */
-  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+  public OkHttpClient getAuthenticatedHttpClient(String token) throws InfrastructureException {
     throw new InfrastructureException(
         "Impersonating the current user is not supported in the Kubernetes Client.");
   }

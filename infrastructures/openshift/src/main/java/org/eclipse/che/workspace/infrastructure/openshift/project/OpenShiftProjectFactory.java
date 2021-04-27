@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.DEFAULT_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta.PHASE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -268,6 +269,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     if (project.getStatus() != null && project.getStatus().getPhase() != null) {
       attributes.put(PHASE_ATTRIBUTE, project.getStatus().getPhase());
     }
+    attributes.put(DEFAULT_ATTRIBUTE, "true");
     return new KubernetesNamespaceMetaImpl(metadata.getName(), attributes);
   }
 }

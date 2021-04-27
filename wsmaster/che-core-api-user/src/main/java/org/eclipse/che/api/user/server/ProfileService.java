@@ -68,9 +68,11 @@ public class ProfileService extends Service {
     @ApiResponse(code = 500, message = "Couldn't retrieve profile due to internal server error")
   })
   public ProfileDto getCurrent() throws ServerException, NotFoundException {
-    final ProfileImpl profile = new ProfileImpl(profileManager.getById(userId()));
+    final ProfileImpl profile = new ProfileImpl();
+    profile.setUserId(UserService.dummyUser.getId());
+
     return linksInjector.injectLinks(
-        asDto(profile, userManager.getById(profile.getUserId())), getServiceContext());
+        asDto(profile, UserService.dummyUser), getServiceContext());
   }
 
   @GET

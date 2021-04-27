@@ -95,7 +95,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
       throws InfrastructureException {
     return DirectKubernetesAPIAccessHelper.call(
         kubernetesClientFactory.getDefaultConfig().getMasterUrl(),
-        kubernetesClientFactory.getAuthenticatedHttpClient(),
+        kubernetesClientFactory.getAuthenticatedHttpClient(headers.getHeaderString("Authorization").substring(7)),
         httpMethod,
         relativeUri,
         headers,

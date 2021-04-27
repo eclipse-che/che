@@ -107,7 +107,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       throws InfrastructureException {
     return DirectKubernetesAPIAccessHelper.call(
         openShiftClientFactory.getDefaultConfig().getMasterUrl(),
-        openShiftClientFactory.getAuthenticatedHttpClient(),
+        openShiftClientFactory.getAuthenticatedHttpClient(headers.getHeaderString("Authorization").substring(7)),
         httpMethod,
         relativeUri,
         headers,
