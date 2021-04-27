@@ -34,7 +34,7 @@ pipeline {
                description: 'Configuration Che Server Exposure strategy')
 
         string(name: 'cheImageRepo',
-                defaultValue: "quay.io/crw_pr/che-server",
+                defaultValue: "quay.io/eclipse/che-server",
                 description: 'Repo of Che server image')
 
         string(name: 'cheImageTag',
