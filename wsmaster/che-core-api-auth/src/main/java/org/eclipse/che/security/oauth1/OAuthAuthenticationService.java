@@ -26,6 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -43,7 +44,7 @@ public class OAuthAuthenticationService extends Service {
   private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
 
   private static final String UNSUPPORTED_OAUTH_PROVIDER_ERROR = "Unsupported OAuth provider: %s";
-
+  private static final String ERROR_QUERY_NAME = "error_code";
   @Inject protected OAuthAuthenticatorProvider providers;
 
   @GET
@@ -74,9 +75,16 @@ public class OAuthAuthenticationService extends Service {
     final String providerName = getParameter(parameters, "oauth_provider");
     final String redirectAfterLogin = getParameter(parameters, "redirect_after_login");
 
-    getAuthenticator(providerName).callback(requestUrl);
+    UriBuilder redirectUriBuilder = UriBuilder.fromUri(redirectAfterLogin);
 
-    return Response.temporaryRedirect(URI.create(redirectAfterLogin)).build();
+    try {
+      getAuthenticator(providerName).callback(requestUrl);
+    } catch (UserDeniedOAuthAuthenticationException e) {
+      redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "access_denied");
+    } catch (OAuthAuthenticationException e) {
+      redirectUriBuilder.queryParam(ERROR_QUERY_NAME, "invalid_request");
+    }
+    return Response.temporaryRedirect(redirectUriBuilder.build()).build();
   }
 
   @GET
