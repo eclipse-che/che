@@ -83,7 +83,7 @@
         <io.opentracing.version>0.33.0</io.opentracing.version>
         <io.opentracing.web-servlet-filter.version>0.4.0</io.opentracing.web-servlet-filter.version>
         <io.prometheus.simpleclient.version>0.7.0</io.prometheus.simpleclient.version>
-        <io.swagger.version>1.5.9</io.swagger.version>
+        <io.swagger.version>1.6.2</io.swagger.version>
         <jakarta.json.version>2.0.0</jakarta.json.version>
         <javax.annotation.version>1.2</javax.annotation.version>
         <javax.inject.version>1</javax.inject.version>
