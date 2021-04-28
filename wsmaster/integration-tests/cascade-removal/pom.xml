@@ -17,7 +17,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.29.3-SNAPSHOT</version>
+        <version>7.29.2</version>
     </parent>
     <artifactId>cascade-removal</artifactId>
     <name>Integration Tests :: Cascade Removal</name>
