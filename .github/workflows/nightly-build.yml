@@ -66,6 +66,7 @@ jobs:
       if: ${{ failure() }}
       run: |
         echo "{\"text\":\":no_entry_sign: Nightly Che Server build has failed: https://github.com/eclipse/che/actions/workflows/nightly-build.yml\"}" > mattermost.json
+    - name: Send MM message
       if: ${{ failure() }}
       uses: mattermost/action-mattermost-notify@1.0.2
       env:
