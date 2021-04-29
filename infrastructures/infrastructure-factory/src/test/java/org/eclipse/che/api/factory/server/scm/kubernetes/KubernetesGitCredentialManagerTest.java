@@ -13,15 +13,19 @@ package org.eclipse.che.api.factory.server.scm.kubernetes;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_CHE_USERID;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_URL;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_USERNAME;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.NAME_PATTERN;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -115,6 +119,8 @@ public class KubernetesGitCredentialManagerTest {
     assertEquals(
         new String(Base64.getDecoder().decode(createdSecret.getData().get("credentials"))),
         "https://username:token123@bitbucket.com");
+    assertTrue(createdSecret.getMetadata().getName().startsWith(NAME_PATTERN));
+    assertFalse(createdSecret.getMetadata().getName().contains(token.getScmUserName()));
   }
 
   @Test
@@ -133,10 +139,11 @@ public class KubernetesGitCredentialManagerTest {
     Map<String, String> annotations = new HashMap<>();
     annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl());
     annotations.put(ANNOTATION_SCM_USERNAME, token.getScmUserName());
+    annotations.put(ANNOTATION_GIT_CREDENTIALS, "true");
+    annotations.put(ANNOTATION_CHE_USERID, token.getCheUserId());
     ObjectMeta objectMeta =
         new ObjectMetaBuilder()
-            .withName(
-                String.format(NAME_PATTERN, NameGenerator.generate(token.getScmUserName(), 5)))
+            .withName(NameGenerator.generate(NAME_PATTERN, 5))
             .withAnnotations(annotations)
             .build();
     Secret existing =
@@ -154,16 +161,17 @@ public class KubernetesGitCredentialManagerTest {
     when(nonNamespaceOperation.withLabels(anyMap())).thenReturn(filterWatchDeletable);
     when(filterWatchDeletable.list()).thenReturn(secretList);
     when(secretList.getItems()).thenReturn(singletonList(existing));
-    ArgumentCaptor<Secret> captor = ArgumentCaptor.forClass(Secret.class);
 
     // when
     kubernetesGitCredentialManager.createOrReplace(token);
     // then
+    ArgumentCaptor<Secret> captor = ArgumentCaptor.forClass(Secret.class);
     verify(nonNamespaceOperation).createOrReplace(captor.capture());
     Secret createdSecret = captor.getValue();
     assertNotNull(createdSecret);
     assertEquals(
         new String(Base64.getDecoder().decode(createdSecret.getData().get("credentials"))),
         "https://username:token123@bitbucket.com:5648");
+    assertEquals(createdSecret.getMetadata().getName(), objectMeta.getName());
   }
 }
