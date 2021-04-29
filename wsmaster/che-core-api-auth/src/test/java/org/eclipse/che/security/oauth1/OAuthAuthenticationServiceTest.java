@@ -14,6 +14,7 @@ import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -33,9 +34,13 @@ public class OAuthAuthenticationServiceTest {
 
   @InjectMocks private OAuthAuthenticationService oAuthAuthenticationService;
 
+  @BeforeMethod
+  public void setUp() {
+    when(oAuthProvider.getAuthenticator("test-server")).thenReturn(oAuthAuthenticator);
+  }
+
   @Test
   public void shouldResolveCallbackWithoutError() throws OAuthAuthenticationException {
-    when(oAuthProvider.getAuthenticator("test-server")).thenReturn(oAuthAuthenticator);
     when(oAuthAuthenticator.callback(any(URL.class))).thenReturn("user1");
     final Response response =
         given()
@@ -53,7 +58,6 @@ public class OAuthAuthenticationServiceTest {
 
   @Test
   public void shouldResolveCallbackWithAccessDeniedError() throws OAuthAuthenticationException {
-    when(oAuthProvider.getAuthenticator("test-server")).thenReturn(oAuthAuthenticator);
     when(oAuthAuthenticator.callback(any(URL.class)))
         .thenThrow(new UserDeniedOAuthAuthenticationException("Access denied"));
     final Response response =
@@ -62,7 +66,7 @@ public class OAuthAuthenticationServiceTest {
             .follow(false)
             .queryParam("state", STATE)
             .queryParam("oauth_token", OAUTH_TOKEN)
-            .queryParam("oauth_verifier", "denies")
+            .queryParam("oauth_verifier", "denied")
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
@@ -72,7 +76,6 @@ public class OAuthAuthenticationServiceTest {
 
   @Test
   public void shouldResolveCallbackWithInvalidRequestError() throws OAuthAuthenticationException {
-    when(oAuthProvider.getAuthenticator("test-server")).thenReturn(oAuthAuthenticator);
     when(oAuthAuthenticator.callback(any(URL.class)))
         .thenThrow(new OAuthAuthenticationException("Invalid request"));
     final Response response =
