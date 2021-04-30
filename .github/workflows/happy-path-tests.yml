@@ -1,0 +1,69 @@
+#
+# Copyright (c) 2021 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+name: Happy Path
+
+on: [push, pull_request]
+
+jobs:
+  happy-path:
+    strategy:
+      fail-fast: false
+      matrix:
+        dist: ['ubuntu', 'rhel']
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+       path: ~/.m2/repository
+       key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+       restore-keys: |
+        ${{ runner.os }}-maven-      
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11.0.11+9'
+    - name: Build with Maven
+      run: mvn -B clean install -U -Pfast -DskipTests -Dskip-enforce -Dskip-validate-sources
+    - name: image-build
+      run: |
+        if [[ "${{matrix.dist}}" == "ubuntu" ]]; then
+          ./dockerfiles/che/build.sh --tag:"happy-path"
+        elif [[ "${{matrix.dist}}" == "rhel" ]]; then
+          ./dockerfiles/che/build.sh --dockerfile:"rhel.Dockerfile" --tag:"happy-path"
+        fi  
+        # save locally built image
+        docker save -o docker-image.tar quay.io/eclipse/che-server:happy-path
+    - name: Start minikube
+      id: run-minikube
+      uses: che-incubator/setup-minikube-action@next
+      with:
+        minikube-version: v1.18.1
+    - name: load-images-minikube-registry
+      id: load-images-minikube-registry
+      run: |
+        # load images in the docker registry
+        eval $(minikube docker-env)
+        docker load --input=docker-image.tar
+        # display images
+        docker images
+    - name: Deploy Eclipse Che
+      id: deploy-che
+      uses: che-incubator/che-deploy-action@next
+      with:
+        # use custom image built by this PR
+        che-server-image: quay.io/eclipse/che-server:happy-path
+    - name: Run Happy Path tests
+      id: run-happy-path-tests
+      uses: che-incubator/happy-path-tests-action@next
+      with:
+        che-url: ${{ steps.deploy-che.outputs.che-url }}
