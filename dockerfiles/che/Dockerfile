@@ -13,7 +13,7 @@ ARG CHE_DASHBOARD_VERSION=next
 
 FROM ${CHE_DASHBOARD_ORGANIZATION}/che-dashboard:${CHE_DASHBOARD_VERSION} as che_dashboard_base
 
-FROM docker.io/adoptopenjdk/openjdk11:jre-11.0.8_10
+FROM docker.io/adoptopenjdk/openjdk11:jre-11.0.11_9
 ENV LANG=C.UTF-8
 RUN echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && rm -rf /tmp/*
 EXPOSE 8000 8080
