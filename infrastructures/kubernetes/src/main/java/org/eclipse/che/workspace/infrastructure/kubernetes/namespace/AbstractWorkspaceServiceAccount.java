@@ -13,9 +13,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import static java.util.Collections.singletonList;
 
-import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.slf4j.Logger;
@@ -51,20 +53,10 @@ public abstract class AbstractWorkspaceServiceAccount<
   private final String workspaceId;
   private final Set<String> clusterRoleNames;
   private final Function<
-          Client,
-          MixedOperation<
-              R,
-              ? extends KubernetesResourceList<R>,
-              ? extends Doneable<R>,
-              ? extends Resource<R, ? extends Doneable<R>>>>
+          Client, MixedOperation<R, ? extends KubernetesResourceList<R>, ? extends Resource<R>>>
       roles;
   private final Function<
-          Client,
-          MixedOperation<
-              B,
-              ? extends KubernetesResourceList<B>,
-              ? extends Doneable<B>,
-              ? extends Resource<B, ? extends Doneable<B>>>>
+          Client, MixedOperation<B, ? extends KubernetesResourceList<B>, ? extends Resource<B>>>
       roleBindings;
 
   protected AbstractWorkspaceServiceAccount(
@@ -74,20 +66,10 @@ public abstract class AbstractWorkspaceServiceAccount<
       Set<String> clusterRoleNames,
       ClientFactory<Client> clientFactory,
       Function<
-              Client,
-              MixedOperation<
-                  R,
-                  ? extends KubernetesResourceList<R>,
-                  ? extends Doneable<R>,
-                  ? extends Resource<R, ? extends Doneable<R>>>>
+              Client, MixedOperation<R, ? extends KubernetesResourceList<R>, ? extends Resource<R>>>
           roles,
       Function<
-              Client,
-              MixedOperation<
-                  B,
-                  ? extends KubernetesResourceList<B>,
-                  ? extends Doneable<B>,
-                  ? extends Resource<B, ? extends Doneable<B>>>>
+              Client, MixedOperation<B, ? extends KubernetesResourceList<B>, ? extends Resource<B>>>
           roleBindings) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
@@ -163,7 +145,8 @@ public abstract class AbstractWorkspaceServiceAccount<
    * 'che.infra.kubernetes.workspace_sa_cluster_roles' property.
    *
    * @see KubernetesNamespaceFactory#KubernetesNamespaceFactory(String, String, String, String,
-   *     boolean, KubernetesClientFactory, UserManager, KubernetesSharedPool)
+   *     boolean, boolean, boolean, String, String, KubernetesClientFactory,
+   *     CheServerKubernetesClientFactory, UserManager, PreferenceManager, KubernetesSharedPool)
    */
   private void createExplicitClusterRoleBindings(Client k8sClient) {
     // If the user specified an additional cluster roles for the workspace,
@@ -210,12 +193,13 @@ public abstract class AbstractWorkspaceServiceAccount<
     k8sClient
         .serviceAccounts()
         .inNamespace(namespace)
-        .createOrReplaceWithNew()
-        .withAutomountServiceAccountToken(true)
-        .withNewMetadata()
-        .withName(serviceAccountName)
-        .endMetadata()
-        .done();
+        .createOrReplace(
+            new ServiceAccountBuilder()
+                .withAutomountServiceAccountToken(true)
+                .withNewMetadata()
+                .withName(serviceAccountName)
+                .endMetadata()
+                .build());
   }
 
   private void createRole(

@@ -38,6 +38,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -227,7 +228,7 @@ public class KubernetesNamespaceTest {
             (Answer<Watch>)
                 invocation -> {
                   final Watcher<ServiceAccount> watcher = invocation.getArgument(0);
-                  watcher.onClose(mock(KubernetesClientException.class));
+                  watcher.onClose(mock(WatcherException.class));
                   return mock(Watch.class);
                 })
         .when(serviceAccountResource)

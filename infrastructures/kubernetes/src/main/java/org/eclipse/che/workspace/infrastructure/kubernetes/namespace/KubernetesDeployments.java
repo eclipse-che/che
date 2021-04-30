@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.CompletableFuture.allOf;
@@ -26,7 +27,6 @@ import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ContainerStateTerminated;
 import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectReference;
@@ -36,10 +36,10 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
@@ -296,12 +296,12 @@ public class KubernetesDeployments {
     Watch watch = null;
     try {
 
-      PodResource<Pod, DoneablePod> podResource =
+      PodResource<Pod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
 
       watch =
           podResource.watch(
-              new Watcher<Pod>() {
+              new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, Pod pod) {
                   if (predicate.test(pod)) {
@@ -310,7 +310,7 @@ public class KubernetesDeployments {
                 }
 
                 @Override
-                public void onClose(KubernetesClientException cause) {
+                public void onClose(WatcherException cause) {
                   future.completeExceptionally(
                       new InfrastructureException(
                           "Waiting for pod '" + podName + "' was interrupted"));
@@ -371,18 +371,18 @@ public class KubernetesDeployments {
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final String podName = getPodName(name);
-      final PodResource<Pod, DoneablePod> podResource =
+      final PodResource<Pod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       final Watch watch =
           podResource.watch(
-              new Watcher<Pod>() {
+              new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, Pod pod) {
                   handleStartingPodStatus(podRunningFuture, pod);
                 }
 
                 @Override
-                public void onClose(KubernetesClientException cause) {
+                public void onClose(WatcherException cause) {
                   podRunningFuture.completeExceptionally(
                       new InfrastructureException(
                           "Waiting for pod '" + podName + "' was interrupted"));
@@ -515,14 +515,14 @@ public class KubernetesDeployments {
   public void watch(PodActionHandler handler) throws InfrastructureException {
     if (podWatch == null) {
       final Watcher<Pod> watcher =
-          new Watcher<Pod>() {
+          new Watcher<>() {
             @Override
             public void eventReceived(Action action, Pod pod) {
               podActionHandlers.forEach(h -> h.handle(action, pod));
             }
 
             @Override
-            public void onClose(KubernetesClientException ignored) {}
+            public void onClose(WatcherException cause) {}
           };
       try {
         podWatch =
@@ -550,7 +550,7 @@ public class KubernetesDeployments {
   public void watchEvents(PodEventHandler handler) throws InfrastructureException {
     if (containerWatch == null) {
       final Watcher<Event> watcher =
-          new Watcher<Event>() {
+          new Watcher<>() {
             @Override
             public void eventReceived(Action action, Event event) {
               ObjectReference involvedObject = event.getInvolvedObject();
@@ -598,7 +598,7 @@ public class KubernetesDeployments {
             }
 
             @Override
-            public void onClose(KubernetesClientException ignored) {}
+            public void onClose(WatcherException ignored) {}
 
             /**
              * Returns the container name if the event is related to container. When the event is
@@ -631,7 +631,7 @@ public class KubernetesDeployments {
       try {
         watcherInitializationDate = new Date();
         containerWatch =
-            clientFactory.create(workspaceId).events().inNamespace(namespace).watch(watcher);
+            clientFactory.create(workspaceId).v1().events().inNamespace(namespace).watch(watcher);
       } catch (KubernetesClientException ex) {
         throw new KubernetesInfrastructureException(ex);
       }
@@ -931,7 +931,7 @@ public class KubernetesDeployments {
 
     Watch toCloseOnException = null;
     try {
-      ScalableResource<Deployment, DoneableDeployment> deploymentResource =
+      ScalableResource<Deployment> deploymentResource =
           clientFactory
               .create(workspaceId)
               .apps()
@@ -948,16 +948,16 @@ public class KubernetesDeployments {
       // If we have a Pod, we have to watch to make sure it is deleted, otherwise, we watch the
       // Deployment we are deleting.
       if (!Strings.isNullOrEmpty(podName)) {
-        PodResource<Pod, DoneablePod> podResource =
+        PodResource<Pod> podResource =
             clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
-        watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
+        watch = podResource.watch(new DeleteWatcher<>(deleteFuture));
         toCloseOnException = watch;
       } else {
         watch = deploymentResource.watch(new DeleteWatcher<Deployment>(deleteFuture));
         toCloseOnException = watch;
       }
 
-      Boolean deleteSucceeded = deploymentResource.withPropagationPolicy("Background").delete();
+      Boolean deleteSucceeded = deploymentResource.withPropagationPolicy(BACKGROUND).delete();
 
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
@@ -985,17 +985,17 @@ public class KubernetesDeployments {
   protected CompletableFuture<Void> doDeletePod(String podName) throws InfrastructureException {
     Watch toCloseOnException = null;
     try {
-      PodResource<Pod, DoneablePod> podResource =
+      PodResource<Pod> podResource =
           clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       if (podResource.get() == null) {
         throw new InfrastructureException(format("No pod found to delete for name %s", podName));
       }
 
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
-      final Watch watch = podResource.watch(new DeleteWatcher<Pod>(deleteFuture));
+      final Watch watch = podResource.watch(new DeleteWatcher<>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = podResource.withPropagationPolicy("Background").delete();
+      Boolean deleteSucceeded = podResource.withPropagationPolicy(BACKGROUND).delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
@@ -1105,7 +1105,7 @@ public class KubernetesDeployments {
     }
 
     @Override
-    public void onClose(KubernetesClientException cause) {
+    public void onClose(WatcherException cause) {
       future.completeExceptionally(
           new RuntimeException("Websocket connection closed before Pod creation event received"));
     }
@@ -1127,7 +1127,7 @@ public class KubernetesDeployments {
     }
 
     @Override
-    public void onClose(KubernetesClientException e) {
+    public void onClose(WatcherException e) {
       // if event about removing is received then this completion has no effect
       future.completeExceptionally(
           new RuntimeException(

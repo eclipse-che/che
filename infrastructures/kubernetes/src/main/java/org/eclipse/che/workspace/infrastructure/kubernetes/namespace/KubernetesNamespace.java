@@ -15,7 +15,7 @@ import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.HashMap;
 import java.util.Map;
@@ -309,11 +310,12 @@ public class KubernetesNamespace {
       Namespace namespace =
           client
               .namespaces()
-              .createNew()
-              .withNewMetadata()
-              .withName(namespaceName)
-              .endMetadata()
-              .done();
+              .create(
+                  new NamespaceBuilder()
+                      .withNewMetadata()
+                      .withName(namespaceName)
+                      .endMetadata()
+                      .build());
       waitDefaultServiceAccount(namespaceName, client);
       return namespace;
     } catch (KubernetesClientException e) {
@@ -329,7 +331,11 @@ public class KubernetesNamespace {
   private void delete(String namespaceName, KubernetesClient client)
       throws InfrastructureException {
     try {
-      client.namespaces().withName(namespaceName).withPropagationPolicy("Background").delete();
+      client
+          .namespaces()
+          .withName(namespaceName)
+          .withPropagationPolicy(DeletionPropagation.BACKGROUND)
+          .delete();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 404) {
         LOG.warn(
@@ -355,14 +361,14 @@ public class KubernetesNamespace {
     final CompletableFuture<ServiceAccount> future = new CompletableFuture<>();
     Watch watch = null;
     try {
-      final Resource<ServiceAccount, DoneableServiceAccount> saResource =
+      final Resource<ServiceAccount> saResource =
           client
               .serviceAccounts()
               .inNamespace(namespaceName)
               .withName(DEFAULT_SERVICE_ACCOUNT_NAME);
       watch =
           saResource.watch(
-              new Watcher<ServiceAccount>() {
+              new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, ServiceAccount serviceAccount) {
                   if (predicate.test(serviceAccount)) {
@@ -371,7 +377,7 @@ public class KubernetesNamespace {
                 }
 
                 @Override
-                public void onClose(KubernetesClientException cause) {
+                public void onClose(WatcherException cause) {
                   future.completeExceptionally(
                       new InfrastructureException(
                           "Waiting for service account '"
