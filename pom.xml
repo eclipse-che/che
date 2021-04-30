@@ -49,7 +49,7 @@
         <ch.qos.logback.version>1.2.1</ch.qos.logback.version>
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
         <com.fasterxml.jackson.core.jackson-databind.version>2.10.5.1</com.fasterxml.jackson.core.jackson-databind.version>
-        <com.fasterxml.jackson.core.version>2.10.3</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.core.version>2.11.2</com.fasterxml.jackson.core.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
@@ -60,7 +60,7 @@
         <com.h2database.version>1.4.196</com.h2database.version>
         <com.jayway.restassured.version>2.6.0</com.jayway.restassured.version>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
-        <com.squareup.okhttp3.version>3.12.6</com.squareup.okhttp3.version>
+        <com.squareup.okhttp3.version>3.12.12</com.squareup.okhttp3.version>
         <com.squareup.okio.version>1.15.0</com.squareup.okio.version>
         <commons-codec.version>1.11</commons-codec.version>
         <commons-compress.version>1.19</commons-compress.version>
@@ -69,7 +69,7 @@
         <commons-lang.version>2.6</commons-lang.version>
         <integration.mysql.db.image>quay.io/eclipse/che--centos--mysql-57-centos7:latest-e08ee4d43b7356607685b69bde6335e27cf20c020f345b6c6c59400183882764</integration.mysql.db.image>
         <integration.postgresql.db.image>quay.io/eclipse/che--centos--postgresql-96-centos7:9.6-b681d78125361519180a6ac05242c296f8906c11eab7e207b5ca9a89b6344392</integration.postgresql.db.image>
-        <io.fabric8.kubernetes-client>4.9.0</io.fabric8.kubernetes-client>
+        <io.fabric8.kubernetes-client>5.3.1</io.fabric8.kubernetes-client>
         <io.github.mweirauch.micrometer-jvm-extras.version>0.1.3</io.github.mweirauch.micrometer-jvm-extras.version>
         <io.jaegertracing.micrometer.version>1.0.0</io.jaegertracing.micrometer.version>
         <io.jaegertracing.version>1.0.0</io.jaegertracing.version>
