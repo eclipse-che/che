@@ -16,8 +16,8 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_CHE_USERID;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_URL;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.ANNOTATION_SCM_USERNAME;
+import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.DEFAULT_SECRET_ANNOTATIONS;
 import static org.eclipse.che.api.factory.server.scm.kubernetes.KubernetesGitCredentialManager.NAME_PATTERN;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.secret.KubernetesSecretAnnotationNames.ANNOTATION_GIT_CREDENTIALS;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -136,10 +136,10 @@ public class KubernetesGitCredentialManagerTest {
             "tid-23434",
             "token123");
 
-    Map<String, String> annotations = new HashMap<>();
+    Map<String, String> annotations = new HashMap<>(DEFAULT_SECRET_ANNOTATIONS);
+
     annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl());
     annotations.put(ANNOTATION_SCM_USERNAME, token.getScmUserName());
-    annotations.put(ANNOTATION_GIT_CREDENTIALS, "true");
     annotations.put(ANNOTATION_CHE_USERID, token.getCheUserId());
     ObjectMeta objectMeta =
         new ObjectMetaBuilder()
