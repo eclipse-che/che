@@ -59,7 +59,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
           "app.kubernetes.io/part-of", "che.eclipse.org",
           "app.kubernetes.io/component", "workspace-secret");
 
-  public static final Map<String, String> DEFAULT_SECRET_ANNOTATIONS =
+  static final Map<String, String> DEFAULT_SECRET_ANNOTATIONS =
       ImmutableMap.of(
           ANNOTATION_AUTOMOUNT,
           "true",
