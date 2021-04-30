@@ -1,0 +1,7 @@
+{
+  "resource_owner_id": 1,
+  "scope": ["api"],
+  "expires_in": null,
+  "application": {"uid": "1cb242f495280beb4291e64bee2a17f330902e499882fe8e1e2aa875519cab33"},
+  "created_at": 1575890427
+}
