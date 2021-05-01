@@ -125,7 +125,8 @@ public class KubernetesPreviewUrlCommandProvisionerTest {
     Service service = new Service();
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
-        Collections.singletonList(new ServicePort("a", null, port, "TCP", new IntOrString(port))));
+        Collections.singletonList(
+            new ServicePort(null, "a", null, port, "TCP", new IntOrString(port))));
     service.setSpec(spec);
     Mockito.when(mockServices.get()).thenReturn(Collections.singletonList(service));
 
@@ -158,7 +159,7 @@ public class KubernetesPreviewUrlCommandProvisionerTest {
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
         Collections.singletonList(
-            new ServicePort(SERVICE_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+            new ServicePort(null, SERVICE_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(spec);
     Mockito.when(mockServices.get()).thenReturn(Collections.singletonList(service));
 
@@ -170,7 +171,8 @@ public class KubernetesPreviewUrlCommandProvisionerTest {
             new HTTPIngressRuleValue(
                 Collections.singletonList(
                     new HTTPIngressPath(
-                        new IngressBackend("servicename", new IntOrString(SERVICE_PORT_NAME)),
+                        new IngressBackend(null, "servicename", new IntOrString(SERVICE_PORT_NAME)),
+                        null,
                         null))));
     ingressSpec.setRules(Collections.singletonList(rule));
     ingress.setSpec(ingressSpec);

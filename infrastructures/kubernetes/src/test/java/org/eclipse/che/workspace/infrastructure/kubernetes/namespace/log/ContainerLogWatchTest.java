@@ -20,11 +20,17 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.ContainerResource;
+import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
-import io.fabric8.kubernetes.client.dsl.internal.PodOperationsImpl;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.concurrent.CountDownLatch;
@@ -51,7 +57,20 @@ public class ContainerLogWatchTest {
 
   @Mock PodLogHandler podLogHandler;
 
-  @Mock PodOperationsImpl pods;
+  @Mock MixedOperation<Pod, PodList, PodResource<Pod>> pods;
+  PodResource<Pod> podResource;
+  ContainerResource<
+          LogWatch,
+          InputStream,
+          PipedOutputStream,
+          OutputStream,
+          PipedInputStream,
+          String,
+          ExecWatch,
+          Boolean,
+          InputStream,
+          Boolean>
+      containerResource;
 
   LogWatchMock logWatch;
 
@@ -61,9 +80,9 @@ public class ContainerLogWatchTest {
 
     when(client.pods()).thenReturn(pods);
     when(pods.inNamespace(namespace)).thenReturn(pods);
-    when(pods.withName(podname)).thenReturn(pods);
-    when(pods.inContainer(container)).thenReturn(pods);
-    when(pods.watchLog()).thenReturn(logWatch);
+    when(pods.withName(podname)).thenReturn(podResource);
+    when(podResource.inContainer(container)).thenReturn(containerResource);
+    when(containerResource.watchLog()).thenReturn(logWatch);
   }
 
   @Test
@@ -241,7 +260,7 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     // return error message logwatch first and regular message logwatch on second call
-    when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
+    when(containerResource.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
         new ContainerLogWatch(
@@ -295,7 +314,7 @@ public class ContainerLogWatchTest {
         .handle("message", container);
 
     // return null stream first and regular message stream on second call
-    when(pods.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
+    when(containerResource.watchLog()).thenReturn(logWatch).thenReturn(logWatchRegularMessage);
 
     ContainerLogWatch clw =
         new ContainerLogWatch(

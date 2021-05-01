@@ -36,8 +36,7 @@ import static org.testng.Assert.fail;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ContainerStateBuilder;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
-import io.fabric8.kubernetes.api.model.DoneableEvent;
-import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.EventList;
 import io.fabric8.kubernetes.api.model.LabelSelector;
@@ -49,7 +48,6 @@ import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentList;
 import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -98,22 +96,14 @@ public class KubernetesDeploymentsTest {
   @Mock private AppsAPIGroupDSL apps;
 
   @Mock
-  private MixedOperation<
-          Deployment,
-          DeploymentList,
-          DoneableDeployment,
-          RollableScalableResource<Deployment, DoneableDeployment>>
+  private MixedOperation<Deployment, DeploymentList, RollableScalableResource<Deployment>>
       deploymentsMixedOperation;
 
   @Mock
-  private NonNamespaceOperation<
-          Deployment,
-          DeploymentList,
-          DoneableDeployment,
-          RollableScalableResource<Deployment, DoneableDeployment>>
+  private NonNamespaceOperation<Deployment, DeploymentList, RollableScalableResource<Deployment>>
       deploymentsNamespaceOperation;
 
-  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
+  @Mock private RollableScalableResource<Deployment> deploymentResource;
   @Mock private Deployment deployment;
   @Mock private ObjectMeta deploymentMetadata;
   @Mock private DeploymentSpec deploymentSpec;
@@ -121,7 +111,7 @@ public class KubernetesDeploymentsTest {
   // Pod Mocks
   @Mock private Pod pod;
   @Mock private PodStatus status;
-  @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private PodResource<Pod> podResource;
   @Mock private ObjectMeta metadata;
   @Mock private MixedOperation podsMixedOperation;
   @Mock private NonNamespaceOperation podsNamespaceOperation;
@@ -133,13 +123,10 @@ public class KubernetesDeploymentsTest {
   @Mock private ObjectReference objectReference;
   @Mock private PodEventHandler podEventHandler;
 
-  @Mock
-  private MixedOperation<Event, EventList, DoneableEvent, Resource<Event, DoneableEvent>>
-      eventMixedOperation;
+  @Mock private MixedOperation<Event, EventList, Resource<Event>> eventMixedOperation;
 
   @Mock
-  private NonNamespaceOperation<Event, EventList, DoneableEvent, Resource<Event, DoneableEvent>>
-      eventNamespaceMixedOperation;
+  private NonNamespaceOperation<Event, EventList, Resource<Event>> eventNamespaceMixedOperation;
 
   @Captor private ArgumentCaptor<Watcher<Event>> eventWatcherCaptor;
 
@@ -177,7 +164,11 @@ public class KubernetesDeploymentsTest {
 
     // Model DSL: client.events().inNamespace(...).watch(...)
     //            event.getInvolvedObject().getKind()
-    when(kubernetesClient.events()).thenReturn(eventMixedOperation);
+    // -
+    // clientFactory.create(workspaceId).events().inNamespace(namespace).watch(watcher);
+    // +
+    // clientFactory.create(workspaceId).v1().events().inNamespace(namespace).watch(watcher);
+    // when(kubernetesClient.events()).thenReturn(eventMixedOperation);
     when(eventMixedOperation.inNamespace(any())).thenReturn(eventNamespaceMixedOperation);
     lenient().when(event.getInvolvedObject()).thenReturn(objectReference);
     lenient().when(event.getMetadata()).thenReturn(new ObjectMeta());
@@ -488,7 +479,9 @@ public class KubernetesDeploymentsTest {
     doReturn(POD_NAME).when(metadata).getName();
 
     doReturn(Boolean.FALSE).when(podResource).delete();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
+    doReturn(podResource)
+        .when(podResource)
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
@@ -503,7 +496,9 @@ public class KubernetesDeploymentsTest {
   public void testDeletePodThrowingKubernetesClientExceptionShouldCloseWatch() throws Exception {
     final String POD_NAME = "nonExistingPod";
     doReturn(POD_NAME).when(metadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
+    doReturn(podResource)
+        .when(podResource)
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
     doThrow(KubernetesClientException.class).when(podResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -524,8 +519,12 @@ public class KubernetesDeploymentsTest {
   public void testDeleteNonExistingDeploymentBeforeWatch() throws Exception {
     final String DEPLOYMENT_NAME = "nonExistingPod";
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
-    doReturn(podResource).when(podResource).withPropagationPolicy(eq("Background"));
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
+    doReturn(podResource)
+        .when(podResource)
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
+    doReturn(deploymentResource)
+        .when(deploymentResource)
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
     doReturn(Boolean.FALSE).when(deploymentResource).delete();
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
@@ -544,7 +543,9 @@ public class KubernetesDeploymentsTest {
     doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
 
     doThrow(KubernetesClientException.class).when(deploymentResource).delete();
-    doReturn(deploymentResource).when(deploymentResource).withPropagationPolicy(eq("Background"));
+    doReturn(deploymentResource)
+        .when(deploymentResource)
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 

@@ -26,8 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DoneableNamespace;
-import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
@@ -78,7 +77,7 @@ public class KubernetesNamespaceTest {
   @Mock private Executor executor;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
-  @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+  @Mock private Resource<ServiceAccount> serviceAccountResource;
 
   private KubernetesNamespace k8sNamespace;
 
@@ -461,14 +460,13 @@ public class KubernetesNamespaceTest {
   }
 
   private MetadataNested prepareCreateNamespaceRequest(Namespace ns) {
-    DoneableNamespace namespace = mock(DoneableNamespace.class);
     MetadataNested metadataNested = mock(MetadataNested.class);
 
-    lenient().doReturn(namespace).when(namespaceOperation).createNew();
-    lenient().doReturn(metadataNested).when(namespace).withNewMetadata();
+    //    lenient().doReturn(namespace).when(namespaceOperation).createNew();
+    //    lenient().doReturn(metadataNested).when(namespace).withNewMetadata();
     lenient().doReturn(metadataNested).when(metadataNested).withName(anyString());
-    lenient().doReturn(namespace).when(metadataNested).endMetadata();
-    lenient().doReturn(ns).when(namespace).done();
+    //    lenient().doReturn(namespace).when(metadataNested).endMetadata();
+    //    lenient().doReturn(ns).when(namespace).done();
     return metadataNested;
   }
 
@@ -478,7 +476,7 @@ public class KubernetesNamespaceTest {
     lenient()
         .doReturn(namespaceResource)
         .when(namespaceResource)
-        .withPropagationPolicy(eq("Background"));
+        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
