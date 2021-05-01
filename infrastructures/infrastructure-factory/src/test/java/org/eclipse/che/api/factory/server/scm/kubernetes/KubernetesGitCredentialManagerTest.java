@@ -29,8 +29,6 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -63,9 +61,7 @@ public class KubernetesGitCredentialManagerTest {
 
   @Mock NonNamespaceOperation<Secret, SecretList, Resource<Secret>> nonNamespaceOperation;
 
-  @Mock
-  private FilterWatchListDeletable<Secret, SecretList, Boolean, Watch, Watcher<Secret>>
-      filterWatchDeletable;
+  @Mock private FilterWatchListDeletable<Secret, SecretList> filterWatchDeletable;
 
   @Mock private SecretList secretList;
 
