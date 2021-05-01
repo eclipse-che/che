@@ -61,11 +61,11 @@ public class KubernetesGitCredentialManagerTest {
   @Mock private KubernetesClient kubeClient;
 
   @Mock
-  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
+  private MixedOperation<Secret, SecretList, Resource<Secret>>
       secretsMixedOperation;
 
   @Mock
-  NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
+  NonNamespaceOperation<Secret, SecretList, Resource<Secret>>
       nonNamespaceOperation;
 
   @Mock

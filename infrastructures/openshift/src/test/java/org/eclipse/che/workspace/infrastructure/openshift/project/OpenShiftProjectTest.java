@@ -82,7 +82,7 @@ public class OpenShiftProjectTest {
   @Mock private Executor executor;
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+  @Mock private Resource<ServiceAccount> serviceAccountResource;
 
   private OpenShiftProject openShiftProject;
 

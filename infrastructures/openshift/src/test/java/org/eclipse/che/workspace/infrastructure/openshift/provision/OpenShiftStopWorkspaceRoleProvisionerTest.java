@@ -64,7 +64,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
           OpenshiftRole,
           OpenshiftRoleList,
           DoneableOpenshiftRole,
-          Resource<OpenshiftRole, DoneableOpenshiftRole>>
+          Resource<OpenshiftRole>>
       mixedRoleOperation;
 
   @Mock
@@ -72,7 +72,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
           OpenshiftRoleBinding,
           OpenshiftRoleBindingList,
           DoneableOpenshiftRoleBinding,
-          Resource<OpenshiftRoleBinding, DoneableOpenshiftRoleBinding>>
+          Resource<OpenshiftRoleBinding>>
       mixedRoleBindingOperation;
 
   @Mock
@@ -80,7 +80,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
           OpenshiftRole,
           OpenshiftRoleList,
           DoneableOpenshiftRole,
-          Resource<OpenshiftRole, DoneableOpenshiftRole>>
+          Resource<OpenshiftRole>>
       nonNamespaceRoleOperation;
 
   @Mock
@@ -88,11 +88,11 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
           OpenshiftRoleBinding,
           OpenshiftRoleBindingList,
           DoneableOpenshiftRoleBinding,
-          Resource<OpenshiftRoleBinding, DoneableOpenshiftRoleBinding>>
+          Resource<OpenshiftRoleBinding>>
       nonNamespaceRoleBindingOperation;
 
-  @Mock private Resource<OpenshiftRole, DoneableOpenshiftRole> roleResource;
-  @Mock private Resource<OpenshiftRoleBinding, DoneableOpenshiftRoleBinding> roleBindingResource;
+  @Mock private Resource<OpenshiftRole> roleResource;
+  @Mock private Resource<OpenshiftRoleBinding> roleBindingResource;
   @Mock private OpenshiftRole mockRole;
   @Mock private OpenshiftRoleBinding mockRoleBinding;
 

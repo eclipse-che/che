@@ -73,15 +73,15 @@ public class OpenshiftTrustedCAProvisionerTest {
 
   @Mock
   private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
+          ConfigMap, ConfigMapList, Resource<ConfigMap>>
       cheServerConfigMapGetter1;
 
   @Mock
   private NonNamespaceOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
+          ConfigMap, ConfigMapList, Resource<ConfigMap>>
       cheServerConfigMapGetter2;
 
-  @Mock private Resource<ConfigMap, DoneableConfigMap> cheServerConfigMapResource;
+  @Mock private Resource<ConfigMap> cheServerConfigMapResource;
   @Mock private ConfigMap cheServerConfigMap;
   @Mock private ObjectMeta cheServerConfigMapMetadata;
 
