@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.DoneableConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -72,13 +71,10 @@ public class OpenshiftTrustedCAProvisionerTest {
   @Mock private CheInstallationLocation cheInstallationLocation;
 
   @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, Resource<ConfigMap>>
-      cheServerConfigMapGetter1;
+  private MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> cheServerConfigMapGetter1;
 
   @Mock
-  private NonNamespaceOperation<
-          ConfigMap, ConfigMapList, Resource<ConfigMap>>
+  private NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>>
       cheServerConfigMapGetter2;
 
   @Mock private Resource<ConfigMap> cheServerConfigMapResource;

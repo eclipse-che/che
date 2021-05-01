@@ -59,6 +59,7 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
+import io.fabric8.kubernetes.client.dsl.V1APIGroupDSL;
 import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
@@ -129,6 +130,7 @@ public class KubernetesDeploymentsTest {
   private NonNamespaceOperation<Event, EventList, Resource<Event>> eventNamespaceMixedOperation;
 
   @Captor private ArgumentCaptor<Watcher<Event>> eventWatcherCaptor;
+  @Mock private V1APIGroupDSL v1APIGroupDSL;
 
   private KubernetesDeployments kubernetesDeployments;
 
@@ -164,11 +166,8 @@ public class KubernetesDeploymentsTest {
 
     // Model DSL: client.events().inNamespace(...).watch(...)
     //            event.getInvolvedObject().getKind()
-    // -
-    // clientFactory.create(workspaceId).events().inNamespace(namespace).watch(watcher);
-    // +
-    // clientFactory.create(workspaceId).v1().events().inNamespace(namespace).watch(watcher);
-    // when(kubernetesClient.events()).thenReturn(eventMixedOperation);
+    when(kubernetesClient.v1()).thenReturn(v1APIGroupDSL);
+    when(v1APIGroupDSL.events()).thenReturn(eventMixedOperation);
     when(eventMixedOperation.inNamespace(any())).thenReturn(eventNamespaceMixedOperation);
     lenient().when(event.getInvolvedObject()).thenReturn(objectReference);
     lenient().when(event.getMetadata()).thenReturn(new ObjectMeta());

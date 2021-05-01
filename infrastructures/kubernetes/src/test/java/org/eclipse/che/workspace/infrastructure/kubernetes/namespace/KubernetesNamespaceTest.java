@@ -29,7 +29,6 @@ import static org.testng.Assert.assertTrue;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
-import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -51,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -111,10 +111,6 @@ public class KubernetesNamespaceTest {
   @Test
   public void testKubernetesNamespacePreparingWhenNamespaceExists() throws Exception {
     // given
-    MetadataNested namespaceMeta =
-        prepareCreateNamespaceRequest(
-            new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
-
     prepareNamespace(NAMESPACE);
     KubernetesNamespace namespace =
         new KubernetesNamespace(clientFactory, cheClientFactory, executor, NAMESPACE, WORKSPACE_ID);
@@ -123,15 +119,12 @@ public class KubernetesNamespaceTest {
     namespace.prepare(true, Map.of());
 
     // then
-    verify(namespaceMeta, never()).withName(NAMESPACE);
+    verify(namespaceOperation, never()).create(any(Namespace.class));
   }
 
   @Test
   public void testKubernetesNamespacePreparingCreationWhenNamespaceDoesNotExist() throws Exception {
     // given
-    MetadataNested namespaceMeta =
-        prepareCreateNamespaceRequest(
-            new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
 
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
@@ -142,7 +135,9 @@ public class KubernetesNamespaceTest {
     namespace.prepare(true, Map.of());
 
     // then
-    verify(namespaceMeta).withName(NAMESPACE);
+    ArgumentCaptor<Namespace> captor = ArgumentCaptor.forClass(Namespace.class);
+    verify(namespaceOperation).create(captor.capture());
+    Assert.assertEquals(captor.getValue().getMetadata().getName(), NAMESPACE);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -196,7 +191,7 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenFailedToGetNamespaceServiceAccounts()
       throws Exception {
-    prepareCreateNamespaceRequest();
+    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
@@ -208,7 +203,7 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenServiceAccountEventNotPublished()
       throws Exception {
-    prepareCreateNamespaceRequest();
+    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
@@ -219,7 +214,7 @@ public class KubernetesNamespaceTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenWatcherClosed() throws Exception {
-    prepareCreateNamespaceRequest();
+    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
@@ -239,9 +234,6 @@ public class KubernetesNamespaceTest {
 
   @Test
   public void testStopsWaitingServiceAccountEventJustAfterEventReceived() throws Exception {
-    prepareCreateNamespaceRequest();
-    prepareCreateNamespaceRequest(
-        new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
 
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
@@ -453,21 +445,6 @@ public class KubernetesNamespaceTest {
 
     // then
     verify(nonNamespaceOperation).createOrReplace(namespace);
-  }
-
-  private MetadataNested prepareCreateNamespaceRequest() {
-    return prepareCreateNamespaceRequest(new NamespaceBuilder().build());
-  }
-
-  private MetadataNested prepareCreateNamespaceRequest(Namespace ns) {
-    MetadataNested metadataNested = mock(MetadataNested.class);
-
-    //    lenient().doReturn(namespace).when(namespaceOperation).createNew();
-    //    lenient().doReturn(metadataNested).when(namespace).withNewMetadata();
-    lenient().doReturn(metadataNested).when(metadataNested).withName(anyString());
-    //    lenient().doReturn(namespace).when(metadataNested).endMetadata();
-    //    lenient().doReturn(ns).when(namespace).done();
-    return metadataNested;
   }
 
   private Resource prepareNamespaceResource(String namespaceName) {

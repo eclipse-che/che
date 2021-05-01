@@ -58,7 +58,9 @@ public class ContainerLogWatchTest {
   @Mock PodLogHandler podLogHandler;
 
   @Mock MixedOperation<Pod, PodList, PodResource<Pod>> pods;
-  PodResource<Pod> podResource;
+  @Mock PodResource<Pod> podResource;
+
+  @Mock
   ContainerResource<
           LogWatch,
           InputStream,

@@ -61,10 +61,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
 
   @Mock
   private MixedOperation<
-          OpenshiftRole,
-          OpenshiftRoleList,
-          DoneableOpenshiftRole,
-          Resource<OpenshiftRole>>
+          OpenshiftRole, OpenshiftRoleList, DoneableOpenshiftRole, Resource<OpenshiftRole>>
       mixedRoleOperation;
 
   @Mock
@@ -77,10 +74,7 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
 
   @Mock
   private NonNamespaceOperation<
-          OpenshiftRole,
-          OpenshiftRoleList,
-          DoneableOpenshiftRole,
-          Resource<OpenshiftRole>>
+          OpenshiftRole, OpenshiftRoleList, DoneableOpenshiftRole, Resource<OpenshiftRole>>
       nonNamespaceRoleOperation;
 
   @Mock

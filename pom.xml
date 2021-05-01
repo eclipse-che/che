@@ -314,12 +314,42 @@
             </dependency>
             <dependency>
                 <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model-apps</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model-batch</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model-core</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model-extensions</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-model-rbac</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-server-mock</artifactId>
                 <version>${io.fabric8.kubernetes-client}</version>
             </dependency>
             <dependency>
                 <groupId>io.fabric8</groupId>
                 <artifactId>openshift-client</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>openshift-model</artifactId>
                 <version>${io.fabric8.kubernetes-client}</version>
             </dependency>
             <dependency>
