@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -60,13 +59,9 @@ public class KubernetesGitCredentialManagerTest {
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubeClient;
 
-  @Mock
-  private MixedOperation<Secret, SecretList, Resource<Secret>>
-      secretsMixedOperation;
+  @Mock private MixedOperation<Secret, SecretList, Resource<Secret>> secretsMixedOperation;
 
-  @Mock
-  NonNamespaceOperation<Secret, SecretList, Resource<Secret>>
-      nonNamespaceOperation;
+  @Mock NonNamespaceOperation<Secret, SecretList, Resource<Secret>> nonNamespaceOperation;
 
   @Mock
   private FilterWatchListDeletable<Secret, SecretList, Boolean, Watch, Watcher<Secret>>
