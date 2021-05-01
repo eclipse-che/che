@@ -50,7 +50,7 @@ public class OpenShiftExternalServerExposerTest {
         "machine123",
         "service123",
         null,
-        new ServicePort("servicePort", null, null, "TCP", null),
+        new ServicePort(null, "servicePort", null, null, "TCP", null),
         servers);
 
     // then
@@ -82,7 +82,7 @@ public class OpenShiftExternalServerExposerTest {
         "machine123",
         "service123",
         null,
-        new ServicePort("servicePort", null, null, "TCP", null),
+        new ServicePort(null, "servicePort", null, null, "TCP", null),
         servers);
 
     // then

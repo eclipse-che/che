@@ -131,7 +131,8 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
     Service service = new Service();
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
-        Collections.singletonList(new ServicePort("a", null, port, "TCP", new IntOrString(port))));
+        Collections.singletonList(
+            new ServicePort(null, "a", null, port, "TCP", new IntOrString(port))));
     service.setSpec(spec);
     Mockito.when(mockServices.get()).thenReturn(Collections.singletonList(service));
 
@@ -163,7 +164,7 @@ public class OpenShiftPreviewUrlCommandProvisionerTest {
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
         Collections.singletonList(
-            new ServicePort("8080", null, port, "TCP", new IntOrString(port))));
+            new ServicePort(null, "8080", null, port, "TCP", new IntOrString(port))));
     service.setSpec(spec);
     Mockito.when(mockServices.get()).thenReturn(Collections.singletonList(service));
 

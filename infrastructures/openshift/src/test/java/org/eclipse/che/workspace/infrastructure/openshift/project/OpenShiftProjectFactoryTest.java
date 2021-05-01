@@ -37,15 +37,13 @@ import static org.testng.Assert.assertNull;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectBuilder;
 import io.fabric8.openshift.api.model.ProjectList;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.dsl.ProjectOperation;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +99,7 @@ public class OpenShiftProjectFactoryTest {
   @Mock private PreferenceManager preferenceManager;
   @Mock private KubernetesSharedPool pool;
 
-  @Mock private NonNamespaceOperation<Project, ProjectList, Resource<Project>> projectOperation;
+  @Mock private ProjectOperation projectOperation;
 
   @Mock private Resource<Project> projectResource;
 
@@ -109,9 +107,7 @@ public class OpenShiftProjectFactoryTest {
 
   private OpenShiftProjectFactory projectFactory;
 
-  @Mock
-  private FilterWatchListDeletable<Project, ProjectList, Boolean, Watch, Watcher<Project>>
-      projectListResource;
+  @Mock private FilterWatchListDeletable<Project, ProjectList> projectListResource;
 
   @Mock private ProjectList projectList;
 

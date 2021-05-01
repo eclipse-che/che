@@ -25,15 +25,13 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.openshift.api.model.DoneableOpenshiftRole;
-import io.fabric8.openshift.api.model.DoneableOpenshiftRoleBinding;
-import io.fabric8.openshift.api.model.OpenshiftRole;
-import io.fabric8.openshift.api.model.OpenshiftRoleBinding;
-import io.fabric8.openshift.api.model.OpenshiftRoleBindingBuilder;
-import io.fabric8.openshift.api.model.OpenshiftRoleBindingList;
-import io.fabric8.openshift.api.model.OpenshiftRoleBuilder;
-import io.fabric8.openshift.api.model.OpenshiftRoleList;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
+import io.fabric8.openshift.api.model.Role;
+import io.fabric8.openshift.api.model.RoleBinding;
+import io.fabric8.openshift.api.model.RoleBindingBuilder;
+import io.fabric8.openshift.api.model.RoleBindingList;
+import io.fabric8.openshift.api.model.RoleBuilder;
+import io.fabric8.openshift.api.model.RoleList;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.CheInstallationLocation;
@@ -59,39 +57,25 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
   @Mock private OpenShiftClient osClient;
   @Mock private KubernetesClient kubernetesClient;
 
-  @Mock
-  private MixedOperation<
-          OpenshiftRole, OpenshiftRoleList, DoneableOpenshiftRole, Resource<OpenshiftRole>>
-      mixedRoleOperation;
+  @Mock private MixedOperation<Role, RoleList, Resource<Role>> mixedRoleOperation;
 
   @Mock
-  private MixedOperation<
-          OpenshiftRoleBinding,
-          OpenshiftRoleBindingList,
-          DoneableOpenshiftRoleBinding,
-          Resource<OpenshiftRoleBinding>>
+  private MixedOperation<RoleBinding, RoleBindingList, Resource<RoleBinding>>
       mixedRoleBindingOperation;
 
-  @Mock
-  private NonNamespaceOperation<
-          OpenshiftRole, OpenshiftRoleList, DoneableOpenshiftRole, Resource<OpenshiftRole>>
-      nonNamespaceRoleOperation;
+  @Mock private NonNamespaceOperation<Role, RoleList, Resource<Role>> nonNamespaceRoleOperation;
 
   @Mock
-  private NonNamespaceOperation<
-          OpenshiftRoleBinding,
-          OpenshiftRoleBindingList,
-          DoneableOpenshiftRoleBinding,
-          Resource<OpenshiftRoleBinding>>
+  private NonNamespaceOperation<RoleBinding, RoleBindingList, Resource<RoleBinding>>
       nonNamespaceRoleBindingOperation;
 
-  @Mock private Resource<OpenshiftRole> roleResource;
-  @Mock private Resource<OpenshiftRoleBinding> roleBindingResource;
-  @Mock private OpenshiftRole mockRole;
-  @Mock private OpenshiftRoleBinding mockRoleBinding;
+  @Mock private Resource<Role> roleResource;
+  @Mock private Resource<RoleBinding> roleBindingResource;
+  @Mock private Role mockRole;
+  @Mock private RoleBinding mockRoleBinding;
 
-  private final OpenshiftRole expectedRole =
-      new OpenshiftRoleBuilder()
+  private final Role expectedRole =
+      new RoleBuilder()
           .withNewMetadata()
           .withName("workspace-stop")
           .endMetadata()
@@ -118,8 +102,8 @@ public class OpenShiftStopWorkspaceRoleProvisionerTest {
                   .build())
           .build();
 
-  private final OpenshiftRoleBinding expectedRoleBinding =
-      new OpenshiftRoleBindingBuilder()
+  private final RoleBinding expectedRoleBinding =
+      new RoleBindingBuilder()
           .withNewMetadata()
           .withName("che-workspace-stop")
           .withNamespace("developer-che")

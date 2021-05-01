@@ -86,7 +86,8 @@ public class OpenShiftPreviewUrlExposerTest {
     service.setMetadata(serviceMeta);
     ServiceSpec serviceSpec = new ServiceSpec();
     serviceSpec.setPorts(
-        singletonList(new ServicePort(SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+        singletonList(
+            new ServicePort(null, SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(serviceSpec);
 
     Route route = new Route();
@@ -127,7 +128,8 @@ public class OpenShiftPreviewUrlExposerTest {
     service.setMetadata(serviceMeta);
     ServiceSpec serviceSpec = new ServiceSpec();
     serviceSpec.setPorts(
-        singletonList(new ServicePort(SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+        singletonList(
+            new ServicePort(null, SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(serviceSpec);
 
     Map<String, Service> services = new HashMap<>();
