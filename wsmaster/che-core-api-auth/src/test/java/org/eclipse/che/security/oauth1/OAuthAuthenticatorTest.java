@@ -27,11 +27,8 @@ import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.ws.rs.core.UriBuilder;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-@Listeners({MockitoTestNGListener.class})
 public class OAuthAuthenticatorTest {
   private final String TEST_URI = "https://test-server";
   private final String STATE =
@@ -77,6 +74,7 @@ public class OAuthAuthenticatorTest {
             .willReturn(
                 aResponse()
                     .withBody("oauth_token=ab3cd9j4ks73hf7g&oauth_token_secret=xyz4992k83j47x0b")));
+
     String user = oAuthAuthenticator.callback(requestURL);
     verify(postRequestedFor(urlPathEqualTo("/access")));
     wireMockServer.stop();
