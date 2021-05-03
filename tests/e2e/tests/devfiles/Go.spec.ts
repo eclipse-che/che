@@ -11,12 +11,13 @@ import { CLASSES, WorkspaceNameHandler } from '../..';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
@@ -57,10 +58,10 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite(`'Language server validation'`, async () => {
-        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
-        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
-        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLanguageServerTests.suggestionInvoking(fileName, 42, 10, 'Parse');
+        commonLanguageServerTests.autocomplete(fileName, 42, 10, 'Parse');
+        commonLanguageServerTests.errorHighlighting(fileName, 'error;\n', 42);
+        // commonLanguageServerTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {

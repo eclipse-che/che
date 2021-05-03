@@ -10,13 +10,14 @@
 import 'reflect-metadata';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
 import { Editor, CLASSES } from '../..';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 
 const workspaceSampleName: string = 'cpp-hello-world';
 const fileFolderPath: string = `${workspaceSampleName}`;
@@ -34,7 +35,7 @@ suite(`${stack} test`, async () => {
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        prepareEditorForLSTests();
+        prepareEditorForLanguageServerTests();
     });
 
     suite('Validation of project build', async () => {
@@ -43,10 +44,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, `error_text;`, 12);
-        commonLsTests.suggestionInvoking(tabTitle, 15, 22, 'test');
-        commonLsTests.autocomplete(tabTitle, 15, 9, 'printf');
-        // commonLsTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
+        commonLanguageServerTests.errorHighlighting(tabTitle, `error_text;`, 12);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 15, 22, 'test');
+        commonLanguageServerTests.autocomplete(tabTitle, 15, 9, 'printf');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
     suite('Stopping and deleting the workspace', async () => {
@@ -62,7 +63,7 @@ suite(`${stack} test`, async () => {
 
 });
 
-export function prepareEditorForLSTests() {
+export function prepareEditorForLanguageServerTests() {
     test(`Prepare file for LS tests`, async () => {
         await editor.moveCursorToLineAndChar(tabTitle, 6, 1);
         await editor.performKeyCombination(tabTitle, '#include <cstdio>\n');

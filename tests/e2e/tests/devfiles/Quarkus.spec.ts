@@ -7,13 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
 
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const workspaceStack: string = 'Quarkus CLI';
 const workspaceSampleName: string = 'quarkus-quickstarts';
 const workspaceRootFolderName: string = 'getting-started-command-mode';
@@ -51,10 +53,10 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite(`'Language server validation'`, async () => {
-        commonLsTests.errorHighlighting(fileName, 'error_text;', 7);
-        commonLsTests.suggestionInvoking(fileName, 8, 33, 'String');
-        commonLsTests.autocomplete(fileName, 8, 33, 'String');
-        commonLsTests.codeNavigation(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.errorHighlighting(fileName, 'error_text;', 7);
+        commonLanguageServerTests.suggestionInvoking(fileName, 8, 33, 'String');
+        commonLanguageServerTests.autocomplete(fileName, 8, 33, 'String');
+        commonLanguageServerTests.codeNavigation(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
     });
 
     suite('Stop and remove workspace', async() => {

@@ -7,14 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
 
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const workspaceStack: string = 'Python';
 const workspaceSampleName: string = 'python-hello-world';
 
@@ -40,10 +42,10 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(fileName, `error_text;`, 7);
-        commonLsTests.suggestionInvoking(fileName, 9, 22, 'str');
-        commonLsTests.autocomplete(fileName, 9, 4, 'print');
-        // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the Python devfile
+        commonLanguageServerTests.errorHighlighting(fileName, `error_text;`, 7);
+        commonLanguageServerTests.suggestionInvoking(fileName, 9, 22, 'str');
+        commonLanguageServerTests.autocomplete(fileName, 9, 4, 'print');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the Python devfile
     });
 
     suite ('Stopping and deleting the workspace', async () => {

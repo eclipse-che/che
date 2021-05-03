@@ -8,12 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler} from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
 
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
@@ -39,10 +41,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
-        commonLsTests.errorHighlighting(tabTitle, 'error_text', 11);
-        commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 11);
+        commonLanguageServerTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
+        commonLanguageServerTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {

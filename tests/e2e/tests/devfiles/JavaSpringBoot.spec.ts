@@ -8,12 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
 
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const stack: string = 'Java Spring Boot';
 const workspaceSampleName: string = 'java-web-spring';
 const workspaceRootFolderName: string = 'src';
@@ -46,10 +48,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
-        commonLsTests.errorHighlighting(tabTitle, 'error_text', 30);
-        commonLsTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
-        commonLsTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
+        commonLanguageServerTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 30);
+        commonLanguageServerTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
     });
 
     suite('Stopping and deleting the workspace', async () => {

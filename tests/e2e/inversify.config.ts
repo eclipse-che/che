@@ -59,9 +59,9 @@ import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountI
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
 import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
 import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
+import { LanguageServerTests } from './testsLibrary/LanguageServerTests';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
-
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
@@ -115,5 +115,6 @@ e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
+e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageServerTests);
 
 export { e2eContainer };
