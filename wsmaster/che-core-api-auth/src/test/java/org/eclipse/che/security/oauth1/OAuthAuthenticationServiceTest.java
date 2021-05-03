@@ -64,6 +64,7 @@ public class OAuthAuthenticationServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .get(SECURE_PATH + "/oauth/1.0/callback");
+    assertEquals(response.statusCode(), 307);
     assertEquals(response.header("Location"), REDIRECT_URI);
   }
 
@@ -82,6 +83,7 @@ public class OAuthAuthenticationServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .get(SECURE_PATH + "/oauth/1.0/callback");
+    assertEquals(response.statusCode(), 307);
     assertEquals(response.header("Location"), REDIRECT_URI + "?error_code=access_denied");
   }
 
@@ -100,6 +102,7 @@ public class OAuthAuthenticationServiceTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .get(SECURE_PATH + "/oauth/1.0/callback");
+    assertEquals(response.statusCode(), 307);
     assertEquals(response.header("Location"), REDIRECT_URI + "?error_code=invalid_request");
   }
 }

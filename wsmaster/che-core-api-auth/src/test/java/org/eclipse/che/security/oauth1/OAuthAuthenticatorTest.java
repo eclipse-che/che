@@ -13,8 +13,10 @@ package org.eclipse.che.security.oauth1;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
@@ -39,7 +41,7 @@ public class OAuthAuthenticatorTest {
       new OAuthAuthenticator(
           "test-server",
           null,
-          "http://localhost:3301/access",
+          "http://localhost:3305/access",
           null,
           null,
           null,
@@ -59,9 +61,9 @@ public class OAuthAuthenticatorTest {
   public void shouldResolveCallbackWithUserId()
       throws MalformedURLException, OAuthAuthenticationException {
     WireMockServer wireMockServer =
-        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(3301));
+        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(3305));
     wireMockServer.start();
-    WireMock.configureFor("localhost", 3301);
+    WireMock.configureFor("localhost", 3305);
 
     URL requestURL =
         UriBuilder.fromUri(TEST_URI)
@@ -76,6 +78,7 @@ public class OAuthAuthenticatorTest {
                 aResponse()
                     .withBody("oauth_token=ab3cd9j4ks73hf7g&oauth_token_secret=xyz4992k83j47x0b")));
     String user = oAuthAuthenticator.callback(requestURL);
+    verify(postRequestedFor(urlPathEqualTo("/access")));
     wireMockServer.stop();
     assertEquals("user1", user);
   }
