@@ -23,13 +23,16 @@ import static org.testng.Assert.assertThrows;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.ws.rs.core.UriBuilder;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class OAuthAuthenticatorTest {
+  private WireMockServer wireMockServer;
+  private static final int PORT = 3305;
   private final String TEST_URI = "https://test-server";
   private final String STATE =
       "oauth_provider=test-server&request_method=POST&signature_method=rsa&userId=user1";
@@ -38,7 +41,7 @@ public class OAuthAuthenticatorTest {
       new OAuthAuthenticator(
           "test-server",
           null,
-          "http://localhost:3305/access",
+          "http://localhost:" + PORT + "/access",
           null,
           null,
           null,
@@ -54,14 +57,23 @@ public class OAuthAuthenticatorTest {
         }
       };
 
+  @BeforeClass
+  void start() {
+    wireMockServer = new WireMockServer(wireMockConfig().port(PORT));
+    wireMockServer.start();
+    WireMock.configureFor("localhost", PORT);
+  }
+
+  @AfterClass
+  void stop() {
+    if (wireMockServer != null) {
+      wireMockServer.stop();
+    }
+  }
+
   @Test
   public void shouldResolveCallbackWithUserId()
       throws MalformedURLException, OAuthAuthenticationException {
-    WireMockServer wireMockServer =
-        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(3305));
-    wireMockServer.start();
-    WireMock.configureFor("localhost", 3305);
-
     URL requestURL =
         UriBuilder.fromUri(TEST_URI)
             .queryParam("state", STATE)
@@ -77,7 +89,6 @@ public class OAuthAuthenticatorTest {
 
     String user = oAuthAuthenticator.callback(requestURL);
     verify(postRequestedFor(urlPathEqualTo("/access")));
-    wireMockServer.stop();
     assertEquals("user1", user);
   }
 
