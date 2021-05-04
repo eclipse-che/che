@@ -58,7 +58,8 @@ const CLASSES = {
     BrowserTabsUtil: 'BrowserTabsUtil',
     LanguageServerTests: 'LanguageServerTests',
     CodeExecutionTests: 'CodeExecutionTests',
-    ProjectAndFileTests: 'ProjectAndFileTests'
+    ProjectAndFileTests: 'ProjectAndFileTests',
+    WorkspaceHandlingTests: 'WorkspaceHandlingTests'
 };
 
 export { TYPES, CLASSES };

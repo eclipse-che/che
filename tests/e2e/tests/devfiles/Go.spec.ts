@@ -10,13 +10,14 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
@@ -40,7 +41,7 @@ suite(`${workspaceStack} test`, async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
             await preferencesHandler.setUseGoLanaguageServer();
         });
-        workspaceHandling.createAndOpenWorkspace(workspaceStack);
+        workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -73,7 +74,7 @@ suite(`${workspaceStack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

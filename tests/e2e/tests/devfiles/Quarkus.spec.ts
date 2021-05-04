@@ -9,12 +9,13 @@
  **********************************************************************/
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
@@ -31,7 +32,7 @@ const taskStartNative: string = 'Start Native';
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
-        workspaceHandling.createAndOpenWorkspace(workspaceStack);
+        workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -69,7 +70,7 @@ suite(`${workspaceStack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

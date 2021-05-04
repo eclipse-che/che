@@ -13,9 +13,10 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../..';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
@@ -52,10 +53,10 @@ suite('Workspace creation via factory url', async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
         test (`Stop workspace`, async () => {
-            await workspaceHandling.stopWorkspace(workspaceName);
+            await workspaceHandlingTests.stopWorkspace(workspaceName);
         });
         test (`Remove workspace`, async () => {
-            await workspaceHandling.removeWorkspace(workspaceName);
+            await workspaceHandlingTests.removeWorkspace(workspaceName);
         });
     });
 
