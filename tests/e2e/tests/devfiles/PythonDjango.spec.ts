@@ -7,11 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { e2eContainer } from '../../inversify.config';
+
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceStack: string = 'Python Django';
 const workspaceSampleName: string = 'django-realworld-example-app';
@@ -31,22 +34,22 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Set up venv', async () => {
-        codeExecutionHelper.runTask(taskSetUpVenv, 60_000);
-        codeExecutionHelper.closeTerminal(taskSetUpVenv);
+        codeExecutionTests.runTask(taskSetUpVenv, 60_000);
+        codeExecutionTests.closeTerminal(taskSetUpVenv);
     });
 
     suite('Install dependencies', async () => {
-        codeExecutionHelper.runTask(taskInstallDependencies, 60_000);
-        codeExecutionHelper.closeTerminal(taskInstallDependencies);
+        codeExecutionTests.runTask(taskInstallDependencies, 60_000);
+        codeExecutionTests.closeTerminal(taskInstallDependencies);
     });
 
     suite('Migrate Django application project', async () => {
-        codeExecutionHelper.runTask(taskMigrate, 30_000);
-        codeExecutionHelper.closeTerminal(taskMigrate);
+        codeExecutionTests.runTask(taskMigrate, 30_000);
+        codeExecutionTests.closeTerminal(taskMigrate);
     });
 
     suite('Run django server', async () => {
-        codeExecutionHelper.runTaskWithNotification(taskRunServer, taskExpectedDialogText, 30_000);
+        codeExecutionTests.runTaskWithNotification(taskRunServer, taskExpectedDialogText, 30_000);
     });
 
     suite ('Stopping and deleting the workspace', async () => {

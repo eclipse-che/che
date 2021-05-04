@@ -10,14 +10,15 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
@@ -48,13 +49,13 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Test golang example', async () => {
-        codeExecutionHelper.runTask(taskTestOutyet, 60_000);
-        codeExecutionHelper.closeTerminal(taskTestOutyet);
+        codeExecutionTests.runTask(taskTestOutyet, 60_000);
+        codeExecutionTests.closeTerminal(taskTestOutyet);
     });
 
     suite('Run golang example server', async () => {
-        codeExecutionHelper.runTaskWithNotification(taskRunServer, notificationText, 40_000);
-        codeExecutionHelper.runTask(taskStopServer, 5_000);
+        codeExecutionTests.runTaskWithNotification(taskRunServer, notificationText, 40_000);
+        codeExecutionTests.runTask(taskStopServer, 5_000);
     });
 
     suite(`'Language server validation'`, async () => {

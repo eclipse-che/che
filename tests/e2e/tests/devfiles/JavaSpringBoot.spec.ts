@@ -11,11 +11,13 @@ import 'reflect-metadata';
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+
 const stack: string = 'Java Spring Boot';
 const workspaceSampleName: string = 'java-web-spring';
 const workspaceRootFolderName: string = 'src';

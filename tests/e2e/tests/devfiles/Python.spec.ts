@@ -9,14 +9,16 @@
  **********************************************************************/
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+
 const workspaceStack: string = 'Python';
 const workspaceSampleName: string = 'python-hello-world';
 
@@ -37,8 +39,8 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite.skip('Run Python project', async () => {
-        codeExecutionHelper.runTask(taskRunName, 30_000);
-        codeExecutionHelper.closeTerminal(taskRunName);
+        codeExecutionTests.runTask(taskRunName, 30_000);
+        codeExecutionTests.closeTerminal(taskRunName);
     });
 
     suite('Language server validation', async () => {

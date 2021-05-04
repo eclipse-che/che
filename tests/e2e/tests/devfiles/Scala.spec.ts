@@ -10,12 +10,14 @@
 import 'reflect-metadata';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+
 const workspaceSampleName: string = 'console-scala-simple';
 const workspaceRootFolderName: string = 'example';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/src/main/scala/org/eclipse/che/examples`;

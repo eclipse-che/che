@@ -56,7 +56,8 @@ const CLASSES = {
     UpdateAccountInformationPage: 'UpdateAccountInformationPage',
     KubernetesPlugin: 'KubernetesPlugin',
     BrowserTabsUtil: 'BrowserTabsUtil',
-    LanguageServerTests: 'LanguageServerTests'
+    LanguageServerTests: 'LanguageServerTests',
+    CodeExecutionTests: 'CodeExecutionTests'
 };
 
 export { TYPES, CLASSES };

@@ -56,3 +56,4 @@ export * from './pageobjects/login/UpdateAccountInformationPage';
 export * from './pageobjects/openshift/CheLoginPage';
 export * from './pageobjects/openshift/OcpLoginPage';
 export * from './testsLibrary/LanguageServerTests';
+export * from './testsLibrary/CodeExecutionTests';

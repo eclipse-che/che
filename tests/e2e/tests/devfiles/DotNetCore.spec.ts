@@ -12,10 +12,11 @@ import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
 import { e2eContainer } from '../../inversify.config';
 import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const workspaceSampleName: string = 'dotnet-web-simple';

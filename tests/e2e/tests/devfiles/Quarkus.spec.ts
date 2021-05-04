@@ -9,13 +9,15 @@
  **********************************************************************/
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+
 const workspaceStack: string = 'Quarkus CLI';
 const workspaceSampleName: string = 'quarkus-quickstarts';
 const workspaceRootFolderName: string = 'getting-started-command-mode';
@@ -38,18 +40,18 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Package Quarkus application', async () => {
-        codeExecutionHelper.runTask(taskPackage, 180_000);
-        codeExecutionHelper.closeTerminal(taskPackage);
+        codeExecutionTests.runTask(taskPackage, 180_000);
+        codeExecutionTests.closeTerminal(taskPackage);
     });
 
     suite('Package Quarkus Native bundle', async () => {
-        codeExecutionHelper.runTask(taskPackageNative, 600_000);
-        codeExecutionHelper.closeTerminal(taskPackageNative);
+        codeExecutionTests.runTask(taskPackageNative, 600_000);
+        codeExecutionTests.closeTerminal(taskPackageNative);
     });
 
     // test is being skipped because of broken devfile, link: https://github.com/eclipse/che/issues/18982
     suite.skip('Start Quarkus Native application', async () => {
-        codeExecutionHelper.runTaskInputText(taskStartNative, 'Enter your name', 'Test User', 90_000);
+        codeExecutionTests.runTaskInputText(taskStartNative, 'Enter your name', 'Test User', 90_000);
     });
 
     suite(`'Language server validation'`, async () => {

@@ -9,13 +9,15 @@
  **********************************************************************/
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
 import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+
 const workspaceStack: string = 'NodeJS Express Web Application';
 const workspaceSampleName: string = 'nodejs-web-app';
 const workspaceRootFolderName: string = 'app';
@@ -39,12 +41,12 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Download dependencies', async () => {
-        codeExecutionHelper.runTask(taskDownloadDependencies, 60_000);
-        codeExecutionHelper.closeTerminal(taskDownloadDependencies);
+        codeExecutionTests.runTask(taskDownloadDependencies, 60_000);
+        codeExecutionTests.closeTerminal(taskDownloadDependencies);
     });
 
     suite('Run nodejs application', async () => {
-        codeExecutionHelper.runTaskWithNotification(taskRunWebApp, taskExpectedDialogText, 30_000);
+        codeExecutionTests.runTaskWithNotification(taskRunWebApp, taskExpectedDialogText, 30_000);
     });
 
     suite(`'Language server validation'`, async () => {
