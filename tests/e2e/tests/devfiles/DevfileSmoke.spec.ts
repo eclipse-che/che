@@ -8,10 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler} from '../..';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import { CLASSES, WorkspaceNameHandler } from '../..';
+import { e2eContainer } from '../../inversify.config';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
 const stack : string = 'Java Maven';

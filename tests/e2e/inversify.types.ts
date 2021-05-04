@@ -57,7 +57,8 @@ const CLASSES = {
     KubernetesPlugin: 'KubernetesPlugin',
     BrowserTabsUtil: 'BrowserTabsUtil',
     LanguageServerTests: 'LanguageServerTests',
-    CodeExecutionTests: 'CodeExecutionTests'
+    CodeExecutionTests: 'CodeExecutionTests',
+    ProjectAndFileTests: 'ProjectAndFileTests'
 };
 
 export { TYPES, CLASSES };

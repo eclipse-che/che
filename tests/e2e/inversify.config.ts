@@ -61,6 +61,7 @@ import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
 import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
 import { LanguageServerTests } from './testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from './testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from './testsLibrary/ProjectAndFileTests';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -118,5 +119,6 @@ e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformation
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
 e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageServerTests);
 e2eContainer.bind<CodeExecutionTests>(CLASSES.CodeExecutionTests).to(CodeExecutionTests);
+e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
 
 export { e2eContainer };

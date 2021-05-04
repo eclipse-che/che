@@ -10,11 +10,12 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
@@ -31,12 +32,12 @@ const taskStartNative: string = 'Start Native';
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite(`Test opening the file`, async () => {
         // opening file that soon should give time for LS to initialize
-        projectManager.openFile(fileFolderPath, fileName);
+        projectAndFileTests.openFile(fileFolderPath, fileName);
     });
 
     suite('Package Quarkus application', async () => {

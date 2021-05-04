@@ -14,8 +14,9 @@ import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../..';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 // the suite expect user to be logged in

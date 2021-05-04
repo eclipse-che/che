@@ -17,10 +17,11 @@ import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Key } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);

@@ -8,50 +8,59 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+import 'reflect-metadata';
+import { inject, injectable } from 'inversify';
 import { By } from 'selenium-webdriver';
-import { CLASSES, Ide, ProjectTree, Editor } from '..';
-import { e2eContainer } from '../inversify.config';
+import { Ide } from '../pageobjects/ide/Ide';
+import { ProjectTree } from '../pageobjects/ide/ProjectTree';
+import { Editor } from '../pageobjects/ide/Editor';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { DriverHelper } from '../utils/DriverHelper';
+import { CLASSES } from '../inversify.types';
 
-const ide: Ide = e2eContainer.get(CLASSES.Ide);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const editor: Editor = e2eContainer.get(CLASSES.Editor);
+@injectable()
+export class ProjectAndFileTests {
 
-export function waitWorkspaceReadiness(sampleName : string, folder: string) {
-    test('Wait for workspace readiness', async () => {
-        await ide.waitAndSwitchToIdeFrame();
-        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-        await projectTree.openProjectTreeContainer();
-        await projectTree.waitProjectImported(sampleName, folder);
-    });
-}
+    constructor(
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.ProjectTree) private readonly projectTree: ProjectTree,
+        @inject(CLASSES.Editor) private readonly editor: Editor) {}
 
-export function waitWorkspaceReadinessNoSubfolder(sampleName : string) {
-    test('Wait for workspace readiness', async () => {
-        await ide.waitAndSwitchToIdeFrame();
-        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-        await projectTree.openProjectTreeContainer();
-        await projectTree.waitProjectImportedNoSubfolder(sampleName);
-    });
-}
+    public waitWorkspaceReadiness(sampleName : string, folder: string) {
+        test('Wait for workspace readiness', async () => {
+            await this.ide.waitAndSwitchToIdeFrame();
+            await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await this.projectTree.openProjectTreeContainer();
+            await this.projectTree.waitProjectImported(sampleName, folder);
+        });
+    }
 
-export function openFile(filePath: string, fileName: string) {
-    test('Expand project and open file in editor', async () => {
-        await projectTree.expandPathAndOpenFile(filePath, fileName);
-        await editor.selectTab(fileName);
-    });
-}
+    public waitWorkspaceReadinessNoSubfolder(sampleName : string) {
+        test('Wait for workspace readiness', async () => {
+            await this.ide.waitAndSwitchToIdeFrame();
+            await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await this.projectTree.openProjectTreeContainer();
+            await this.projectTree.waitProjectImportedNoSubfolder(sampleName);
+        });
+    }
 
-export function checkFileNotExists(filePath: string) {
-    test('Check that file is not exist in project', async () => {
-        await projectTree.waitItemDisappearance(filePath);
-    });
-}
+    public openFile(filePath: string, fileName: string) {
+        test('Expand project and open file in editor', async () => {
+            await this.projectTree.expandPathAndOpenFile(filePath, fileName);
+            await this.editor.selectTab(fileName);
+        });
+    }
 
-export function checkProjectBranchName(branchName: string) {
-    test('Check branch name is ${}', async () => {
-        await driverHelper.waitVisibility(By.xpath(`//div[@id='theia-statusBar']/div//span[text()=' ${branchName}']`));
-    });
+    public checkFileNotExists(filePath: string) {
+        test('Check that file is not exist in project', async () => {
+            await this.projectTree.waitItemDisappearance(filePath);
+        });
+    }
+
+    public checkProjectBranchName(branchName: string) {
+        test('Check branch name is ${}', async () => {
+            await this.driverHelper.waitVisibility(By.xpath(`//div[@id='theia-statusBar']/div//span[text()=' ${branchName}']`));
+        });
+    }
 }

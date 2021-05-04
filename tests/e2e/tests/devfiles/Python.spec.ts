@@ -9,13 +9,13 @@
  **********************************************************************/
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
@@ -30,7 +30,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
+        projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
     suite('Test opening file', async () => {

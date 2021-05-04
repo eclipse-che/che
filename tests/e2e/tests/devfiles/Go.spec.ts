@@ -10,13 +10,14 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
@@ -40,12 +41,12 @@ suite(`${workspaceStack} test`, async () => {
             await preferencesHandler.setUseGoLanaguageServer();
         });
         workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
-        projectManager.openFile(fileFolderPath, fileName);
+        projectAndFileTests.openFile(fileFolderPath, fileName);
     });
 
     suite('Test golang example', async () => {

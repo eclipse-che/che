@@ -10,10 +10,11 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
 import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceStack: string = 'Python Django';
@@ -30,7 +31,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Set up venv', async () => {
