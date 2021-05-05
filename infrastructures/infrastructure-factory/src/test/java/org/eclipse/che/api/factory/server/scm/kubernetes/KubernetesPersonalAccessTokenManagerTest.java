@@ -145,17 +145,17 @@ public class KubernetesPersonalAccessTokenManagerTest {
     ObjectMeta meta1 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host1"))
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host1/"))
             .build();
     ObjectMeta meta2 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host2"))
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host2/"))
             .build();
     ObjectMeta meta3 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user2", ANNOTATION_SCM_URL, "http://host2"))
+                Map.of(ANNOTATION_CHE_USERID, "user2", ANNOTATION_SCM_URL, "http://host3/"))
             .build();
 
     Secret secret1 = new SecretBuilder().withMetadata(meta1).withData(data1).build();
@@ -173,7 +173,7 @@ public class KubernetesPersonalAccessTokenManagerTest {
 
     // then
     assertEquals(token.getCheUserId(), "user1");
-    assertEquals(token.getScmProviderUrl(), "http://host1");
+    assertEquals(token.getScmProviderUrl(), "http://host1/");
     assertEquals(token.getToken(), "token1");
   }
 

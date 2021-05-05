@@ -37,6 +37,7 @@ import org.eclipse.che.api.factory.server.scm.exception.UnknownScmProviderExcept
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.StringUtils;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
@@ -144,7 +145,8 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
         for (Secret secret : secrets) {
           Map<String, String> annotations = secret.getMetadata().getAnnotations();
           if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUser.getUserId())
-              && annotations.get(ANNOTATION_SCM_URL).equals(scmServerUrl)) {
+              && StringUtils.trimEnd(annotations.get(ANNOTATION_SCM_URL), '/')
+                  .equals(StringUtils.trimEnd(scmServerUrl, '/'))) {
             PersonalAccessToken token =
                 new PersonalAccessToken(
                     annotations.get(ANNOTATION_SCM_URL),
