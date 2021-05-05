@@ -20,10 +20,10 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 class GitlabAuthorizingFileContentProvider extends AuthorizingFileContentProvider<GitlabUrl> {
 
   GitlabAuthorizingFileContentProvider(
-      GitlabUrl githubUrl,
+      GitlabUrl gitlabUrl,
       URLFetcher urlFetcher,
       GitCredentialManager gitCredentialManager,
       PersonalAccessTokenManager personalAccessTokenManager) {
-    super(githubUrl, urlFetcher, personalAccessTokenManager, gitCredentialManager);
+    super(gitlabUrl, urlFetcher, personalAccessTokenManager, gitCredentialManager);
   }
 }

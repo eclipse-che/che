@@ -188,6 +188,11 @@ public abstract class OAuthAuthenticator {
       getAccessToken.consumerKey = clientId;
       getAccessToken.temporaryToken = oauthTemporaryToken;
       getAccessToken.verifier = (String) callbackUrl.getFirst(OAUTH_VERIFIER_PARAM_KEY);
+
+      if ("denied".equals(getAccessToken.verifier)) {
+        throw new UserDeniedOAuthAuthenticationException("Authorization denied");
+      }
+
       getAccessToken.transport = httpTransport;
       if (signatureMethod != null && "rsa".equalsIgnoreCase(signatureMethod)) {
         getAccessToken.signer = getOAuthRsaSigner();
@@ -197,7 +202,6 @@ public abstract class OAuthAuthenticator {
       }
 
       final OAuthCredentialsResponse credentials = getAccessToken.execute();
-
       String userId = getParameterFromState(state, USER_ID_PARAM_KEY);
 
       credentialsStoreLock.lock();
@@ -217,6 +221,8 @@ public abstract class OAuthAuthenticator {
 
       return userId;
 
+    } catch (OAuthAuthenticationException e) {
+      throw e;
     } catch (Exception e) {
       throw new OAuthAuthenticationException(e.getMessage());
     }
