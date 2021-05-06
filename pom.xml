@@ -303,17 +303,6 @@
             </dependency>
             <dependency>
                 <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jackson-module-jaxb-annotations</artifactId>
-                        <groupId>com.fasterxml.jackson.module</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-model-apps</artifactId>
                 <version>${io.fabric8.kubernetes-client}</version>
             </dependency>
