@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
-import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -237,7 +237,7 @@ public class CheNamespaceTest {
     when(kubeConfigMaps.inNamespace(CHE_NAMESPACE)).thenReturn(kubeConfigMapsInNamespace);
     when(kubeConfigMapsInNamespace.withLabel(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID))
         .thenReturn(kubeConfigMapsWithLabel);
-    when(kubeConfigMapsWithLabel.withPropagationPolicy(DeletionPropagation.BACKGROUND))
+    when(kubeConfigMapsWithLabel.withPropagationPolicy(BACKGROUND))
         .thenReturn(kubeConfigMapsWithPropagationPolicy);
 
     // when

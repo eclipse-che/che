@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,7 +27,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
@@ -453,7 +453,7 @@ public class KubernetesNamespaceTest {
     lenient()
         .doReturn(namespaceResource)
         .when(namespaceResource)
-        .withPropagationPolicy(eq(DeletionPropagation.BACKGROUND));
+        .withPropagationPolicy(eq(BACKGROUND));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());
