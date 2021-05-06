@@ -598,7 +598,7 @@ public class WorkspaceManagerTest {
     DevfileImpl devfile = mock(DevfileImpl.class);
     WorkspaceImpl workspace = createAndMockWorkspace(devfile, NAMESPACE_1, new HashMap<>());
     workspace.getAttributes().remove(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
-    when(runtimes.evalLegacyInfrastructureNamespace(any())).thenReturn("evaluated-legacy");
+    when(runtimes.evalInfrastructureNamespace(any())).thenReturn("evaluated-legacy");
 
     EnvironmentImpl environment = new EnvironmentImpl(null, emptyMap());
     Command command = new CommandImpl("cmd", "echo hello", "custom");
@@ -627,7 +627,7 @@ public class WorkspaceManagerTest {
             .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
         "evaluated-legacy");
     verify(runtimes)
-        .evalLegacyInfrastructureNamespace(
+        .evalInfrastructureNamespace(
             new NamespaceResolutionContext(workspace.getId(), USER_ID, NAMESPACE_1));
   }
 
@@ -708,7 +708,7 @@ public class WorkspaceManagerTest {
             .getAttributes()
             .get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE),
         "user-defined");
-    verify(runtimes, never()).evalLegacyInfrastructureNamespace(any());
+    verify(runtimes, never()).evalInfrastructureNamespace(any());
   }
 
   @Test

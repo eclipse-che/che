@@ -492,8 +492,7 @@ public class WorkspaceManager {
         workspace.getAttributes().get(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE);
     if (isNullOrEmpty(targetNamespace)) {
       try {
-        targetNamespace =
-            runtimes.evalLegacyInfrastructureNamespace(buildResolutionContext(workspace));
+        targetNamespace = runtimes.evalInfrastructureNamespace(buildResolutionContext(workspace));
         workspace
             .getAttributes()
             .put(WORKSPACE_INFRASTRUCTURE_NAMESPACE_ATTRIBUTE, targetNamespace);

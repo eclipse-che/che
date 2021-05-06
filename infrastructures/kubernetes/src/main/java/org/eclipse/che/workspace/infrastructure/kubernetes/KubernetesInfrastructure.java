@@ -79,12 +79,6 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
-      throws InfrastructureException {
-    return namespaceFactory.evaluateLegacyNamespaceName(resolutionContext);
-  }
-
-  @Override
   public boolean isNamespaceValid(String name) {
     return NamespaceNameValidator.isValid(name);
   }

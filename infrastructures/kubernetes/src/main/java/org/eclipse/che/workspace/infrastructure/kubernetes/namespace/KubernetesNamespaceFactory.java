@@ -31,7 +31,6 @@ import com.google.inject.Singleton;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +39,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Named;
@@ -58,7 +56,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.CheServerKubernetesClientFactory;
@@ -81,31 +78,24 @@ public class KubernetesNamespaceFactory {
 
   private static final Map<String, Function<NamespaceResolutionContext, String>>
       NAMESPACE_NAME_PLACEHOLDERS = new HashMap<>();
-  private static final Set<String> LEGACY_NAMESPACE_NAME_PLACEHOLDERS = new HashSet<>();
   private static final Set<String> REQUIRED_NAMESPACE_NAME_PLACEHOLDERS = new HashSet<>();
   private static final String USERNAME_PLACEHOLDER = "<username>";
   private static final String USERID_PLACEHOLDER = "<userid>";
-  private static final String WORKSPACEID_PLACEHOLDER = "<workspaceid>";
 
   static final String NAMESPACE_TEMPLATE_ATTRIBUTE = "infrastructureNamespaceTemplate";
 
   static {
     NAMESPACE_NAME_PLACEHOLDERS.put(USERNAME_PLACEHOLDER, NamespaceResolutionContext::getUserName);
     NAMESPACE_NAME_PLACEHOLDERS.put(USERID_PLACEHOLDER, NamespaceResolutionContext::getUserId);
-    NAMESPACE_NAME_PLACEHOLDERS.put(
-        WORKSPACEID_PLACEHOLDER, NamespaceResolutionContext::getWorkspaceId);
-    LEGACY_NAMESPACE_NAME_PLACEHOLDERS.add(WORKSPACEID_PLACEHOLDER);
     REQUIRED_NAMESPACE_NAME_PLACEHOLDERS.add(USERNAME_PLACEHOLDER);
     REQUIRED_NAMESPACE_NAME_PLACEHOLDERS.add(USERID_PLACEHOLDER);
   }
 
   private final String defaultNamespaceName;
-  private final boolean allowUserDefinedNamespaces;
   protected final boolean labelNamespaces;
   protected final Map<String, String> namespaceLabels;
   protected final Map<String, String> namespaceAnnotations;
 
-  private final String legacyNamespaceName;
   private final String serviceAccountName;
   private final Set<String> clusterRoleNames;
   private final KubernetesClientFactory clientFactory;
@@ -117,12 +107,9 @@ public class KubernetesNamespaceFactory {
 
   @Inject
   public KubernetesNamespaceFactory(
-      @Nullable @Named("che.infra.kubernetes.namespace") String legacyNamespaceName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       @Nullable @Named("che.infra.kubernetes.workspace_sa_cluster_roles") String clusterRoleNames,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
-      @Named("che.infra.kubernetes.namespace.allow_user_defined")
-          boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       @Named("che.infra.kubernetes.namespace.label") boolean labelNamespaces,
       @Named("che.infra.kubernetes.namespace.labels") String namespaceLabels,
@@ -135,12 +122,10 @@ public class KubernetesNamespaceFactory {
       throws ConfigurationException {
     this.namespaceCreationAllowed = namespaceCreationAllowed;
     this.userManager = userManager;
-    this.legacyNamespaceName = legacyNamespaceName;
     this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
     this.cheClientFactory = cheClientFactory;
     this.defaultNamespaceName = defaultNamespaceName;
-    this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
     this.preferenceManager = preferenceManager;
     this.sharedPool = sharedPool;
     this.labelNamespaces = labelNamespaces;
@@ -158,6 +143,15 @@ public class KubernetesNamespaceFactory {
 
     if (isNullOrEmpty(defaultNamespaceName)) {
       throw new ConfigurationException("che.infra.kubernetes.namespace.default must be configured");
+    } else if (REQUIRED_NAMESPACE_NAME_PLACEHOLDERS
+        .stream()
+        .noneMatch(defaultNamespaceName::contains)) {
+      throw new ConfigurationException(
+          format(
+              "Only 'per user' is allowed."
+                  + "Using the %s placeholder is required in the 'che.infra.kubernetes.namespace.default' parameter."
+                  + " The current value is: `%s`.",
+              Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS), defaultNamespaceName));
     }
 
     if (!isNullOrEmpty(clusterRoleNames)) {
@@ -167,7 +161,6 @@ public class KubernetesNamespaceFactory {
     } else {
       this.clusterRoleNames = Collections.emptySet();
     }
-    printLegacyWarningIfNeeded();
   }
 
   /**
@@ -188,36 +181,6 @@ public class KubernetesNamespaceFactory {
         clientFactory, cheClientFactory, sharedPool.getExecutor(), name, workspaceId);
   }
 
-  @ScheduleRate(period = 1, initialDelay = 1, unit = TimeUnit.HOURS)
-  private void printLegacyWarningIfNeeded() {
-    if (!isNullOrEmpty(legacyNamespaceName)) {
-      LOG.warn(
-          "The 'che.infra.kubernetes.namespace' configuration parameter has been deprecated "
-              + "and is subject to removal in future releases. The current value is: `{}`. Legacy workspaces located "
-              + "in this namespace may become unreachable in future releases. "
-              + "Please refer to the documentation about possible next steps.",
-          legacyNamespaceName);
-    }
-    if (LEGACY_NAMESPACE_NAME_PLACEHOLDERS.stream().anyMatch(defaultNamespaceName::contains)) {
-      LOG.warn(
-          "The 'che.infra.kubernetes.namespace.default' configuration parameter with the `{}` "
-              + "placeholder has been deprecated and is subject to removal in future releases."
-              + " The current value is: `{}`. Please refer to the documentation about "
-              + "possible next steps.",
-          LEGACY_NAMESPACE_NAME_PLACEHOLDERS,
-          defaultNamespaceName);
-    } else if (REQUIRED_NAMESPACE_NAME_PLACEHOLDERS
-        .stream()
-        .noneMatch(defaultNamespaceName::contains)) {
-      LOG.warn(
-          "Namespace strategies other than 'per user' have been deprecated and are subject to removal in future releases. "
-              + "Using the {} placeholder is required in the 'che.infra.kubernetes.namespace.default' parameter."
-              + " The current value is: `{}`.",
-          Joiner.on(" or ").join(REQUIRED_NAMESPACE_NAME_PLACEHOLDERS),
-          defaultNamespaceName);
-    }
-  }
-
   /**
    * Checks if the current user is able to use the specified namespace for their new workspaces.
    *
@@ -225,13 +188,8 @@ public class KubernetesNamespaceFactory {
    * @throws ValidationException if the specified namespace is not permitted for the current user
    */
   public void checkIfNamespaceIsAllowed(String namespaceName) throws ValidationException {
-    if (allowUserDefinedNamespaces) {
-      // any namespace name is allowed but workspace start may fail
-      return;
-    }
     NamespaceResolutionContext context =
         new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
-
     final String defaultNamespace =
         findStoredNamespace(context).orElse(evalPlaceholders(defaultNamespaceName, context));
     if (!namespaceName.equals(defaultNamespace)) {
@@ -241,7 +199,7 @@ public class KubernetesNamespaceFactory {
           throw new ValidationException(
               format(
                   "User defined namespaces are not allowed. Only the default namespace '%s' is available.",
-                  defaultNamespaceName));
+                  defaultNamespace));
         }
       } catch (InfrastructureException e) {
         throw new ValidationException("Some infrastructure failure caused failed validation.", e);
@@ -251,24 +209,16 @@ public class KubernetesNamespaceFactory {
 
   /** Returns list of k8s namespaces names where a user is able to run workspaces. */
   public List<KubernetesNamespaceMeta> list() throws InfrastructureException {
-    if (!allowUserDefinedNamespaces) {
-      NamespaceResolutionContext resolutionCtx =
-          new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
 
-      List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
-      if (!labeledNamespaces.isEmpty()) {
-        return labeledNamespaces;
-      } else {
-        return singletonList(getDefaultNamespace(resolutionCtx));
-      }
+    NamespaceResolutionContext resolutionCtx =
+        new NamespaceResolutionContext(EnvironmentContext.getCurrent().getSubject());
+
+    List<KubernetesNamespaceMeta> labeledNamespaces = findPreparedNamespaces(resolutionCtx);
+    if (!labeledNamespaces.isEmpty()) {
+      return labeledNamespaces;
+    } else {
+      return singletonList(getDefaultNamespace(resolutionCtx));
     }
-
-    // if user defined namespaces are allowed - fetch all available
-    List<KubernetesNamespaceMeta> namespaces = new ArrayList<>(fetchNamespaces());
-
-    provisionDefaultNamespace(namespaces);
-
-    return namespaces;
   }
 
   /**
@@ -394,29 +344,26 @@ public class KubernetesNamespaceFactory {
     if (!namespaceCreationAllowed) {
       return false;
     }
-    if (allowUserDefinedNamespaces) {
-      return true;
-    } else {
-      // we need to make sure that the provided namespace is indeed the one provided by our
-      // configuration
-      User owner;
-      try {
-        owner = userManager.getById(identity.getOwnerId());
-      } catch (NotFoundException | ServerException e) {
-        throw new InfrastructureException(
-            "Failed to resolve workspace owner. Cause: " + e.getMessage(), e);
-      }
 
-      String requiredNamespace = identity.getInfrastructureNamespace();
-
-      NamespaceResolutionContext resolutionContext =
-          new NamespaceResolutionContext(
-              identity.getWorkspaceId(), identity.getOwnerId(), owner.getName());
-
-      String resolvedDefaultNamespace = evaluateNamespaceName(resolutionContext);
-
-      return resolvedDefaultNamespace.equals(requiredNamespace);
+    // we need to make sure that the provided namespace is indeed the one provided by our
+    // configuration
+    User owner;
+    try {
+      owner = userManager.getById(identity.getOwnerId());
+    } catch (NotFoundException | ServerException e) {
+      throw new InfrastructureException(
+          "Failed to resolve workspace owner. Cause: " + e.getMessage(), e);
     }
+
+    String requiredNamespace = identity.getInfrastructureNamespace();
+
+    NamespaceResolutionContext resolutionContext =
+        new NamespaceResolutionContext(
+            identity.getWorkspaceId(), identity.getOwnerId(), owner.getName());
+
+    String resolvedDefaultNamespace = evaluateNamespaceName(resolutionContext);
+
+    return resolvedDefaultNamespace.equals(requiredNamespace);
   }
 
   /**
@@ -466,7 +413,7 @@ public class KubernetesNamespaceFactory {
               workspace.getId(),
               EnvironmentContext.getCurrent().getSubject().getUserId(),
               EnvironmentContext.getCurrent().getSubject().getUserName());
-      namespace = evaluateLegacyNamespaceName(resolutionCtx);
+      namespace = evaluateNamespaceName(resolutionCtx);
 
       LOG.warn(
           "Workspace '{}' doesn't have an explicit namespace assigned."
@@ -511,17 +458,6 @@ public class KubernetesNamespaceFactory {
       }
 
       // ok, we tried to recover the namespace but nothing helped.
-    }
-
-    return namespace;
-  }
-
-  public String evaluateLegacyNamespaceName(NamespaceResolutionContext resolutionCtx)
-      throws InfrastructureException {
-    String namespace = resolveLegacyNamespaceName(resolutionCtx);
-
-    if (!NamespaceNameValidator.isValid(namespace) || !checkNamespaceExists(namespace)) {
-      namespace = evaluateNamespaceName(resolutionCtx);
     }
 
     return namespace;
@@ -596,7 +532,7 @@ public class KubernetesNamespaceFactory {
    */
   private Optional<String> findStoredNamespace(NamespaceResolutionContext resolutionCtx) {
     Optional<Pair<String, String>> storedNamespace = getPreferencesNamespaceName(resolutionCtx);
-    if (storedNamespace.isPresent() && isStoredTemplateValid(storedNamespace.get().second)) {
+    if (storedNamespace.isPresent() && storedNamespace.get().second.equals(defaultNamespaceName)) {
       return Optional.of(storedNamespace.get().first);
     } else {
       return Optional.empty();
@@ -636,9 +572,8 @@ public class KubernetesNamespaceFactory {
         resolutionCtx.getWorkspaceId(),
         namespace);
 
-    if (!defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
-      recordEvaluatedNamespaceName(namespace, resolutionCtx);
-    }
+    recordEvaluatedNamespaceName(namespace, resolutionCtx);
+
     return namespace;
   }
 
@@ -723,13 +658,6 @@ public class KubernetesNamespaceFactory {
     if (isWorkspaceNamespaceManaged(namespace.getName(), workspace)) {
       namespace.delete();
     }
-  }
-
-  private String resolveLegacyNamespaceName(NamespaceResolutionContext resolutionCtx) {
-    String effectiveOldLogicNamespace =
-        isNullOrEmpty(legacyNamespaceName) ? WORKSPACEID_PLACEHOLDER : legacyNamespaceName;
-
-    return evalPlaceholders(effectiveOldLogicNamespace, resolutionCtx);
   }
 
   protected boolean checkNamespaceExists(String namespaceName) throws InfrastructureException {
@@ -826,19 +754,6 @@ public class KubernetesNamespaceFactory {
         Math.min(
             namespaceName.length(),
             METADATA_NAME_MAX_LENGTH)); // limit length to METADATA_NAME_MAX_LENGTH
-  }
-
-  /**
-   * Checks that current template does not contains workspace id and compares current and stored
-   * template checksum.
-   */
-  private boolean isStoredTemplateValid(String storedNamespaceTemplate) {
-    if (defaultNamespaceName.contains(WORKSPACEID_PLACEHOLDER)) {
-      // we must never use stored namespace if there is workspaceid placeholder
-      return false;
-    }
-    // check that template didn't changed yet, otherwise, we cannot use stored value anymore
-    return storedNamespaceTemplate.equals(defaultNamespaceName);
   }
 
   @VisibleForTesting

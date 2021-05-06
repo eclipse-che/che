@@ -165,11 +165,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -189,11 +187,9 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -218,11 +214,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -246,11 +240,9 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -271,11 +263,9 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionIfNoDefaultNamespaceIsConfigured() {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             null,
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -323,11 +313,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che-default",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -368,11 +356,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che-default",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -400,11 +386,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che-default",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -436,11 +420,9 @@ public class KubernetesNamespaceFactoryTest {
             .build());
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che-default",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -466,11 +448,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che-default",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -500,11 +480,9 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetInfoAboutDefaultNamespace() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "che",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -528,11 +506,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "default",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -565,11 +541,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "default",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -604,11 +578,9 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldThrowExceptionWhenFailedToGetNamespaces() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "predefined",
             "",
             "",
             "default_ns",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -636,11 +608,9 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "predefined",
                 "",
                 "",
                 "new-default",
-                false,
                 true,
                 true,
                 NAMESPACE_LABELS,
@@ -670,11 +640,9 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "predefined",
                 "",
                 "",
                 "new-default",
-                true,
                 false,
                 true,
                 NAMESPACE_LABELS,
@@ -705,11 +673,9 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "",
                 "serviceAccount",
                 "",
                 "<workspaceid>",
-                false,
                 true,
                 true,
                 NAMESPACE_LABELS,
@@ -744,11 +710,9 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "",
                 "serviceAccount",
                 "cr2, cr3",
                 "<workspaceid>",
-                false,
                 true,
                 true,
                 NAMESPACE_LABELS,
@@ -815,11 +779,9 @@ public class KubernetesNamespaceFactoryTest {
     namespaceFactory =
         spy(
             new KubernetesNamespaceFactory(
-                "",
                 "serviceAccount",
                 "",
                 "<workspaceid>",
-                false,
                 true,
                 true,
                 NAMESPACE_LABELS,
@@ -873,11 +835,9 @@ public class KubernetesNamespaceFactoryTest {
   public void testNullClusterRolesResultsInEmptySet() {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             null,
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -894,11 +854,9 @@ public class KubernetesNamespaceFactoryTest {
   public void testClusterRolesProperlyParsed() {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "  one,two, three ,,five  ",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -919,11 +877,9 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -948,11 +904,9 @@ public class KubernetesNamespaceFactoryTest {
   public void testEvalNamespaceUsesNamespaceFromUserPreferencesIfExist() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "",
             "che-<userid>",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -980,11 +934,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "",
             "che-<userid>-<username>",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1013,11 +965,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "",
             "che-<userid>-<username>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1046,11 +996,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>--",
             "",
             "",
             "che-<workspaceid>-<username>",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1079,11 +1027,9 @@ public class KubernetesNamespaceFactoryTest {
           throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
-            true,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1108,11 +1054,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1139,11 +1083,9 @@ public class KubernetesNamespaceFactoryTest {
   public void testEvalNamespaceTreatsWorkspaceRecordedNamespaceLiterally() throws Exception {
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "blabol-<userid>-<username>-<userid>-<username>",
             "",
             "",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1192,11 +1134,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1231,11 +1171,9 @@ public class KubernetesNamespaceFactoryTest {
 
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "defaultNs",
-            false,
             true,
             true,
             "try_placeholder_here=<username>",
@@ -1257,9 +1195,7 @@ public class KubernetesNamespaceFactoryTest {
         new KubernetesNamespaceFactory(
             "",
             "",
-            "",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1278,9 +1214,7 @@ public class KubernetesNamespaceFactoryTest {
         new KubernetesNamespaceFactory(
             "",
             "",
-            "",
             "che-<userid>",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1305,11 +1239,9 @@ public class KubernetesNamespaceFactoryTest {
     // run your test
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            "legacy",
             "",
             "",
             "<userid>-che",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1330,11 +1262,9 @@ public class KubernetesNamespaceFactoryTest {
     // run your test
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            null,
             "",
             "",
             "che-che",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
@@ -1355,11 +1285,9 @@ public class KubernetesNamespaceFactoryTest {
     // run your test
     namespaceFactory =
         new KubernetesNamespaceFactory(
-            null,
             "",
             "",
             "<workspaceid>-che",
-            false,
             true,
             true,
             NAMESPACE_LABELS,
