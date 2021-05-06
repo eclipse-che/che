@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.30.0-SNAPSHOT</version>
+        <version>7.30.1-SNAPSHOT</version>
     </parent>
     <artifactId>infrastructure-kubernetes</artifactId>
     <name>Infrastructure :: Kubernetes</name>
