@@ -1234,29 +1234,6 @@ public class KubernetesNamespaceFactoryTest {
   }
 
   @Test(enabled = false)
-  public void shouldPrintWarnMessageAboutLegacyNamespaceName() {
-
-    // run your test
-    namespaceFactory =
-        new KubernetesNamespaceFactory(
-            "",
-            "",
-            "<userid>-che",
-            true,
-            true,
-            NAMESPACE_LABELS,
-            NAMESPACE_ANNOTATIONS,
-            clientFactory,
-            cheClientFactory,
-            userManager,
-            preferenceManager,
-            pool);
-
-    assertEqualsMessage(
-        "The 'che.infra.kubernetes.namespace' configuration parameter has been deprecated and is subject to removal in future releases. The current value is: `{}`. Legacy workspaces located in this namespace may become unreachable in future releases. Please refer to the documentation about possible next steps.");
-  }
-
-  @Test(enabled = false)
   public void shouldPrintWarnMessageAboutMissingRequiredPlaceholders() {
 
     // run your test

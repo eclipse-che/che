@@ -76,8 +76,6 @@ public class AsyncStoragePodWatcher {
       WorkspaceRuntimes runtimes,
       @Named("che.infra.kubernetes.async.storage.shutdown_timeout_min") long shutdownTimeoutMin,
       @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
-      @Named("che.infra.kubernetes.namespace.allow_user_defined")
-          boolean allowUserDefinedNamespaces,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.limits.user.workspaces.run.count") int runtimesPerUser) {
     this.kubernetesClientFactory = kubernetesClientFactory;
@@ -87,8 +85,7 @@ public class AsyncStoragePodWatcher {
     this.shutdownTimeoutSec = MINUTES.toSeconds(shutdownTimeoutMin);
 
     isAsyncStoragePodCanBeRun =
-        isAsyncStoragePodCanBeRun(
-            pvcStrategy, allowUserDefinedNamespaces, defaultNamespaceName, runtimesPerUser);
+        isAsyncStoragePodCanBeRun(pvcStrategy, defaultNamespaceName, runtimesPerUser);
   }
 
   /**
@@ -97,18 +94,13 @@ public class AsyncStoragePodWatcher {
    *
    * <ul>
    *   <li>che.infra.kubernetes.namespace.default=<username>-che
-   *   <li>che.infra.kubernetes.namespace.allow_user_defined=false
    *   <li>che.infra.kubernetes.pvc.strategy=common
    *   <li>che.limits.user.workspaces.run.count=1
    * </ul>
    */
   private boolean isAsyncStoragePodCanBeRun(
-      String pvcStrategy,
-      boolean allowUserDefinedNamespaces,
-      String defaultNamespaceName,
-      int runtimesPerUser) {
-    return !allowUserDefinedNamespaces
-        && COMMON_STRATEGY.equals(pvcStrategy)
+      String pvcStrategy, String defaultNamespaceName, int runtimesPerUser) {
+    return COMMON_STRATEGY.equals(pvcStrategy)
         && runtimesPerUser == 1
         && !isNullOrEmpty(defaultNamespaceName)
         && defaultNamespaceName.contains("<username>");
