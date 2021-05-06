@@ -7,12 +7,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceStack: string = 'NodeJS Express Web Application';
 const workspaceSampleName: string = 'nodejs-web-app';
@@ -27,29 +33,29 @@ const taskExpectedDialogText: string = 'Process nodejs is now listening on port 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack}`, async () => {
-        workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
-        projectManager.openFile(fileFolderPath, fileName);
+        projectAndFileTests.openFile(fileFolderPath, fileName);
     });
 
     suite('Download dependencies', async () => {
-        codeExecutionHelper.runTask(taskDownloadDependencies, 60_000);
-        codeExecutionHelper.closeTerminal(taskDownloadDependencies);
+        codeExecutionTests.runTask(taskDownloadDependencies, 60_000);
+        codeExecutionTests.closeTerminal(taskDownloadDependencies);
     });
 
     suite('Run nodejs application', async () => {
-        codeExecutionHelper.runTaskWithNotification(taskRunWebApp, taskExpectedDialogText, 30_000);
+        codeExecutionTests.runTaskWithNotification(taskRunWebApp, taskExpectedDialogText, 30_000);
     });
 
     suite(`'Language server validation'`, async () => {
-        commonLsTests.errorHighlighting(fileName, 'error text;\n', 17);
-        commonLsTests.suggestionInvoking(fileName, 15, 20, 'require');
-        commonLsTests.autocomplete(fileName, 15, 20, 'require');
-        // commonLsTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLanguageServerTests.errorHighlighting(fileName, 'error text;\n', 17);
+        commonLanguageServerTests.suggestionInvoking(fileName, 15, 20, 'require');
+        commonLanguageServerTests.autocomplete(fileName, 15, 20, 'require');
+        // commonLanguageServerTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {
@@ -59,7 +65,7 @@ suite(`${workspaceStack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

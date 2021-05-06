@@ -59,9 +59,12 @@ import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountI
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
 import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
 import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
+import { LanguageServerTests } from './testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from './testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from './testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from './testsLibrary/WorkspaceHandlingTests';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
-
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
@@ -115,5 +118,9 @@ e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
+e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageServerTests);
+e2eContainer.bind<CodeExecutionTests>(CLASSES.CodeExecutionTests).to(CodeExecutionTests);
+e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
+e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 
 export { e2eContainer };
