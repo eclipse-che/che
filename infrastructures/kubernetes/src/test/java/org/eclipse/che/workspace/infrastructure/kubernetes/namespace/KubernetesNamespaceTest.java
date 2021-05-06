@@ -191,7 +191,6 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenFailedToGetNamespaceServiceAccounts()
       throws Exception {
-    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
@@ -203,7 +202,6 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenServiceAccountEventNotPublished()
       throws Exception {
-    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
@@ -214,7 +212,6 @@ public class KubernetesNamespaceTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenWatcherClosed() throws Exception {
-    // prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
