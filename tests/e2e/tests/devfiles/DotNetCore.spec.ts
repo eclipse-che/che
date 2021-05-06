@@ -10,11 +10,15 @@
 import 'reflect-metadata';
 import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
 import { e2eContainer } from '../../inversify.config';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const workspaceSampleName: string = 'dotnet-web-simple';
@@ -29,14 +33,14 @@ const runTaskNameExpectedString: string = 'Process 5000-tcp is now listening on 
 
 suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        prepareEditorForLSTests();
+        prepareEditorForLanguageServerTests();
     });
 
     suite('Installing dependencies', async () => {
@@ -54,10 +58,10 @@ suite(`Test ${stack}`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.suggestionInvoking(tabTitle, 22, 33, 'test');
-        commonLsTests.errorHighlighting(tabTitle, 'error_text;', 23);
-        commonLsTests.autocomplete(tabTitle, 22, 27, 'WriteLine');
-        // commonLsTests.codeNavigation(tabTitle, 22, 27, codeNavigationClassName); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 22, 33, 'test');
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text;', 23);
+        commonLanguageServerTests.autocomplete(tabTitle, 22, 27, 'WriteLine');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 22, 27, codeNavigationClassName); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -67,12 +71,12 @@ suite(`Test ${stack}`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });
 
-export function prepareEditorForLSTests() {
+export function prepareEditorForLanguageServerTests() {
     test(`Prepare file for LS tests`, async () => {
         await editor.moveCursorToLineAndChar(tabTitle, 18, 6);
         await editor.performKeyCombination(tabTitle, '\nprivate static String test = "test";');
