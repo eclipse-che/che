@@ -8,14 +8,18 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
 import { Editor, CLASSES } from '../..';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const workspaceSampleName: string = 'cpp-hello-world';
@@ -27,14 +31,14 @@ const stack: string = 'C/C++';
 
 suite(`${stack} test`, async () => {
     suite(`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        prepareEditorForLSTests();
+        prepareEditorForLanguageServerTests();
     });
 
     suite('Validation of project build', async () => {
@@ -43,10 +47,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, `error_text;`, 12);
-        commonLsTests.suggestionInvoking(tabTitle, 15, 22, 'test');
-        commonLsTests.autocomplete(tabTitle, 15, 9, 'printf');
-        // commonLsTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
+        commonLanguageServerTests.errorHighlighting(tabTitle, `error_text;`, 12);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 15, 22, 'test');
+        commonLanguageServerTests.autocomplete(tabTitle, 15, 9, 'printf');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
     suite('Stopping and deleting the workspace', async () => {
@@ -56,13 +60,13 @@ suite(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 
 });
 
-export function prepareEditorForLSTests() {
+export function prepareEditorForLanguageServerTests() {
     test(`Prepare file for LS tests`, async () => {
         await editor.moveCursorToLineAndChar(tabTitle, 6, 1);
         await editor.performKeyCombination(tabTitle, '#include <cstdio>\n');

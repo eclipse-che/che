@@ -8,11 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler } from '../..';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { CLASSES, WorkspaceNameHandler } from '../..';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const stack: string = 'Java Spring Boot';
 const workspaceSampleName: string = 'java-web-spring';
@@ -26,7 +32,7 @@ const runTaskExpectedDialogue: string = 'Process 8080-tcp is now listening on po
 
 suite(`${stack} test`, async () => {
     suite(`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -46,10 +52,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
-        commonLsTests.errorHighlighting(tabTitle, 'error_text', 30);
-        commonLsTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
-        commonLsTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
+        commonLanguageServerTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 30);
+        commonLanguageServerTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
     });
 
     suite('Stopping and deleting the workspace', async () => {
@@ -59,7 +65,7 @@ suite(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

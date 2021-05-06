@@ -8,11 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler} from '../..';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
+import { CLASSES, WorkspaceNameHandler } from '../..';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
@@ -24,7 +30,7 @@ const taskName: string = 'maven build';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -39,10 +45,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
-        commonLsTests.errorHighlighting(tabTitle, 'error_text', 11);
-        commonLsTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLsTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 11);
+        commonLanguageServerTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
+        commonLanguageServerTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -52,7 +58,7 @@ suite(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

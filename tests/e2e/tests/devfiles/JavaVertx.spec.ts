@@ -8,11 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceSampleName: string = 'vertx-http-example';
 const workspaceRootFolderName: string = 'src';
@@ -24,7 +30,7 @@ const stack: string = 'Java Vert.x';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -39,10 +45,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, 'error_text;', 20);
-        commonLsTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
-        commonLsTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text;', 20);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
+        commonLanguageServerTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
+        commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -52,7 +58,7 @@ suite(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

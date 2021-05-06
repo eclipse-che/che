@@ -10,13 +10,17 @@
 import { CLASSES, WorkspaceNameHandler } from '../..';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
-import * as codeExecutionHelper from '../../testsLibrary/CodeExecutionTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as projectManager from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorksapceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
@@ -37,30 +41,30 @@ suite(`${workspaceStack} test`, async () => {
             Logger.warn(`Manually setting a preference for golang devfile LS based on issue: https://github.com/eclipse/che/issues/16113`);
             await preferencesHandler.setUseGoLanaguageServer();
         });
-        workspaceHandling.createAndOpenWorkspace(workspaceStack);
-        projectManager.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
-        projectManager.openFile(fileFolderPath, fileName);
+        projectAndFileTests.openFile(fileFolderPath, fileName);
     });
 
     suite('Test golang example', async () => {
-        codeExecutionHelper.runTask(taskTestOutyet, 60_000);
-        codeExecutionHelper.closeTerminal(taskTestOutyet);
+        codeExecutionTests.runTask(taskTestOutyet, 60_000);
+        codeExecutionTests.closeTerminal(taskTestOutyet);
     });
 
     suite('Run golang example server', async () => {
-        codeExecutionHelper.runTaskWithNotification(taskRunServer, notificationText, 40_000);
-        codeExecutionHelper.runTask(taskStopServer, 5_000);
+        codeExecutionTests.runTaskWithNotification(taskRunServer, notificationText, 40_000);
+        codeExecutionTests.runTask(taskStopServer, 5_000);
     });
 
     suite(`'Language server validation'`, async () => {
-        commonLsTests.suggestionInvoking(fileName, 42, 10, 'Parse');
-        commonLsTests.autocomplete(fileName, 42, 10, 'Parse');
-        commonLsTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLsTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        commonLanguageServerTests.suggestionInvoking(fileName, 42, 10, 'Parse');
+        commonLanguageServerTests.autocomplete(fileName, 42, 10, 'Parse');
+        commonLanguageServerTests.errorHighlighting(fileName, 'error;\n', 42);
+        // commonLanguageServerTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {
@@ -70,7 +74,7 @@ suite(`${workspaceStack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

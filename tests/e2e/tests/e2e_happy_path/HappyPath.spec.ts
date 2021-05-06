@@ -24,13 +24,14 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -83,7 +84,7 @@ suite('Validation of workspace start', async () => {
         await workspaces.clickOpenButton(workspaceName);
     });
 
-    await projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
+    projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
 });
 
 suite('Language server validation', async () => {

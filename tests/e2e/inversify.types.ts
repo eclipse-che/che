@@ -54,7 +54,11 @@ const CLASSES = {
     GetStarted: 'GetStarted',
     OpenDialogWidget: 'OpenDialogWidget',
     UpdateAccountInformationPage: 'UpdateAccountInformationPage',
-    KubernetesPlugin: 'KubernetesPlugin'
+    KubernetesPlugin: 'KubernetesPlugin',
+    LanguageServerTests: 'LanguageServerTests',
+    CodeExecutionTests: 'CodeExecutionTests',
+    ProjectAndFileTests: 'ProjectAndFileTests',
+    WorkspaceHandlingTests: 'WorkspaceHandlingTests'
 };
 
 export { TYPES, CLASSES };
