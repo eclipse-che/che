@@ -49,7 +49,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
  */
 @Singleton
 public class KubernetesGitCredentialManager implements GitCredentialManager {
-  public static final String NAME_PATTERN = "%s-git-credentials-secret-";
+  public static final String NAME_PATTERN = "git-credentials-secret-";
   public static final String ANNOTATION_SCM_URL = "che.eclipse.org/scm-url";
   public static final String ANNOTATION_SCM_USERNAME = "che.eclipse.org/scm-username";
   public static final String ANNOTATION_CHE_USERID = "che.eclipse.org/che-userid";
@@ -59,7 +59,7 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
           "app.kubernetes.io/part-of", "che.eclipse.org",
           "app.kubernetes.io/component", "workspace-secret");
 
-  private static final Map<String, String> ANNOTATIONS =
+  static final Map<String, String> DEFAULT_SECRET_ANNOTATIONS =
       ImmutableMap.of(
           ANNOTATION_AUTOMOUNT,
           "true",
@@ -116,16 +116,13 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
       Secret secret =
           existing.orElseGet(
               () -> {
-                Map<String, String> annotations = new HashMap<>(ANNOTATIONS);
+                Map<String, String> annotations = new HashMap<>(DEFAULT_SECRET_ANNOTATIONS);
                 annotations.put(ANNOTATION_SCM_URL, personalAccessToken.getScmProviderUrl());
                 annotations.put(ANNOTATION_SCM_USERNAME, personalAccessToken.getScmUserName());
                 annotations.put(ANNOTATION_CHE_USERID, personalAccessToken.getCheUserId());
                 ObjectMeta meta =
                     new ObjectMetaBuilder()
-                        .withName(
-                            NameGenerator.generate(
-                                String.format(NAME_PATTERN, personalAccessToken.getScmUserName()),
-                                5))
+                        .withName(NameGenerator.generate(NAME_PATTERN, 5))
                         .withAnnotations(annotations)
                         .withLabels(LABELS)
                         .build();
