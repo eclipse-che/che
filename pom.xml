@@ -48,8 +48,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <ch.qos.logback.version>1.2.1</ch.qos.logback.version>
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
-        <com.fasterxml.jackson.core.jackson-databind.version>2.10.5.1</com.fasterxml.jackson.core.jackson-databind.version>
-        <com.fasterxml.jackson.core.version>2.11.2</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.version>2.11.2</com.fasterxml.jackson.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
@@ -142,26 +141,6 @@
                 <groupId>com.auth0</groupId>
                 <artifactId>jwks-rsa</artifactId>
                 <version>${com.auth0.jwks-rsa.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${com.fasterxml.jackson.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${com.fasterxml.jackson.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${com.fasterxml.jackson.core.jackson-databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.tomakehurst</groupId>
@@ -289,57 +268,6 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-client</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>generex</artifactId>
-                        <groupId>com.github.mifmif</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model-apps</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model-batch</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model-core</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model-extensions</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-model-rbac</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-server-mock</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>openshift-client</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>openshift-model</artifactId>
-                <version>${io.fabric8.kubernetes-client}</version>
             </dependency>
             <dependency>
                 <groupId>io.github.mweirauch</groupId>
@@ -1408,6 +1336,20 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${org.testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${com.fasterxml.jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${io.fabric8.kubernetes-client}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.kirviq</groupId>
