@@ -111,6 +111,7 @@ suite('Git with ssh workflow', async () => {
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await cloneTestRepo();
+        await projectTree.expandPath('Spoon-Knife');
         await projectTree.waitItem('Spoon-Knife/README.md');
     });
 
