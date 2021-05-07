@@ -59,6 +59,7 @@ import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountI
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
 import { KubernetesPlugin } from './pageobjects/ide/plugins/KubernetesPlugin';
 import { BrowserTabsUtil } from './utils/BrowserTabsUtil';
+import { PluginsView } from './pageobjects/ide/plugins/PluginsView';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -115,5 +116,6 @@ e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidget);
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
+e2eContainer.bind<PluginsView>(CLASSES.PluginsView).to(PluginsView);
 
 export { e2eContainer };

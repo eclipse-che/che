@@ -2,7 +2,6 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By, error } from 'selenium-webdriver';
-import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { QuickOpenContainer } from './QuickOpenContainer';
 import { TimeoutConstants } from '../../TimeoutConstants';
@@ -22,7 +21,6 @@ export class TopMenu {
     private static readonly TOP_MENU_BUTTONS: string[] = ['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'];
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) { }
 
     public async waitTopMenu(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
@@ -46,7 +44,6 @@ export class TopMenu {
 
         const buttonLocator: By = this.getTopMenuButtonLocator(buttonText);
 
-        await this.ide.closeAllNotifications();
         await this.driverHelper.waitAndClick(buttonLocator, timeout);
     }
 
