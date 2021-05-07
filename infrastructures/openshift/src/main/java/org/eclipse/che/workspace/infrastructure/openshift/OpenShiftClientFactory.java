@@ -94,7 +94,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public OpenShiftClient createOC(String workspaceId) throws InfrastructureException {
-    Config configForWorkspace = buildConfig(getDefaultConfig(), workspaceId);
+    Config configForWorkspace = buildConfig(getDefaultConfig(), workspaceId, null);
     return createOC(configForWorkspace);
   }
 
@@ -113,7 +113,11 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public OpenShiftClient createOC() throws InfrastructureException {
-    return createOC(buildConfig(getDefaultConfig(), null));
+    return createOC(buildConfig(getDefaultConfig(), null, null));
+  }
+
+  public OpenShiftClient createAuthenticatedOC(String token) throws InfrastructureException {
+    return createOC(buildConfig(getDefaultConfig(), null, token));
   }
 
   @Override
@@ -122,7 +126,7 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
       throw new InfrastructureException(
           "Not able to construct impersonating openshift API client.");
     }
-    return clientForConfig(buildConfig(getDefaultConfig(), null));
+    return clientForConfig(buildConfig(getDefaultConfig(), null, null));
   }
 
   @Override
@@ -147,9 +151,9 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
    * extension level by delegating to an {@link OpenShiftClientConfigFactory}
    */
   @Override
-  protected Config buildConfig(Config config, @Nullable String workspaceId)
+  protected Config buildConfig(Config config, @Nullable String workspaceId, @Nullable String token)
       throws InfrastructureException {
-    return configBuilder.buildConfig(config, workspaceId);
+    return configBuilder.buildConfig(config, workspaceId, token);
   }
 
   @Override

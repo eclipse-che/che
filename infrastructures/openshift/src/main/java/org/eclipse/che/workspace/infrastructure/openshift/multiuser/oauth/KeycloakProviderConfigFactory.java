@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
  * @author David Festal
  */
 @Singleton
-public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory {
+public class KeycloakProviderConfigFactory extends OpenShiftClientConfigFactory {
 
-  private static final Logger LOG = LoggerFactory.getLogger(IdentityProviderConfigFactory.class);
+  private static final Logger LOG = LoggerFactory.getLogger(KeycloakProviderConfigFactory.class);
 
   private final String oauthIdentityProvider;
 
@@ -68,7 +68,7 @@ public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory 
   private final String messageToLinkAccount;
 
   @Inject
-  public IdentityProviderConfigFactory(
+  public KeycloakProviderConfigFactory(
       KeycloakServiceClient keycloakServiceClient,
       KeycloakSettings keycloakSettings,
       Provider<WorkspaceRuntimes> workspaceRuntimeProvider,
@@ -120,25 +120,26 @@ public class IdentityProviderConfigFactory extends OpenShiftClientConfigFactory 
    * Builds the OpenShift {@link Config} object based on a default {@link Config} object and an
    * optional workspace Id.
    */
-  public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
+  public Config buildConfig(
+      Config defaultConfig, @Nullable String workspaceId, @Nullable String token)
       throws InfrastructureException {
-    Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (token != null) {
+      LOG.debug("Creating token authenticated client");
+      return new OpenShiftConfigBuilder(OpenShiftConfig.wrap(defaultConfig))
+          .withOauthToken(token)
+          .build();
+    }
 
     if (oauthIdentityProvider == null) {
       LOG.debug("OAuth Provider is not configured, default config is used.");
       return defaultConfig;
     }
 
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (subject == Subject.ANONYMOUS) {
       LOG.debug(
           "OAuth Provider is configured but default subject is anonymous, default config is used.");
       return defaultConfig;
-    }
-
-    if (workspaceId == null) {
-      LOG.debug(
-          "OAuth Provider is configured and this request is not related to any workspace. OAuth token will be retrieved.");
-      return personalizeConfig(defaultConfig);
     }
 
     Optional<RuntimeContext> context =

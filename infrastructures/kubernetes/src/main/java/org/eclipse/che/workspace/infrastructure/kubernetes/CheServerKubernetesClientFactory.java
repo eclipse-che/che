@@ -66,7 +66,7 @@ public class CheServerKubernetesClientFactory extends KubernetesClientFactory {
   }
 
   @Override
-  protected Config buildConfig(Config config, String workspaceId) {
+  protected Config buildConfig(Config config, String workspaceId, String token) {
     return config;
   }
 }
