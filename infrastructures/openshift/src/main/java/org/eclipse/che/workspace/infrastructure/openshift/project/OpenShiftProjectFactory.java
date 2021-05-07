@@ -216,31 +216,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
     }
   }
 
-  @Override
-  protected List<KubernetesNamespaceMeta> fetchNamespaces() throws InfrastructureException {
-    try {
-      return clientFactory
-          .createOC()
-          .projects()
-          .list()
-          .getItems()
-          .stream()
-          .map(this::asNamespaceMeta)
-          .collect(Collectors.toList());
-    } catch (KubernetesClientException e) {
-      if (e.getCode() == 403) {
-        LOG.warn(
-            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
-            e.getMessage());
-        return emptyList();
-      } else {
-        throw new InfrastructureException(
-            "Error occurred when tried to list all available projects. Cause: " + e.getMessage(),
-            e);
-      }
-    }
-  }
-
   private KubernetesNamespaceMeta asNamespaceMeta(io.fabric8.openshift.api.model.Project project) {
     Map<String, String> attributes = new HashMap<>(4);
     ObjectMeta metadata = project.getMetadata();
