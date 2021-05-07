@@ -51,6 +51,10 @@ export class TopMenu {
         Logger.debug(`TopMenu.clickOnSubmenuItem "${itemText}"`);
 
         const submenuItemLocator: By = this.getSubmenuItemLocator(itemText);
+
+        // To ensure that drop-down animation is over
+        await this.driverHelper.wait(3000);
+
         await this.driverHelper.waitAndClick(submenuItemLocator, timeout);
     }
 
