@@ -145,17 +145,17 @@ public class KubernetesPersonalAccessTokenManagerTest {
     ObjectMeta meta1 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host1/"))
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host1"))
             .build();
     ObjectMeta meta2 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host2/"))
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host2"))
             .build();
     ObjectMeta meta3 =
         new ObjectMetaBuilder()
             .withAnnotations(
-                Map.of(ANNOTATION_CHE_USERID, "user2", ANNOTATION_SCM_URL, "http://host3/"))
+                Map.of(ANNOTATION_CHE_USERID, "user2", ANNOTATION_SCM_URL, "http://host3"))
             .build();
 
     Secret secret1 = new SecretBuilder().withMetadata(meta1).withData(data1).build();
@@ -173,8 +173,56 @@ public class KubernetesPersonalAccessTokenManagerTest {
 
     // then
     assertEquals(token.getCheUserId(), "user1");
-    assertEquals(token.getScmProviderUrl(), "http://host1/");
+    assertEquals(token.getScmProviderUrl(), "http://host1");
     assertEquals(token.getToken(), "token1");
+  }
+
+  @Test
+  public void testGetTokenFromNamespaceWithTrailingSlashMismatch() throws Exception {
+
+    KubernetesNamespaceMeta meta = new KubernetesNamespaceMetaImpl("test");
+    when(namespaceFactory.list()).thenReturn(Collections.singletonList(meta));
+    KubernetesNamespace kubernetesnamespace = Mockito.mock(KubernetesNamespace.class);
+    KubernetesSecrets secrets = Mockito.mock(KubernetesSecrets.class);
+    when(namespaceFactory.access(eq(null), eq(meta.getName()))).thenReturn(kubernetesnamespace);
+    when(kubernetesnamespace.secrets()).thenReturn(secrets);
+    when(scmPersonalAccessTokenFetcher.isValid(any(PersonalAccessToken.class))).thenReturn(true);
+
+    Map<String, String> data1 =
+        Map.of("token", Base64.getEncoder().encodeToString("token1".getBytes(UTF_8)));
+    Map<String, String> data2 =
+        Map.of("token", Base64.getEncoder().encodeToString("token2".getBytes(UTF_8)));
+
+    ObjectMeta meta1 =
+        new ObjectMetaBuilder()
+            .withAnnotations(
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host1.com/"))
+            .build();
+    ObjectMeta meta2 =
+        new ObjectMetaBuilder()
+            .withAnnotations(
+                Map.of(ANNOTATION_CHE_USERID, "user1", ANNOTATION_SCM_URL, "http://host2.com"))
+            .build();
+
+    Secret secret1 = new SecretBuilder().withMetadata(meta1).withData(data1).build();
+    Secret secret2 = new SecretBuilder().withMetadata(meta2).withData(data2).build();
+
+    when(secrets.get(any(LabelSelector.class)))
+        .thenReturn(Arrays.asList(secret1, secret2));
+
+    // when
+    PersonalAccessToken token1 =
+        personalAccessTokenManager
+            .get(new SubjectImpl("user", "user1", "t1", false), "http://host1.com")
+            .get();
+    PersonalAccessToken token2 =
+        personalAccessTokenManager
+            .get(new SubjectImpl("user", "user1", "t1", false), "http://host2.com/")
+            .get();
+
+    // then
+    assertNotNull(token1);
+    assertNotNull(token2);
   }
 
   @Test
