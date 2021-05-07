@@ -242,29 +242,6 @@ public class KubernetesNamespaceFactory {
   }
 
   /**
-   * Provision default namespace into the specified list. If default namespace is already there -
-   * just provision the corresponding attributes to it.
-   *
-   * @param namespaces list where default namespace should be provisioned
-   */
-  private void provisionDefaultNamespace(List<KubernetesNamespaceMeta> namespaces) {
-    String evaluatedName =
-        evalPlaceholders(defaultNamespaceName, EnvironmentContext.getCurrent().getSubject(), null);
-
-    Optional<KubernetesNamespaceMeta> defaultNamespaceOpt =
-        namespaces.stream().filter(n -> evaluatedName.equals(n.getName())).findAny();
-    KubernetesNamespaceMeta defaultNamespace;
-    if (defaultNamespaceOpt.isPresent()) {
-      defaultNamespace = defaultNamespaceOpt.get();
-    } else {
-      defaultNamespace = new KubernetesNamespaceMetaImpl(evaluatedName);
-      namespaces.add(defaultNamespace);
-    }
-
-    defaultNamespace.getAttributes().put(DEFAULT_ATTRIBUTE, "true");
-  }
-
-  /**
    * Fetches the specified namespace from a cluster.
    *
    * @param name name of namespace that should be fetched.
@@ -283,36 +260,6 @@ public class KubernetesNamespaceFactory {
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(
           "Error occurred when tried to fetch default namespace. Cause: " + e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Fetched namespace from a k8s cluster.
-   *
-   * @return list with available k8s namespace metas.
-   * @throws InfrastructureException when any error occurs during namespaces fetching
-   */
-  protected List<KubernetesNamespaceMeta> fetchNamespaces() throws InfrastructureException {
-    try {
-      return clientFactory
-          .create()
-          .namespaces()
-          .list()
-          .getItems()
-          .stream()
-          .map(this::asNamespaceMeta)
-          .collect(Collectors.toList());
-    } catch (KubernetesClientException e) {
-      if (e.getCode() == 403) {
-        LOG.warn(
-            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
-            e.getMessage());
-        return emptyList();
-      } else {
-        throw new InfrastructureException(
-            "Error occurred when tried to list all available namespaces. Cause: " + e.getMessage(),
-            e);
-      }
     }
   }
 
