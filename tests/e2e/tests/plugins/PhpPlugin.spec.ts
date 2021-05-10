@@ -9,7 +9,6 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
 import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
@@ -21,7 +20,9 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
@@ -99,7 +100,7 @@ suite(`The 'PhpPlugin' tests`, async () => {
                 workspaceName = await WorkspaceNameHandler.getNameFromUrl();
             });
 
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

@@ -8,11 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
-import { WorkspaceNameHandler } from '../..';
+import { CLASSES, WorkspaceNameHandler } from '../..';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { e2eContainer } from '../../inversify.config';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 
 const workspaceSampleName: string = 'console-scala-simple';
 const workspaceRootFolderName: string = 'example';
@@ -26,7 +32,7 @@ const stack: string = 'Scala';
 // skipping scala to enable pre-release suite to be easily used for updates until https://github.com/eclipse/che/issues/18662 is fixed
 suite.skip(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -45,10 +51,10 @@ suite.skip(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, 'Abc:', 21);
-        // commonLsTests.suggestionInvoking(tabTitle, 15, 31, 'Console scala');
-        commonLsTests.autocomplete(tabTitle, 25, 28, 'name: String');
-        // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // not working
+        commonLanguageServerTests.errorHighlighting(tabTitle, 'Abc:', 21);
+        // commonLanguageServerTests.suggestionInvoking(tabTitle, 15, 31, 'Console scala');
+        commonLanguageServerTests.autocomplete(tabTitle, 25, 28, 'name: String');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // not working
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -58,7 +64,7 @@ suite.skip(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 
