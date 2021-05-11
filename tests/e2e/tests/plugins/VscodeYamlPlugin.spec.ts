@@ -103,12 +103,14 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
     });
 
-    test('Stop and remove workspace', async () => {
-        if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
-            return;
-        }
+    suite('Delete workspace', async () => {
+        test('Stop and remove workspace', async () => {
+            if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
+                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                return;
+            }
 
-        Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
-    })
+            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
+        })
+    });
 });
