@@ -27,15 +27,12 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -64,17 +61,11 @@ public class KubernetesGitCredentialManagerTest {
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubeClient;
 
-  @Mock
-  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      secretsMixedOperation;
+  @Mock private MixedOperation<Secret, SecretList, Resource<Secret>> secretsMixedOperation;
 
-  @Mock
-  NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      nonNamespaceOperation;
+  @Mock NonNamespaceOperation<Secret, SecretList, Resource<Secret>> nonNamespaceOperation;
 
-  @Mock
-  private FilterWatchListDeletable<Secret, SecretList, Boolean, Watch, Watcher<Secret>>
-      filterWatchDeletable;
+  @Mock private FilterWatchListDeletable<Secret, SecretList> filterWatchDeletable;
 
   @Mock private SecretList secretList;
 

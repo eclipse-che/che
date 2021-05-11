@@ -37,19 +37,17 @@ import static org.testng.Assert.assertTrue;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.google.common.collect.ImmutableMap;
-import io.fabric8.kubernetes.api.model.DoneableNamespace;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.NamespaceList;
 import io.fabric8.kubernetes.api.model.ServiceAccountList;
 import io.fabric8.kubernetes.api.model.Status;
+import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBuilder;
 import io.fabric8.kubernetes.api.model.rbac.Role;
 import io.fabric8.kubernetes.api.model.rbac.RoleBindingList;
 import io.fabric8.kubernetes.api.model.rbac.RoleList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -118,19 +116,15 @@ public class KubernetesNamespaceFactoryTest {
   @Mock Appender mockedAppender;
 
   @Mock
-  private NonNamespaceOperation<
-          Namespace, NamespaceList, DoneableNamespace, Resource<Namespace, DoneableNamespace>>
-      namespaceOperation;
+  private NonNamespaceOperation<Namespace, NamespaceList, Resource<Namespace>> namespaceOperation;
 
-  @Mock private Resource<Namespace, DoneableNamespace> namespaceResource;
+  @Mock private Resource<Namespace> namespaceResource;
 
   private KubernetesServer serverMock;
 
   private KubernetesNamespaceFactory namespaceFactory;
 
-  @Mock
-  private FilterWatchListDeletable<Namespace, NamespaceList, Boolean, Watch, Watcher<Namespace>>
-      namespaceListResource;
+  @Mock private FilterWatchListDeletable<Namespace, NamespaceList> namespaceListResource;
 
   @Mock private NamespaceList namespaceList;
 
@@ -771,11 +765,12 @@ public class KubernetesNamespaceFactoryTest {
                 k8sClient
                     .rbac()
                     .clusterRoles()
-                    .createOrReplaceWithNew()
-                    .withNewMetadata()
-                    .withName(cr)
-                    .endMetadata()
-                    .done());
+                    .createOrReplace(
+                        new ClusterRoleBuilder()
+                            .withNewMetadata()
+                            .withName(cr)
+                            .endMetadata()
+                            .build()));
 
     // when
     RuntimeIdentity identity =
@@ -1417,7 +1412,7 @@ public class KubernetesNamespaceFactoryTest {
 
   private void prepareNamespaceToBeFoundByName(String name, Namespace namespace) throws Exception {
     @SuppressWarnings("unchecked")
-    Resource<Namespace, DoneableNamespace> getNamespaceByNameOperation = mock(Resource.class);
+    Resource<Namespace> getNamespaceByNameOperation = mock(Resource.class);
     when(namespaceOperation.withName(name)).thenReturn(getNamespaceByNameOperation);
 
     when(getNamespaceByNameOperation.get()).thenReturn(namespace);
@@ -1425,7 +1420,7 @@ public class KubernetesNamespaceFactoryTest {
 
   private void throwOnTryToGetNamespaceByName(String namespaceName, Throwable e) throws Exception {
     @SuppressWarnings("unchecked")
-    Resource<Namespace, DoneableNamespace> getNamespaceByNameOperation = mock(Resource.class);
+    Resource<Namespace> getNamespaceByNameOperation = mock(Resource.class);
     when(namespaceOperation.withName(namespaceName)).thenReturn(getNamespaceByNameOperation);
 
     when(getNamespaceByNameOperation.get()).thenThrow(e);

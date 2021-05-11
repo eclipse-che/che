@@ -25,11 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -67,10 +65,10 @@ public class AsyncStoragePodWatcherTest {
   @Mock private PreferenceManager preferenceManager;
   @Mock private WorkspaceRuntimes runtimes;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
+  @Mock private RollableScalableResource<Deployment> deploymentResource;
   @Mock private MixedOperation mixedOperation;
   @Mock private NonNamespaceOperation namespaceOperation;
-  @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private PodResource<Pod> podResource;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespacePodOperation;
   @Mock private UserImpl user;

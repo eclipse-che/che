@@ -11,18 +11,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility.isEphemeral;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +74,7 @@ public class AsyncStoragePodInterceptor {
     String namespace = identity.getInfrastructureNamespace();
     String workspaceId = identity.getWorkspaceId();
 
-    RollableScalableResource<Deployment, DoneableDeployment> asyncStorageDeploymentResource =
+    RollableScalableResource<Deployment> asyncStorageDeploymentResource =
         getAsyncStorageDeploymentResource(namespace, workspaceId);
 
     if (asyncStorageDeploymentResource.get() == null) { // deployment doesn't exist
@@ -103,9 +103,8 @@ public class AsyncStoragePodInterceptor {
     }
   }
 
-  private RollableScalableResource<Deployment, DoneableDeployment>
-      getAsyncStorageDeploymentResource(String namespace, String workspaceId)
-          throws InfrastructureException {
+  private RollableScalableResource<Deployment> getAsyncStorageDeploymentResource(
+      String namespace, String workspaceId) throws InfrastructureException {
     return kubernetesClientFactory
         .create(workspaceId)
         .apps()
@@ -115,15 +114,14 @@ public class AsyncStoragePodInterceptor {
   }
 
   private CompletableFuture<Void> deleteAsyncStorageDeployment(
-      RollableScalableResource<Deployment, DoneableDeployment> resource)
-      throws InfrastructureException {
+      RollableScalableResource<Deployment> resource) throws InfrastructureException {
     Watch toCloseOnException = null;
     try {
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = resource.watch(new DeleteWatcher<>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = resource.withPropagationPolicy("Background").delete();
+      Boolean deleteSucceeded = resource.withPropagationPolicy(BACKGROUND).delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
@@ -156,7 +154,7 @@ public class AsyncStoragePodInterceptor {
     String namespace = identity.getInfrastructureNamespace();
     String workspaceId = identity.getWorkspaceId();
 
-    PodResource<Pod, DoneablePod> asyncStoragePodResource =
+    PodResource<Pod> asyncStoragePodResource =
         kubernetesClientFactory
             .create(workspaceId)
             .pods()
@@ -169,7 +167,7 @@ public class AsyncStoragePodInterceptor {
     }
   }
 
-  private CompletableFuture<Void> deleteAsyncStoragePod(PodResource<Pod, DoneablePod> podResource)
+  private CompletableFuture<Void> deleteAsyncStoragePod(PodResource<Pod> podResource)
       throws InfrastructureException {
     Watch toCloseOnException = null;
     try {
@@ -177,7 +175,7 @@ public class AsyncStoragePodInterceptor {
       final Watch watch = podResource.watch(new DeleteWatcher<>(deleteFuture));
       toCloseOnException = watch;
 
-      Boolean deleteSucceeded = podResource.withPropagationPolicy("Background").delete();
+      Boolean deleteSucceeded = podResource.withPropagationPolicy(BACKGROUND).delete();
       if (deleteSucceeded == null || !deleteSucceeded) {
         deleteFuture.complete(null);
       }
@@ -217,7 +215,7 @@ public class AsyncStoragePodInterceptor {
     }
 
     @Override
-    public void onClose(KubernetesClientException e) {
+    public void onClose(WatcherException e) {
       // if event about removing is received then this completion has no effect
       future.completeExceptionally(
           new RuntimeException(

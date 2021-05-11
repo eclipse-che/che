@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,12 +20,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretList;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.EditReplacePatchDeletable;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -50,18 +49,12 @@ public class KubernetesSecretsTest {
   @Mock private KubernetesClient client;
   @Mock private KubernetesClientFactory clientFactory;
 
-  @Mock
-  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      secretsMixedOperation;
+  @Mock private MixedOperation<Secret, SecretList, Resource<Secret>> secretsMixedOperation;
 
-  @Mock
-  private NonNamespaceOperation<
-          Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      nonNamespaceOperation;
+  @Mock private NonNamespaceOperation<Secret, SecretList, Resource<Secret>> nonNamespaceOperation;
 
-  @Mock
-  private FilterWatchListDeletable<Secret, SecretList, Boolean, Watch, Watcher<Secret>>
-      deletableList;
+  @Mock private FilterWatchListDeletable<Secret, SecretList> deletableList;
+  @Mock private EditReplacePatchDeletable<Secret> deletableSecret;
 
   private KubernetesSecrets kubernetesSecrets;
 
@@ -74,7 +67,7 @@ public class KubernetesSecretsTest {
     when(client.secrets()).thenReturn(secretsMixedOperation);
     lenient().when(secretsMixedOperation.inNamespace(any())).thenReturn(nonNamespaceOperation);
     lenient().when(nonNamespaceOperation.withLabel(any(), any())).thenReturn(deletableList);
-    lenient().doReturn(deletableList).when(deletableList).withPropagationPolicy(eq("Background"));
+    lenient().doReturn(deletableSecret).when(deletableList).withPropagationPolicy(eq(BACKGROUND));
   }
 
   @Test
@@ -94,6 +87,7 @@ public class KubernetesSecretsTest {
 
     verify(secretsMixedOperation).inNamespace(NAMESPACE);
     verify(nonNamespaceOperation).withLabel(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID);
-    verify(deletableList).delete();
+    verify(deletableList).withPropagationPolicy(eq(BACKGROUND));
+    verify(deletableSecret).delete();
   }
 }

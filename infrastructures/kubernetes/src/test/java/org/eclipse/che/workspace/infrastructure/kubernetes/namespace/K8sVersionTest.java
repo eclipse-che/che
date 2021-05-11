@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.client.VersionInfo.VersionKeys.BUILD_DATE_FORMAT;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -21,8 +22,6 @@ import io.fabric8.kubernetes.client.VersionInfo;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
@@ -143,33 +142,16 @@ public class K8sVersionTest {
   }
 
   private VersionInfo createDummyVersionInfo(String major, String minor) throws ParseException {
-    Map<String, String> versionData = new HashMap<>();
-    versionData.put(
-        VERSION_KEYS.BUILD_DATE,
-        new SimpleDateFormat(VERSION_KEYS.BUILD_DATE_FORMAT).format(new Date()));
-    versionData.put(VERSION_KEYS.GIT_COMMIT, "3f6f40d");
-    versionData.put(VERSION_KEYS.GIT_VERSION, "v1.17.1+3f6f40d");
-    versionData.put(VERSION_KEYS.GIT_TREE_STATE, "clean");
-    versionData.put(VERSION_KEYS.GO_VERSION, "go1.13.4");
-    versionData.put(VERSION_KEYS.PLATFORM, "linux/amd64");
-    versionData.put(VERSION_KEYS.COMPILER, "gc");
-
-    versionData.put(VERSION_KEYS.MAJOR, major);
-    versionData.put(VERSION_KEYS.MINOR, minor);
-    return new VersionInfo(versionData);
-  }
-
-  private final class VERSION_KEYS {
-
-    public static final String BUILD_DATE = "buildDate";
-    public static final String GIT_COMMIT = "gitCommit";
-    public static final String GIT_VERSION = "gitVersion";
-    public static final String MAJOR = "major";
-    public static final String MINOR = "minor";
-    public static final String GIT_TREE_STATE = "gitTreeState";
-    public static final String PLATFORM = "platform";
-    public static final String GO_VERSION = "goVersion";
-    public static final String COMPILER = "compiler";
-    public static final String BUILD_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    return new VersionInfo.Builder()
+        .withBuildDate(new SimpleDateFormat(BUILD_DATE_FORMAT).format(new Date()))
+        .withGitCommit("3f6f40d")
+        .withGitVersion("1.17.1+3f6f40d")
+        .withGitTreeState("clean")
+        .withGoVersion("go1.13.4")
+        .withPlatform("linux/amd64")
+        .withCompiler("gc")
+        .withMajor(major)
+        .withMinor(minor)
+        .build();
   }
 }

@@ -228,24 +228,24 @@ public class ContainerSearchTest {
             .endTemplate()
             .endSpec()
             .build();
-
     Template template =
         new TemplateBuilder()
-            .addNewDeploymentObject()
-            .withNewMetadata()
-            .withName("deploymentWithName")
-            .endMetadata()
-            .withNewSpec()
-            .withNewTemplate()
-            .withNewMetadata()
-            .withName("podWithName")
-            .endMetadata()
-            .withNewSpec()
-            .withContainers(container12)
-            .endSpec()
-            .endTemplate()
-            .endSpec()
-            .endDeploymentObject()
+            .addToObjects(
+                new DeploymentBuilder()
+                    .withNewMetadata()
+                    .withName("deploymentWithName")
+                    .endMetadata()
+                    .withNewSpec()
+                    .withNewTemplate()
+                    .withNewMetadata()
+                    .withName("podWithName")
+                    .endMetadata()
+                    .withNewSpec()
+                    .withContainers(container12)
+                    .endSpec()
+                    .endTemplate()
+                    .endSpec()
+                    .build())
             .build();
 
     // Pod, PodTemplate, DaemonSet, Deployment, Job, ReplicaSet, ReplicationController, StatefulSet,

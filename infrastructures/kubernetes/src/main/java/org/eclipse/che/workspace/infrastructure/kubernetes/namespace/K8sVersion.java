@@ -117,7 +117,7 @@ public class K8sVersion {
       synchronized (this) {
         if (versionInfo == null) {
           versionInfo = clientFactory.create().getVersion();
-          LOG.debug("Obtained k8s version {}", versionInfo.getData());
+          LOG.debug("Obtained k8s version {} {}", versionInfo.getMajor(), versionInfo.getMinor());
           parseVersions();
         }
       }

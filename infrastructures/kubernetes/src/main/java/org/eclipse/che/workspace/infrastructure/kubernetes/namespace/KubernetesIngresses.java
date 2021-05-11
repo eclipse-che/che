@@ -11,14 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
-import io.fabric8.kubernetes.api.model.extensions.DoneableIngress;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -84,7 +85,7 @@ public class KubernetesIngresses {
     CompletableFuture<Ingress> future = new CompletableFuture<>();
     Watch watch = null;
     try {
-      Resource<Ingress, DoneableIngress> ingressResource =
+      Resource<Ingress> ingressResource =
           clientFactory
               .create(workspaceId)
               .extensions()
@@ -94,7 +95,7 @@ public class KubernetesIngresses {
 
       watch =
           ingressResource.watch(
-              new Watcher<Ingress>() {
+              new Watcher<>() {
                 @Override
                 public void eventReceived(Action action, Ingress ingress) {
                   if (predicate.test(ingress)) {
@@ -103,7 +104,7 @@ public class KubernetesIngresses {
                 }
 
                 @Override
-                public void onClose(KubernetesClientException cause) {
+                public void onClose(WatcherException cause) {
                   future.completeExceptionally(
                       new InfrastructureException(
                           "Waiting for ingress '" + name + "' was interrupted"));
@@ -144,7 +145,7 @@ public class KubernetesIngresses {
           .ingresses()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
-          .withPropagationPolicy("Background")
+          .withPropagationPolicy(BACKGROUND)
           .delete();
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);

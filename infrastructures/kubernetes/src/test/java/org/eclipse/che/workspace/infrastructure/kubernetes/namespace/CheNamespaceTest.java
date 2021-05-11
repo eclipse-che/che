@@ -11,19 +11,20 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.CREATE_IN_CHE_INSTALLATION_NAMESPACE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapList;
-import io.fabric8.kubernetes.api.model.DoneableConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -60,24 +61,16 @@ public class CheNamespaceTest {
   @Mock private RuntimeIdentity identity;
   @Mock private KubernetesClient kubeClient;
 
-  @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
-      kubeConfigMaps;
+  @Mock private MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> kubeConfigMaps;
 
   @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
-      kubeConfigMapsInNamespace;
+  private MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> kubeConfigMapsInNamespace;
 
   @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
-      kubeConfigMapsWithLabel;
+  private MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> kubeConfigMapsWithLabel;
 
   @Mock
-  private MixedOperation<
-          ConfigMap, ConfigMapList, DoneableConfigMap, Resource<ConfigMap, DoneableConfigMap>>
+  private MixedOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>>
       kubeConfigMapsWithPropagationPolicy;
 
   @Mock private InternalRuntime internalRuntime;
@@ -244,7 +237,7 @@ public class CheNamespaceTest {
     when(kubeConfigMaps.inNamespace(CHE_NAMESPACE)).thenReturn(kubeConfigMapsInNamespace);
     when(kubeConfigMapsInNamespace.withLabel(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID))
         .thenReturn(kubeConfigMapsWithLabel);
-    when(kubeConfigMapsWithLabel.withPropagationPolicy("Background"))
+    when(kubeConfigMapsWithLabel.withPropagationPolicy(BACKGROUND))
         .thenReturn(kubeConfigMapsWithPropagationPolicy);
 
     // when

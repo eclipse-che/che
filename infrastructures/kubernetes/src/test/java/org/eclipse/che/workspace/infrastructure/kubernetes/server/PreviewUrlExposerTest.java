@@ -100,7 +100,8 @@ public class PreviewUrlExposerTest {
     service.setMetadata(serviceMeta);
     ServiceSpec serviceSpec = new ServiceSpec();
     serviceSpec.setPorts(
-        singletonList(new ServicePort(SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+        singletonList(
+            new ServicePort(null, SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(serviceSpec);
 
     Ingress ingress = new Ingress();
@@ -111,9 +112,9 @@ public class PreviewUrlExposerTest {
     IngressRule ingressRule = new IngressRule();
     ingressRule.setHost("ingresshost");
     IngressBackend ingressBackend =
-        new IngressBackend("servicename", new IntOrString(SERVER_PORT_NAME));
+        new IngressBackend(null, "servicename", new IntOrString(SERVER_PORT_NAME));
     ingressRule.setHttp(
-        new HTTPIngressRuleValue(singletonList(new HTTPIngressPath(ingressBackend, null))));
+        new HTTPIngressRuleValue(singletonList(new HTTPIngressPath(ingressBackend, null, null))));
     ingressSpec.setRules(singletonList(ingressRule));
     ingress.setSpec(ingressSpec);
 
@@ -153,7 +154,8 @@ public class PreviewUrlExposerTest {
     service.setMetadata(serviceMeta);
     ServiceSpec serviceSpec = new ServiceSpec();
     serviceSpec.setPorts(
-        singletonList(new ServicePort(SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
+        singletonList(
+            new ServicePort(null, SERVER_PORT_NAME, null, PORT, "TCP", new IntOrString(PORT))));
     service.setSpec(serviceSpec);
 
     Map<String, Service> services = new HashMap<>();
