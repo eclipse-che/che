@@ -10,7 +10,6 @@
 
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
@@ -22,8 +21,6 @@ import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -85,7 +82,7 @@ suite('The "VscodeValePlugin" userstory', async () => {
                 return;
             }
 
-            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
-        })
+            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
+        });
     });
 });

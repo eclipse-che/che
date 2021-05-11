@@ -102,7 +102,7 @@ suite(`The 'PhpPlugin' tests`, async () => {
                 return;
             }
 
-            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
-        })
+            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
+        });
     });
 });
