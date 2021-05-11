@@ -19,6 +19,8 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import { Logger } from '../../utils/Logger';
 
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
@@ -26,6 +28,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 let workspaceName: string = '';
 
@@ -103,9 +106,12 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
-        test('Delete workspace', async () => {
-            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
-        });
-    });
+    test('Stop and remove workspace', async () => {
+        if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            return;
+        }
+
+        Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
+    })
 });

@@ -20,6 +20,8 @@ import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { Logger } from '../../utils/Logger';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
@@ -28,6 +30,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 let workspaceName: string = '';
 
@@ -100,9 +103,12 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
-        test('Delete workspace', async () => {
-            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
-        });
-    });
+    test('Stop and remove workspace', async () => {
+        if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            return;
+        }
+
+        Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`)
+    })
 });
