@@ -25,7 +25,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DoneableSecret;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -68,13 +67,9 @@ public class KubernetesPersonalAccessTokenManagerTest {
 
   @Mock private KubernetesClient kubeClient;
 
-  @Mock
-  private MixedOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      secretsMixedOperation;
+  @Mock private MixedOperation<Secret, SecretList, Resource<Secret>> secretsMixedOperation;
 
-  @Mock
-  NonNamespaceOperation<Secret, SecretList, DoneableSecret, Resource<Secret, DoneableSecret>>
-      nonNamespaceOperation;
+  @Mock NonNamespaceOperation<Secret, SecretList, Resource<Secret>> nonNamespaceOperation;
 
   KubernetesPersonalAccessTokenManager personalAccessTokenManager;
 

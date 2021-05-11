@@ -8,35 +8,35 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { CLASSES, Dashboard } from '..';
-import { e2eContainer } from '../inversify.config';
-import { CreateWorkspace as CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
-import { Logger } from '../utils/Logger';
+import 'reflect-metadata';
+import { inject, injectable } from 'inversify';
+import { CLASSES } from '../inversify.types';
+import { Dashboard } from '../pageobjects/dashboard/Dashboard';
+import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+@injectable()
+export class WorkspaceHandlingTests {
 
-export function createAndOpenWorkspace(stack: string) {
-    test(`Open 'New Workspace' page`, async () => {
-        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace wait for dashboard`);
-        await dashboard.waitPage();
-        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace click Create workspace button`);
-        await dashboard.clickCreateWorkspaceButton();
-        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace wait for getting started page`);
-        await createWorkspace.waitPage();
-        Logger.trace(`WorkspaceHandlingTests.createAndOpenWorkspace click on sample ${stack}`);
-        await createWorkspace.clickOnSample(stack);
-    });
-}
+    constructor(@inject(CLASSES.Dashboard) private readonly dashboard: Dashboard, @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace) {}
 
-export async function stopWorkspace(workspaceName: string) {
-    await dashboard.stopWorkspaceByUI(workspaceName);
-}
+    public createAndOpenWorkspace(stack: string) {
+        test(`Open 'New Workspace' page`, async () => {
+            await this.dashboard.waitPage();
+            await this.dashboard.clickCreateWorkspaceButton();
+            await this.createWorkspace.waitPage();
+            await this.createWorkspace.clickOnSample(stack);
+        });
+    }
 
-export async function removeWorkspace(workspaceName: string) {
-    await dashboard.deleteWorkspaceByUI(workspaceName);
-}
+    public async stopWorkspace(workspaceName: string) {
+        await this.dashboard.stopWorkspaceByUI(workspaceName);
+    }
 
-export async function stopAndRemoveWorkspace(workspaceName: string) {
-    await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+    public async removeWorkspace(workspaceName: string) {
+        await this.dashboard.deleteWorkspaceByUI(workspaceName);
+    }
+
+    public async stopAndRemoveWorkspace(workspaceName: string) {
+        await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+    }
 }

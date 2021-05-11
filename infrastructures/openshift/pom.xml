@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure</groupId>
-        <version>7.30.0-SNAPSHOT</version>
+        <version>7.31.0-SNAPSHOT</version>
     </parent>
     <artifactId>infrastructure-openshift</artifactId>
     <name>Infrastructure :: OpenShift</name>
@@ -44,11 +44,23 @@
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-model</artifactId>
+            <artifactId>kubernetes-model-apps</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-model-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-model-extensions</artifactId>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>openshift-model</artifactId>
         </dependency>
         <dependency>
             <groupId>io.opentracing</groupId>

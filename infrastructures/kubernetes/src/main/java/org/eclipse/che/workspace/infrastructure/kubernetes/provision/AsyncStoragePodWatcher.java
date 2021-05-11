@@ -23,10 +23,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.AsyncStorageProvisioner.ASYNC_STORAGE;
 
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import java.time.Instant;
@@ -141,7 +139,7 @@ public class AsyncStoragePodWatcher {
               ofEpochSecond(lastTimeAccessSec).plusSeconds(shutdownTimeoutSec);
           if (now().isAfter(expectedShutdownAfter)) {
             removeAsyncStoragePodWithoutDeployment(namespace);
-            RollableScalableResource<Deployment, DoneableDeployment> doneableResource =
+            RollableScalableResource<Deployment> doneableResource =
                 kubernetesClientFactory
                     .create()
                     .apps()
@@ -168,7 +166,7 @@ public class AsyncStoragePodWatcher {
    */
   private void removeAsyncStoragePodWithoutDeployment(String namespace)
       throws InfrastructureException {
-    PodResource<Pod, DoneablePod> doneablePodResource =
+    PodResource<Pod> doneablePodResource =
         kubernetesClientFactory.create().pods().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (doneablePodResource.get() != null) {
       doneablePodResource.delete();

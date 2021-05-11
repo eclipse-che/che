@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,11 +27,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DoneableNamespace;
-import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
-import io.fabric8.kubernetes.api.model.NamespaceFluent.MetadataNested;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -38,6 +36,7 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -51,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -77,7 +77,7 @@ public class KubernetesNamespaceTest {
   @Mock private Executor executor;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
-  @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+  @Mock private Resource<ServiceAccount> serviceAccountResource;
 
   private KubernetesNamespace k8sNamespace;
 
@@ -111,10 +111,6 @@ public class KubernetesNamespaceTest {
   @Test
   public void testKubernetesNamespacePreparingWhenNamespaceExists() throws Exception {
     // given
-    MetadataNested namespaceMeta =
-        prepareCreateNamespaceRequest(
-            new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
-
     prepareNamespace(NAMESPACE);
     KubernetesNamespace namespace =
         new KubernetesNamespace(clientFactory, cheClientFactory, executor, NAMESPACE, WORKSPACE_ID);
@@ -123,15 +119,12 @@ public class KubernetesNamespaceTest {
     namespace.prepare(true, Map.of());
 
     // then
-    verify(namespaceMeta, never()).withName(NAMESPACE);
+    verify(namespaceOperation, never()).create(any(Namespace.class));
   }
 
   @Test
   public void testKubernetesNamespacePreparingCreationWhenNamespaceDoesNotExist() throws Exception {
     // given
-    MetadataNested namespaceMeta =
-        prepareCreateNamespaceRequest(
-            new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
 
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
@@ -142,7 +135,9 @@ public class KubernetesNamespaceTest {
     namespace.prepare(true, Map.of());
 
     // then
-    verify(namespaceMeta).withName(NAMESPACE);
+    ArgumentCaptor<Namespace> captor = ArgumentCaptor.forClass(Namespace.class);
+    verify(namespaceOperation).create(captor.capture());
+    Assert.assertEquals(captor.getValue().getMetadata().getName(), NAMESPACE);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -196,7 +191,6 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenFailedToGetNamespaceServiceAccounts()
       throws Exception {
-    prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
@@ -208,7 +202,6 @@ public class KubernetesNamespaceTest {
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenServiceAccountEventNotPublished()
       throws Exception {
-    prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
@@ -219,7 +212,6 @@ public class KubernetesNamespaceTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void testThrowsInfrastructureExceptionWhenWatcherClosed() throws Exception {
-    prepareCreateNamespaceRequest();
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
@@ -227,7 +219,7 @@ public class KubernetesNamespaceTest {
             (Answer<Watch>)
                 invocation -> {
                   final Watcher<ServiceAccount> watcher = invocation.getArgument(0);
-                  watcher.onClose(mock(KubernetesClientException.class));
+                  watcher.onClose(mock(WatcherException.class));
                   return mock(Watch.class);
                 })
         .when(serviceAccountResource)
@@ -239,9 +231,6 @@ public class KubernetesNamespaceTest {
 
   @Test
   public void testStopsWaitingServiceAccountEventJustAfterEventReceived() throws Exception {
-    prepareCreateNamespaceRequest();
-    prepareCreateNamespaceRequest(
-        new NamespaceBuilder().withNewMetadata().withName(NAMESPACE).endMetadata().build());
 
     final Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
@@ -455,29 +444,13 @@ public class KubernetesNamespaceTest {
     verify(nonNamespaceOperation).createOrReplace(namespace);
   }
 
-  private MetadataNested prepareCreateNamespaceRequest() {
-    return prepareCreateNamespaceRequest(new NamespaceBuilder().build());
-  }
-
-  private MetadataNested prepareCreateNamespaceRequest(Namespace ns) {
-    DoneableNamespace namespace = mock(DoneableNamespace.class);
-    MetadataNested metadataNested = mock(MetadataNested.class);
-
-    lenient().doReturn(namespace).when(namespaceOperation).createNew();
-    lenient().doReturn(metadataNested).when(namespace).withNewMetadata();
-    lenient().doReturn(metadataNested).when(metadataNested).withName(anyString());
-    lenient().doReturn(namespace).when(metadataNested).endMetadata();
-    lenient().doReturn(ns).when(namespace).done();
-    return metadataNested;
-  }
-
   private Resource prepareNamespaceResource(String namespaceName) {
     Resource namespaceResource = mock(Resource.class);
     doReturn(namespaceResource).when(namespaceOperation).withName(namespaceName);
     lenient()
         .doReturn(namespaceResource)
         .when(namespaceResource)
-        .withPropagationPolicy(eq("Background"));
+        .withPropagationPolicy(eq(BACKGROUND));
     when(namespaceResource.get())
         .thenReturn(
             new NamespaceBuilder().withNewMetadata().withName(namespaceName).endMetadata().build());

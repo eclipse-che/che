@@ -9,7 +9,6 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
@@ -19,7 +18,9 @@ import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Key } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -76,7 +77,7 @@ suite(`The 'PythonPlugin' test`, async () => {
         });
 
         test(`Stop and remove workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 

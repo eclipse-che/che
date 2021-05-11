@@ -8,13 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import * as projectAndFileTests from '../../testsLibrary/ProjectAndFileTests';
-import * as workspaceHandling from '../../testsLibrary/WorkspaceHandlingTests';
-import * as commonLsTests from '../../testsLibrary/LsTests';
-import * as codeExecutionTests from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
 import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
+import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
+const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const workspaceSampleName: string = 'php-web-simple';
@@ -27,14 +31,14 @@ const stack: string = 'PHP Simple';
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
-        workspaceHandling.createAndOpenWorkspace(stack);
+        workspaceHandlingTests.createAndOpenWorkspace(stack);
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 
     suite('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
-        prepareEditorForLSTests();
+        prepareEditorForLanguageServerTests();
     });
 
     suite('Configuration of dependencies', async () => {
@@ -46,10 +50,10 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Language server validation', async () => {
-        commonLsTests.errorHighlighting(tabTitle, `error_text;`, 14);
-        commonLsTests.suggestionInvoking(tabTitle, 14, 26, '$test');
-        commonLsTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
-        // commonLsTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
+        commonLanguageServerTests.errorHighlighting(tabTitle, `error_text;`, 14);
+        commonLanguageServerTests.suggestionInvoking(tabTitle, 14, 26, '$test');
+        commonLanguageServerTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
+        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
     });
 
     suite ('Stopping and deleting the workspace', async () => {
@@ -59,13 +63,13 @@ suite(`${stack} test`, async () => {
         });
 
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 
 });
 
-export function prepareEditorForLSTests() {
+export function prepareEditorForLanguageServerTests() {
     test(`Prepare file for LS tests`, async () => {
         await editor.moveCursorToLineAndChar(tabTitle, 12, 4);
         await editor.performKeyCombination(tabTitle, '\n$test = " test";');

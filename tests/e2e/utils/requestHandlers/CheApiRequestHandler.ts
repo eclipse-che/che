@@ -25,7 +25,7 @@ export class CheApiRequestHandler {
         return axios.interceptors.request.use( request => {
                 try {
                     let request_censored: AxiosRequestConfig = JSON.parse(JSON.stringify(request));
-                    request_censored.headers['Authorization'] = 'CENSORED';
+                    request_censored.headers.Authorization = 'CENSORED';
                     console.log(`RequestHandler request:\n`, request_censored);
                 } catch (err) {
                     console.log(`RequestHandler request: Failed to deep clone AxiosRequestConfig:`, err);
@@ -47,12 +47,12 @@ export class CheApiRequestHandler {
                             default: return value;
                         }
                     }));
-                    response_censored.config.headers['Authorization'] = 'CENSORED';
-                    if (response_censored.data['access_token'] != null) {
-                        response_censored.data['access_token'] = 'CENSORED';
+                    response_censored.config.headers.Authorization = 'CENSORED';
+                    if (response_censored.data.access_token != null) {
+                        response_censored.data.access_token = 'CENSORED';
                     }
-                    if (response_censored.data['refresh_token'] != null) {
-                        response_censored.data['refresh_token'] = 'CENSORED';
+                    if (response_censored.data.refresh_token != null) {
+                        response_censored.data.refresh_token = 'CENSORED';
                     }
                     console.log(`RequestHandler response:\n`, response_censored);
                 } catch (err) {
