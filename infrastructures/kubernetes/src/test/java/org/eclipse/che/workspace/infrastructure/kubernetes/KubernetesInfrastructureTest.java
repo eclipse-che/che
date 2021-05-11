@@ -62,6 +62,6 @@ public class KubernetesInfrastructureTest {
     }
 
     // then
-    verify(factory).getAuthenticatedHttpClient();
+    verify(factory).getAuthenticatedHttpClient(null);
   }
 }

@@ -45,7 +45,7 @@ import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
-import org.eclipse.che.api.user.server.spi.NoopProfileDao;
+import org.eclipse.che.api.user.server.spi.OpenshiftProfileDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
@@ -422,7 +422,7 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
       bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
       bind(JwtParser.class).to(DefaultJwtParser.class);
-      bind(ProfileDao.class).to(NoopProfileDao.class);
+      bind(ProfileDao.class).to(OpenshiftProfileDao.class);
       bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
       bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
     } else {

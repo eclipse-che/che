@@ -1,13 +1,29 @@
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.openshift.api.model.User;
+import io.fabric8.openshift.client.OpenShiftClient;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
+@Singleton
 public class OpenshiftUserDao implements UserDao {
+
+  private final OpenShiftClientFactory clientFactory;
+
+  @Inject
+  public OpenshiftUserDao(OpenShiftClientFactory clientFactory) {
+    this.clientFactory = clientFactory;
+  }
 
   @Override
   public UserImpl getByAliasAndPassword(String emailOrName, String password)
@@ -37,7 +53,21 @@ public class OpenshiftUserDao implements UserDao {
 
   @Override
   public UserImpl getById(String id) throws NotFoundException, ServerException {
-    throw new UnsupportedOperationException("not yet implemented");
+    try {
+      OpenShiftClient client =
+          clientFactory.createAuthenticatedOC(
+              EnvironmentContext.getCurrent().getSubject().getToken());
+      User openshiftUser = client.currentUser();
+      if (openshiftUser == null
+          || openshiftUser.getMetadata() == null
+          || !id.equals(openshiftUser.getMetadata().getUid())) {
+        throw new NotFoundException(String.format("User with ID '%s' not found.", id));
+      }
+      ObjectMeta userMeta = openshiftUser.getMetadata();
+      return new UserImpl(userMeta.getUid(), userMeta.getName() + "@che", userMeta.getName());
+    } catch (InfrastructureException e) {
+      throw new ServerException(e);
+    }
   }
 
   @Override

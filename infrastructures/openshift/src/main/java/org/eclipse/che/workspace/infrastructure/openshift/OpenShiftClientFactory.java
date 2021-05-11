@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static io.fabric8.kubernetes.client.utils.Utils.isNotNullOrEmpty;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -30,6 +31,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.ws.rs.core.HttpHeaders;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.EventListener;
@@ -121,12 +123,14 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   @Override
-  public OkHttpClient getAuthenticatedHttpClient() throws InfrastructureException {
+  public OkHttpClient getAuthenticatedHttpClient(@Nullable HttpHeaders headers)
+      throws InfrastructureException {
     if (!configBuilder.isPersonalized()) {
       throw new InfrastructureException(
           "Not able to construct impersonating openshift API client.");
     }
-    return clientForConfig(buildConfig(getDefaultConfig(), null, null));
+    return clientForConfig(
+        buildConfig(getDefaultConfig(), null, headers.getHeaderString(HttpHeaders.AUTHORIZATION)));
   }
 
   @Override

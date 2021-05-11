@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
-import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.google.inject.Provider;
 import io.fabric8.kubernetes.client.Config;
@@ -22,22 +19,11 @@ import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Optional;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.subject.Subject;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
-import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +50,7 @@ public class OpenshiftProviderConfigFactory extends OpenShiftClientConfigFactory
   private final Provider<WorkspaceRuntimes> workspaceRuntimeProvider;
 
   @Inject
-  public OpenshiftProviderConfigFactory(
-      Provider<WorkspaceRuntimes> workspaceRuntimeProvider) {
+  public OpenshiftProviderConfigFactory(Provider<WorkspaceRuntimes> workspaceRuntimeProvider) {
     this.workspaceRuntimeProvider = workspaceRuntimeProvider;
   }
 
@@ -97,6 +82,9 @@ public class OpenshiftProviderConfigFactory extends OpenShiftClientConfigFactory
       Config defaultConfig, @Nullable String workspaceId, @Nullable String token) {
     if (token != null) {
       LOG.debug("Creating token authenticated client");
+      if (token.startsWith("Bearer")) {
+        token = token.substring("Bearer ".length());
+      }
       return new OpenShiftConfigBuilder(OpenShiftConfig.wrap(defaultConfig))
           .withOauthToken(token)
           .build();
