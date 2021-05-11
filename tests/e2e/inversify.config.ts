@@ -20,7 +20,6 @@ import { TestConstants } from './TestConstants';
 import { ICheLoginPage } from './pageobjects/login/ICheLoginPage';
 import { RegularUserOcpCheLoginPage } from './pageobjects/login/RegularUserOcpCheLoginPage';
 import { MultiUserLoginPage } from './pageobjects/login/MultiUserLoginPage';
-import { SingleUserLoginPage } from './pageobjects/login/SingleUserLoginPage';
 import { ContextMenu } from './pageobjects/ide/ContextMenu';
 import { DriverHelper } from './utils/DriverHelper';
 import { Dashboard } from './pageobjects/dashboard/Dashboard';
@@ -47,7 +46,6 @@ import { PreferencesHandler } from './utils/PreferencesHandler';
 import { IAuthorizationHeaderHandler } from './utils/requestHandlers/headers/IAuthorizationHeaderHandler';
 import { CheMultiuserAuthorizationHeaderHandler } from './utils/requestHandlers/headers/CheMultiuserAuthorizationHeaderHandler';
 import { CheMultiuserTokenHandler } from './utils/requestHandlers/tokens/CheMultiuserTokenHandler';
-import { CheSingleUserAuthorizationHeaderHandler } from './utils/requestHandlers/headers/CheSingleUserAuthorizationHeaderHandler';
 import { ITokenHandler } from './utils/requestHandlers/tokens/ITokenHandler';
 import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandler';
 import { CheGitApi } from './utils/VCS/CheGitApi';
@@ -70,19 +68,13 @@ e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
 
-if (TestConstants.TS_SELENIUM_MULTIUSER) {
-    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
-    e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler);
+e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
+e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler);
 
-    if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage);
-    } else {
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage);
-    }
-
+if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage);
 } else {
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage);
-    e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheSingleUserAuthorizationHeaderHandler);
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage);
 }
 
 e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);

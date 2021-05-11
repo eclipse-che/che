@@ -110,11 +110,6 @@ export const TestConstants = {
     TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || '',
 
     /**
-     * Log into CHE in MultiUser mode, "false" by default.
-     */
-    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
-
-    /**
      * Path to folder with load tests execution report.
      */
     TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: process.env.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER || './load-test-folder',
