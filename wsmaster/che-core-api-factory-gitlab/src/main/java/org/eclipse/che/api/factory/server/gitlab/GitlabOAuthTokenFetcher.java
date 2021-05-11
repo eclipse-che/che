@@ -59,8 +59,8 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
     this.apiEndpoint = apiEndpoint;
     this.oAuthAPI = oAuthAPI;
     if (gitlabEndpoints != null) {
-      final String OAuthEndpoint = Splitter.on(",").splitToList(gitlabEndpoints).get(0);
-      this.gitlabApiClient = new GitlabApiClient(StringUtils.trimEnd(OAuthEndpoint, '/'));
+      final String oAuthEndpoint = Splitter.on(",").splitToList(gitlabEndpoints).get(0);
+      this.gitlabApiClient = new GitlabApiClient(StringUtils.trimEnd(oAuthEndpoint, '/'));
     } else {
       this.gitlabApiClient = null;
     }
