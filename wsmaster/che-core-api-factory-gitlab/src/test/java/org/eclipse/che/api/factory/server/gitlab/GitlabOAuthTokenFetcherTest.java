@@ -21,6 +21,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -132,5 +133,28 @@ public class GitlabOAuthTokenFetcherTest {
     PersonalAccessToken token =
         oAuthTokenFetcher.fetchPersonalAccessToken(subject, wireMockServer.url("/"));
     assertNotNull(token);
+  }
+
+  @Test
+  public void shouldValidatePersonalToken() throws Exception {
+    stubFor(
+        get(urlEqualTo("/api/v4/user"))
+            .withHeader(HttpHeaders.AUTHORIZATION, equalTo("Bearer token123"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", "application/json; charset=utf-8")
+                    .withBodyFile("gitlab/rest/api/v4/user/response.json")));
+
+    PersonalAccessToken token =
+        new PersonalAccessToken(
+            wireMockServer.baseUrl(),
+            "cheUser",
+            "username",
+            "userId",
+            "token-name",
+            "tid-23434",
+            "token123");
+
+    assertTrue(oAuthTokenFetcher.isValid(token).get());
   }
 }
