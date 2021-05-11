@@ -72,7 +72,7 @@ export class PluginsView {
         // it will cause to the random result
         for (let i: number = 0; i < text.length; i++) {
             await this.driverHelper.type(PluginsView.SEARCH_FIELD_LOCATOR, text.charAt(i), timeout);
-            await this.driverHelper.wait(1000);
+            await this.driverHelper.wait(2000);
         }
     }
 
