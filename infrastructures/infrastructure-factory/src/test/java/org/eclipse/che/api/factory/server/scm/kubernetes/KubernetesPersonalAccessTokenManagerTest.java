@@ -207,8 +207,7 @@ public class KubernetesPersonalAccessTokenManagerTest {
     Secret secret1 = new SecretBuilder().withMetadata(meta1).withData(data1).build();
     Secret secret2 = new SecretBuilder().withMetadata(meta2).withData(data2).build();
 
-    when(secrets.get(any(LabelSelector.class)))
-        .thenReturn(Arrays.asList(secret1, secret2));
+    when(secrets.get(any(LabelSelector.class))).thenReturn(Arrays.asList(secret1, secret2));
 
     // when
     PersonalAccessToken token1 =

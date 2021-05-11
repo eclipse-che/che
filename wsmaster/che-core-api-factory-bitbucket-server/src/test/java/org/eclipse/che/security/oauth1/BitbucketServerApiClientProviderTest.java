@@ -52,6 +52,22 @@ public class BitbucketServerApiClientProviderTest {
     assertTrue(HttpBitbucketServerApiClient.class.isAssignableFrom(actual.getClass()));
   }
 
+  @Test
+  public void shouldNormalizeURLsBeforeCreateBitbucketServerApi() {
+    // given
+    BitbucketServerApiProvider bitbucketServerApiProvider =
+        new BitbucketServerApiProvider(
+            "https://bitbucket.server.com/, https://bitbucket2.server.com/",
+            "https://bitbucket.server.com/",
+            ImmutableSet.of(oAuthAuthenticator));
+    // when
+    BitbucketServerApiClient actual = bitbucketServerApiProvider.get();
+    // then
+    assertNotNull(actual);
+    // internal representation always w/out slashes
+    assertTrue(actual.isConnected("https://bitbucket.server.com"));
+  }
+
   @Test(dataProvider = "noopConfig")
   public void shouldProvideNoopOAuthAuthenticatorIfSomeConfigurationIsNotSet(
       @Nullable String bitbucketEndpoints,

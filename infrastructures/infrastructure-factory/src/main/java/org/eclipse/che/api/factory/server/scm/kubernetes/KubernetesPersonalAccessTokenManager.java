@@ -144,12 +144,12 @@ public class KubernetesPersonalAccessTokenManager implements PersonalAccessToken
                 .get(KUBERNETES_PERSONAL_ACCESS_TOKEN_LABEL_SELECTOR);
         for (Secret secret : secrets) {
           Map<String, String> annotations = secret.getMetadata().getAnnotations();
+          String trimmedUrl = StringUtils.trimEnd(annotations.get(ANNOTATION_SCM_URL), '/');
           if (annotations.get(ANNOTATION_CHE_USERID).equals(cheUser.getUserId())
-              && StringUtils.trimEnd(annotations.get(ANNOTATION_SCM_URL), '/')
-                  .equals(StringUtils.trimEnd(scmServerUrl, '/'))) {
+              && trimmedUrl.equals(StringUtils.trimEnd(scmServerUrl, '/'))) {
             PersonalAccessToken token =
                 new PersonalAccessToken(
-                    annotations.get(ANNOTATION_SCM_URL),
+                    trimmedUrl,
                     annotations.get(ANNOTATION_CHE_USERID),
                     annotations.get(ANNOTATION_SCM_USERNAME),
                     annotations.get(ANNOTATION_SCM_USERID),
