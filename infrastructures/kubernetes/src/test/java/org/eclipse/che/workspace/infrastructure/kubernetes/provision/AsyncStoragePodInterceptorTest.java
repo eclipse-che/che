@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static io.fabric8.kubernetes.api.model.DeletionPropagation.BACKGROUND;
 import static java.util.Collections.emptyMap;
 import static java.util.UUID.randomUUID;
 import static org.eclipse.che.api.workspace.shared.Constants.ASYNC_PERSIST_ATTRIBUTE;
@@ -24,17 +25,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import io.fabric8.kubernetes.api.model.DoneablePod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
-import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
+import io.fabric8.kubernetes.client.dsl.EditReplacePatchDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
@@ -60,13 +57,13 @@ public class AsyncStoragePodInterceptorTest {
   @Mock private RuntimeIdentity identity;
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private RollableScalableResource<Deployment, DoneableDeployment> deploymentResource;
-  @Mock private PodResource<Pod, DoneablePod> podResource;
+  @Mock private RollableScalableResource<Deployment> deploymentResource;
+  @Mock private PodResource<Pod> podResource;
   @Mock private MixedOperation mixedOperation;
   @Mock private MixedOperation mixedOperationPod;
   @Mock private NonNamespaceOperation namespaceOperation;
   @Mock private NonNamespaceOperation namespacePodOperation;
-  @Mock private FilterWatchListDeletable<Pod, PodList, Boolean, Watch, Watcher<Pod>> deletable;
+  @Mock private EditReplacePatchDeletable<Deployment> deletable;
   @Mock private AppsAPIGroupDSL apps;
 
   private AsyncStoragePodInterceptor asyncStoragePodInterceptor;
@@ -156,7 +153,7 @@ public class AsyncStoragePodInterceptorTest {
     deployment.setMetadata(meta);
 
     when(deploymentResource.get()).thenReturn(deployment);
-    when(deploymentResource.withPropagationPolicy("Background")).thenReturn(deletable);
+    when(deploymentResource.withPropagationPolicy(BACKGROUND)).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);
     when(deploymentResource.watch(any())).thenReturn(watch);
@@ -192,7 +189,7 @@ public class AsyncStoragePodInterceptorTest {
     deployment.setMetadata(meta);
 
     when(deploymentResource.get()).thenReturn(deployment);
-    when(deploymentResource.withPropagationPolicy("Background")).thenReturn(deletable);
+    when(deploymentResource.withPropagationPolicy(BACKGROUND)).thenReturn(deletable);
 
     Watch watch = mock(Watch.class);
     when(deploymentResource.watch(any())).thenReturn(watch);

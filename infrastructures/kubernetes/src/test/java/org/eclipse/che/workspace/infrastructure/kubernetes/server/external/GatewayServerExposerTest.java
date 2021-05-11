@@ -47,7 +47,7 @@ public class GatewayServerExposerTest {
   private final String serviceName = "service";
   private final String serverId = "server";
   private final ServicePort servicePort =
-      new ServicePort("portName", 1, 1, "http", new IntOrString(1234));
+      new ServicePort(null, "portName", 1, 1, "http", new IntOrString(1234));
 
   private final Map<String, String> s1attrs = Collections.singletonMap("s1attr", "s1val");
 

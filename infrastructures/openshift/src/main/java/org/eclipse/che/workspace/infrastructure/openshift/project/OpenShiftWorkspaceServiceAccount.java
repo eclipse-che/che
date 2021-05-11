@@ -12,12 +12,12 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
-import io.fabric8.openshift.api.model.OpenshiftRole;
-import io.fabric8.openshift.api.model.OpenshiftRoleBinding;
-import io.fabric8.openshift.api.model.OpenshiftRoleBindingBuilder;
-import io.fabric8.openshift.api.model.OpenshiftRoleBindingFluent;
-import io.fabric8.openshift.api.model.OpenshiftRoleBuilder;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
+import io.fabric8.openshift.api.model.Role;
+import io.fabric8.openshift.api.model.RoleBinding;
+import io.fabric8.openshift.api.model.RoleBindingBuilder;
+import io.fabric8.openshift.api.model.RoleBindingFluent;
+import io.fabric8.openshift.api.model.RoleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  *     org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesWorkspaceServiceAccount
  */
 class OpenShiftWorkspaceServiceAccount
-    extends AbstractWorkspaceServiceAccount<OpenShiftClient, OpenshiftRole, OpenshiftRoleBinding> {
+    extends AbstractWorkspaceServiceAccount<OpenShiftClient, Role, RoleBinding> {
 
   OpenShiftWorkspaceServiceAccount(
       String workspaceId,
@@ -54,9 +54,9 @@ class OpenShiftWorkspaceServiceAccount
   }
 
   @Override
-  protected OpenshiftRole buildRole(
+  protected Role buildRole(
       String name, List<String> resources, List<String> apiGroups, List<String> verbs) {
-    return new OpenshiftRoleBuilder()
+    return new RoleBuilder()
         .withNewMetadata()
         .withName(name)
         .endMetadata()
@@ -70,10 +70,10 @@ class OpenShiftWorkspaceServiceAccount
   }
 
   @Override
-  protected OpenshiftRoleBinding createRoleBinding(
+  protected RoleBinding createRoleBinding(
       String roleName, String bindingName, boolean clusterRole) {
-    OpenshiftRoleBindingFluent.RoleRefNested<OpenshiftRoleBindingBuilder> bld =
-        new OpenshiftRoleBindingBuilder()
+    RoleBindingFluent.RoleRefNested<RoleBindingBuilder> bld =
+        new RoleBindingBuilder()
             .withNewMetadata()
             .withName(bindingName)
             .withNamespace(namespace)

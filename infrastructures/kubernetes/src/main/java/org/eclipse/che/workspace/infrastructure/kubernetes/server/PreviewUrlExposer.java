@@ -107,7 +107,7 @@ public class PreviewUrlExposer<T extends KubernetesEnvironment> {
   }
 
   private ServicePort createServicePort(int port) {
-    return new ServicePort("server-" + port, null, port, "TCP", new IntOrString(port));
+    return new ServicePort(null, "server-" + port, null, port, "TCP", new IntOrString(port));
   }
 
   protected boolean hasMatchingEndpoint(T env, Service service, int port) {

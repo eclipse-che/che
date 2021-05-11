@@ -100,7 +100,7 @@ public class RoutesTest {
     service.setMetadata(metadata);
     ServiceSpec spec = new ServiceSpec();
     spec.setPorts(
-        Collections.singletonList(new ServicePort(portString, null, portInt, "TCP", null)));
+        Collections.singletonList(new ServicePort(null, portString, null, portInt, "TCP", null)));
     service.setSpec(spec);
     return service;
   }

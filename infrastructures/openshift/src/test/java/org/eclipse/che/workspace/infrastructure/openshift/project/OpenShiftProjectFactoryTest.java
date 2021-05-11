@@ -37,16 +37,13 @@ import static org.testng.Assert.assertNull;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.openshift.api.model.DoneableProject;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectBuilder;
 import io.fabric8.openshift.api.model.ProjectList;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.dsl.ProjectOperation;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -102,20 +99,15 @@ public class OpenShiftProjectFactoryTest {
   @Mock private PreferenceManager preferenceManager;
   @Mock private KubernetesSharedPool pool;
 
-  @Mock
-  private NonNamespaceOperation<
-          Project, ProjectList, DoneableProject, Resource<Project, DoneableProject>>
-      projectOperation;
+  @Mock private ProjectOperation projectOperation;
 
-  @Mock private Resource<Project, DoneableProject> projectResource;
+  @Mock private Resource<Project> projectResource;
 
   @Mock private OpenShiftClient osClient;
 
   private OpenShiftProjectFactory projectFactory;
 
-  @Mock
-  private FilterWatchListDeletable<Project, ProjectList, Boolean, Watch, Watcher<Project>>
-      projectListResource;
+  @Mock private FilterWatchListDeletable<Project, ProjectList> projectListResource;
 
   @Mock private ProjectList projectList;
 
@@ -856,7 +848,7 @@ public class OpenShiftProjectFactoryTest {
 
   private void prepareNamespaceToBeFoundByName(String name, Project project) throws Exception {
     @SuppressWarnings("unchecked")
-    Resource<Project, DoneableProject> getProjectByNameOperation = mock(Resource.class);
+    Resource<Project> getProjectByNameOperation = mock(Resource.class);
     when(projectOperation.withName(name)).thenReturn(getProjectByNameOperation);
 
     when(getProjectByNameOperation.get()).thenReturn(project);
@@ -865,7 +857,7 @@ public class OpenShiftProjectFactoryTest {
   private void throwOnTryToGetProjectByName(String name, KubernetesClientException e)
       throws Exception {
     @SuppressWarnings("unchecked")
-    Resource<Project, DoneableProject> getProjectByNameOperation = mock(Resource.class);
+    Resource<Project> getProjectByNameOperation = mock(Resource.class);
     when(projectOperation.withName(name)).thenReturn(getProjectByNameOperation);
 
     when(getProjectByNameOperation.get()).thenThrow(e);
