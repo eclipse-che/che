@@ -25,7 +25,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
@@ -35,11 +34,12 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.openshift.api.model.DoneableProjectRequest;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.ProjectBuilder;
+import io.fabric8.openshift.api.model.ProjectRequest;
 import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.openshift.client.dsl.ProjectOperation;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -55,6 +55,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -82,7 +83,9 @@ public class OpenShiftProjectTest {
   @Mock private Executor executor;
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
-  @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+  @Mock private Resource<ServiceAccount> serviceAccountResource;
+  @Mock private ProjectRequestOperation projectRequestOperation;
+  @Mock private MetadataNested metadataNested;
 
   private OpenShiftProject openShiftProject;
 
@@ -99,6 +102,8 @@ public class OpenShiftProjectTest {
     lenient().when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
     lenient().when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     lenient().when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
+    lenient().doReturn(projectRequestOperation).when(openShiftClient).projectrequests();
+    lenient().doReturn(metadataNested).when(metadataNested).withName(anyString());
 
     openShiftProject =
         new OpenShiftProject(
@@ -118,7 +123,6 @@ public class OpenShiftProjectTest {
   @Test
   public void testOpenShiftProjectPreparingWhenProjectExists() throws Exception {
     // given
-    MetadataNested projectMeta = prepareProjectRequest();
     prepareNamespaceGet(PROJECT_NAME);
 
     prepareProject(PROJECT_NAME);
@@ -129,13 +133,12 @@ public class OpenShiftProjectTest {
     project.prepare(true, Map.of());
 
     // then
-    verify(projectMeta, never()).withName(PROJECT_NAME);
+    verify(metadataNested, never()).withName(PROJECT_NAME);
   }
 
   @Test
   public void testOpenShiftProjectPreparingWhenProjectDoesNotExist() throws Exception {
     // given
-    MetadataNested projectMetadata = prepareProjectRequest();
     prepareNamespaceGet(PROJECT_NAME);
 
     Resource resource = prepareProjectResource(PROJECT_NAME);
@@ -147,7 +150,9 @@ public class OpenShiftProjectTest {
     openShiftProject.prepare(true, Map.of());
 
     // then
-    verify(projectMetadata).withName(PROJECT_NAME);
+    ArgumentCaptor<ProjectRequest> captor = ArgumentCaptor.forClass(ProjectRequest.class);
+    verify(projectRequestOperation).create(captor.capture());
+    Assert.assertEquals(captor.getValue().getMetadata().getName(), PROJECT_NAME);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -365,23 +370,10 @@ public class OpenShiftProjectTest {
     verify(nonNamespaceOperation).createOrReplace(namespace);
   }
 
-  private MetadataNested prepareProjectRequest() {
-    ProjectRequestOperation projectRequestOperation = mock(ProjectRequestOperation.class);
-    DoneableProjectRequest projectRequest = mock(DoneableProjectRequest.class);
-    MetadataNested metadataNested = mock(MetadataNested.class);
-
-    lenient().doReturn(projectRequestOperation).when(openShiftClient).projectrequests();
-    lenient().doReturn(projectRequest).when(projectRequestOperation).createNew();
-    lenient().doReturn(metadataNested).when(projectRequest).withNewMetadata();
-    lenient().doReturn(metadataNested).when(metadataNested).withName(anyString());
-    lenient().doReturn(projectRequest).when(metadataNested).endMetadata();
-    return metadataNested;
-  }
-
   private Resource prepareProjectResource(String projectName) {
     Resource projectResource = mock(Resource.class);
 
-    NonNamespaceOperation projectOperation = mock(NonNamespaceOperation.class);
+    ProjectOperation projectOperation = mock(ProjectOperation.class);
     doReturn(projectResource).when(projectOperation).withName(projectName);
     doReturn(projectOperation).when(openShiftClient).projects();
 

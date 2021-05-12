@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
+import io.fabric8.openshift.api.model.ProjectRequestBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.util.Map;
@@ -166,11 +167,12 @@ public class OpenShiftProject extends KubernetesNamespace {
     try {
       osClient
           .projectrequests()
-          .createNew()
-          .withNewMetadata()
-          .withName(projectName)
-          .endMetadata()
-          .done();
+          .create(
+              new ProjectRequestBuilder()
+                  .withNewMetadata()
+                  .withName(projectName)
+                  .endMetadata()
+                  .build());
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         LOG.error(

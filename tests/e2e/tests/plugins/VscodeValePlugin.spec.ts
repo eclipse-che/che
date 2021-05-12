@@ -10,7 +10,6 @@
 
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
@@ -20,14 +19,15 @@ import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+import { Logger } from '../../utils/Logger';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 let workspaceName: string = '';
 
@@ -75,9 +75,14 @@ suite('The "VscodeValePlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
-        test('Delete workspace', async () => {
-            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+    suite('Stopping and deleting the workspace', async () => {
+        test('Stop and remove workspace', async () => {
+            if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
+                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                return;
+            }
+
+            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
         });
     });
 });

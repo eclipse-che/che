@@ -31,9 +31,6 @@ import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.DoneableConfigMap;
-import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.DoneableService;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -53,7 +50,6 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
-import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
@@ -188,7 +184,7 @@ public class AsyncStorageProvisioner {
   }
 
   private void createPvcIfNotExist(KubernetesClient k8sClient, String namespace, String userId) {
-    Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> claimResource =
+    Resource<PersistentVolumeClaim> claimResource =
         k8sClient.persistentVolumeClaims().inNamespace(namespace).withName(pvcName);
 
     if (claimResource.get() != null) {
@@ -242,7 +238,7 @@ public class AsyncStorageProvisioner {
       String userId,
       KubernetesEnvironment k8sEnv)
       throws InfrastructureException {
-    Resource<ConfigMap, DoneableConfigMap> mapResource =
+    Resource<ConfigMap> mapResource =
         k8sClient.configMaps().inNamespace(namespace).withName(configMapName);
     if (mapResource.get() != null) { // map already exist
       return;
@@ -273,7 +269,7 @@ public class AsyncStorageProvisioner {
   private void createAsyncStoragePodIfNotExist(
       KubernetesClient k8sClient, String namespace, String configMap, String userId) {
 
-    RollableScalableResource<Deployment, DoneableDeployment> resource =
+    RollableScalableResource<Deployment> resource =
         k8sClient.apps().deployments().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (resource.get() != null) {
       return; // deployment already exist
@@ -373,7 +369,7 @@ public class AsyncStorageProvisioner {
   /** Create service for serving rsync connection */
   private void createStorageServiceIfNotExist(
       KubernetesClient k8sClient, String namespace, String userId) {
-    ServiceResource<Service, DoneableService> serviceResource =
+    ServiceResource<Service> serviceResource =
         k8sClient.services().inNamespace(namespace).withName(ASYNC_STORAGE);
     if (serviceResource.get() != null) {
       return; // service already exist

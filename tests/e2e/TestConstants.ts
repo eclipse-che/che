@@ -228,6 +228,11 @@ export const TestConstants = {
     /**
      * This variable specifies that run test is used for load testing and that all artifacts will be sent to ftp client.
      */
-    TS_LOAD_TESTS: process.env.TS_LOAD_TESTS || 'false'
+    TS_LOAD_TESTS: process.env.TS_LOAD_TESTS || 'false',
+
+    /**
+     * This variable determines whether to delete the workspace after the test or leave the workspace running.
+     */
+    TS_DELETE_PLUGINS_TEST_WORKSPACE: process.env.TS_DELETE_PLUGINS_TEST_WORKSPACE || 'true'
 
 };

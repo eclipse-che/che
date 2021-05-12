@@ -200,4 +200,11 @@ export const TimeoutConstants = {
      */
     TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT: Number(process.env.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) || 120_000,
 
+    // ----------------------------------------- PLUGINS -----------------------------------------
+
+    /**
+     * Common timeout for plugins.
+     */
+    TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 20_000
+
 };
