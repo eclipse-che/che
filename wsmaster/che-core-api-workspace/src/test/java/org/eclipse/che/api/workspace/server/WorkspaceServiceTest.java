@@ -229,47 +229,6 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldCreateWorkspaceFromDevfileInNamespace() throws Exception {
-    final DevfileDto devfileDto = createDevfileDto();
-    final WorkspaceImpl workspace = createWorkspace(devfileDto);
-
-    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
-        .thenReturn(workspace);
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .body(devfileDto)
-            .when()
-            .post(
-                SECURE_PATH
-                    + "/workspace/devfile"
-                    + "?namespace=test"
-                    + "&attribute=factoryId:factory123"
-                    + "&attribute=custom:custom:value"
-                    + "&infrastructure-namespace=my-namespace");
-
-    assertEquals(response.getStatusCode(), 201);
-    assertEquals(
-        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
-    verify(wsManager)
-        .createWorkspace(
-            any(Devfile.class),
-            eq("test"),
-            eq(
-                ImmutableMap.of(
-                    "factoryId",
-                    "factory123",
-                    "custom",
-                    "custom:value",
-                    "infrastructureNamespace",
-                    "my-namespace")),
-            any());
-  }
-
-  @Test
   public void shouldReturnBadRequestOnInvalidDevfile() throws Exception {
     final DevfileDto devfileDto = createDevfileDto();
     final WorkspaceImpl workspace = createWorkspace(devfileDto);

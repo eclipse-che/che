@@ -123,20 +123,6 @@ public abstract class RuntimeInfrastructure {
       throws InfrastructureException;
 
   /**
-   * Returns the namespace a workspace should be deployed into when using the legacy (pre 7.5.0)
-   * logic. This is required to handle a case where we're starting a workspace created using an old
-   * version of the Che server that didn't store the infrastructure namespace in the workspace
-   * attributes.
-   *
-   * @param resolutionContext the runtime holder specifying which user and workspace runtime
-   *     targets.
-   * @throws InfrastructureException when there is no configured default namespace or any other
-   *     error
-   */
-  public abstract String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
-      throws InfrastructureException;
-
-  /**
    * Checks whether the infrastructure namespace is valid in this infrastructure.
    *
    * @param namespaceName the namespace name
