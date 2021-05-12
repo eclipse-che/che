@@ -62,10 +62,12 @@ suite('Git with ssh workflow', async () => {
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
     });
 
     test('Generate a SSH key', async () => {
+        await topMenu.selectOption('View', 'Find Command...');
+        // workaround - reopen 'Find Command' container - https://github.com/eclipse/che/issues/19793
         await topMenu.selectOption('View', 'Find Command...');
         await quickOpenContainer.typeAndSelectSuggestion('SSH', 'SSH: Generate Key...');
         await ide.waitNotificationAndClickOnButton('Key pair successfully generated, do you want to view the public key', 'View');
@@ -109,7 +111,7 @@ suite('Git with ssh workflow', async () => {
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
         await cloneTestRepo();
         await projectTree.expandPath('Spoon-Knife');
         await projectTree.waitItem('Spoon-Knife/README.md');
@@ -127,6 +129,8 @@ async function cloneTestRepo() {
     const sshLinkToRepo: string = 'git@github.com:' + TestConstants.TS_GITHUB_TEST_REPO + '.git';
     const confirmMessage = 'Clone from URL';
 
+    await topMenu.selectOption('View', 'Find Command...');
+    // workaround - reopen 'Find Command' container - https://github.com/eclipse/che/issues/19793
     await topMenu.selectOption('View', 'Find Command...');
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
