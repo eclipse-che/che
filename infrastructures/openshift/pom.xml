@@ -71,6 +71,10 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -117,6 +121,10 @@
         <dependency>
             <groupId>org.eclipse.che.infrastructure</groupId>
             <artifactId>infrastructure-kubernetes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-api-authentication-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
