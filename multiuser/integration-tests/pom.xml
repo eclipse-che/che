@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-parent</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.30.1-SNAPSHOT</version>
+        <version>7.30.2-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-integration-tests</artifactId>
     <packaging>pom</packaging>

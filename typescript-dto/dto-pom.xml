@@ -17,13 +17,13 @@
     <parent>
         <artifactId>maven-parent-pom</artifactId>
         <groupId>org.eclipse.che.parent</groupId>
-        <version></version>
+        <version>7.15.0</version>
     </parent>
     <artifactId>dts-dto-typescript</artifactId>
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>7.30.1-SNAPSHOT</che.version>
+        <che.version>7.30.2-SNAPSHOT</che.version>
     </properties>
     <repositories>
         <repository>
