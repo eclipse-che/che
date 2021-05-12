@@ -282,11 +282,6 @@ public class WorkspaceRuntimes {
     return infrastructure.evaluateInfraNamespace(resolutionCtx);
   }
 
-  public String evalLegacyInfrastructureNamespace(NamespaceResolutionContext resolutionContext)
-      throws InfrastructureException {
-    return infrastructure.evaluateLegacyInfraNamespace(resolutionContext);
-  }
-
   /**
    * This method just passes on the question down to the underlying infrastructure.
    *

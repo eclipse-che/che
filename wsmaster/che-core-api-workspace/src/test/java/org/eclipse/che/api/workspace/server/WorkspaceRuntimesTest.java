@@ -1060,12 +1060,6 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
-    public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
-        throws InfrastructureException {
-      return "defaultLegacyNamespace";
-    }
-
-    @Override
     public boolean isNamespaceValid(String namespaceName) {
       return true;
     }
