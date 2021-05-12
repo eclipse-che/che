@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.User;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.IOException;
@@ -59,6 +60,12 @@ public class TokenInitializationFilter extends MultiUserEnvironmentInitializatio
       OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
       return client.currentUser().getMetadata().getUid();
     } catch (InfrastructureException e) {
+      throw new RuntimeException(e);
+    } catch (KubernetesClientException e) {
+      if (e.getCode() == 401) {
+        LOG.error(
+            "Unauthorized when getting current user. Invalid OpenShift token, probably expired. Re-login? Re-request the token?");
+      }
       throw new RuntimeException(e);
     }
   }
