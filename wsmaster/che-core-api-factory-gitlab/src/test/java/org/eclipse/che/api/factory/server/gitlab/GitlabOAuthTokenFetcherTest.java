@@ -47,18 +47,16 @@ public class GitlabOAuthTokenFetcherTest {
   @Mock OAuthAPI oAuthAPI;
   GitlabOAuthTokenFetcher oAuthTokenFetcher;
 
-  final int httpPort = 3301;
   WireMockServer wireMockServer;
   WireMock wireMock;
 
   @BeforeMethod
   void start() {
-
     wireMockServer =
-        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(httpPort));
+        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).dynamicPort());
     wireMockServer.start();
-    WireMock.configureFor("localhost", httpPort);
-    wireMock = new WireMock("localhost", httpPort);
+    WireMock.configureFor("localhost", wireMockServer.port());
+    wireMock = new WireMock("localhost", wireMockServer.port());
     oAuthTokenFetcher =
         new GitlabOAuthTokenFetcher(wireMockServer.url("/"), "http://che.api", oAuthAPI);
   }
