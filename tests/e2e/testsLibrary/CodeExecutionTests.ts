@@ -36,14 +36,21 @@ export class CodeExecutionTests {
         });
     }
 
-    public runTaskInputText(taskName: string, waitedText: string, inputText: string, timeout: number) {
+    public runTaskInputText(taskName: string, expectedQuery: string, inputText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
             await this.topMenu.runTask(taskName);
-            await this.terminal.waitText(taskName, waitedText, timeout);
+            await this.terminal.waitText(taskName, expectedQuery, timeout);
             await this.terminal.clickOnTab(taskName);
             await this.terminal.type(taskName, inputText);
             await this.terminal.type(taskName, Key.ENTER);
             await this.terminal.waitIconSuccess(taskName, timeout);
+        });
+    }
+
+    public runTaskConsoleOutput(taskName: string, expectedText: string, timeout: number) {
+        test(`Run command '${taskName}' expecting console putput: ${expectedText}`, async () => {
+            await this.topMenu.runTask(taskName);
+            await this.terminal.waitText(taskName, expectedText, timeout);
         });
     }
 
