@@ -13,14 +13,20 @@ import { inject, injectable } from 'inversify';
 import { CLASSES } from '../inversify.types';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Editor } from '../pageobjects/ide/Editor';
-import { Ide} from '../pageobjects/ide/Ide';
+import { Ide, LeftToolbarButton } from '../pageobjects/ide/Ide';
+import { TopMenu } from '../pageobjects/ide/TopMenu';
+import { DebugView } from '../pageobjects/ide/DebugView';
 import { Key, error } from 'selenium-webdriver';
 import { Logger } from '../utils/Logger';
 
 @injectable()
 export class LanguageServerTests {
 
-    constructor(@inject(CLASSES.Editor) private readonly editor: Editor, @inject(CLASSES.Ide) private readonly ide: Ide) { }
+    constructor(
+        @inject(CLASSES.Editor) private readonly editor: Editor,
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
+        @inject(CLASSES.DebugView) private readonly debugView: DebugView) { }
 
     public errorHighlighting(openedTab: string, textToWrite: string, line: number) {
         test('Error highlighting', async () => {
@@ -87,6 +93,30 @@ export class LanguageServerTests {
                     throw err;
                 }
             }
+        });
+    }
+
+    public startAndAttachDebugger(openedFile: string) {
+        test('Open debug panel', async () => {
+            await this.editor.selectTab(openedFile);
+            await this.topMenu.selectOption('View', 'Debug');
+            await this.ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
+        });
+
+        test('Run debug', async () => {
+            await this.debugView.clickOnRunDebugButton();
+        });
+    }
+
+    public setBreakpoint(openedFile: string, line: number) {
+        test('Activating breakpoint', async () => {
+            await this.editor.activateBreakpoint(openedFile, line);
+        });
+    }
+
+    public checkDebuggerStoppedAtBreakpoint(openedFile: string, line: number, timeout: number) {
+        test('Check that debug stopped at the breakpoint', async () => {
+            await this.editor.waitStoppedDebugBreakpoint(openedFile, line, timeout);
         });
     }
 }
