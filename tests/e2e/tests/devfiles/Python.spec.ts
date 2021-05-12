@@ -48,7 +48,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(fileName, `error_text;`, 7);
         commonLanguageServerTests.suggestionInvoking(fileName, 9, 22, 'str');
         commonLanguageServerTests.autocomplete(fileName, 9, 4, 'print');
-        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the Python devfile
+        // commonLanguageServerTests.goToImplementations(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the Python devfile
     });
 
     suite ('Stopping and deleting the workspace', async () => {

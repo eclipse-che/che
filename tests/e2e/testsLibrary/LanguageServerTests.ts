@@ -75,21 +75,52 @@ export class LanguageServerTests {
         });
     }
 
-    public codeNavigation(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
-        test('Codenavigation', async () => {
-            // adding retry to fix https://github.com/eclipse/che/issues/17411
+    public goToDefinition(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
+        test('Go to Definition', async () => {
+            try {
+                await this.editor.moveCursorToLineAndChar(openedFile, line, char);
+                await this.editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F11));
+                await this.editor.waitEditorAvailable(codeNavigationClassName, timeout);
+            } catch (err) {
+                // https://github.com/eclipse/che/issues/17411 was fixed by adding a retry
+                if (err instanceof error.TimeoutError) {
+                    Logger.warn('Code navigation (definition) didn\'t work. Trying again.');
+                    try {
+                        await this.editor.moveCursorToLineAndChar(openedFile, line, char);
+                        await this.editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F11));
+                        await this.editor.waitEditorAvailable(codeNavigationClassName, timeout);
+                    } catch (err) {
+                        Logger.error('Code navigation (definition) didn\'t work even after retrying.');
+                        throw err;
+                    }
+                } else {
+                    Logger.error('Code navigation (definition) failed with unexpected exception.');
+                    throw err;
+                }
+            }
+        });
+    }
+
+    public goToImplementations(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
+        test('Go to Implementations', async () => {
             try {
                 await this.editor.moveCursorToLineAndChar(openedFile, line, char);
                 await this.editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
                 await this.editor.waitEditorAvailable(codeNavigationClassName, timeout);
             } catch (err) {
+                // https://github.com/eclipse/che/issues/17411 was fixed by adding a retry
                 if (err instanceof error.TimeoutError) {
-                    Logger.warn('Code navigation didn\'t work. Trying again.');
-                    await this.editor.moveCursorToLineAndChar(openedFile, line, char);
-                    await this.editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
-                    await this.editor.waitEditorAvailable(codeNavigationClassName, timeout);
+                    Logger.warn('Code navigation (implementations) didn\'t work. Trying again.');
+                    try {
+                        await this.editor.moveCursorToLineAndChar(openedFile, line, char);
+                        await this.editor.performKeyCombination(openedFile, Key.chord(Key.CONTROL, Key.F12));
+                        await this.editor.waitEditorAvailable(codeNavigationClassName, timeout);
+                    } catch (err) {
+                        Logger.error('Code navigation (implementations) didn\'t work even after retrying.');
+                        throw err;
+                    }
                 } else {
-                    Logger.error('Code navigation didn\'t work even after retrying.');
+                    Logger.error('Code navigation (implementations) failed with unexpected exception.');
                     throw err;
                 }
             }

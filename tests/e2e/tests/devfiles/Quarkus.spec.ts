@@ -60,7 +60,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(fileName, 'error_text;', 7);
         commonLanguageServerTests.suggestionInvoking(fileName, 8, 33, 'String');
         commonLanguageServerTests.autocomplete(fileName, 8, 33, 'String');
-        commonLanguageServerTests.codeNavigation(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.goToImplementations(fileName, 8, 33, 'String.class', 30_000); // extended timout to give LS enough time to start
     });
 
     suite('Stop and remove workspace', async() => {
