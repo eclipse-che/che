@@ -51,9 +51,10 @@ public class KubernetesInfrastructureTest {
   @Test
   public void testUsesAuthenticatedKubernetesClient() throws Exception {
     // when
+    HttpHeaders headers = mock(HttpHeaders.class);
     try {
       infra.sendDirectInfrastructureRequest(
-          "GET", URI.create("somewhere/over/the/rainbow"), mock(HttpHeaders.class), null);
+          "GET", URI.create("somewhere/over/the/rainbow"), headers, null);
     } catch (Exception e) {
       // we don't care that this fails, because it fails during the execution of the HTTP request
       // that we intentionally don't set up fully.
@@ -62,6 +63,6 @@ public class KubernetesInfrastructureTest {
     }
 
     // then
-    verify(factory).getAuthenticatedHttpClient(null);
+    verify(factory).getAuthenticatedHttpClient(headers);
   }
 }

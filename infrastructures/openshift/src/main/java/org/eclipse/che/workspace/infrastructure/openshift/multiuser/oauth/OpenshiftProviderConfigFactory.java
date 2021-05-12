@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
-
 import com.google.inject.Provider;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.openshift.client.OpenShiftConfig;
