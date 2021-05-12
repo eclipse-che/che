@@ -79,12 +79,6 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   }
 
   @Override
-  public String evaluateLegacyInfraNamespace(NamespaceResolutionContext resolutionContext)
-      throws InfrastructureException {
-    return projectFactory.evaluateLegacyNamespaceName(resolutionContext);
-  }
-
-  @Override
   public String evaluateInfraNamespace(NamespaceResolutionContext resolutionCtx)
       throws InfrastructureException {
     return projectFactory.evaluateNamespaceName(resolutionCtx);

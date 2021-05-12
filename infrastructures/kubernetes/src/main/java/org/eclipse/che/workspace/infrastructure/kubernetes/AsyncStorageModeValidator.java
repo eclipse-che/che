@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>che.infra.kubernetes.namespace.default=<username>-che
- *   <li>che.infra.kubernetes.namespace.allow_user_defined=false
  *   <li>che.infra.kubernetes.pvc.strategy=common
  *   <li>che.limits.user.workspaces.run.count=1
  * </ul>
@@ -56,7 +55,6 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   private static final Logger LOG = LoggerFactory.getLogger(AsyncStorageModeValidator.class);
 
   private final String pvcStrategy;
-  private final boolean allowUserDefinedNamespaces;
   private final int runtimesPerUser;
   private final boolean isNamespaceStrategyNotValid;
   private final boolean isPvcStrategyNotValid;
@@ -65,13 +63,10 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
   @Inject
   public AsyncStorageModeValidator(
       @Named("che.infra.kubernetes.pvc.strategy") String pvcStrategy,
-      @Named("che.infra.kubernetes.namespace.allow_user_defined")
-          boolean allowUserDefinedNamespaces,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
       @Named("che.limits.user.workspaces.run.count") int runtimesPerUser) {
 
     this.pvcStrategy = pvcStrategy;
-    this.allowUserDefinedNamespaces = allowUserDefinedNamespaces;
     this.runtimesPerUser = runtimesPerUser;
 
     this.isPvcStrategyNotValid = !COMMON_STRATEGY.equals(pvcStrategy);
@@ -85,7 +80,6 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
     if (parseBoolean(attributes.get(ASYNC_PERSIST_ATTRIBUTE))) {
       isEphemeralAttributeValidation(attributes);
       pvcStrategyValidation();
-      alowUserDefinedNamespaceValidation();
       nameSpaceStrategyValidation();
       runtimesPerUserValidation();
     }
@@ -97,7 +91,6 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
     if (parseBoolean(update.get(ASYNC_PERSIST_ATTRIBUTE))) {
       if (isEphemeral(existing) || isEphemeral(update)) {
         pvcStrategyValidation();
-        alowUserDefinedNamespaceValidation();
         nameSpaceStrategyValidation();
         runtimesPerUserValidation();
       } else {
@@ -134,17 +127,6 @@ public class AsyncStorageModeValidator implements WorkspaceAttributeValidator {
     if (isNamespaceStrategyNotValid) {
       String message =
           "Workspace configuration not valid: Asynchronous storage available only for 'per-user' namespace strategy";
-      LOG.warn(message);
-      throw new ValidationException(message);
-    }
-  }
-
-  private void alowUserDefinedNamespaceValidation() throws ValidationException {
-    if (allowUserDefinedNamespaces) {
-      String message =
-          format(
-              "Workspace configuration not valid: Asynchronous storage available only if 'che.infra.kubernetes.namespace.allow_user_defined' set to 'false', but got '%s'",
-              allowUserDefinedNamespaces);
       LOG.warn(message);
       throw new ValidationException(message);
     }
