@@ -61,12 +61,11 @@ public class HttpBitbucketServerApiClientTest {
 
   @BeforeMethod
   void start() {
-    int httpPort = getHttpPort();
     wireMockServer =
-        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(httpPort));
+        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).dynamicPort());
     wireMockServer.start();
-    WireMock.configureFor("localhost", httpPort);
-    wireMock = new WireMock("localhost", httpPort);
+    WireMock.configureFor("localhost", wireMockServer.port());
+    wireMock = new WireMock("localhost", wireMockServer.port());
     bitbucketServer =
         new HttpBitbucketServerApiClient(
             wireMockServer.url("/"),
@@ -83,10 +82,6 @@ public class HttpBitbucketServerApiClientTest {
   @AfterMethod
   void stop() {
     wireMockServer.stop();
-  }
-
-  int getHttpPort() {
-    return 3301;
   }
 
   @Test

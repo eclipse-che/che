@@ -33,7 +33,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class GitlabApiClientTest {
 
-  final int httpPort = 3301;
   private GitlabApiClient client;
   WireMockServer wireMockServer;
   WireMock wireMock;
@@ -41,10 +40,10 @@ public class GitlabApiClientTest {
   @BeforeMethod
   void start() {
     wireMockServer =
-        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).port(httpPort));
+        new WireMockServer(wireMockConfig().notifier(new Slf4jNotifier(false)).dynamicPort());
     wireMockServer.start();
-    WireMock.configureFor("localhost", httpPort);
-    wireMock = new WireMock("localhost", httpPort);
+    WireMock.configureFor("localhost", wireMockServer.port());
+    wireMock = new WireMock("localhost", wireMockServer.port());
     client = new GitlabApiClient(wireMockServer.url("/"));
   }
 
