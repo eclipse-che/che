@@ -142,6 +142,12 @@ public class KeycloakProviderConfigFactory extends OpenShiftClientConfigFactory 
       return defaultConfig;
     }
 
+    if (workspaceId == null) {
+      LOG.debug(
+          "OAuth Provider is configured and this request is not related to any workspace. OAuth token will be retrieved.");
+      return personalizeConfig(defaultConfig);
+    }
+
     Optional<RuntimeContext> context =
         workspaceRuntimeProvider.get().getRuntimeContext(workspaceId);
     if (!context.isPresent()) {

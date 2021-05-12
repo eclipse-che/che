@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 
 /** @author David Festal */
 @Listeners(MockitoTestNGListener.class)
-public class IdentityProviderConfigFactoryTest {
+public class KeycloakProviderConfigFactoryTest {
   private static final String PROVIDER = "openshift-v3";
   private static final String THE_USER_ID = "a_user_id";
   private static final String ANOTHER_USER_ID = "another_user_id";
