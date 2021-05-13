@@ -33,6 +33,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmItemNotFoundException
 import org.eclipse.che.api.factory.server.scm.exception.ScmUnauthorizedException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.StringUtils;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.security.oauth.OAuthAPI;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
   private static final String OAUTH_PROVIDER_NAME = "gitlab";
   public static final Set<String> DEFAULT_TOKEN_SCOPES =
       ImmutableSet.of("api", "write_repository", "openid");
+  public static final String OAUTH_2_PREFIX = "oauth2-";
 
   private final OAuthAPI oAuthAPI;
   private final String apiEndpoint;
@@ -58,8 +60,8 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
     this.apiEndpoint = apiEndpoint;
     this.oAuthAPI = oAuthAPI;
     if (gitlabEndpoints != null) {
-      this.gitlabApiClient =
-          new GitlabApiClient(Splitter.on(",").splitToList(gitlabEndpoints).get(0));
+      final String oAuthEndpoint = Splitter.on(",").splitToList(gitlabEndpoints).get(0);
+      this.gitlabApiClient = new GitlabApiClient(StringUtils.trimEnd(oAuthEndpoint, '/'));
     } else {
       this.gitlabApiClient = null;
     }
@@ -68,6 +70,7 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
   @Override
   public PersonalAccessToken fetchPersonalAccessToken(Subject cheSubject, String scmServerUrl)
       throws ScmUnauthorizedException, ScmCommunicationException {
+    scmServerUrl = StringUtils.trimEnd(scmServerUrl, '/');
     if (gitlabApiClient == null || !gitlabApiClient.isConnected(scmServerUrl)) {
       LOG.debug("not a  valid url {} for current fetcher ", scmServerUrl);
       return null;
@@ -82,7 +85,7 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
               cheSubject.getUserId(),
               user.getUsername(),
               Long.toString(user.getId()),
-              NameGenerator.generate("oauth2-", 5),
+              NameGenerator.generate(OAUTH_2_PREFIX, 5),
               NameGenerator.generate("id-", 5),
               oAuthToken.getToken());
       Optional<Boolean> valid = isValid(token);
@@ -122,11 +125,24 @@ public class GitlabOAuthTokenFetcher implements PersonalAccessTokenFetcher {
           "not a  valid url {} for current fetcher ", personalAccessToken.getScmProviderUrl());
       return Optional.empty();
     }
-    try {
-      GitlabOauthTokenInfo info = gitlabApiClient.getTokenInfo(personalAccessToken.getToken());
-      return Optional.of(Sets.newHashSet(info.getScope()).containsAll(DEFAULT_TOKEN_SCOPES));
-    } catch (ScmItemNotFoundException | ScmCommunicationException e) {
-      return Optional.of(Boolean.FALSE);
+    if (personalAccessToken.getScmTokenName() != null
+        && personalAccessToken.getScmTokenName().startsWith(OAUTH_2_PREFIX)) {
+      // validation OAuth token by special API call
+      try {
+        GitlabOauthTokenInfo info = gitlabApiClient.getTokenInfo(personalAccessToken.getToken());
+        return Optional.of(Sets.newHashSet(info.getScope()).containsAll(DEFAULT_TOKEN_SCOPES));
+      } catch (ScmItemNotFoundException | ScmCommunicationException e) {
+        return Optional.of(Boolean.FALSE);
+      }
+    } else {
+      // validating personal access token from secret. Since PAT API is accessible only in
+      // latest GitLab version, we just perform check by accessing something from API.
+      try {
+        gitlabApiClient.getUser(personalAccessToken.getToken());
+        return Optional.of(Boolean.TRUE);
+      } catch (ScmItemNotFoundException | ScmCommunicationException | ScmBadRequestException e) {
+        return Optional.of(Boolean.FALSE);
+      }
     }
   }
 

@@ -13,8 +13,11 @@ package org.eclipse.che.security.oauth1;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+import com.google.common.base.Splitter;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -23,6 +26,7 @@ import org.eclipse.che.api.factory.server.bitbucket.server.BitbucketServerApiCli
 import org.eclipse.che.api.factory.server.bitbucket.server.HttpBitbucketServerApiClient;
 import org.eclipse.che.api.factory.server.bitbucket.server.NoopBitbucketServerApiClient;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.StringUtils;
 import org.eclipse.che.inject.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,17 +53,25 @@ public class BitbucketServerApiProvider implements Provider<BitbucketServerApiCl
   }
 
   private static BitbucketServerApiClient doGet(
-      String bitbucketEndpoints,
+      String rawBitbucketEndpoints,
       String bitbucketOauth1Endpoint,
       Set<OAuthAuthenticator> authenticators) {
     if (isNullOrEmpty(bitbucketOauth1Endpoint)) {
       return new NoopBitbucketServerApiClient();
     } else {
-      if (isNullOrEmpty(bitbucketEndpoints)) {
+      if (isNullOrEmpty(rawBitbucketEndpoints)) {
         throw new ConfigurationException(
             "`che.integration.bitbucket.server_endpoints` bitbucket configuration is missing."
                 + " It should contain values from 'che.oauth1.bitbucket.endpoint'");
       } else {
+        // sanitise URL-s first
+        bitbucketOauth1Endpoint = StringUtils.trimEnd(bitbucketOauth1Endpoint, '/');
+        List<String> bitbucketEndpoints =
+            Splitter.on(",")
+                .splitToList(rawBitbucketEndpoints)
+                .stream()
+                .map(s -> StringUtils.trimEnd(s, '/'))
+                .collect(Collectors.toList());
         if (bitbucketEndpoints.contains(bitbucketOauth1Endpoint)) {
           Optional<OAuthAuthenticator> authenticator =
               authenticators

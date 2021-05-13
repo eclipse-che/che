@@ -129,7 +129,7 @@ public class KubernetesGitCredentialManagerTest {
 
     Map<String, String> annotations = new HashMap<>(DEFAULT_SECRET_ANNOTATIONS);
 
-    annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl());
+    annotations.put(ANNOTATION_SCM_URL, token.getScmProviderUrl() + "/");
     annotations.put(ANNOTATION_SCM_USERNAME, token.getScmUserName());
     annotations.put(ANNOTATION_CHE_USERID, token.getCheUserId());
     ObjectMeta objectMeta =
