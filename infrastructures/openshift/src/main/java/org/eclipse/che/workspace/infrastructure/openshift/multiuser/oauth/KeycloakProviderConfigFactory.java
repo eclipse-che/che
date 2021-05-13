@@ -66,17 +66,20 @@ public class KeycloakProviderConfigFactory extends OpenShiftClientConfigFactory 
   private final KeycloakServiceClient keycloakServiceClient;
   private final Provider<WorkspaceRuntimes> workspaceRuntimeProvider;
   private final String messageToLinkAccount;
+  private final OpenshiftProviderConfigFactory openshiftProviderConfigFactory;
 
   @Inject
   public KeycloakProviderConfigFactory(
       KeycloakServiceClient keycloakServiceClient,
       KeycloakSettings keycloakSettings,
       Provider<WorkspaceRuntimes> workspaceRuntimeProvider,
+      OpenshiftProviderConfigFactory openshiftProviderConfigFactory,
       @Nullable @Named("che.infra.openshift.oauth_identity_provider") String oauthIdentityProvider,
       @Named("che.api") String apiEndpoint) {
     this.keycloakServiceClient = keycloakServiceClient;
     this.workspaceRuntimeProvider = workspaceRuntimeProvider;
     this.oauthIdentityProvider = oauthIdentityProvider;
+    this.openshiftProviderConfigFactory = openshiftProviderConfigFactory;
 
     messageToLinkAccount =
         "You should link your account with the <strong>"
@@ -123,11 +126,11 @@ public class KeycloakProviderConfigFactory extends OpenShiftClientConfigFactory 
   public Config buildConfig(
       Config defaultConfig, @Nullable String workspaceId, @Nullable String token)
       throws InfrastructureException {
+    Subject subject = EnvironmentContext.getCurrent().getSubject();
+
     if (token != null) {
-      LOG.debug("Creating token authenticated client");
-      return new OpenShiftConfigBuilder(OpenShiftConfig.wrap(defaultConfig))
-          .withOauthToken(token)
-          .build();
+      LOG.debug("Delegating creation of client config to OpenShift specific implementation.");
+      return openshiftProviderConfigFactory.buildConfig(defaultConfig, workspaceId, token);
     }
 
     if (oauthIdentityProvider == null) {
@@ -135,7 +138,6 @@ public class KeycloakProviderConfigFactory extends OpenShiftClientConfigFactory 
       return defaultConfig;
     }
 
-    Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (subject == Subject.ANONYMOUS) {
       LOG.debug(
           "OAuth Provider is configured but default subject is anonymous, default config is used.");
