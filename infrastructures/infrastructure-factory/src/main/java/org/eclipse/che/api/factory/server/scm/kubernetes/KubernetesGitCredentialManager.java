@@ -39,6 +39,7 @@ import org.eclipse.che.api.factory.server.scm.exception.ScmConfigurationPersiste
 import org.eclipse.che.api.factory.server.scm.exception.UnsatisfiedScmPreconditionException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.StringUtils;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.api.shared.KubernetesNamespaceMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -103,7 +104,10 @@ public class KubernetesGitCredentialManager implements GitCredentialManager {
                               s.getMetadata().getAnnotations().get(ANNOTATION_GIT_CREDENTIALS))
                           && personalAccessToken
                               .getScmProviderUrl()
-                              .equals(s.getMetadata().getAnnotations().get(ANNOTATION_SCM_URL))
+                              .equals(
+                                  StringUtils.trimEnd(
+                                      s.getMetadata().getAnnotations().get(ANNOTATION_SCM_URL),
+                                      '/'))
                           && personalAccessToken
                               .getCheUserId()
                               .equals(s.getMetadata().getAnnotations().get(ANNOTATION_CHE_USERID))
