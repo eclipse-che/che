@@ -97,7 +97,7 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
 
       case "create":
         {
-          checkAccountPermissions((String) arguments[4], AccountOperation.CREATE_WORKSPACE);
+          checkAccountPermissions((String) arguments[3], AccountOperation.CREATE_WORKSPACE);
           return;
         }
 

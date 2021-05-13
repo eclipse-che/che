@@ -109,7 +109,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             COMMON_STRATEGY,
-            false,
             "<username>",
             1);
 
@@ -137,7 +136,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             10,
             COMMON_STRATEGY,
-            false,
             "<username>",
             1);
     long epochSecond = now().getEpochSecond();
@@ -160,7 +158,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             COMMON_STRATEGY,
-            false,
             "<username>",
             1);
 
@@ -190,7 +187,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             COMMON_STRATEGY,
-            false,
             "<username>",
             1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
@@ -212,7 +208,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             "my-own-strategy",
-            false,
             "<username>",
             1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
@@ -234,7 +229,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             "my-own-strategy",
-            true,
             "<username>",
             1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
@@ -256,7 +250,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             "my-own-strategy",
-            true,
             "<foo-bar>",
             1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
@@ -278,7 +271,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             1,
             "my-own-strategy",
-            true,
             "<foo-bar>",
             2);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences
@@ -300,7 +292,6 @@ public class AsyncStoragePodWatcherTest {
             runtimes,
             0,
             COMMON_STRATEGY,
-            false,
             "<username>",
             1);
     when(preferenceManager.find(USER_ID)).thenReturn(emptyMap()); // no records in user preferences

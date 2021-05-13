@@ -65,12 +65,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @Inject
   public OpenShiftProjectFactory(
-      @Nullable @Named("che.infra.openshift.project") String projectName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       @Nullable @Named("che.infra.kubernetes.workspace_sa_cluster_roles") String clusterRoleNames,
       @Nullable @Named("che.infra.kubernetes.namespace.default") String defaultNamespaceName,
-      @Named("che.infra.kubernetes.namespace.allow_user_defined")
-          boolean allowUserDefinedNamespaces,
       @Named("che.infra.kubernetes.namespace.creation_allowed") boolean namespaceCreationAllowed,
       @Named("che.infra.kubernetes.namespace.label") boolean labelProjects,
       @Named("che.infra.kubernetes.namespace.labels") String projectLabels,
@@ -85,11 +82,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.openshift.oauth_identity_provider")
           String oAuthIdentityProvider) {
     super(
-        projectName,
         serviceAccountName,
         clusterRoleNames,
         defaultNamespaceName,
-        allowUserDefinedNamespaces,
         namespaceCreationAllowed,
         labelProjects,
         projectLabels,
@@ -99,12 +94,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         userManager,
         preferenceManager,
         sharedPool);
-    if (allowUserDefinedNamespaces && !clientConfigFactory.isPersonalized()) {
-      LOG.warn(
-          "Users are allowed to list projects but Che server is configured with a service account. "
-              + "All users will receive the same list of projects. Consider configuring OpenShift "
-              + "OAuth to personalize credentials that will be used for cluster access.");
-    }
     this.clientFactory = clientFactory;
     this.cheClientFactory = cheClientFactory;
     this.stopWorkspaceRoleProvisioner = stopWorkspaceRoleProvisioner;
@@ -223,31 +212,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
         throw new InfrastructureException(
             "Error occurred when tried to list all available projects. Cause: " + kce.getMessage(),
             kce);
-      }
-    }
-  }
-
-  @Override
-  protected List<KubernetesNamespaceMeta> fetchNamespaces() throws InfrastructureException {
-    try {
-      return clientFactory
-          .createOC()
-          .projects()
-          .list()
-          .getItems()
-          .stream()
-          .map(this::asNamespaceMeta)
-          .collect(Collectors.toList());
-    } catch (KubernetesClientException e) {
-      if (e.getCode() == 403) {
-        LOG.warn(
-            "Trying to fetch all namespaces, but failed for lack of permissions. Cause: {}",
-            e.getMessage());
-        return emptyList();
-      } else {
-        throw new InfrastructureException(
-            "Error occurred when tried to list all available projects. Cause: " + e.getMessage(),
-            e);
       }
     }
   }

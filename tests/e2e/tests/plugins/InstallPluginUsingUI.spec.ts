@@ -18,6 +18,7 @@ import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PluginsView } from '../../pageobjects/ide/plugins/PluginsView';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import { Logger } from '../../utils/Logger';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -67,7 +68,12 @@ suite(`The 'InstallPluginUsingUI' test`, async () => {
 
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {
-            await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+            if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
+                await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+                return;
+            }
+
+            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
         });
     });
 

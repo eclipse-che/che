@@ -29,27 +29,30 @@ public class OIDCInfoProviderTest {
 
   private static final String CHE_REALM = "che";
   private static final String TEST_URL = "some-test-url-to-skip";
-  private static final String SERVER_URL = "http://localhost:" + getHttpPort() + "/auth";
+
+  private String serverUrl;
+  private String openIdConfig;
+
   private static final String OPEN_ID_CONF_TEMPLATE =
       ""
           + "{"
           + "  \"token_endpoint\": \""
-          + SERVER_URL
+          + "<SERVER_URL>"
           + "/realms/"
           + CHE_REALM
           + "/protocol/openid-connect/token\","
           + "  \"end_session_endpoint\": \""
-          + SERVER_URL
+          + "<SERVER_URL>"
           + "/realms/"
           + CHE_REALM
           + "/protocol/openid-connect/logout\","
           + "  \"userinfo_endpoint\": \""
-          + SERVER_URL
+          + "<SERVER_URL>"
           + "/realms/"
           + CHE_REALM
           + "/protocol/openid-connect/userinfo\","
           + "  \"jwks_uri\": \""
-          + SERVER_URL
+          + "<SERVER_URL>"
           + "/realms/"
           + CHE_REALM
           + "/protocol/openid-connect/certs\""
@@ -57,9 +60,12 @@ public class OIDCInfoProviderTest {
 
   @BeforeClass
   void start() {
-    wireMockServer = new WireMockServer(wireMockConfig().port(getHttpPort()));
+    wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
     wireMockServer.start();
-    WireMock.configureFor("localhost", getHttpPort());
+    WireMock.configureFor("localhost", wireMockServer.port());
+
+    serverUrl = "http://localhost:" + wireMockServer.port() + "/auth";
+    openIdConfig = OPEN_ID_CONF_TEMPLATE.replaceAll("<SERVER_URL>", serverUrl);
   }
 
   @AfterClass
@@ -80,7 +86,7 @@ public class OIDCInfoProviderTest {
                 aResponse().withHeader("Content-Type", "text/html").withBody("broken json")));
 
     OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
-    oidcInfoProvider.oidcProviderUrl = SERVER_URL;
+    oidcInfoProvider.oidcProviderUrl = serverUrl;
     oidcInfoProvider.realm = CHE_REALM;
 
     oidcInfoProvider.get();
@@ -91,26 +97,24 @@ public class OIDCInfoProviderTest {
     stubFor(
         get(urlEqualTo("/auth/realms/che/.well-known/openid-configuration"))
             .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "text/html")
-                    .withBody(OPEN_ID_CONF_TEMPLATE)));
+                aResponse().withHeader("Content-Type", "text/html").withBody(openIdConfig)));
 
     OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
-    oidcInfoProvider.serverURL = SERVER_URL;
+    oidcInfoProvider.serverURL = serverUrl;
     oidcInfoProvider.realm = CHE_REALM;
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
         oidcInfo.getTokenPublicEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
         oidcInfo.getEndSessionPublicEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
         oidcInfo.getJwksUri());
   }
 
@@ -151,7 +155,7 @@ public class OIDCInfoProviderTest {
 
     OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
     oidcInfoProvider.serverURL = serverPublicUrl;
-    oidcInfoProvider.serverInternalURL = SERVER_URL;
+    oidcInfoProvider.serverInternalURL = serverUrl;
     oidcInfoProvider.realm = CHE_REALM;
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
@@ -169,18 +173,18 @@ public class OIDCInfoProviderTest {
         oidcInfo.getJwksPublicUri());
 
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
         oidcInfo.getJwksUri());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
-    assertEquals(SERVER_URL, oidcInfo.getAuthServerURL());
+    assertEquals(serverUrl, oidcInfo.getAuthServerURL());
   }
 
   @Test
   public void shouldParseOIDCConfigurationWithPublicUrlsForInternalServerUrl() {
     String serverPublicUrl = "https://keycloak-che.domain/auth";
-    String serverInternalUrl = SERVER_URL;
+    String serverInternalUrl = serverUrl;
 
     String OPEN_ID_CONF_TEMPLATE =
         ""
@@ -246,13 +250,11 @@ public class OIDCInfoProviderTest {
 
   @Test
   public void shouldParseOIDCConfigurationForOIDCProviderUrl() {
-    String OIDCProviderUrl = "http://localhost:" + getHttpPort() + "/realms/";
+    String OIDCProviderUrl = "http://localhost:" + wireMockServer.port() + "/realms/";
     stubFor(
         get(urlEqualTo("/realms/.well-known/openid-configuration"))
             .willReturn(
-                aResponse()
-                    .withHeader("Content-Type", "text/html")
-                    .withBody(OPEN_ID_CONF_TEMPLATE)));
+                aResponse().withHeader("Content-Type", "text/html").withBody(openIdConfig)));
 
     OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
     oidcInfoProvider.serverURL = TEST_URL;
@@ -262,16 +264,16 @@ public class OIDCInfoProviderTest {
     OIDCInfo oidcInfo = oidcInfoProvider.get();
 
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/token",
         oidcInfo.getTokenPublicEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/logout",
         oidcInfo.getEndSessionPublicEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/userinfo",
         oidcInfo.getUserInfoEndpoint());
     assertEquals(
-        SERVER_URL + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
+        serverUrl + "/realms/" + CHE_REALM + "/protocol/openid-connect/certs",
         oidcInfo.getJwksUri());
   }
 
@@ -291,9 +293,5 @@ public class OIDCInfoProviderTest {
     OIDCInfoProvider oidcInfoProvider = new OIDCInfoProvider();
     oidcInfoProvider.serverURL = TEST_URL;
     oidcInfoProvider.get();
-  }
-
-  private static int getHttpPort() {
-    return 3001;
   }
 }
