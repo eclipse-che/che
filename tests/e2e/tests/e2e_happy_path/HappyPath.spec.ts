@@ -168,8 +168,6 @@ suite('Language server validation', async () => {
 });
 
 suite('Validation of workspace build and run', async () => {
-    // let applicationUrl: string = '';
-
     test('Build application', async () => {
         let buildTaskName: string = 'build-file-output';
         await topMenu.runTask('build-file-output');
@@ -178,23 +176,18 @@ suite('Validation of workspace build and run', async () => {
 
     test('Run application', async () => {
         await topMenu.runTask('run');
-        // await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
-        // applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
-        // await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check the running application', async () => {
-        // await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
-        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 20_000);
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
     });
 
     test('Close preview widget', async () => {
         await rightToolBar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
-
     });
 
     test('Close the terminal running tasks', async () => {
@@ -206,8 +199,6 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
-    // let applicationUrl: string = '';
-
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
@@ -227,17 +218,13 @@ suite('Display source code changes in the running application', async () => {
 
     test('Run application with changes', async () => {
         await topMenu.runTask('run-with-changes');
-        // await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
-        // applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
-        // await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check changes are displayed', async () => {
-        // await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
-        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 20_000);
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
         await checkErrorMessageInApplicationController();
     });
 
@@ -254,20 +241,14 @@ suite('Display source code changes in the running application', async () => {
 });
 
 suite('Validation of debug functionality', async () => {
-    // let applicationUrl: string = '';
-
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
-        // await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180_000);
-        // applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180_000);
-        // await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180_000);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check content of the launched application', async () => {
-        // await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitAndSwitchToWidgetFrame();
         await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();
