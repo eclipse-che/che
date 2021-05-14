@@ -180,8 +180,8 @@ pipeline {
                     sh """
                         echo "Build 'che-dashboard' image"
                         echo "${maxura_docker_password}" | docker login -u maxura --password-stdin
-                        cd ${WORKSPACE}/che-dashboard
-                        docker build . -f apache.Dockerfile -t ${dashboardImageRepo}:${mutableDashboardImageTag}
+                        cd ${WORKSPACE}/che-dashboard/build/dockerfiles
+                        docker build . -f Dockerfile -t ${dashboardImageRepo}:${mutableDashboardImageTag}
                     """
                 }
 
