@@ -44,7 +44,7 @@ public class WsMasterServletModule extends ServletModule {
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
-      if (Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
+      if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
         LOG.info("Running in multi-user openshift-user mode ...");
         configureOpenshiftUserMode();
       } else {

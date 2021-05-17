@@ -364,7 +364,7 @@ public class WsMasterModule extends AbstractModule {
     }
 
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
-      if (Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
+      if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
         bind(OpenShiftClientConfigFactory.class).to(OpenshiftProviderConfigFactory.class);
       } else {
         bind(OpenShiftClientConfigFactory.class).to(KeycloakProviderConfigFactory.class);
@@ -405,7 +405,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.multiuser.permission.workspace.activity.ActivityPermissionsFilter.class);
 
-    if (!Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
+    if (!Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
       bind(AdminPermissionInitializer.class).asEagerSingleton();
     }
     bind(
@@ -419,7 +419,7 @@ public class WsMasterModule extends AbstractModule {
     install(new OrganizationApiModule());
     install(new OrganizationJpaModule());
 
-    if (Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
+    if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
       bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
       bind(JwtParser.class).to(DefaultJwtParser.class);
       bind(ProfileDao.class).to(OpenshiftProfileDao.class);
@@ -435,7 +435,7 @@ public class WsMasterModule extends AbstractModule {
 
     // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
-    if (Boolean.parseBoolean(System.getenv("CHE_OPENSHIFTUSER"))) {
+    if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
       bind(UserDao.class).to(OpenshiftUserDao.class);
     } else {
       bind(UserDao.class).to(JpaUserDao.class);
