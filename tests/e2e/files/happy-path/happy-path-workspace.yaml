@@ -32,6 +32,13 @@ components:
       - name: MAVEN_CONFIG
         value: /home/user/.m2
     memoryLimit: 1500Mi
+    endpoints:
+      - name: '8080-tcp'
+        port: 8080
+      - name: 'debug'
+        port: 5005
+        attributes:
+          public: 'false'
     mountSources: true
   - type: chePlugin
     id: redhat/java/latest
