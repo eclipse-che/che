@@ -67,11 +67,30 @@ export class LanguageServerTests {
         });
     }
 
-    public waitLSInitialization(startingNote: string, startTimeout: number, buildWorkspaceTimeout: number) {
+    public waitLSInitialization(startingNote: string, alternateNote: string = '', startTimeout: number = TimeoutConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
         test('LS initialization', async () => {
-            await this.ide.checkLsInitializationStart(startingNote);
+            try {
+                await this.ide.checkLsInitializationStart(startingNote);
+            } catch (err) {
+                if (alternateNote.length === 0) {
+                    throw err;
+                }
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+                Logger.warn('Known flakiness has occurred https://github.com/eclipse/che/issues/17864');
+                await this.ide.waitStatusBarContains(alternateNote);
+                await this.ide.waitStatusBarTextAbsence(alternateNote, startTimeout);
+                return;
+            }
             await this.ide.waitStatusBarTextAbsence(startingNote, startTimeout);
-            await this.ide.waitStatusBarTextAbsence('Building workspace', buildWorkspaceTimeout);
+            Logger.debug('Starting note successfully disappeared.');
+            if (alternateNote.length > 0) {
+                Logger.debug('AlternateNote value is set, waiting for presence and disappearance.');
+                await this.ide.waitStatusBarContains(alternateNote);
+                await this.ide.waitStatusBarTextAbsence(alternateNote, startTimeout);
+            }
+            Logger.debug('Language Server successfully initialized.');
         });
     }
 
@@ -135,6 +154,20 @@ export class LanguageServerTests {
         });
 
         test('Run debug', async () => {
+            await this.debugView.clickOnRunDebugButton();
+        });
+    }
+
+    public startAndAttachDebuggerWithConfiguration(openedFile: string, configurationName: string) {
+        test('Open debug panel', async () => {
+            await this.editor.selectTab(openedFile);
+            await this.topMenu.selectOption('View', 'Debug');
+            await this.ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
+        });
+
+        test('Run debug', async () => {
+            await this.debugView.clickOnDebugConfigurationDropDown();
+            await this.debugView.clickOnDebugConfigurationItem(configurationName);
             await this.debugView.clickOnRunDebugButton();
         });
     }

@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TYPES, CLASSES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
@@ -21,7 +21,6 @@ import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
@@ -59,7 +58,6 @@ const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
-const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 const SpringAppLocators = {
@@ -69,14 +67,6 @@ const SpringAppLocators = {
     springHomeButtonLocator: By.className('navbar-brand'),
     springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`)
 };
-
-suite('Login', async () => {
-    test('Login', async () => {
-        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
-        await loginPage.login();
-    });
-});
-
 
 suite('Validation of workspace start', async () => {
     test('Start workspace', async () => {

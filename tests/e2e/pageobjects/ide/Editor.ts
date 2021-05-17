@@ -370,7 +370,7 @@ export class Editor {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const breakpointStatus: boolean = await this.isBreakpointPresent(tabTitle, lineNumber);
 
-        if (breakpointStatus) return;
+        if (breakpointStatus) { return; }
 
         for (let i = 0; i < attempts; i++) {
             try {

@@ -13,11 +13,15 @@ import { inject, injectable } from 'inversify';
 import { CLASSES } from '../inversify.types';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
+import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 
 @injectable()
 export class WorkspaceHandlingTests {
 
-    constructor(@inject(CLASSES.Dashboard) private readonly dashboard: Dashboard, @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace) {}
+    constructor(
+        @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
+        @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace,
+        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) {}
 
     public createAndOpenWorkspace(stack: string) {
         test(`Open 'New Workspace' page`, async () => {
@@ -25,6 +29,15 @@ export class WorkspaceHandlingTests {
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             await this.createWorkspace.clickOnSample(stack);
+        });
+    }
+
+    public openExistingWorkspace(workspaceName: string) {
+        test('Start workspace', async () => {
+            await this.dashboard.waitPage();
+            await this.dashboard.clickWorkspacesButton();
+            await this.workspaces.waitPage();
+            await this.workspaces.clickOpenButton(workspaceName);
         });
     }
 
