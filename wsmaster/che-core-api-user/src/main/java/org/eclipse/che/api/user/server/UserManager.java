@@ -13,7 +13,9 @@ package org.eclipse.che.api.user.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.user.server.Constants.ID_LENGTH;
 import static org.eclipse.che.api.user.server.Constants.PASSWORD_LENGTH;
@@ -22,6 +24,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.inject.persist.Transactional;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -268,6 +271,50 @@ public class UserManager {
     eventService.publish(new UserRemovedEvent(id));
   }
 
+  /**
+   * Method is used to retrieve user object from Che DB for given user {@code id}, {@code email},
+   * and {@code username}. Various actualization operations may be performed:
+   *
+   * <p>- if user is found in Che DB by the given {@code id}, then it will check, if it's email,
+   * matches the {@code email} , and update it in DB if necessary.
+   *
+   * <p>- if user is not found in Che DB by the given {@code id} , then attempt to create one. But
+   * also, it will attempt to get one by {@code email}. If such is found, he will be removed. That
+   * way, there will be no conflict with existing user id or email upon recreation. In case of
+   * conflict with user name, it may be prepended randomized symbols
+   *
+   * @param id - user id from
+   * @param email - user email
+   * @param username - user name
+   * @return user object from Che Database, with all needed actualization operations performed on
+   *     him
+   * @throws ServerException if this exception during user creation, removal, or retrieval
+   * @throws ConflictException if this exception occurs during user creation or removal
+   */
+  public User getOrCreateUser(String id, String email, String username)
+      throws ServerException, ConflictException {
+    Optional<User> userById = getUserById(id);
+    if (!userById.isPresent()) {
+      synchronized (this) {
+        userById = getUserById(id);
+        if (!userById.isPresent()) {
+          Optional<User> userByEmail = getUserByEmail(email);
+          if (userByEmail.isPresent()) {
+            remove(userByEmail.get().getId());
+          }
+          final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
+          try {
+            return create(cheUser, false);
+          } catch (ConflictException ex) {
+            cheUser.setName(generate(cheUser.getName(), 4));
+            return create(cheUser, false);
+          }
+        }
+      }
+    }
+    return actualizeUserEmail(userById.get(), email);
+  }
+
   @Transactional(
       rollbackOn = {RuntimeException.class, ServerException.class, ConflictException.class})
   protected void doRemove(String id) throws ConflictException, ServerException {
@@ -288,5 +335,42 @@ public class UserManager {
       throw e;
     }
     userDao.remove(id);
+  }
+
+  /**
+   * Performs check that {@code email} matches with the one in local DB, and synchronize them
+   * otherwise
+   */
+  private User actualizeUserEmail(User actualUser, String email) throws ServerException {
+    if (isNullOrEmpty(email) || actualUser.getEmail().equals(email)) {
+      return actualUser;
+    }
+    UserImpl update = new UserImpl(actualUser);
+    update.setEmail(email);
+    try {
+      update(update);
+    } catch (NotFoundException e) {
+      throw new ServerException("Unable to actualize user email. User not found.", e);
+    } catch (ConflictException e) {
+      throw new ServerException(
+          "Unable to actualize user email. Another user with such email exists", e);
+    }
+    return update;
+  }
+
+  private Optional<User> getUserById(String id) throws ServerException {
+    try {
+      return Optional.of(getById(id));
+    } catch (NotFoundException e) {
+      return Optional.empty();
+    }
+  }
+
+  private Optional<User> getUserByEmail(String email) throws ServerException {
+    try {
+      return Optional.of(getByEmail(email));
+    } catch (NotFoundException e) {
+      return Optional.empty();
+    }
   }
 }

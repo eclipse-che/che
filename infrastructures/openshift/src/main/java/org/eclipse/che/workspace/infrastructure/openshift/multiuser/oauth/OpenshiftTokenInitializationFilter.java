@@ -27,83 +27,83 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.authentication.commons.SessionStore;
 import org.eclipse.che.multiuser.api.authentication.commons.filter.MultiUserEnvironmentInitializationFilter;
 import org.eclipse.che.multiuser.api.authentication.commons.token.RequestTokenExtractor;
+import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
+import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class TokenInitializationFilter extends MultiUserEnvironmentInitializationFilter {
+public class OpenshiftTokenInitializationFilter extends MultiUserEnvironmentInitializationFilter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TokenInitializationFilter.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OpenshiftTokenInitializationFilter.class);
 
   private static final List<String> UNAUTHORIZED_ENDPOINT_PATHS =
       Collections.singletonList("/system/state");
 
+  private final PermissionChecker permissionChecker;
   private final OpenShiftClientFactory clientFactory;
 
   private final UserManager userManager;
 
   @Inject
-  public TokenInitializationFilter(
+  public OpenshiftTokenInitializationFilter(
       SessionStore sessionStore,
       RequestTokenExtractor tokenExtractor,
       OpenShiftClientFactory clientFactory,
-      UserManager userManager) {
+      UserManager userManager,
+      PermissionChecker permissionChecker) {
     super(sessionStore, tokenExtractor);
     this.clientFactory = clientFactory;
     this.userManager = userManager;
+    this.permissionChecker = permissionChecker;
   }
 
   @Override
   protected String getUserId(String token) {
     try {
-      OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
-      User openshiftUser = client.currentUser();
-      ensureUserInDb(openshiftUser);
-      return openshiftUser.getMetadata().getUid();
+      return getCurrentUser(token).getMetadata().getUid();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 401) {
         LOG.error(
             "Unauthorized when getting current user. Invalid OpenShift token, probably expired. Re-login? Re-request the token?");
       }
       throw new RuntimeException(e);
-    } catch (InfrastructureException | ServerException | ConflictException e) {
+    } catch (InfrastructureException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  private void ensureUserInDb(User openshiftUser) throws ServerException, ConflictException {
-    ObjectMeta userMeta = openshiftUser.getMetadata();
-    try {
-      org.eclipse.che.api.core.model.user.User u = userManager.getById(userMeta.getUid());
-      LOG.debug("foud user '{}'", u);
-    } catch (NotFoundException e) {
-      LOG.warn("User '{}' not found in db. Saving.", openshiftUser.getMetadata().getUid());
-      userManager.create(
-          new UserImpl(userMeta.getUid(), userMeta.getName() + "@che", userMeta.getName()), false);
     }
   }
 
   @Override
   protected Subject extractSubject(String token) {
     try {
-      OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
-      User openshiftUser = client.currentUser();
-      ObjectMeta userMeta = openshiftUser.getMetadata();
-      return new SubjectImpl(userMeta.getName(), userMeta.getUid(), token, false);
-    } catch (InfrastructureException e) {
+      ObjectMeta userMeta = getCurrentUser(token).getMetadata();
+      org.eclipse.che.api.core.model.user.User user =
+          userManager.getOrCreateUser(
+              userMeta.getUid(), openshiftUserEmail(userMeta), userMeta.getName());
+      return new AuthorizedSubject(
+          new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
+    } catch (InfrastructureException | ServerException | ConflictException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private User getCurrentUser(String token) throws InfrastructureException {
+    OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
+    return client.currentUser();
+  }
+
+  private String openshiftUserEmail(ObjectMeta userMeta) {
+    return userMeta + "@che";
   }
 
   @Override
@@ -128,11 +128,11 @@ public class TokenInitializationFilter extends MultiUserEnvironmentInitializatio
 
   @Override
   public void init(FilterConfig filterConfig) {
-    LOG.debug("TokenInitializationFilter#init({})", filterConfig);
+    LOG.trace("OpenshiftTokenInitializationFilter#init({})", filterConfig);
   }
 
   @Override
   public void destroy() {
-    LOG.debug("TokenInitializationFilter#destroy()");
+    LOG.trace("OpenshiftTokenInitializationFilter#destroy()");
   }
 }

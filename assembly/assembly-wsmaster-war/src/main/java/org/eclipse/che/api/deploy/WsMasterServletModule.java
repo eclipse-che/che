@@ -17,7 +17,7 @@ import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
-import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.TokenInitializationFilter;
+import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.OpenshiftTokenInitializationFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +80,6 @@ public class WsMasterServletModule extends ServletModule {
   }
 
   private void configureOpenshiftUserMode() {
-    filter("/*").through(TokenInitializationFilter.class);
+    filter("/*").through(OpenshiftTokenInitializationFilter.class);
   }
 }
