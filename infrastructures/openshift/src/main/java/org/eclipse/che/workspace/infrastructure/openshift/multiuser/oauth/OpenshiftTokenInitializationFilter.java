@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.api.model.User;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.IOException;
 import java.util.Collections;
@@ -28,6 +27,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.subject.Subject;
@@ -87,7 +87,7 @@ public class OpenshiftTokenInitializationFilter extends MultiUserEnvironmentInit
   protected Subject extractSubject(String token) {
     try {
       ObjectMeta userMeta = getCurrentUser(token).getMetadata();
-      org.eclipse.che.api.core.model.user.User user =
+      User user =
           userManager.getOrCreateUser(
               userMeta.getUid(), openshiftUserEmail(userMeta), userMeta.getName());
       return new AuthorizedSubject(
@@ -97,13 +97,16 @@ public class OpenshiftTokenInitializationFilter extends MultiUserEnvironmentInit
     }
   }
 
-  private User getCurrentUser(String token) throws InfrastructureException {
+  private io.fabric8.openshift.api.model.User getCurrentUser(String token)
+      throws InfrastructureException {
     OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
     return client.currentUser();
   }
 
-  private String openshiftUserEmail(ObjectMeta userMeta) {
-    return userMeta + "@che";
+  protected String openshiftUserEmail(ObjectMeta userMeta) {
+    // OpenShift User does not have data about user's email. However, we need some email. For now,
+    // we can use fake email, but probably we will need to find better solution.
+    return userMeta.getName() + "@che";
   }
 
   @Override
