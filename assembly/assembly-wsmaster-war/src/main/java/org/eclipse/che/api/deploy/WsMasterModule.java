@@ -44,8 +44,8 @@ import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
+import org.eclipse.che.api.user.server.jpa.JpaProfileDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
-import org.eclipse.che.api.user.server.spi.OpenshiftProfileDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
@@ -114,7 +114,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructur
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.KeycloakProviderConfigFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.OpenshiftProviderConfigFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth.OpenshiftUserDao;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -422,7 +421,7 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
       bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
       bind(JwtParser.class).to(DefaultJwtParser.class);
-      bind(ProfileDao.class).to(OpenshiftProfileDao.class);
+      bind(ProfileDao.class).to(JpaProfileDao.class);
       bind(OAuthAPI.class).to(EmbeddedOAuthAPI.class);
       bind(RequestTokenExtractor.class).to(HeaderRequestTokenExtractor.class);
     } else {
@@ -435,11 +434,7 @@ public class WsMasterModule extends AbstractModule {
 
     // User and profile - use profile from keycloak and other stuff is JPA
     bind(PasswordEncryptor.class).to(PBKDF2PasswordEncryptor.class);
-    if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
-      bind(UserDao.class).to(OpenshiftUserDao.class);
-    } else {
-      bind(UserDao.class).to(JpaUserDao.class);
-    }
+    bind(UserDao.class).to(JpaUserDao.class);
     bind(PreferenceDao.class).to(JpaPreferenceDao.class);
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 

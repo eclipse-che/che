@@ -26,6 +26,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.user.server.UserManager;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -38,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TokenInitializationFilter extends MultiUserEnvironmentInitializationFilter {
+
   private static final Logger LOG = LoggerFactory.getLogger(TokenInitializationFilter.class);
 
   private static final List<String> UNAUTHORIZED_ENDPOINT_PATHS =
@@ -45,28 +51,46 @@ public class TokenInitializationFilter extends MultiUserEnvironmentInitializatio
 
   private final OpenShiftClientFactory clientFactory;
 
+  private final UserManager userManager;
+
   @Inject
   public TokenInitializationFilter(
       SessionStore sessionStore,
       RequestTokenExtractor tokenExtractor,
-      OpenShiftClientFactory clientFactory) {
+      OpenShiftClientFactory clientFactory,
+      UserManager userManager) {
     super(sessionStore, tokenExtractor);
     this.clientFactory = clientFactory;
+    this.userManager = userManager;
   }
 
   @Override
   protected String getUserId(String token) {
     try {
       OpenShiftClient client = clientFactory.createAuthenticatedOC(token);
-      return client.currentUser().getMetadata().getUid();
-    } catch (InfrastructureException e) {
-      throw new RuntimeException(e);
+      User openshiftUser = client.currentUser();
+      ensureUserInDb(openshiftUser);
+      return openshiftUser.getMetadata().getUid();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 401) {
         LOG.error(
             "Unauthorized when getting current user. Invalid OpenShift token, probably expired. Re-login? Re-request the token?");
       }
       throw new RuntimeException(e);
+    } catch (InfrastructureException | ServerException | ConflictException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void ensureUserInDb(User openshiftUser) throws ServerException, ConflictException {
+    ObjectMeta userMeta = openshiftUser.getMetadata();
+    try {
+      org.eclipse.che.api.core.model.user.User u = userManager.getById(userMeta.getUid());
+      LOG.debug("foud user '{}'", u);
+    } catch (NotFoundException e) {
+      LOG.warn("User '{}' not found in db. Saving.", openshiftUser.getMetadata().getUid());
+      userManager.create(
+          new UserImpl(userMeta.getUid(), userMeta.getName() + "@che", userMeta.getName()), false);
     }
   }
 
