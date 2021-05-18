@@ -45,8 +45,8 @@ public class WsMasterServletModule extends ServletModule {
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       if (Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
-        LOG.info("Running in multi-user openshift-user mode ...");
-        configureOpenshiftUserMode();
+        LOG.info("Running in native-user mode ...");
+        configureNativeUserMode();
       } else {
         LOG.info("Running in classic multi-user mode ...");
         configureMultiUserMode();
@@ -79,7 +79,7 @@ public class WsMasterServletModule extends ServletModule {
     install(new KeycloakServletModule());
   }
 
-  private void configureOpenshiftUserMode() {
+  private void configureNativeUserMode() {
     filter("/*").through(OpenshiftTokenInitializationFilter.class);
   }
 }

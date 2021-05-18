@@ -76,6 +76,7 @@ import org.eclipse.che.commons.observability.deploy.ExecutorWrapperModule;
 import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
+import org.eclipse.che.inject.ConfigurationException;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.api.authentication.commons.token.ChainedTokenExtractor;
 import org.eclipse.che.multiuser.api.authentication.commons.token.HeaderRequestTokenExtractor;
@@ -368,6 +369,12 @@ public class WsMasterModule extends AbstractModule {
       } else {
         bind(OpenShiftClientConfigFactory.class).to(KeycloakProviderConfigFactory.class);
       }
+    }
+
+    if (KubernetesInfrastructure.NAME.equals(infrastructure)
+        && Boolean.parseBoolean(System.getenv("CHE_AUTH_NATIVEUSER"))) {
+      throw new ConfigurationException(
+          "Native user mode is not supported on Kubernetes. It is supported only on OpenShift.");
     }
 
     persistenceProperties.put(
