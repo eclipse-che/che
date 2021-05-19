@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.multiuser.oauth;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
@@ -21,8 +23,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
@@ -52,7 +54,7 @@ public class OpenshiftTokenInitializationFilterTest {
   @Mock private ObjectMeta openshiftUserMeta;
 
   @Mock private HttpServletRequest servletRequest;
-  @Mock private ServletResponse servletResponse;
+  @Mock private HttpServletResponse servletResponse;
   @Mock private FilterChain filterChain;
 
   private static final String TOKEN = "touken";
@@ -102,11 +104,21 @@ public class OpenshiftTokenInitializationFilterTest {
   @Test
   public void handleMissingTokenShouldAllowUnauthorizedEndpoint()
       throws ServletException, IOException {
-    when(servletRequest.getServletPath()).thenReturn("blabol");
+    when(servletRequest.getServletPath()).thenReturn("/system/state");
 
     openshiftTokenInitializationFilter.handleMissingToken(
         servletRequest, servletResponse, filterChain);
 
     verify(filterChain).doFilter(servletRequest, servletResponse);
+  }
+
+  @Test
+  public void handleMissingTokenShouldRejectRequest() throws ServletException, IOException {
+    when(servletRequest.getServletPath()).thenReturn("blabol");
+
+    openshiftTokenInitializationFilter.handleMissingToken(
+        servletRequest, servletResponse, filterChain);
+
+    verify(servletResponse).sendError(eq(401), anyString());
   }
 }
