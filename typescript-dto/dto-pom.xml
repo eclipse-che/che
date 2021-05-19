@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>7.30.3-SNAPSHOT</che.version>
+        <che.version>7.30.2</che.version>
     </properties>
     <repositories>
         <repository>
