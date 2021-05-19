@@ -50,7 +50,7 @@ public class OpenshiftProviderConfigFactory extends OpenShiftClientConfigFactory
           .withOauthToken(token)
           .build();
     } else {
-      LOG.warn("NO TOKEN PASSED. Getting default client config.");
+      LOG.debug("NO TOKEN PASSED. Getting default client config.");
       return defaultConfig;
     }
   }
