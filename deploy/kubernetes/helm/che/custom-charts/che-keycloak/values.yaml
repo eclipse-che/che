@@ -21,7 +21,7 @@ global:
   endpointWatcher:
     image: quay.io/eclipse/che-endpoint-watcher:nightly
 
-image: quay.io/eclipse/che-keycloak:7.30.1
+image: quay.io/eclipse/che-keycloak:7.30.2
 
 ## Admin credentials configuration
 # Manually define them in clear
