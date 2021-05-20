@@ -1,7 +1,0 @@
-# This is file is needed to include the project in the CentOS Container
-# Pipeline main index. It can be used to set the image name (using job-id), set
-# the test script and/or build script and whether to perform or skip the
-# user-defined tests. More information on cccp.yml file can be found on:
-# https://github.com/CentOS/container-index#the-cccpyml-file
-
-job-id: che-server
