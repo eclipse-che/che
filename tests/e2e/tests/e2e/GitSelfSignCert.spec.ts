@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-  import { e2eContainer } from '../../inversify.config';
+ import { e2eContainer } from '../../inversify.config';
  import { CLASSES, TYPES } from '../../inversify.types';
  import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
  import { Ide } from '../../pageobjects/ide/Ide';
@@ -26,8 +26,8 @@
  import { Editor } from '../../pageobjects/ide/Editor';
 
  const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
- const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
  const ide: Ide = e2eContainer.get(CLASSES.Ide);
+ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
  const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
  const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
  const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
@@ -54,8 +54,7 @@
          await testWorkspaceUtils.createWsFromDevFile(wsConfig);
      });
 
-     test('Login into workspace and open tree container', async () => {
-         await dashboard.openDashboard();
+     test('Wait until created workspace is started', async () => {
          await dashboard.waitPage();
          await browserTabsUtil.navigateTo(workspacePrefixUrl + workspaceName);
          await ide.waitWorkspaceAndIde();
@@ -85,7 +84,6 @@
         await quickOpenContainer.typeAndSelectSuggestion('git-admin', 'Git: https://10.0.104.86:10080 (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
         await quickOpenContainer.typeAndSelectSuggestion('admin', 'Git: https://git-admin@10.0.104.86:10080 (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
         await gitPlugin.waitDataIsSynchronized();
-        await driverHelper.wait(TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
     });
 
  });
