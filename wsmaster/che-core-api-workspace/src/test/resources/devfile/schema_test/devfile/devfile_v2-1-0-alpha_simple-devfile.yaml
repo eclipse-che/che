@@ -13,6 +13,8 @@
 schemaVersion: 2.1.0-alpha
 metadata:
   name: spring-petclinic
+attributes:
+  example: foo
 components:
   - name: maven
     container:
