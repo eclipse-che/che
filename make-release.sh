@@ -13,7 +13,6 @@ DOCKER_FILES_LOCATIONS=(
     che/dockerfiles/postgres
     che/dockerfiles/dev
     che/dockerfiles/che
-    che/dockerfiles/dashboard-dev
     che/dockerfiles/e2e
 )
 
@@ -23,7 +22,6 @@ IMAGES_LIST=(
     quay.io/eclipse/che-postgres
     quay.io/eclipse/che-dev
     quay.io/eclipse/che-server
-    quay.io/eclipse/che-dashboard-dev
     quay.io/eclipse/che-e2e
 )
 
@@ -215,7 +213,6 @@ prepareRelease() {
         echo "[INFO] Che Server version has been updated to ${CHE_VERSION} (parentVersion = ${VERSION_CHE_PARENT})"
 
         # Replace dependencies in che-server parent
-        sed -i -e "s#<che.dashboard.version>.*<\/che.dashboard.version>#<che.dashboard.version>${CHE_VERSION}<\/che.dashboard.version>#" pom.xml
         sed -i -e "s#<che.version>.*<\/che.version>#<che.version>${CHE_VERSION}<\/che.version>#" pom.xml
         echo "[INFO] Dependencies updated in che-server parent"
 
@@ -306,11 +303,7 @@ buildImages() {
     # BUILD IMAGES
     for image_dir in ${DOCKER_FILES_LOCATIONS[@]}
       do
-        if [[ ${image_dir} == "che/dockerfiles/che" ]]; then
-          bash "$(pwd)/${image_dir}/build.sh" --tag:${TAG} --build-arg:"CHE_DASHBOARD_VERSION=${CHE_VERSION},CHE_WORKSPACE_LOADER_VERSION=${CHE_VERSION}"  
-        else
-          bash "$(pwd)/${image_dir}/build.sh" --tag:${TAG} 
-        fi
+        bash "$(pwd)/${image_dir}/build.sh" --tag:${TAG}
         if [[ $? -ne 0 ]]; then
            echo "ERROR:"
            echo "build of '${image_dir}' image is failed!"
@@ -381,7 +374,6 @@ bumpVersion() {
             mvn versions:update-parent -DgenerateBackupPoms=false -DallowSnapshots=true -DparentVersion=[${VERSION_CHE_PARENT}]
         fi
         mvn versions:set -DgenerateBackupPoms=false -DallowSnapshots=true -DnewVersion=$1
-        sed -i -e "s#<che.dashboard.version>.*<\/che.dashboard.version>#<che.dashboard.version>$1<\/che.dashboard.version>#" pom.xml
         sed -i -e "s#<che.version>.*<\/che.version>#<che.version>$1<\/che.version>#" pom.xml
         pushd typescript-dto >/dev/null
             sed -i -e "s#<che.version>.*<\/che.version>#<che.version>${1}<\/che.version>#" dto-pom.xml
