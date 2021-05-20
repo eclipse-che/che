@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2018 Red Hat, Inc.
+    Copyright (c) 2012-2021 Red Hat, Inc.
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -14,16 +14,24 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>maven-parent-pom</artifactId>
-        <groupId>org.eclipse.che.parent</groupId>
-        <version>7.15.0</version>
-    </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-server</artifactId>
     <version>7.31.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Server</name>
+    <description>Eclipse Che Server</description>
+    <inceptionYear>2012</inceptionYear>
+    <organization>
+        <name>Red Hat, Inc.</name>
+        <url>http://www.redhat.com</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>Eclipse Public License 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <modules>
         <module>core</module>
         <module>wsmaster</module>
@@ -39,18 +47,15 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <?SORTPOM IGNORE?>
-        <build.info>${project.version}</build.info>
-        <che.version>7.31.0-SNAPSHOT</che.version>
-        <specification.version>1.0-beta2</specification.version>
-        <?SORTPOM RESUME?>
         <aopalliance.version>1.0</aopalliance.version>
         <ch.qos.logback.version>1.2.1</ch.qos.logback.version>
         <com.auth0.jwks-rsa.version>0.3.0</com.auth0.jwks-rsa.version>
         <com.fasterxml.jackson.version>2.11.2</com.fasterxml.jackson.version>
         <com.github.kirviq.dumbster.version>1.7.1</com.github.kirviq.dumbster.version>
         <com.github.tomakehurst.wiremock-jre8-standalone.version>2.27.2</com.github.tomakehurst.wiremock-jre8-standalone.version>
+        <com.google.code.findbugs.jsr305.version>3.0.2</com.google.code.findbugs.jsr305.version>
         <com.google.code.guice.version>4.2.2</com.google.code.guice.version>
+        <com.google.errorprone>2.3.4</com.google.errorprone>
         <com.google.guava.version>30.1.1-jre</com.google.guava.version>
         <com.google.http-client.version>1.39.1</com.google.http-client.version>
         <com.google.oauth-client.version>1.27.0</com.google.oauth-client.version>
@@ -83,6 +88,7 @@
         <io.prometheus.simpleclient.version>0.7.0</io.prometheus.simpleclient.version>
         <io.swagger.version>1.6.2</io.swagger.version>
         <jakarta.json.version>2.0.0</jakarta.json.version>
+        <java.target.version>11</java.target.version>
         <javax.annotation.version>1.2</javax.annotation.version>
         <javax.inject.version>1</javax.inject.version>
         <javax.mail.version>1.4.4</javax.mail.version>
@@ -90,8 +96,34 @@
         <javax.validation.version>1.1.0.Final</javax.validation.version>
         <javax.websocket.api.version>1.1</javax.websocket.api.version>
         <javax.ws.rs.version>2.0</javax.ws.rs.version>
+        <jdk.min.version>${java.target.version}</jdk.min.version>
         <junit.version>4.13.1</junit.version>
+        <license_contributor>Red Hat, Inc. - initial API and implementation</license_contributor>
+        <?SORTPOM IGNORE?>
+        <build.info>${project.version}</build.info>
+        <che.version>7.31.0-SNAPSHOT</che.version>
+        <specification.version>1.0-beta2</specification.version>
+        <?SORTPOM RESUME?>
+        <license_copyrightOwner>Red Hat, Inc.</license_copyrightOwner>
         <logstash.logback.encoder.version>4.11</logstash.logback.encoder.version>
+        <maven.antrun.plugin.version>3.0.0</maven.antrun.plugin.version>
+        <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
+        <maven.buildhelper.plugin.version>3.2.0</maven.buildhelper.plugin.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+        <maven.exec.plugin.version>3.0.0</maven.exec.plugin.version>
+        <maven.fabric8io.docker.plugin.version>0.35.0</maven.fabric8io.docker.plugin.version>
+        <maven.failsafe.plugin.version>3.0.0-M5</maven.failsafe.plugin.version>
+        <maven.fmt.plugin.version>2.5.1</maven.fmt.plugin.version>
+        <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
+        <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
+        <maven.mycila.license.plugin.version>3.0</maven.mycila.license.plugin.version>
+        <maven.plugin.plugin.version>3.6.1</maven.plugin.plugin.version>
+        <maven.resources.plugin.version>3.2.0</maven.resources.plugin.version>
+        <maven.sortpom.plugin.version>2.3.1</maven.sortpom.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
+        <maven.war.plugin.version>3.3.1</maven.war.plugin.version>
         <mysql.connector.version>8.0.16</mysql.connector.version>
         <net.java.dev.jna.version>4.1.0</net.java.dev.jna.version>
         <org.antlr.st4.version>4.0.7</org.antlr.st4.version>
@@ -149,7 +181,7 @@
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
-                <version>${version.jsr305.plugin}</version>
+                <version>${com.google.code.findbugs.jsr305.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -602,6 +634,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-dashboard-war</artifactId>
+                <version>${che.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -965,6 +1003,12 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>wsmaster-local</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.dashboard</groupId>
+                <artifactId>che-dashboard-war</artifactId>
+                <version>${che.dashboard.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
@@ -1380,9 +1424,326 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>${maven.fabric8io.docker.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                    <configuration>
+                        <argLine>--illegal-access=permit</argLine>
+                        <systemPropertyVariables>
+                            <!-- To avoid conflicts on CI server - PAR-192 -->
+                            <!-- There is an incompatibility with Byteman - used in social -->
+                            <!-- <java.io.tmpdir>${project.build.directory}</java.io.tmpdir> -->
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven.antrun.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven.clean.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${maven.buildhelper.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${maven.exec.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>${maven.plugin.plugin.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.eclipse.che.core</groupId>
                     <artifactId>che-core-dynamodule-maven-plugin</artifactId>
                     <version>${che.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.google.code.sortpom</groupId>
+                    <artifactId>maven-sortpom-plugin</artifactId>
+                    <version>${maven.sortpom.plugin.version}</version>
+                    <configuration>
+                        <expandEmptyElements>false</expandEmptyElements>
+                        <nrOfIndentSpace>4</nrOfIndentSpace>
+                        <createBackupFile>false</createBackupFile>
+                        <sortProperties>true</sortProperties>
+                        <sortDependencies>scope,groupId,artifactId</sortDependencies>
+                        <verifyFail>Stop</verifyFail>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven.assembly.plugin.version}</version>
+                    <configuration>
+                        <!-- Use GNU Tar -->
+                        <tarLongFileMode>gnu</tarLongFileMode>
+                        <!-- Perfs improvements - PAR-191 -->
+                        <useJvmChmod>true</useJvmChmod>
+                        <!-- Allow to activate/deactivate the recompression of zip files -->
+                        <recompressZippedFiles>${maven.assembly.recompressZippedFiles}</recompressZippedFiles>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.plugin.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Date>${maven.build.timestamp}</Date>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                                <SCM-URL>${project.scm.connection}</SCM-URL>
+                                <SCM-Revision>${buildNumber}</SCM-Revision>
+                                <Specification-Title>${product.name}</Specification-Title>
+                                <Specification-Version>${specification.version}</Specification-Version>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven.javadoc.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${maven.mycila.license.plugin.version}</version>
+                    <!-- Add a dependency since this is where the maven-license-plugin plugin will find the license-header.txt file -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.mycila</groupId>
+                            <artifactId>license-maven-plugin-git</artifactId>
+                            <version>${maven.mycila.license.plugin.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.eclipse.che.dev</groupId>
+                            <artifactId>che-eclipse-license-resource-bundle</artifactId>
+                            <version>20</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <header>license-header.txt</header>
+                        <properties>
+                            <!-- Values to be substituted in template -->
+                            <h_inceptionYear>${project.inceptionYear}</h_inceptionYear>
+                            <h_currentYear>${currentYear}</h_currentYear>
+                            <h_copyrightOwner>${license_copyrightOwner}</h_copyrightOwner>
+                            <h_license_years>${license_years}</h_license_years>
+                            <h_contributor>${license_contributor}</h_contributor>
+                            <h_contributor2>${license_contributor2}</h_contributor2>
+                        </properties>
+                        <failIfMissing>true</failIfMissing>
+                        <strictCheck>true</strictCheck>
+                        <!-- We're only interested in checking our sources and our POMs -->
+                        <includes>
+                            <include>src/**</include>
+                            <include>pom.xml</include>
+                        </includes>
+                        <!-- Default excludes are excluding POMs -->
+                        <useDefaultExcludes>false</useDefaultExcludes>
+                        <excludes>
+                            <exclude>**/*~</exclude>
+                            <exclude>**/#*#</exclude>
+                            <exclude>**/.#*</exclude>
+                            <exclude>**/%*%</exclude>
+                            <exclude>**/._*</exclude>
+                            <exclude>**/.repository/**</exclude>
+                            <exclude>**/CVS</exclude>
+                            <exclude>**/CVS/**</exclude>
+                            <exclude>**/.cvsignore</exclude>
+                            <exclude>**/RCS</exclude>
+                            <exclude>**/RCS/**</exclude>
+                            <exclude>**/SCCS</exclude>
+                            <exclude>**/SCCS/**</exclude>
+                            <exclude>**/vssver.scc</exclude>
+                            <exclude>**/.svn</exclude>
+                            <exclude>**/.svn/**</exclude>
+                            <exclude>**/.arch-ids</exclude>
+                            <exclude>**/.arch-ids/**</exclude>
+                            <exclude>**/.bzr</exclude>
+                            <exclude>**/.bzr/**</exclude>
+                            <exclude>**/.MySCMServerInfo</exclude>
+                            <exclude>**/.DS_Store</exclude>
+                            <exclude>**/.metadata</exclude>
+                            <exclude>**/.metadata/**</exclude>
+                            <exclude>**/.hg</exclude>
+                            <exclude>**/.hg/**</exclude>
+                            <exclude>**/.git</exclude>
+                            <exclude>**/.git/**</exclude>
+                            <exclude>**/.gitignore</exclude>
+                            <exclude>**/BitKeeper</exclude>
+                            <exclude>**/BitKeeper/**</exclude>
+                            <exclude>**/ChangeSet</exclude>
+                            <exclude>**/ChangeSet/**</exclude>
+                            <exclude>**/_darcs</exclude>
+                            <exclude>**/_darcs/**</exclude>
+                            <exclude>**/.darcsrepo</exclude>
+                            <exclude>**/.darcsrepo/**</exclude>
+                            <exclude>**/-darcs-backup*</exclude>
+                            <exclude>**/.darcs-temp-mail</exclude>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/test-output/**</exclude>
+                            <exclude>**/release.properties</exclude>
+                            <exclude>**/dependency-reduced-pom.xml</exclude>
+                            <exclude>**/cobertura.ser</exclude>
+                            <exclude>**/.clover/**</exclude>
+                            <exclude>**/.classpath</exclude>
+                            <exclude>**/.project</exclude>
+                            <exclude>**/.settings/**</exclude>
+                            <exclude>**/*.iml</exclude>
+                            <exclude>**/*.ipr</exclude>
+                            <exclude>**/*.iws</exclude>
+                            <exclude>**/.idea/**</exclude>
+                            <exclude>**/MANIFEST.MF</exclude>
+                            <exclude>**/*.jpg</exclude>
+                            <exclude>**/*.png</exclude>
+                            <exclude>**/*.gif</exclude>
+                            <exclude>**/*.ico</exclude>
+                            <exclude>**/*.bmp</exclude>
+                            <exclude>**/*.tiff</exclude>
+                            <exclude>**/*.tif</exclude>
+                            <exclude>**/*.cr2</exclude>
+                            <exclude>**/*.xcf</exclude>
+                            <exclude>**/*.class</exclude>
+                            <exclude>**/*.exe</exclude>
+                            <exclude>**/*.md5</exclude>
+                            <exclude>**/*.sha1</exclude>
+                            <exclude>**/*.jar</exclude>
+                            <exclude>**/*.zip</exclude>
+                            <exclude>**/*.rar</exclude>
+                            <exclude>**/*.tar</exclude>
+                            <exclude>**/*.tar.gz</exclude>
+                            <exclude>**/*.tar.bz2</exclude>
+                            <exclude>**/*.gz</exclude>
+                            <exclude>**/*.xls</exclude>
+                            <exclude>**/META-INF/services/**</exclude>
+                            <exclude>**/*.pem</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>**/*.log</exclude>
+                            <exclude>**/README</exclude>
+                            <exclude>**/server.xml</exclude>
+                            <exclude>**/*.json</exclude>
+                            <exclude>**/catalina.properties</exclude>
+                            <exclude>**/logging.properties</exclude>
+                            <exclude>**/jaas.conf</exclude>
+                            <exclude>**/jmxremote.access</exclude>
+                            <exclude>**/jmxremote.password</exclude>
+                            <exclude>**/tomcat-users.xml</exclude>
+                            <exclude>**/rewrite.config</exclude>
+                        </excludes>
+                        <mapping>
+                            <svg>XML_STYLE</svg>
+                            <ts>SLASHSTAR_STYLE</ts>
+                            <go>DOUBLESLASH_STYLE</go>
+                            <java>SLASHSTAR_STYLE</java>
+                        </mapping>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven.source.plugin.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Date>${maven.build.timestamp}</Date>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                                <SCM-URL>${project.scm.connection}</SCM-URL>
+                                <SCM-Revision>${buildNumber}</SCM-Revision>
+                                <Specification-Title>${product.name}</Specification-Title>
+                                <Specification-Version>${parsedVersion.majorVersion}.0</Specification-Version>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven.war.plugin.version}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Date>${maven.build.timestamp}</Date>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                                <SCM-URL>${project.scm.connection}</SCM-URL>
+                                <SCM-Revision>${buildNumber}</SCM-Revision>
+                                <Specification-Title>${product.name}</Specification-Title>
+                                <Specification-Version>${parsedVersion.majorVersion}.0</Specification-Version>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                            </manifestEntries>
+                        </archive>
+                        <!-- PAR-145 : Be sure that all product package all their classes in JAR (No stand alone classes in WEB-INF/classes) -->
+                        <archiveClasses>${archiveClasses}</archiveClasses>
+                        <attachClasses>${maven.war.attachClasses}</attachClasses>
+                        <useCache>${useCache}</useCache>
+                        <!-- Allow to activate/deactivate the recompression of zip files -->
+                        <recompressZippedFiles>${maven.war.recompressZippedFiles}</recompressZippedFiles>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven.install.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -1440,6 +1801,76 @@
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
                 <sonar.organization>eclipse</sonar.organization>
             </properties>
+        </profile>
+        <profile>
+            <id>validate-sources</id>
+            <activation>
+                <property>
+                    <name>!skip-validate-sources</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>${maven.compiler.plugin.version}</version>
+                        <configuration>
+                            <release>${java.target.version}</release>
+                            <compilerArgs>
+                                <arg>-XDcompilePolicy=simple</arg>
+                                <arg>-Xplugin:ErrorProne</arg>
+                            </compilerArgs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>${com.google.errorprone}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.google.code.sortpom</groupId>
+                        <artifactId>maven-sortpom-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.coveo</groupId>
+                        <artifactId>fmt-maven-plugin</artifactId>
+                        <version>${maven.fmt.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Adding header to file -->
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>check-headers</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
