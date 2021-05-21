@@ -1,3 +1,10 @@
+### Eclipse Che Server has moved!
+
+If you're looking for the sources of the Eclipse Che Server, it has been relocated here:
+
+https://github.com/eclipse-che/che-server
+
+
 <div id="header" align="center">
 
 [![Eclipse Che - Eclipse Next-Generation IDE](https://raw.githubusercontent.com/eclipse/che/assets/eclipseche.png)](
