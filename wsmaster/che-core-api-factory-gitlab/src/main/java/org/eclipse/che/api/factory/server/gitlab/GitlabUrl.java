@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -32,6 +32,8 @@ import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
  */
 public class GitlabUrl implements RemoteFactoryUrl {
 
+  private final String NAME = "gitlab";
+
   /** Hostname of the gitlab URL */
   private String hostName;
 
@@ -58,6 +60,11 @@ public class GitlabUrl implements RemoteFactoryUrl {
    * directly
    */
   protected GitlabUrl() {}
+
+  @Override
+  public String getProviderName() {
+    return NAME;
+  }
 
   /**
    * Gets hostname of this gitlab url

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -26,6 +26,11 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
   private String devfileFileLocation;
 
   @Override
+  public String getProviderName() {
+    return "default";
+  }
+
+  @Override
   public List<DevfileLocation> devfileFileLocations() {
     return singletonList(
         new DevfileLocation() {
@@ -49,6 +54,11 @@ public class DefaultFactoryUrl implements RemoteFactoryUrl {
   @Override
   public String getHostName() {
     return URI.create(devfileFileLocation).getHost();
+  }
+
+  @Override
+  public String getBranch() {
+    return null;
   }
 
   public DefaultFactoryUrl withDevfileFileLocation(String devfileFileLocation) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -25,9 +25,11 @@ import org.eclipse.che.api.factory.server.DefaultFactoryParameterResolver;
 import org.eclipse.che.api.factory.server.scm.GitCredentialManager;
 import org.eclipse.che.api.factory.server.scm.PersonalAccessTokenManager;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryMetaDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryVisitor;
+import org.eclipse.che.api.factory.shared.dto.ScmInfoDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
@@ -110,6 +112,18 @@ public class BitbucketServerAuthorizingFactoryParametersResolver
 
     private BitbucketFactoryVisitor(BitbucketUrl bitbucketUrl) {
       this.bitbucketUrl = bitbucketUrl;
+    }
+
+    @Override
+    public FactoryDevfileV2Dto visit(FactoryDevfileV2Dto factoryDto) {
+      ScmInfoDto scmInfo =
+          newDto(ScmInfoDto.class)
+              .withScmProviderName(bitbucketUrl.getProviderName())
+              .withRepositoryUrl(bitbucketUrl.repositoryLocation());
+      if (bitbucketUrl.getBranch() != null) {
+        scmInfo.withBranch(bitbucketUrl.getBranch());
+      }
+      return factoryDto.withScmInfo(scmInfo);
     }
 
     @Override

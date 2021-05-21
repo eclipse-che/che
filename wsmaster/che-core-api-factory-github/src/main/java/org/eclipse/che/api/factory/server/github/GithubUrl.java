@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -31,6 +31,8 @@ import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
  */
 public class GithubUrl implements RemoteFactoryUrl {
 
+  private final String NAME = "github";
+
   private static final String HOSTNAME = "https://github.com";
 
   /** Username part of github URL */
@@ -53,6 +55,11 @@ public class GithubUrl implements RemoteFactoryUrl {
    * directly
    */
   protected GithubUrl() {}
+
+  @Override
+  public String getProviderName() {
+    return NAME;
+  }
 
   /**
    * Gets username of this github url
@@ -173,6 +180,6 @@ public class GithubUrl implements RemoteFactoryUrl {
    * @return location of the repository.
    */
   protected String repositoryLocation() {
-    return HOSTNAME + "/" + this.username + "/" + this.repository;
+    return HOSTNAME + "/" + this.username + "/" + this.repository + ".git";
   }
 }

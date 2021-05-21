@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.factory.server.bitbucket;
+package org.eclipse.che.api.factory.server.gitlab;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
@@ -48,8 +48,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+/**
+ * Validate operations performed by the Github Factory service
+ *
+ * @author Florent Benoit
+ */
 @Listeners(MockitoTestNGListener.class)
-public class BitbucketServerAuthorizingFactoryParametersResolverTest {
+public class GitlabFactoryParametersResolverTest {
 
   @Mock private URLFactoryBuilder urlFactoryBuilder;
 
@@ -57,27 +62,25 @@ public class BitbucketServerAuthorizingFactoryParametersResolverTest {
 
   @Mock private DevfileFilenamesProvider devfileFilenamesProvider;
 
-  BitbucketURLParser bitbucketURLParser;
+  GitlabUrlParser gitlabUrlParser;
 
   @Mock private GitCredentialManager gitCredentialManager;
   @Mock private PersonalAccessTokenManager personalAccessTokenManager;
 
-  private BitbucketServerAuthorizingFactoryParametersResolver
-      bitbucketServerFactoryParametersResolver;
+  private GitlabFactoryParametersResolver gitlabFactoryParametersResolver;
 
   @BeforeMethod
   protected void init() {
-    bitbucketURLParser =
-        new BitbucketURLParser("http://bitbucket.2mcl.com", devfileFilenamesProvider);
-    assertNotNull(this.bitbucketURLParser);
-    bitbucketServerFactoryParametersResolver =
-        new BitbucketServerAuthorizingFactoryParametersResolver(
+    gitlabUrlParser = new GitlabUrlParser("http://gitlab.2mcl.com", devfileFilenamesProvider);
+    assertNotNull(this.gitlabUrlParser);
+    gitlabFactoryParametersResolver =
+        new GitlabFactoryParametersResolver(
             urlFactoryBuilder,
             urlFetcher,
-            bitbucketURLParser,
+            gitlabUrlParser,
             gitCredentialManager,
             personalAccessTokenManager);
-    assertNotNull(this.bitbucketServerFactoryParametersResolver);
+    assertNotNull(this.gitlabFactoryParametersResolver);
   }
 
   /** Check url which is not a bitbucket url can't be accepted by this resolver */
@@ -85,22 +88,22 @@ public class BitbucketServerAuthorizingFactoryParametersResolverTest {
   public void checkInvalidAcceptUrl() {
     Map<String, String> parameters = singletonMap(URL_PARAMETER_NAME, "http://github.com");
     // shouldn't be accepted
-    assertFalse(bitbucketServerFactoryParametersResolver.accept(parameters));
+    assertFalse(gitlabFactoryParametersResolver.accept(parameters));
   }
 
   /** Check bitbucket url will be be accepted by this resolver */
   @Test
   public void checkValidAcceptUrl() {
     Map<String, String> parameters =
-        singletonMap(URL_PARAMETER_NAME, "http://bitbucket.2mcl.com/scm/test/repo.git");
+        singletonMap(URL_PARAMETER_NAME, "http://gitlab.2mcl.com/test/proj/repo.git");
     // should be accepted
-    assertTrue(bitbucketServerFactoryParametersResolver.accept(parameters));
+    assertTrue(gitlabFactoryParametersResolver.accept(parameters));
   }
 
   @Test
   public void shouldGenerateDevfileForFactoryWithNoDevfileOrJson() throws Exception {
 
-    String bitbucketUrl = "http://bitbucket.2mcl.com/scm/test/repo.git";
+    String gitlabUrl = "http://gitlab.2mcl.com/test/proj/repo.git";
 
     FactoryDto computedFactory = generateDevfileFactory();
 
@@ -108,58 +111,56 @@ public class BitbucketServerAuthorizingFactoryParametersResolverTest {
 
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.empty());
-    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, gitlabUrl);
     // when
-    FactoryDto factory =
-        (FactoryDto) bitbucketServerFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) gitlabFactoryParametersResolver.createFactory(params);
     // then
-    verify(urlFactoryBuilder).buildDefaultDevfile(eq("repo"));
+    verify(urlFactoryBuilder).buildDefaultDevfile(eq("proj"));
     assertEquals(factory, computedFactory);
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
-    assertEquals(source.getLocation(), bitbucketUrl);
+    assertEquals(source.getLocation(), gitlabUrl);
     assertNull(source.getBranch());
   }
 
   @Test
   public void shouldSetDefaultProjectIntoDevfileIfNotSpecified() throws Exception {
 
-    String bitbucketUrl = "http://bitbucket.2mcl.com/scm/test/repo.git?at=foobar";
+    String gitlabUrl = "http://gitlab.2mcl.com/test/proj/repo/-/tree/foobar";
 
     FactoryDto computedFactory = generateDevfileFactory();
 
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.of(computedFactory));
 
-    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, gitlabUrl);
     // when
-    FactoryDto factory =
-        (FactoryDto) bitbucketServerFactoryParametersResolver.createFactory(params);
+    FactoryDto factory = (FactoryDto) gitlabFactoryParametersResolver.createFactory(params);
     // then
     assertNotNull(factory.getDevfile());
     SourceDto source = factory.getDevfile().getProjects().get(0).getSource();
-    assertEquals(source.getLocation(), "http://bitbucket.2mcl.com/scm/test/repo.git");
+    assertEquals(source.getLocation(), "http://gitlab.2mcl.com/test/proj/repo.git");
     assertEquals(source.getBranch(), "foobar");
   }
 
   @Test
   public void shouldSetScmInfoIntoDevfileV2() throws Exception {
 
-    String bitbucketUrl = "http://bitbucket.2mcl.com/scm/test/repo.git?at=foobar";
+    String gitlabUrl = "http://gitlab.2mcl.com/eclipse/che/-/tree/foobar";
 
     FactoryDevfileV2Dto computedFactory = generateDevfileV2Factory();
 
     when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
         .thenReturn(Optional.of(computedFactory));
 
-    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, bitbucketUrl);
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, gitlabUrl);
     // when
     FactoryDevfileV2Dto factory =
-        (FactoryDevfileV2Dto) bitbucketServerFactoryParametersResolver.createFactory(params);
+        (FactoryDevfileV2Dto) gitlabFactoryParametersResolver.createFactory(params);
     // then
     ScmInfo scmInfo = factory.getScmInfo();
     assertNotNull(scmInfo);
-    assertEquals(scmInfo.getScmProviderName(), "bitbucket");
-    assertEquals(scmInfo.getRepositoryUrl(), "http://bitbucket.2mcl.com/scm/test/repo.git");
+    assertEquals(scmInfo.getScmProviderName(), "gitlab");
+    assertEquals(scmInfo.getRepositoryUrl(), "http://gitlab.2mcl.com/eclipse/che.git");
     assertEquals(scmInfo.getBranch(), "foobar");
   }
 

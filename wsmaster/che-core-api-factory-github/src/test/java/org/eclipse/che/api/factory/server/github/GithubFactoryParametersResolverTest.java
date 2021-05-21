@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -32,10 +32,12 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.che.api.core.model.factory.ScmInfo;
 import org.eclipse.che.api.factory.server.urlfactory.DevfileFilenamesProvider;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
+import org.eclipse.che.api.factory.shared.dto.FactoryDevfileV2Dto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
@@ -225,6 +227,28 @@ public class GithubFactoryParametersResolverTest {
     assertEquals(source.getBranch(), "foobranch");
   }
 
+  @Test
+  public void shouldSetScmInfoIntoDevfileV2() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che/tree/foobar";
+
+    FactoryDevfileV2Dto computedFactory = generateDevfileV2Factory();
+
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any(), anyMap()))
+        .thenReturn(Optional.of(computedFactory));
+
+    Map<String, String> params = ImmutableMap.of(URL_PARAMETER_NAME, githubUrl);
+    // when
+    FactoryDevfileV2Dto factory =
+        (FactoryDevfileV2Dto) githubFactoryParametersResolver.createFactory(params);
+    // then
+    ScmInfo scmInfo = factory.getScmInfo();
+    assertNotNull(scmInfo);
+    assertEquals(scmInfo.getScmProviderName(), "github");
+    assertEquals(scmInfo.getRepositoryUrl(), "https://github.com/eclipse/che.git");
+    assertEquals(scmInfo.getBranch(), "foobar");
+  }
+
   private FactoryDto generateDevfileFactory() {
     return newDto(FactoryDto.class)
         .withV(CURRENT_VERSION)
@@ -233,5 +257,12 @@ public class GithubFactoryParametersResolverTest {
             newDto(DevfileDto.class)
                 .withApiVersion(CURRENT_API_VERSION)
                 .withMetadata(newDto(MetadataDto.class).withName("che")));
+  }
+
+  private FactoryDevfileV2Dto generateDevfileV2Factory() {
+    return newDto(FactoryDevfileV2Dto.class)
+        .withV(CURRENT_VERSION)
+        .withSource("repo")
+        .withDevfile(Map.of("schemaVersion", "2.0.0"));
   }
 }
