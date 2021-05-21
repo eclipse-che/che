@@ -109,6 +109,7 @@
         <maven.antrun.plugin.version>3.0.0</maven.antrun.plugin.version>
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
         <maven.buildhelper.plugin.version>3.2.0</maven.buildhelper.plugin.version>
+        <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
         <maven.exec.plugin.version>3.0.0</maven.exec.plugin.version>
@@ -1472,6 +1473,11 @@
                     <version>${che.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>${maven.buildnumber.plugin.version}</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
                     <configuration>
@@ -1747,6 +1753,38 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <buildNumberPropertyName>buildNumber</buildNumberPropertyName>
+                    <revisionOnScmFailure>no_revision</revisionOnScmFailure>
+                    <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+                    <timestampFormat>{0, date,yyyyMMdd}</timestampFormat>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
     <profiles>
         <!-- Profile for building Che faster by skipping unit tests, license checks and other enforcement features -->
