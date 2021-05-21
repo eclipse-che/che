@@ -368,6 +368,9 @@ export class Editor {
 
         const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const breakpointStatus: boolean = await this.isBreakpointPresent(tabTitle, lineNumber);
+
+        if (breakpointStatus) { return; }
 
         for (let i = 0; i < attempts; i++) {
             try {
@@ -387,7 +390,6 @@ export class Editor {
             }
         }
     }
-
 
     async getLineYCoordinates(lineNumber: number): Promise<number> {
         Logger.debug(`Editor.getLineYCoordinates line: "${lineNumber}"`);
