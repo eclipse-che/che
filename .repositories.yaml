@@ -8,26 +8,22 @@
 # List of repositories of Eclipse Che components
 ---
 repositories:
-  - url: https://github.com/eclipse/che
+  - url: https://github.com/eclipse-che/che-server/
     name: che
     description: >-
-      (this repository) the main project repository
-    devfile: https://github.com/eclipse/che/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master
+      Che server project repository
+    devfile: https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml
+    doc: https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master
     useCheReleaseLifecycle: true
     components:
      - name: dockerfiles
-       url: https://github.com/eclipse/che/tree/master/dockerfiles
+       url: https://github.com/eclipse-che/che-server/tree/HEAD/dockerfiles
        description: >-
          source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo.
-     - name: wsmaster
-       url: https://github.com/eclipse/che/tree/master/wsmaster
+     - name: che-server
+       url: https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster
        description: >-
          orchestrates the Che workspaces with devfiles on Kubernetes
-     - name: tests
-       url: https://github.com/eclipse/che/tree/master/tests
-       description: >-
-         source code of our integration tests.
   - url: https://github.com/eclipse-che/che-theia
     name: che-theia
     description: >-
