@@ -61,7 +61,7 @@ suite(`Test ${stack}`, async () => {
         commonLanguageServerTests.suggestionInvoking(tabTitle, 22, 33, 'test');
         commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text;', 23);
         commonLanguageServerTests.autocomplete(tabTitle, 22, 27, 'WriteLine');
-        // commonLanguageServerTests.codeNavigation(tabTitle, 22, 27, codeNavigationClassName); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        // commonLanguageServerTests.goToImplementations(tabTitle, 22, 27, codeNavigationClassName); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite ('Stopping and deleting the workspace', async () => {
