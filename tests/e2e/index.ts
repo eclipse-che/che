@@ -40,6 +40,7 @@ export * from './pageobjects/ide/OpenDialogWidget';
 export * from './pageobjects/ide/OpenshiftPlugin';
 export * from './pageobjects/ide/OpenWorkspaceWidget';
 export * from './pageobjects/ide/plugins/KubernetesPlugin';
+export * from './pageobjects/ide/plugins/PluginsView';
 export * from './pageobjects/ide/PreviewWidget';
 export * from './pageobjects/ide/ProjectTree';
 export * from './pageobjects/ide/QuickOpenContainer';

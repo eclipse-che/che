@@ -55,7 +55,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(fileName, 'error text;\n', 17);
         commonLanguageServerTests.suggestionInvoking(fileName, 15, 20, 'require');
         commonLanguageServerTests.autocomplete(fileName, 15, 20, 'require');
-        // commonLanguageServerTests.codeNavigation(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        // commonLanguageServerTests.goToImplementations(fileName, 19, 10, 'index.d.ts'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {

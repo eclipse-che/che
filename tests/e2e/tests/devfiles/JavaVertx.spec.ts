@@ -48,7 +48,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text;', 20);
         commonLanguageServerTests.suggestionInvoking(tabTitle, 19, 31, 'router(Vertx vertx) : Router');
         commonLanguageServerTests.autocomplete(tabTitle, 19, 7, 'Router - io.vertx.ext.web');
-        commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.goToImplementations(tabTitle, 19, 7, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {

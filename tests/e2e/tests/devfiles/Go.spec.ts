@@ -64,7 +64,7 @@ suite(`${workspaceStack} test`, async () => {
         commonLanguageServerTests.suggestionInvoking(fileName, 42, 10, 'Parse');
         commonLanguageServerTests.autocomplete(fileName, 42, 10, 'Parse');
         commonLanguageServerTests.errorHighlighting(fileName, 'error;\n', 42);
-        // commonLanguageServerTests.codeNavigation(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
+        // commonLanguageServerTests.goToImplementations(fileName, 42, 10, 'flag.go'); // codenavigation is inconsistent https://github.com/eclipse/che/issues/16929
     });
 
     suite('Stop and remove workspace', async() => {

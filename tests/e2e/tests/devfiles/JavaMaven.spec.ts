@@ -48,7 +48,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.suggestionInvoking(tabTitle, 10, 20, 'append(char c) : PrintStream');
         commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 11);
         commonLanguageServerTests.autocomplete(tabTitle, 10, 11, 'System - java.lang');
-        commonLanguageServerTests.codeNavigation(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
+        commonLanguageServerTests.goToImplementations(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
     suite ('Stopping and deleting the workspace', async () => {
