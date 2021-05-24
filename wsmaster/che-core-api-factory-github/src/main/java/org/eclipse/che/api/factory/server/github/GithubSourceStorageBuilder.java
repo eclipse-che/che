@@ -57,7 +57,7 @@ public class GithubSourceStorageBuilder {
    */
   public SourceDto buildDevfileSource(GithubUrl githubUrl) {
     return newDto(SourceDto.class)
-        .withLocation(githubUrl.repositoryLocation() + ".git")
+        .withLocation(githubUrl.repositoryLocation())
         .withType("github")
         .withBranch(githubUrl.getBranch())
         .withSparseCheckoutDir(githubUrl.getSubfolder());
