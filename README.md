@@ -88,3 +88,4 @@ There are several [GitHub Actions](https://github.com/eclipse-che/che-server/act
 
 ### License
 Che is open sourced under the Eclipse Public License 2.0.
+ 
