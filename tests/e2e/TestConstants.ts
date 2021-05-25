@@ -17,11 +17,25 @@ function getBaseUrl(): string {
     return baseUrl.replace(/\/$/, '');
 }
 
+function getKeycloackUrl(): string {
+    const keycloakUrl: string | undefined = process.env.TS_SELENIUM_KEYCLOAK_URL;
+    if (!keycloakUrl) {
+        return 'http://keycloak-url';
+    }
+
+    return keycloakUrl.replace(/\/$/, '');
+}
+
 export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
     TS_SELENIUM_BASE_URL: getBaseUrl(),
+
+    /**
+     * Base URL of the application which should be checked
+     */
+    TS_SELENIUM_KEYCLOAK_URL: getKeycloackUrl(),
 
     /**
      * Base URl of web console OpenShift which uses to test OperatorHub.
@@ -188,6 +202,16 @@ export const TestConstants = {
      * Token for a github repository with permissions which allow add the ssh keys
      */
     TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || '',
+
+    /**
+     * Username of the github account
+     */
+    TS_GITHUB_USERNAME: process.env.TS_GITHUB_USERNAME || '',
+    
+    /**
+     * Password of the github account
+     */
+    TS_GITHUB_PASSWORD: process.env.TS_GITHUB_PASSWORD || '',
 
     /**
      * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
