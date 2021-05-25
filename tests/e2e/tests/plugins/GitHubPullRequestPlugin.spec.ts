@@ -9,7 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
@@ -30,10 +30,10 @@ const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSE
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
 const gitOauthAppsSettings: GitOauthAppsSettings = e2eContainer.get(CLASSES.GitOauthAppsSettings);
 
-const devfileUrl: string = `https://gist.githubusercontent.com/Ohrimenko1988/244ad55483c717201ee6f71d68d43c87/raw/8fec64dcb57084f9e201a35b12c464d3fd73eee3/GithubPullRequestPlugin.yaml`;
+const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-const projectName: string = 'Spoon-Knife'
-const oAuthAppName: string = 'iokhrime-che';
+const projectName: string = 'Spoon-Knife';
+const oAuthAppName: string = 'eclipse-che';
 
 
 suite(`The 'GitHubPullRequestPlugin' test`, async () => {
@@ -53,8 +53,8 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitOauthAppsSettings.scrollToUpdateApplicationButton();
 
             await gitOauthAppsSettings.typeHomePageUrl(TestConstants.TS_SELENIUM_BASE_URL);
-            await gitOauthAppsSettings.typeCallbackUrl(`${TestConstants.TS_SELENIUM_KEYCLOAK_URL}/realms/che/broker/github/endpoint`)
-            await gitOauthAppsSettings.clickUpdateApplicationButton()
+            await gitOauthAppsSettings.typeCallbackUrl(`${TestConstants.TS_SELENIUM_KEYCLOAK_URL}/realms/che/broker/github/endpoint`);
+            await gitOauthAppsSettings.clickUpdateApplicationButton();
         });
     });
 
@@ -78,7 +78,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitHubPullRequestPlugin.openView();
         });
 
-        test('Login to GitHub', async () => {
+        test('Authorize workspace to use GitHub', async () => {
             const loginNotificationText: string = `wants to sign in using GitHub.`;
             const buttonText: string = 'Allow';
 
@@ -88,7 +88,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
 
         test('Check PR plugin connected to PR', async () => {
             await gitHubPullRequestPlugin.expandTreeItem('Created By Me');
-            await gitHubPullRequestPlugin.waitTreeItem('iokhrime-pr-test (#1) by @chepullreq4');
+            await gitHubPullRequestPlugin.waitTreeItem('gh-pr-plugin-test (#2) by @chepullreq4');
         });
     });
 

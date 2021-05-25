@@ -208,7 +208,7 @@ export const TestConstants = {
      * Username of the github account
      */
     TS_GITHUB_USERNAME: process.env.TS_GITHUB_USERNAME || '',
-    
+
     /**
      * Password of the github account
      */
