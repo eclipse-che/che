@@ -30,7 +30,7 @@ export class CreateWorkspace {
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('CreateWorkspace.waitPage');
 
-        await this.waitTitleContains('Create Workspace', timeout);
+        await this.waitTitleContains('Quick Add', timeout);
     }
 
     async waitSample(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
