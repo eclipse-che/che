@@ -33,7 +33,7 @@ export const TestConstants = {
     TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
-     * Base URL of the application which should be checked
+     * The keycloak URL of the application which should be checked
      */
     TS_SELENIUM_KEYCLOAK_URL: getKeycloackUrl(),
 
