@@ -22,7 +22,6 @@ IMAGES_LIST=(
     quay.io/eclipse/che-postgres
     quay.io/eclipse/che-dev
     quay.io/eclipse/che-server
-    quay.io/eclipse/che-e2e
 )
 
 loadMvnSettingsGpgKey() {
