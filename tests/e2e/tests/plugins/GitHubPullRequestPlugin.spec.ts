@@ -35,7 +35,6 @@ const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfil
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
 
-
 suite(`The 'GitHubPullRequestPlugin' test`, async () => {
     let workspaceName: string = '';
 
@@ -58,7 +57,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
         });
     });
 
-    suite('Test', async () => {
+    suite('Check the GH PR plugin', async () => {
         test('Create workspace using factory', async () => {
             await driverHelper.navigateToUrl(factoryUrl);
         });
@@ -91,7 +90,6 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitHubPullRequestPlugin.waitTreeItem('gh-pr-plugin-test (#2) by @chepullreq4');
         });
     });
-
 
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {

@@ -8,8 +8,6 @@ import { TimeoutConstants } from '../../../TimeoutConstants';
 import { LeftToolBar } from '../LeftToolBar';
 import { TestConstants } from '../../../TestConstants';
 
-
-
 @injectable()
 export class GitHubPullRequestPlugin {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
