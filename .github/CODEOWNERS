@@ -39,4 +39,3 @@ tests/e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTS
 
 # e2e tests infra
 tests/.infra/centos-ci/** @musienko-maxim @rhopp @nickboldt
-tests/.infra/crw-ci/** @dmytro-ndp @rhopp @nickboldt

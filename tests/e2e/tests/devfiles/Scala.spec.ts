@@ -54,7 +54,7 @@ suite.skip(`${stack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(tabTitle, 'Abc:', 21);
         // commonLanguageServerTests.suggestionInvoking(tabTitle, 15, 31, 'Console scala');
         commonLanguageServerTests.autocomplete(tabTitle, 25, 28, 'name: String');
-        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName, 30_000); // not working
+        // commonLanguageServerTests.goToImplementations(tabTitle, 19, 7, codeNavigationClassName, 30_000); // not working
     });
 
     suite ('Stopping and deleting the workspace', async () => {

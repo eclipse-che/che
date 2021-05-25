@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TYPES, CLASSES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
@@ -21,7 +21,6 @@ import { By, Key, error } from 'selenium-webdriver';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
@@ -30,6 +29,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -58,7 +58,7 @@ const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
-const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -67,14 +67,6 @@ const SpringAppLocators = {
     springHomeButtonLocator: By.className('navbar-brand'),
     springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`)
 };
-
-suite('Login', async () => {
-    test('Login', async () => {
-        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
-        await loginPage.login();
-    });
-});
-
 
 suite('Validation of workspace start', async () => {
     test('Start workspace', async () => {
@@ -125,7 +117,7 @@ suite('Language server validation', async () => {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
-            await driverHelper.reloadPage();
+            await browserTabsUtil.refreshPage();
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde();
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
@@ -166,8 +158,6 @@ suite('Language server validation', async () => {
 });
 
 suite('Validation of workspace build and run', async () => {
-    let applicationUrl: string = '';
-
     test('Build application', async () => {
         let buildTaskName: string = 'build-file-output';
         await topMenu.runTask('build-file-output');
@@ -176,20 +166,17 @@ suite('Validation of workspace build and run', async () => {
 
     test('Run application', async () => {
         await topMenu.runTask('run');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
+        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
+        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check the running application', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
     });
 
     test('Close preview widget', async () => {
         await rightToolBar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
-
     });
 
     test('Close the terminal running tasks', async () => {
@@ -201,8 +188,6 @@ suite('Validation of workspace build and run', async () => {
 });
 
 suite('Display source code changes in the running application', async () => {
-    let applicationUrl: string = '';
-
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
@@ -216,20 +201,17 @@ suite('Display source code changes in the running application', async () => {
 
     test('Build application with changes', async () => {
         let buildTaskName: string = 'build';
-
         await topMenu.runTask('build');
         await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
     test('Run application with changes', async () => {
         await topMenu.runTask('run-with-changes');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120_000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 120_000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120_000);
+        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
+        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check changes are displayed', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60_000, 10_000);
         await checkErrorMessageInApplicationController();
     });
@@ -247,17 +229,13 @@ suite('Display source code changes in the running application', async () => {
 });
 
 suite('Validation of debug functionality', async () => {
-    let applicationUrl: string = '';
-
     test('Launch debug', async () => {
         await topMenu.runTask('run-debug');
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 180_000);
-        applicationUrl = await ide.getApplicationUrlFromNotification('Redirect is now enabled on port 8080', 180_000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 180_000);
+        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
+        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
 
     test('Check content of the launched application', async () => {
-        await previewWidget.waitApplicationOpened(applicationUrl, 60_000);
         await previewWidget.waitAndSwitchToWidgetFrame();
         await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();

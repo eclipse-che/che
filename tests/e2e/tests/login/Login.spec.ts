@@ -8,19 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { TestConstants, DriverHelper, CLASSES, ICheLoginPage, TYPES, Logger } from '../..';
+import { TestConstants, CLASSES, ICheLoginPage, TYPES, Logger } from '../..';
 import { e2eContainer } from '../../inversify.config';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 
 suite('Login test', async () => {
     test('Login', async () => {
-        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
         await loginPage.login();
         if (TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
             Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
-            await driverHelper.maximize();
+            await browserTabsUtil.maximize();
         }
     });
 });

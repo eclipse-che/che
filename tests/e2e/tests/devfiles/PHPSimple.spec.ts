@@ -53,7 +53,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(tabTitle, `error_text;`, 14);
         commonLanguageServerTests.suggestionInvoking(tabTitle, 14, 26, '$test');
         commonLanguageServerTests.autocomplete(tabTitle, 15, 5, 'phpinfo');
-        // commonLanguageServerTests.codeNavigation(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
+        // commonLanguageServerTests.goToImplementations(tabTitle, 19, 7, codeNavigationClassName); // there is no codenavigation in the php simple stack (no object oriented code)
     });
 
     suite ('Stopping and deleting the workspace', async () => {

@@ -54,7 +54,7 @@ suite(`${stack} test`, async () => {
     suite('Language server validation', async () => {
         commonLanguageServerTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
         commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 30);
-        commonLanguageServerTests.codeNavigation(tabTitle, 32, 23, codeNavigationClassName);
+        commonLanguageServerTests.goToImplementations(tabTitle, 32, 23, codeNavigationClassName);
         commonLanguageServerTests.suggestionInvoking(tabTitle, 32, 23, 'run(Class<?>');
     });
 

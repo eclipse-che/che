@@ -1,4 +1,0 @@
-embed-server --server-config=standalone.xml --std-out=echo
-/subsystem=keycloak-server/spi=truststore/:add
-/subsystem=keycloak-server/spi=truststore/provider=file/:add(properties={file => "/scripts/openshift.jks", password => "openshift", disabled => "false" },enabled=true)
-stop-embedded-server

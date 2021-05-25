@@ -52,6 +52,12 @@ export class ProjectAndFileTests {
         });
     }
 
+    public checkFilePresence(filePath: string, timeout: number) {
+        test('Check that file is present in project', async () => {
+            await this.projectTree.waitItem(filePath, timeout);
+        });
+    }
+
     public checkFileNotExists(filePath: string) {
         test('Check that file is not exist in project', async () => {
             await this.projectTree.waitItemDisappearance(filePath);
