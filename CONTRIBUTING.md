@@ -14,7 +14,7 @@ Che is composed of multiple sub projects. For each projects we provide a *CONTRI
 <!-- begin repository list -->
 Repository | Component | Description | Devfile | Documentation
 --- | --- | ---  | --- | ---
-[che](https://github.com/eclipse/che) | | (this repository) the main project repository | | [doc](https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master)
+[che](https://github.com/eclipse-che/che-server/) | | Che server project repository | [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master)
 ---| [dockerfiles](https://github.com/eclipse-che/che-server/tree/HEAD/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | |
 ---| [che-server](https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
 ---| [tests](https://github.com/eclipse/che/tree/master/tests) | source code of our integration tests. | | |

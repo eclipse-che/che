@@ -24,6 +24,10 @@ repositories:
        url: https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster
        description: >-
          orchestrates the Che workspaces with devfiles on Kubernetes
+     - name: tests
+       url: https://github.com/eclipse/che/tree/master/tests
+       description: >-
+         source code of our integration tests.
   - url: https://github.com/eclipse-che/che-theia
     name: che-theia
     description: >-
