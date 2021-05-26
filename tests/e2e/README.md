@@ -46,7 +46,7 @@ The ```'eclipse/che-e2e'``` docker image has VNC server instaled inside. For con
 **The easiest way to do that is to perform steps which are described in the "Docker launch" paragraph.
 For running tests without docker, please perform next steps:**
 
-- Deploy Che on Kubernetes infrastructure by using 'Minikube' and 'Chectl' <https://github.com/eclipse/che/blob/master/deploy/kubernetes/README.md>
+- Deploy Che on Kubernetes infrastructure by using 'Minikube' and 'Chectl' <https://github.com/eclipse-che/che-server/blob/HEAD/deploy/kubernetes/README.md>
 - Create workspace by using 'Chectl' and devfile
   - link to 'Chectl' manual <https://github.com/che-incubator/chectl#chectl-workspacestart>
   - link to devfile ( **```For successfull test passing, exactly provided devfile should be used```** )

@@ -5,7 +5,7 @@
 - [Devfile to contribute](#devfile-to-contribute)
 - [Contribute to ...](#contribute-to-...)
   - [Dashboard](#dashboard)
-  - [Che Server a.k.a WS master](#che-server-a.k.a-ws-master)
+  - [Che Server ](#che-server...)
 
 ## Other Che repositories
 
@@ -14,9 +14,11 @@ Che is composed of multiple sub projects. For each projects we provide a *CONTRI
 <!-- begin repository list -->
 Repository | Component | Description | Devfile | Documentation
 --- | --- | ---  | --- | ---
-[che](https://github.com/eclipse/che) | | (this repository) the main project repository | [devfile](https://github.com/eclipse/che/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master)
----| [dockerfiles](https://github.com/eclipse/che/tree/master/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | |
----| [wsmaster](https://github.com/eclipse/che/tree/master/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
+[che](https://github.com/eclipse/che) | | (this repository) the main project repository | [devfile](https://github.com/eclipse/che/blob/main/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/main/CONTRIBUTING.md#che-server-aka-ws-master)
+---| [tests](https://github.com/eclipse/che/tree/main/tests) | source code of our integration tests. | | |
+[che-server](https://github.com/eclipse-che/che-server/) | | Che server project repository | [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master)
+---| [dockerfiles](https://github.com/eclipse-che/che-server/tree/HEAD/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo. | | |
+---| [che-server](https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
 ---| [tests](https://github.com/eclipse/che/tree/master/tests) | source code of our integration tests. | | |
 [che-theia](https://github.com/eclipse-che/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse-che/che-theia/blob/master/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse-che/che-theia/blob/master/CONTRIBUTING.md)
 ---| [generator](https://github.com/eclipse-che/che-theia/tree/master/generator) | `che:theia init` CLI to prepare and build che-theia | | |
@@ -157,8 +159,8 @@ You can use the Che command `dashboard_dev_server` (command pallette > Run task 
 $ node_modules/.bin/gulp serve --server=<che_api_url>
 ```
 
-### Che server a.k.a WS master
-There is a [devfile](https://github.com/eclipse/che/blob/master/devfile.yaml) for development of Che server in Che.
+### Che server
+There is a [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) for development of Che server in Che.
 To build Che one may run a predefined build task from the devfile.
 
 Starting Che master requires some manual steps.
