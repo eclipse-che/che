@@ -33,7 +33,7 @@ export const TestConstants = {
     TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
-     * The keycloak URL
+     * The keycloak URL.
      */
     TS_SELENIUM_KEYCLOAK_URL: getKeycloackUrl(),
 
