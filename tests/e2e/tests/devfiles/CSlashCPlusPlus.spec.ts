@@ -50,7 +50,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.errorHighlighting(tabTitle, `error_text;`, 12);
         commonLanguageServerTests.suggestionInvoking(tabTitle, 15, 22, 'test');
         commonLanguageServerTests.autocomplete(tabTitle, 15, 9, 'printf');
-        // commonLanguageServerTests.codeNavigation(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
+        // commonLanguageServerTests.goToImplementations(tabTitle, 15, 9, 'stdio.h'); currently not working because of LS not exposing Ctrl + F12 combination
     });
 
     suite('Stopping and deleting the workspace', async () => {

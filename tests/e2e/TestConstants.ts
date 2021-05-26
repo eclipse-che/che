@@ -34,9 +34,10 @@ export const TestConstants = {
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
 
     /**
-     * Run browser in "Fullscreen" (kiosk) mode, "false" by default.
+     * Run browser in "Fullscreen" (kiosk) mode.
+     * Default to true if undefined
      */
-    TS_SELENIUM_LAUNCH_FULLSCREEN: process.env.TS_SELENIUM_LAUNCH_FULLSCREEN === 'true',
+    TS_SELENIUM_LAUNCH_FULLSCREEN: (process.env.TS_SELENIUM_LAUNCH_FULLSCREEN === 'false') ? false : true,
 
     /**
      * Run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
