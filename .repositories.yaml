@@ -8,8 +8,20 @@
 # List of repositories of Eclipse Che components
 ---
 repositories:
-  - url: https://github.com/eclipse-che/che-server/
+  - url: https://github.com/eclipse/che
     name: che
+    description: >-
+      (this repository) the main project repository
+    devfile: https://github.com/eclipse/che/blob/master/devfile.yaml
+    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master
+    useCheReleaseLifecycle: true
+    components:
+      - name: tests
+        url: https://github.com/eclipse/che/tree/master/tests
+        description: >-
+          source code of our integration tests.
+  - url: https://github.com/eclipse-che/che-server/
+    name: che-server
     description: >-
       Che server project repository
     devfile: https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml
