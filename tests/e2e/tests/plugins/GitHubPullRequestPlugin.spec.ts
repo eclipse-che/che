@@ -21,6 +21,7 @@ import { GitHubPullRequestPlugin } from '../../pageobjects/ide/plugins/GitHubPul
 import { GitLoginPage } from '../../pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from '../../pageobjects/third-parties/GitOauthAppsSettings';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { KeycloackUrlHandler } from '../../utils/KeycloackUrlHandler';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -30,7 +31,8 @@ const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSE
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
 const gitOauthAppsSettings: GitOauthAppsSettings = e2eContainer.get(CLASSES.GitOauthAppsSettings);
 
-const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
+// const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
+const devfileUrl: string = `https://gist.githubusercontent.com/Ohrimenko1988/244ad55483c717201ee6f71d68d43c87/raw/6f6b29cd5c7ce65ac01a0981dffa5111d28edcf8/GithubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
@@ -52,7 +54,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitOauthAppsSettings.scrollToUpdateApplicationButton();
 
             await gitOauthAppsSettings.typeHomePageUrl(TestConstants.TS_SELENIUM_BASE_URL);
-            await gitOauthAppsSettings.typeCallbackUrl(`${TestConstants.TS_SELENIUM_KEYCLOAK_URL}/realms/che/broker/github/endpoint`);
+            await gitOauthAppsSettings.typeCallbackUrl(KeycloackUrlHandler.getIdentityCallbackUrl());
             await gitOauthAppsSettings.clickUpdateApplicationButton();
         });
     });
@@ -87,7 +89,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
 
         test('Check PR plugin connected to PR', async () => {
             await gitHubPullRequestPlugin.expandTreeItem('Created By Me');
-            await gitHubPullRequestPlugin.waitTreeItem('gh-pr-plugin-test (#2) by @chepullreq4');
+            await gitHubPullRequestPlugin.waitTreeItem('[DO NOT MERGE] gh-pr-plugin-test (#3) by @chepullreq4');
         });
     });
 
