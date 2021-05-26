@@ -12,12 +12,12 @@ repositories:
     name: che
     description: >-
       (this repository) the main project repository
-    devfile: https://github.com/eclipse/che/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#che-server-aka-ws-master
+    devfile: https://github.com/eclipse/che/blob/main/devfile.yaml
+    doc: https://github.com/eclipse/che/blob/main/CONTRIBUTING.md#che-server-aka-ws-master
     useCheReleaseLifecycle: true
     components:
       - name: tests
-        url: https://github.com/eclipse/che/tree/master/tests
+        url: https://github.com/eclipse/che/tree/main/tests
         description: >-
           source code of our integration tests.
   - url: https://github.com/eclipse-che/che-server/
