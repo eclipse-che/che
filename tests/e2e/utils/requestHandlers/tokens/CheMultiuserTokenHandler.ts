@@ -12,22 +12,14 @@ import querystring from 'querystring';
 import { injectable } from 'inversify';
 import { TestConstants } from '../../../TestConstants';
 import { ITokenHandler } from './ITokenHandler';
+import { KeycloackUrlHandler } from '../../KeycloackUrlHandler';
 
 @injectable()
 export class CheMultiuserTokenHandler implements ITokenHandler {
     async get(): Promise<string> {
-        let params = {};
+        const keycloakUrl = KeycloackUrlHandler.getTokenEndpointUrl();
 
-        let keycloakUrl = this.handleTrailingSlash(TestConstants.TS_SELENIUM_BASE_URL);
-        const keycloakAuthSuffix = 'auth/realms/che/protocol/openid-connect/token';
-
-        if (TestConstants.TS_SELENIUM_SINGLE_HOST) {
-            keycloakUrl = keycloakUrl + keycloakAuthSuffix;
-        } else {
-            keycloakUrl = keycloakUrl.replace('che', 'keycloak') + keycloakAuthSuffix;
-        }
-
-        params = {
+        const params = {
             client_id: 'che-public',
             username: TestConstants.TS_SELENIUM_USERNAME,
             password: TestConstants.TS_SELENIUM_PASSWORD,
@@ -44,15 +36,4 @@ export class CheMultiuserTokenHandler implements ITokenHandler {
 
     }
 
-    /**
-     * Append `/` if it's not in the URL yet. Keycloak doesn't handle double `//` in URL well.
-     *
-     * @param keycloakUrl
-     */
-    private handleTrailingSlash(keycloakUrl: string) {
-        if (!(new RegExp('/$').test(keycloakUrl))) {
-            keycloakUrl += '/';
-        }
-        return keycloakUrl;
-    }
 }

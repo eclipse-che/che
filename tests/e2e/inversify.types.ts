@@ -60,7 +60,10 @@ const CLASSES = {
     LanguageServerTests: 'LanguageServerTests',
     CodeExecutionTests: 'CodeExecutionTests',
     ProjectAndFileTests: 'ProjectAndFileTests',
-    WorkspaceHandlingTests: 'WorkspaceHandlingTests'
+    WorkspaceHandlingTests: 'WorkspaceHandlingTests',
+    GitHubPullRequestPlugin: 'GitHubPullRequestPlugin',
+    GitLoginPage: 'GitLoginPage',
+    GitOauthAppsSettings: 'GitOauthAppsSettings'
 };
 
 export { TYPES, CLASSES };

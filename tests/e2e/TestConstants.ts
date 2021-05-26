@@ -191,6 +191,16 @@ export const TestConstants = {
     TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || '',
 
     /**
+     * Username of the github account
+     */
+    TS_GITHUB_USERNAME: process.env.TS_GITHUB_USERNAME || '',
+
+    /**
+     * Password of the github account
+     */
+    TS_GITHUB_PASSWORD: process.env.TS_GITHUB_PASSWORD || '',
+
+    /**
      * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
      */
     TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_TEST_OPENSHIFT_PLUGIN_USERNAME || '',
