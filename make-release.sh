@@ -13,7 +13,6 @@ DOCKER_FILES_LOCATIONS=(
     che/dockerfiles/postgres
     che/dockerfiles/dev
     che/dockerfiles/che
-    che/dockerfiles/e2e
 )
 
 IMAGES_LIST=(
