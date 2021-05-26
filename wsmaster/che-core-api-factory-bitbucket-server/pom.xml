@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.31.0-SNAPSHOT</version>
+        <version>7.32.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-factory-bitbucket-server</artifactId>
     <packaging>jar</packaging>

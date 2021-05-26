@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-permission</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>7.31.0-SNAPSHOT</version>
+        <version>7.32.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-permission-workspace</artifactId>
     <name>Che Multiuser :: Workspace Permissions</name>
