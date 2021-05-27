@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    name: Create Che Devfile Registry Release
+    name: Create Che Release
     runs-on: ubuntu-20.04
     steps:
       -

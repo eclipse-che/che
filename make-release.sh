@@ -112,7 +112,7 @@ git add VERSION
 echo "Copying source code to dockerfile directory"
 cp -r "tests/e2e" "dockerfiles/e2e/e2e"
 
-docker build -t quay.io/eclipse/che-e2e:${VERSION} 
+docker build -t quay.io/eclipse/che-e2e:${VERSION} dockerfiles/e2e/
 docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
 docker push quay.io/eclipse/che-e2e:${VERSION}
 docker push quay.io/eclipse/che-e2e:latest
