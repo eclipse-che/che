@@ -19,6 +19,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PluginsView } from '../../pageobjects/ide/plugins/PluginsView';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -28,24 +29,25 @@ const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandling: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
-const workspaceName: string = 'install-plugin-test';
-const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/${workspaceName}`;
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/InstallPluginUsingUI.yaml';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 
 const pluginTitle: string = 'java11';
 
 suite(`The 'InstallPluginUsingUI' test`, async () => {
+    let workspaceName: string = '';
+
     suite('Create workspace', async () => {
-        test('Create workspace', async () => {
-            const wsConfig = await testWorkspaceUtils.getBaseDevfile();
-            wsConfig.metadata!.name = workspaceName;
-            await testWorkspaceUtils.createWsFromDevFile(wsConfig);
+        test('Create workspace using factory', async () => {
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
-            await browserTabsUtil.navigateTo(workspaceUrl);
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await projectTree.openProjectTreeContainer();
+
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
     });
 
