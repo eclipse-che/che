@@ -8,7 +8,7 @@
 #
 
 base_dir=$(cd "$(dirname "$0")"; pwd)
-. "${base_dir}"/../build.include
+. "${base_dir}"/build.include
 
 E2E_DIR="${base_dir}/../../tests/e2e"
 LOCAL_E2E_DIR="${base_dir}/e2e"
