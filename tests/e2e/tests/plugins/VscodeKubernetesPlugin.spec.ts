@@ -28,7 +28,7 @@ const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.Preferen
 const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeKubernetesPlugin.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeKubernetesPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';

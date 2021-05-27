@@ -27,7 +27,7 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/PythonPluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/PythonPluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'python-hello-world';
 const subRootFile: string = 'README.md';

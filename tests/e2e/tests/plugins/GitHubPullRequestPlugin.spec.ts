@@ -31,7 +31,7 @@ const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSE
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
 const gitOauthAppsSettings: GitOauthAppsSettings = e2eContainer.get(CLASSES.GitOauthAppsSettings);
 
-const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
+const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
