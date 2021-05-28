@@ -36,7 +36,7 @@ const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/TypescriptNodeDebug2PluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/TypescriptNodeDebug2PluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const codeNavigationClassName: string = 'OpenDefinition.ts';
 const projectName: string = 'nodejs-web-app';

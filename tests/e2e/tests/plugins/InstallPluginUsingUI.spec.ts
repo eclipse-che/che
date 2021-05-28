@@ -9,43 +9,43 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PluginsView } from '../../pageobjects/ide/plugins/PluginsView';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const pluginsView: PluginsView = e2eContainer.get(CLASSES.PluginsView);
 
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandling: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
-const workspaceName: string = 'install-plugin-test';
-const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/${workspaceName}`;
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/InstallPluginUsingUI.yaml';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 
 const pluginTitle: string = 'java11';
 
 suite(`The 'InstallPluginUsingUI' test`, async () => {
+    let workspaceName: string = '';
+
     suite('Create workspace', async () => {
-        test('Create workspace', async () => {
-            const wsConfig = await testWorkspaceUtils.getBaseDevfile();
-            wsConfig.metadata!.name = workspaceName;
-            await testWorkspaceUtils.createWsFromDevFile(wsConfig);
+        test('Create workspace using factory', async () => {
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
-            await browserTabsUtil.navigateTo(workspaceUrl);
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await projectTree.openProjectTreeContainer();
+
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
     });
 

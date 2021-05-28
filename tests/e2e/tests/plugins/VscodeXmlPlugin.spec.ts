@@ -29,7 +29,7 @@ const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.
 
 let workspaceName: string = '';
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeXmlPlugin.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeXmlPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;

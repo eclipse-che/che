@@ -31,7 +31,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/PhpPluginTest.yaml';
+const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/PhpPluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'php-web-simple';
 const subRootFolder: string = 'README.md';
