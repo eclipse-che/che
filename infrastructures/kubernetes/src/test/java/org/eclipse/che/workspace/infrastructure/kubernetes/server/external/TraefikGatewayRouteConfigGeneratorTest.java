@@ -33,7 +33,7 @@ public class TraefikGatewayRouteConfigGeneratorTest {
 
   @BeforeMethod
   public void setUp() {
-    gatewayConfigGenerator = new TraefikGatewayRouteConfigGenerator();
+    gatewayConfigGenerator = new TraefikGatewayRouteConfigGenerator("cluster.local");
   }
 
   @Test

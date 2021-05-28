@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -20,7 +22,15 @@ import javax.inject.Singleton;
 @Singleton
 public class GatewayRouteConfigGeneratorFactory {
 
+  private final String clusterDomain;
+
+  @Inject
+  public GatewayRouteConfigGeneratorFactory(
+      @Named("che.infra.kubernetes.cluster_domain") String clusterDomain) {
+    this.clusterDomain = clusterDomain;
+  }
+
   public GatewayRouteConfigGenerator create() {
-    return new TraefikGatewayRouteConfigGenerator();
+    return new TraefikGatewayRouteConfigGenerator(clusterDomain);
   }
 }

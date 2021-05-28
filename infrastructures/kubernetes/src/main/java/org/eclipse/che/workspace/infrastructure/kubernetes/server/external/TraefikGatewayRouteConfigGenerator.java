@@ -55,7 +55,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
  */
 public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGenerator {
 
-  private static final String SERVICE_URL_FORMAT = "http://%s.%s.svc.cluster.local:%s";
+  private static final String SERVICE_URL_FORMAT = "http://%s.%s.svc.%s:%s";
+
+  private final String clusterDomain;
+
+  public TraefikGatewayRouteConfigGenerator(String clusterDomain) {
+    this.clusterDomain = clusterDomain;
+  }
 
   private final Map<String, ConfigMap> routeConfigs = new HashMap<>();
 
@@ -227,6 +233,7 @@ public class TraefikGatewayRouteConfigGenerator implements GatewayRouteConfigGen
   }
 
   private String createServiceUrl(String serviceName, String servicePort, String serviceNamespace) {
-    return String.format(SERVICE_URL_FORMAT, serviceName, serviceNamespace, servicePort);
+    return String.format(
+        SERVICE_URL_FORMAT, serviceName, serviceNamespace, clusterDomain, servicePort);
   }
 }
