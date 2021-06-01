@@ -98,7 +98,7 @@ export class PreviewWidget {
             await this.switchBackToIdeFrame();
             await this.refreshPage();
             await this.waitAndSwitchToWidgetFrame();
-            await this.driverHelper.wait(polling);
+            await this.driverHelper.wait(timeout);
         }, timeout);
     }
 
