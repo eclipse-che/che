@@ -86,6 +86,8 @@ export class PreviewWidget {
 
         Logger.debug(`PreviewWidget.waitContentAvailable ${contentLocator}`);
 
+        await this.driverHelper.wait(polling);   // workaround https://github.com/eclipse/che/issues/19895
+
         await this.waitAndSwitchToWidgetFrame();
         await this.driverHelper.getDriver().wait(async () => {
             const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
