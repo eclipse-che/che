@@ -22,7 +22,7 @@ testImages() {
   set -o pipefail
 
   TAG=$1
-  if [[ ${TAG} != "nightly" ]]; then #if given tag 'nightly' means that don't need to checkout and going to build master
+  if [[ ${TAG} != "nightly" ]]; then #if given tag 'nightly' means that don't need to checkout and going to build main
     git checkout ${TAG}
   fi
   REGISTRY="quay.io"
@@ -318,8 +318,8 @@ createTestWorkspaceAndRunTest() {
   ### Create workspace
   DEV_FILE_URL=$1
   echo "====== Create test workspace ======"
-  if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'master' branch
-    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --telemetry=off --chenamespace=eclipse-che --devfile=https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/happy-path/happy-path-workspace.yaml
+  if [[ ${DEV_FILE_URL} = "" ]]; then # by default it is used 'happy-path-devfile' yaml from CHE 'main' branch
+    chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --telemetry=off --chenamespace=eclipse-che --devfile=https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/happy-path/happy-path-workspace.yaml
   else
     chectl workspace:create --start --access-token "$USER_ACCESS_TOKEN" --telemetry=off --chenamespace=eclipse-che $1 # it can be directly indicated other URL to 'devfile' yaml
   fi

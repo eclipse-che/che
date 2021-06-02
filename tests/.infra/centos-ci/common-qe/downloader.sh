@@ -10,7 +10,7 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-COMMON_FOLDER_URL="https://raw.githubusercontent.com/eclipse/che/master/tests/.infra/centos-ci/common-qe"
+COMMON_FOLDER_URL="https://raw.githubusercontent.com/eclipse/che/main/tests/.infra/centos-ci/common-qe"
 
 COMMON_FOLDER_NAME="common-qe"
 CERT_GENERATION_SCRIPT_NAME="che-cert-generation.sh"
