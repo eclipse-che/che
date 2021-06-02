@@ -40,6 +40,8 @@ jobs:
         SHORT_SHA1=$(git rev-parse --short HEAD)
         echo ::set-output name=short_sha1::${SHORT_SHA1}
 
+        echo "Copying source code to dockerfile directory"
+        cp -r "tests/e2e" "dockerfiles/e2e/e2e"
         docker build -t quay.io/eclipse/che-e2e:nightly dockerfiles/e2e/
         docker tag quay.io/eclipse/che-e2e:nightly quay.io/eclipse/che-e2e:${SHORT_SHA1}
     - name: Push docker images
