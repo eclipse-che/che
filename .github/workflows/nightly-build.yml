@@ -46,8 +46,8 @@ jobs:
         docker tag quay.io/eclipse/che-e2e:nightly quay.io/eclipse/che-e2e:${SHORT_SHA1}
     - name: Push docker images
       run: |
-        docker push quay.io/eclipse/che-server:nightly
-        docker push quay.io/eclipse/che-server:${{ steps.build.outputs.short_sha1 }}
+        docker push quay.io/eclipse/che-e2e:nightly
+        docker push quay.io/eclipse/che-e2e:${{ steps.build.outputs.short_sha1 }}
     - name: Create failure MM message
       if: ${{ failure() }}
       run: |
