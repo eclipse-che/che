@@ -47,7 +47,7 @@ jobs:
         registry: quay.io
     - name: Build docker images
       id: build
-      run:
+      run: |
           SHORT_SHA1=$(git rev-parse --short HEAD)
           echo ::set-output name=short_sha1::${SHORT_SHA1}
           docker build -t quay.io/eclipse/che-e2e:next dockerfiles/e2e/
