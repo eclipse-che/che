@@ -16,6 +16,7 @@ import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -42,6 +43,11 @@ suite(`${workspaceStack} test`, async () => {
             await preferencesHandler.setUseGoLanaguageServer();
         });
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
+
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 

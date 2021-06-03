@@ -11,8 +11,9 @@
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../..';
+import { TestConstants, WorkspaceNameHandler } from '../..';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import CheReporter from '../../driver/CheReporter';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -31,6 +32,10 @@ suite('Workspace creation via factory url', async () => {
     });
 
     suite('Wait workspace readiness', async () => {
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 

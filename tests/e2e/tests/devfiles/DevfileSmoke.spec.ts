@@ -9,6 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { CLASSES, WorkspaceNameHandler } from '../..';
+import CheReporter from '../../driver/CheReporter';
 import { e2eContainer } from '../../inversify.config';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
@@ -22,6 +23,11 @@ const stack : string = 'Java Maven';
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
+
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 

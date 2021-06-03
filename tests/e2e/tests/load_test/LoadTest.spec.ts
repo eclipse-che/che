@@ -16,6 +16,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TestConstants, WorkspaceNameHandler } from '../..';
+import CheReporter from '../../driver/CheReporter';
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -39,8 +40,8 @@ suite('Load test suite', async () => {
         await cheLoginPage.login();
     });
 
-
     test('Wait loading workspace and get time', async () => {
+        CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
     });

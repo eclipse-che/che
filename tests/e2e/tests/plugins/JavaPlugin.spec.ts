@@ -21,6 +21,7 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -45,8 +46,11 @@ suite(`The 'JavaPlugin' test`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(sampleName, subRootFolder);
         });

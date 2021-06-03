@@ -15,6 +15,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../..';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -37,6 +38,10 @@ suite('Workspace creation via factory url', async () => {
     });
 
     suite('Wait workspace readyness', async () => {
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 

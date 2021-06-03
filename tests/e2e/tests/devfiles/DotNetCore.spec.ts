@@ -14,6 +14,7 @@ import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -34,6 +35,11 @@ const runTaskNameExpectedString: string = 'Process 5000-tcp is now listening on 
 suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
+
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
     });
 

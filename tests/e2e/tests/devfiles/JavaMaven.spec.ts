@@ -14,6 +14,7 @@ import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -31,6 +32,11 @@ const taskName: string = 'maven build';
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
+
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -51,7 +57,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.goToImplementations(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
-    suite ('Stopping and deleting the workspace', async () => {
+    suite('Stopping and deleting the workspace', async () => {
         let workspaceName = 'not defined';
         suiteSetup(async () => {
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();

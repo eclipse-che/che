@@ -22,6 +22,7 @@ import { DebugView } from '../../pageobjects/ide/DebugView';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -46,8 +47,11 @@ suite(`The 'PhpPlugin' tests`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, subRootFolder);
         });

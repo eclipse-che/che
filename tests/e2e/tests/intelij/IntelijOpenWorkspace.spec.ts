@@ -14,6 +14,8 @@ import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import CheReporter from '../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -26,6 +28,7 @@ suite('The "IntelijOpenWorkspace" userstory', async () => {
         });
 
         test('Wait workspace', async () => {
+            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
             await ide.waitAndSwitchToIdeFrame();
             await waitIntelijWorkspace();
         });

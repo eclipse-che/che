@@ -9,7 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
@@ -26,6 +26,7 @@ import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
+import CheReporter from '../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -75,14 +76,15 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 
             await gitHubPullRequestPlugin.waitViewIcon();
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, 'README.md');
-
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
         
         test('Create new branch', async () => {

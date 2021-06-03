@@ -207,6 +207,26 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     }
 
+    public async cleanUpRunningWorkspace(workspaceName: string) {
+        if (workspaceName === undefined || workspaceName.length === 0) {
+          Logger.warn(`Could nod delete workspace because workspaceName is undefined or empty`);
+          return;
+        }
+
+        Logger.debug(`TestWorkspaceUtil.cleanUpRunningWorkspace ${workspaceName}`);
+        const workspaceID: string = await this.getIdOfRunningWorkspace(workspaceName);
+        
+        if (workspaceID === undefined || workspaceID.length === 0) {
+          Logger.error(`Could nod delete workspace with name ${workspaceName} because workspaceID is undefined or empty`);
+          return;
+        }
+        
+        Logger.trace(`TestWorkspaceUtil.cleanUpRunningWorkspace Stopping workspace:${workspaceName} with ID:${workspaceID}`);
+        await this.stopWorkspaceById(workspaceID);
+        Logger.trace(`TestWorkspaceUtil.cleanUpRunningWorkspace Deleting workspace ${workspaceName}`);
+        await this.removeWorkspaceById(workspaceID);
+    }
+
     async createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile) {
         Logger.debug('TestWorkspaceUtil.createWsFromDevFile');
 

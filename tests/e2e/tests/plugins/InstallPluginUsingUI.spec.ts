@@ -19,6 +19,7 @@ import { PluginsView } from '../../pageobjects/ide/plugins/PluginsView';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import CheReporter from '../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -41,11 +42,13 @@ suite(`The 'InstallPluginUsingUI' test`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
+            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await projectTree.openProjectTreeContainer();
 
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            await projectTree.openProjectTreeContainer();
         });
     });
 
