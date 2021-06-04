@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: happy-path-che
+  namespace: CHE-NAMESPACE
+spec:
+  volumes:
+    - name: test-run-results
+    - name: dshm
+      emptyDir:
+        medium: Memory
+  containers:
+    # container containing the tests
+    - name: happy-path-test
+      image: quay.io/eclipse/che-e2e:next
+      imagePullPolicy: Always
+      env:
+        - name: TEST_SUITE
+          value: test-devworkspace-happy-path
+        - name: NODE_TLS_REJECT_UNAUTHORIZED
+          value: '0'
+        - name: TS_SELENIUM_BASE_URL
+          value: CHE_URL
+        - name: TS_SELENIUM_DEVWORKSPACE_URL
+          value: WORKSPACE_ROUTE
+        - name: TS_SELENIUM_MULTIUSER
+          value: 'true'
+        - name: TS_SELENIUM_LOG_LEVEL
+          value: TRACE
+        - name: TS_SELENIUM_OCP_USERNAME
+          value: 'user'
+        - name: TS_SELENIUM_OCP_PASSWORD
+          value: "user"
+        - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
+          value: 'true'
+        - name: TS_SELENIUM_USERNAME
+          value: "admin"
+        - name: TS_SELENIUM_PASSWORD
+          value: 'admin'
+        - name: TS_OCP_LOGIN_PAGE_PROVIDER_TITLE
+          value: "htpasswd"
+        - name: DELETE_WORKSPACE_ON_FAILED_TEST
+          value: "true"
+        - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
+          value: '540000'
+        - name: TS_IDE_LOAD_TIMEOUT
+          value: '40000'
+      volumeMounts:
+        - name: test-run-results
+          mountPath: /tmp/e2e/report/
+        - mountPath: /dev/shm
+          name: dshm
+      resources:
+        requests:
+          memory: "3Gi"
+          cpu: "2"
+        limits:
+          memory: "4Gi"
+          cpu: "2"
+    # Download results    
+    - name: download-reports
+      image: eeacms/rsync
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: test-run-results
+          mountPath: /tmp/e2e/report/
+      command: ["sh"]
+      args:
+        [
+          "-c",
+          "while true; if [[ -f /tmp/done ]]; then exit 0; fi; do sleep 1; done",
+        ]
+  restartPolicy: Never
