@@ -337,7 +337,7 @@ createTestWorkspaceAndRunTest() {
   -e TS_SELENIUM_LOG_LEVEL=TRACE \
   -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
-  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+  quay.io/eclipse/che-e2e:next || IS_TESTS_FAILED=true
 }
 
 function createTestUserAndObtainUserToken() {
@@ -407,7 +407,7 @@ function runDevfileTestSuite() {
   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \
   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
-  quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+  quay.io/eclipse/che-e2e:next || IS_TESTS_FAILED=true
 }
 
 function setupSelfSignedCertificate() {

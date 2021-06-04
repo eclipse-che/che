@@ -34,7 +34,7 @@ function runOpenshiftConnectorTest(){
     -e TS_SELENIUM_LOG_LEVEL=TRACE \
     -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=720000 \
     -e TEST_SUITE=test-openshift-connector \
-     quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+     quay.io/eclipse/che-e2e:next || IS_TESTS_FAILED=true
     
 }
 
