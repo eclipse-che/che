@@ -22,7 +22,6 @@ import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import * as fs from 'fs';
-import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
@@ -37,7 +36,6 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
-const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
 const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const rightToolBar: RightToolBar = e2eContainer.get(CLASSES.RightToolBar);
@@ -135,15 +133,8 @@ suite('Language server validation', async () => {
 
     test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-        try {
-            await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
-            await editor.waitEditorAvailable(codeNavigationClassName);
-        } catch (err) {
-            // workaround for issue: https://github.com/eclipse/che/issues/14520
-            if (err instanceof error.TimeoutError) {
-                checkCodeNavigationWithContextMenu();
-            }
-        }
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
+        await editor.waitEditorAvailable(codeNavigationClassName);
     });
 
     test.skip('Yaml LS initialization', async () => {
@@ -293,12 +284,6 @@ async function checkErrorMessageInApplicationController() {
 
     await driverHelper.getDriver().switchTo().defaultContent();
     await ide.waitAndSwitchToIdeFrame();
-}
-
-async function checkCodeNavigationWithContextMenu() {
-    await contextMenu.invokeContextMenuOnActiveElementWithKeys();
-    await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
-    console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
 }
 
 async function checkJavaPathCompletion() {
