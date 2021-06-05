@@ -153,9 +153,9 @@ export const TimeoutConstants = {
     TS_SELENIUM_TOOLBAR_TIMEOUT: Number(process.env.TS_SELENIUM_TOOLBAR_TIMEOUT) || 30_000,
 
     /**
-     * Timeout for clicking on visible item, "3 000" by default
+     * Timeout for clicking on visible item, "5 000" by default
      */
-    TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: Number(process.env.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) || 3_000,
+    TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: Number(process.env.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) || 5_000,
 
     /**
      * Timeout for OpenDialogWidget class, "5 000" by default

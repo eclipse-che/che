@@ -160,7 +160,7 @@ suite('Language server validation', async () => {
 suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         let buildTaskName: string = 'build-file-output';
-        await topMenu.runTask('build-file-output');
+        await topMenu.runTask(buildTaskName);
         await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
