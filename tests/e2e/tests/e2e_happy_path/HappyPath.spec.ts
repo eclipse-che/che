@@ -134,7 +134,7 @@ suite('Language server validation', async () => {
     test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
-        await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 2);
+        await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 4);
     });
 
     test.skip('Yaml LS initialization', async () => {
