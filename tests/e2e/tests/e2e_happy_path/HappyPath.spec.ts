@@ -239,8 +239,20 @@ suite('Validation of debug functionality', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
-        await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+
+        try {
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+
+            Logger.debug(`Workaround to the https://github.com/eclipse/che/issues/19887`);
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+        }
+
         await debugView.clickOnRunDebugButton();
 
         try {
