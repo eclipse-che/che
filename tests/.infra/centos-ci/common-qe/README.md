@@ -6,7 +6,7 @@
  ```
 #Download and import the "common-qe" functions
 export IS_TESTS_FAILED="false"
-DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/master/tests/.infra/centos-ci/common-qe/downloader.sh
+DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/main/tests/.infra/centos-ci/common-qe/downloader.sh
 curl $DOWNLOADER_URL -o downloader.sh
 chmod u+x downloader.sh
 . ./downloader.sh
@@ -42,7 +42,7 @@ export PATH_TO_CONFIGURATION_FILE=/full/path/to/conf/file/qe-config.conf
 
 #Download and import the "common-qe" functions
 export IS_TESTS_FAILED="false"
-DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/master/tests/.infra/centos-ci/common-qe/downloader.sh
+DOWNLOADER_URL=https://raw.githubusercontent.com/eclipse/che/main/tests/.infra/centos-ci/common-qe/downloader.sh
 curl $DOWNLOADER_URL -o downloader.sh
 chmod u+x downloader.sh
 . ./downloader.sh

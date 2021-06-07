@@ -22,7 +22,6 @@ import { DebugView } from '../../pageobjects/ide/DebugView';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import * as fs from 'fs';
-import { ContextMenu } from '../../pageobjects/ide/ContextMenu';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
@@ -37,7 +36,6 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
-const contextMenu: ContextMenu = e2eContainer.get(CLASSES.ContextMenu);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
 const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const rightToolBar: RightToolBar = e2eContainer.get(CLASSES.RightToolBar);
@@ -135,15 +133,8 @@ suite('Language server validation', async () => {
 
     test('Codenavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-        try {
-            await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
-            await editor.waitEditorAvailable(codeNavigationClassName);
-        } catch (err) {
-            // workaround for issue: https://github.com/eclipse/che/issues/14520
-            if (err instanceof error.TimeoutError) {
-                checkCodeNavigationWithContextMenu();
-            }
-        }
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
+        await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 4);
     });
 
     test.skip('Yaml LS initialization', async () => {
@@ -160,7 +151,7 @@ suite('Language server validation', async () => {
 suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         let buildTaskName: string = 'build-file-output';
-        await topMenu.runTask('build-file-output');
+        await topMenu.runTask(buildTaskName);
         await terminal.waitIconSuccess(buildTaskName, 250_000);
     });
 
@@ -248,8 +239,20 @@ suite('Validation of debug functionality', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
-        await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+
+        try {
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+
+            Logger.debug(`Workaround to the https://github.com/eclipse/che/issues/19887`);
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+        }
+
         await debugView.clickOnRunDebugButton();
 
         try {
@@ -293,12 +296,6 @@ async function checkErrorMessageInApplicationController() {
 
     await driverHelper.getDriver().switchTo().defaultContent();
     await ide.waitAndSwitchToIdeFrame();
-}
-
-async function checkCodeNavigationWithContextMenu() {
-    await contextMenu.invokeContextMenuOnActiveElementWithKeys();
-    await contextMenu.waitContextMenuAndClickOnItem('Go to Definition');
-    console.log('Known isuue https://github.com/eclipse/che/issues/14520.');
 }
 
 async function checkJavaPathCompletion() {

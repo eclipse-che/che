@@ -93,7 +93,7 @@ function runTest() {
     -e TS_SELENIUM_LOAD_PAGE_TIMEOUT="$load_page_timeout" \
     -e TEST_SUITE="$suite" \
     -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
-    $additional_options quay.io/eclipse/che-e2e:nightly || IS_TESTS_FAILED=true
+    $additional_options quay.io/eclipse/che-e2e:next || IS_TESTS_FAILED=true
     
     export IS_TESTS_FAILED
 }

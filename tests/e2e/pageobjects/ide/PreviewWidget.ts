@@ -95,9 +95,6 @@ export class PreviewWidget {
                 return true;
             }
 
-            await this.switchBackToIdeFrame();
-            await this.refreshPage();
-            await this.waitAndSwitchToWidgetFrame();
             await this.driverHelper.wait(polling);
         }, timeout);
     }
