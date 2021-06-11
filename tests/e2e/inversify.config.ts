@@ -65,6 +65,7 @@ import { WorkspaceHandlingTests } from './testsLibrary/WorkspaceHandlingTests';
 import { GitHubPullRequestPlugin } from './pageobjects/ide/plugins/GitHubPullRequestPlugin';
 import { GitLoginPage } from './pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from './pageobjects/third-parties/GitOauthAppsSettings';
+import { AnimationChecker } from './utils/AnimationChecker';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -122,5 +123,6 @@ e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(Wor
 e2eContainer.bind<GitHubPullRequestPlugin>(CLASSES.GitHubPullRequestPlugin).to(GitHubPullRequestPlugin);
 e2eContainer.bind<GitLoginPage>(CLASSES.GitLoginPage).to(GitLoginPage);
 e2eContainer.bind<GitOauthAppsSettings>(CLASSES.GitOauthAppsSettings).to(GitOauthAppsSettings);
+e2eContainer.bind<AnimationChecker>(CLASSES.AnimationChecker).to(AnimationChecker);
 
 export { e2eContainer };

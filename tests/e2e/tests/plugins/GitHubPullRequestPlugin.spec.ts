@@ -9,7 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
@@ -22,6 +22,10 @@ import { GitLoginPage } from '../../pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from '../../pageobjects/third-parties/GitOauthAppsSettings';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { KeycloackUrlHandler } from '../../utils/KeycloackUrlHandler';
+import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
+import { TopMenu } from '../../pageobjects/ide/TopMenu';
+import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
+import { Editor } from '../../pageobjects/ide/Editor';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -30,11 +34,18 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSES.GitHubPullRequestPlugin);
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
 const gitOauthAppsSettings: GitOauthAppsSettings = e2eContainer.get(CLASSES.GitOauthAppsSettings);
+const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
+const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
+const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
+const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
+const branchName: string =  WorkspaceNameHandler.generateWorkspaceName('ghPrPlugin-', 10);
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
+const changedFile: string = 'README.md';
+const currentDate: string = Date.now().toString();
 
 suite(`The 'GitHubPullRequestPlugin' test`, async () => {
     let workspaceName: string = '';
@@ -73,7 +84,22 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
 
             workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-
+        
+        test('Create new branch', async () => {
+            await topMenu.selectOption('View', 'Find Command...');
+            await quickOpenContainer.typeAndSelectSuggestion('branch', 'Git: Create Branch...');
+            await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
+    
+            await projectTree.expandPathAndOpenFile('Spoon-Knife', changedFile);
+            await editor.type(changedFile, currentDate + '\n', 1);
+            await gitPlugin.openGitPluginContainer();
+            await gitPlugin.waitChangedFileInChagesList(changedFile);
+            await gitPlugin.stageAllChanges(changedFile);
+            await gitPlugin.waitChangedFileInChagesList(changedFile);
+            await gitPlugin.typeCommitMessage(`ghPrPlugin-${currentDate}`);
+            await gitPlugin.commitFromCommandMenu();
+        });
+        
         test('Open GH PR plugin', async () => {
             await gitHubPullRequestPlugin.openView();
         });
@@ -89,6 +115,20 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
         test('Check PR plugin connected to PR', async () => {
             await gitHubPullRequestPlugin.expandTreeItem('Created By Me');
             await gitHubPullRequestPlugin.waitTreeItem('[DO NOT MERGE] gh-pr-plugin-test (#3) by @chepullreq4');
+        });
+
+        test('Create PR', async () => {
+            const permissionsNotificationText: string = `wants to sign in using GitHub.`;
+            const buttonText: string = 'Allow';
+
+            await gitHubPullRequestPlugin.createPrFromCommandMenu();
+            await quickOpenContainer.clickOnContainerItem('chepullreq4:Spoon-Knife');
+            await quickOpenContainer.clickOnContainerItem(`Choose target branch for chepullreq4/Spoon-Knife (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
+            await quickOpenContainer.clickOnContainerItem(`The branch '${branchName}' is not published yet, pick a name for the upstream branch (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
+            
+            await ide.waitNotificationAndClickOnButton(permissionsNotificationText, buttonText);
+            await quickOpenContainer.clickOnContainerItem('commit');
+            await gitHubPullRequestPlugin.waitTreeItem(`ghPrPlugin-${currentDate}`)
         });
     });
 
