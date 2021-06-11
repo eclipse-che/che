@@ -63,7 +63,8 @@ const CLASSES = {
     WorkspaceHandlingTests: 'WorkspaceHandlingTests',
     GitHubPullRequestPlugin: 'GitHubPullRequestPlugin',
     GitLoginPage: 'GitLoginPage',
-    GitOauthAppsSettings: 'GitOauthAppsSettings'
+    GitOauthAppsSettings: 'GitOauthAppsSettings',
+    AnimationChecker: 'AnimationChecker'
 };
 
 export { TYPES, CLASSES };

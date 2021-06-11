@@ -187,6 +187,11 @@ export const TimeoutConstants = {
      */
     TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT: Number(process.env.TS_SELENIUM_WAIT_TASK_EXIT_CODE_TIMEOUT) || 300_000,
 
+    /**
+     * Timeout waiting for end of the animation, "5000" by default.
+     */
+    TS_SELENIUM_ANIMATION_END_DELAY: Number(process.env.TS_SELENIUM_ANIMATION_END_DELAY) || 5000,
+
 
     // ------------------------------------ OPENSHIFT RELATED ------------------------------------
 

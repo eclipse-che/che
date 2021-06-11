@@ -5,6 +5,7 @@ import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { QuickOpenContainer } from './QuickOpenContainer';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { AnimationChecker } from '../../utils/AnimationChecker';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -21,7 +22,8 @@ export class TopMenu {
     private static readonly TOP_MENU_BUTTONS: string[] = ['File', 'Edit', 'Selection', 'View', 'Go', 'Run', 'Terminal', 'Help'];
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) { }
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
+        @inject(CLASSES.AnimationChecker) private readonly animationChecker: AnimationChecker) { }
 
     public async waitTopMenu(timeout: number = TimeoutConstants.TS_SELENIUM_TOOLBAR_TIMEOUT) {
         Logger.debug('TopMenu.waitTopMenu');
@@ -52,9 +54,7 @@ export class TopMenu {
 
         const submenuItemLocator: By = this.getSubmenuItemLocator(itemText);
 
-        // to ensure that drop-down animation is over
-        await this.driverHelper.wait(5000);
-
+        await this.animationChecker.waitDropDownAnimationEnd();
         await this.driverHelper.waitAndClick(submenuItemLocator, timeout);
     }
 
