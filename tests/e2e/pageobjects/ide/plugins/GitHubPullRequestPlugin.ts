@@ -7,11 +7,16 @@ import { By, error } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { LeftToolBar } from '../LeftToolBar';
 import { TestConstants } from '../../../TestConstants';
+import { TopMenu } from '../TopMenu';
+import { QuickOpenContainer } from '../QuickOpenContainer';
 
 @injectable()
 export class GitHubPullRequestPlugin {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.LeftToolBar) private readonly leftToolbar: LeftToolBar) { }
+        @inject(CLASSES.LeftToolBar) private readonly leftToolbar: LeftToolBar,
+        @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer
+    ) { }
 
     async openView(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug(`GithubPullRequestPlugin.openView`);
@@ -77,6 +82,13 @@ export class GitHubPullRequestPlugin {
         const signInButtonLocator: By = By.xpath(`//div[@id='pr:github']//button[text()='Sign in']`);
 
         await this.driverHelper.waitAndClick(signInButtonLocator, timeout);
+    }
+
+    async createPrFromCommandMenu() {
+        Logger.debug(`GithubPullRequestPlugin.createPrFromCommandMenu`);
+
+        await this.topMenu.selectOption('View', 'Find Command...');
+        await this.quickOpenContainer.typeAndSelectSuggestion('pull', 'GitHub Pull Requests: Create Pull Request');
     }
 
     private async isTreeItemCollapsed(itemTitle: string): Promise<boolean> {
