@@ -78,8 +78,10 @@ class CheReporter extends mocha.reporters.Spec {
       console.log(launchInformation);
 
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
-      if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'TRACE') {
+      if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
         CheApiRequestHandler.enableRequestInteceptor();
+      }
+      if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
         CheApiRequestHandler.enableResponseInterceptor();
       }
       await preferencesHandler.setConfirmExit(AskForConfirmationType.never);
