@@ -6,6 +6,7 @@ export * from './TimeoutConstants';
 
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
+export * from './utils/AnimationChecker';
 export * from './utils/BrowserTabsUtil';
 export * from './utils/DriverHelper';
 export * from './utils/Logger';
