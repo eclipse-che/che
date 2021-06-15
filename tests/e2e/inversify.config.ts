@@ -66,6 +66,7 @@ import { GitHubPullRequestPlugin } from './pageobjects/ide/plugins/GitHubPullReq
 import { GitLoginPage } from './pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from './pageobjects/third-parties/GitOauthAppsSettings';
 import { AnimationChecker } from './utils/AnimationChecker';
+import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -120,6 +121,7 @@ e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageS
 e2eContainer.bind<CodeExecutionTests>(CLASSES.CodeExecutionTests).to(CodeExecutionTests);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
+e2eContainer.bind<WorkspaceNameHandler>(CLASSES.WorkspaceNameHandler).to(WorkspaceNameHandler);
 e2eContainer.bind<GitHubPullRequestPlugin>(CLASSES.GitHubPullRequestPlugin).to(GitHubPullRequestPlugin);
 e2eContainer.bind<GitLoginPage>(CLASSES.GitLoginPage).to(GitLoginPage);
 e2eContainer.bind<GitOauthAppsSettings>(CLASSES.GitOauthAppsSettings).to(GitOauthAppsSettings);

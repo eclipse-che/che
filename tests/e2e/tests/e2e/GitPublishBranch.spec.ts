@@ -22,8 +22,11 @@ import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { By } from 'selenium-webdriver';
+import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
@@ -32,16 +35,15 @@ const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
+const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
+const wsNameGitPublishBranch = workspaceNameHandler.generateWorkspaceName('checkGitPublishBranch-', 5);
+const changedFile = 'README.md';
+const branchName = workspaceNameHandler.generateWorkspaceName('checkGitPublishBranch', 5);
+const file = `https://github.com/${TestConstants.TS_GITHUB_TEST_REPO}/blob/${branchName}/README.md`;
 
 suite('Publish branch in git extension', async () => {
-    const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-    const wsNameGitPublishBranch = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch-', 5);
-    const changedFile = 'README.md';
-    const branchName = WorkspaceNameHandler.generateWorkspaceName('checkGitPublishBranch', 5);
-    const file = `https://github.com/${TestConstants.TS_GITHUB_TEST_REPO}/blob/${branchName}/README.md`;
-
-
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = wsNameGitPublishBranch;
@@ -49,8 +51,9 @@ suite('Publish branch in git extension', async () => {
     });
 
     test('Login into workspace', async () => {
-        await driverHelper.navigateToUrl(workspacePrefixUrl + wsNameGitPublishBranch);
+        await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameGitPublishBranch);
         await loginPage.login();
+        CheReporter.registerRunningWorkspace(wsNameGitPublishBranch);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(15000);
@@ -79,7 +82,7 @@ suite('Publish branch in git extension', async () => {
         await gitPlugin.waitDataIsSynchronized();
         await testWorkspaceUtils.cleanUpAllWorkspaces();
 
-        await driverHelper.navigateToUrl(file);
+        await browserTabsUtil.navigateTo(file);
         await driverHelper.waitVisibility(By.xpath(readmeFileContentXpath));
     });
 

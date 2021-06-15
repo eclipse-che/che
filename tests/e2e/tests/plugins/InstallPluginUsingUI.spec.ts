@@ -19,6 +19,7 @@ import { PluginsView } from '../../pageobjects/ide/plugins/PluginsView';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import CheReporter from '../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -26,26 +27,28 @@ const pluginsView: PluginsView = e2eContainer.get(CLASSES.PluginsView);
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandling: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/InstallPluginUsingUI.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 
 const pluginTitle: string = 'java11';
+let workspaceName: string;
 
 suite(`The 'InstallPluginUsingUI' test`, async () => {
-    let workspaceName: string = '';
-
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await projectTree.openProjectTreeContainer();
 
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            await projectTree.openProjectTreeContainer();
         });
     });
 

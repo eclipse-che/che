@@ -10,12 +10,15 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../..';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { TestConstants } from '../../TestConstants';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
@@ -26,11 +29,15 @@ suite('Workspace creation via factory url', async () => {
 
     suite('Open factory URL', async () => {
         test(`Navigating to factory URL`, async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
     });
 
     suite('Wait workspace readiness', async () => {
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(await workspaceNameHandler.getNameFromUrl());
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 

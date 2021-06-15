@@ -9,14 +9,13 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { GitHubPullRequestPlugin } from '../../pageobjects/ide/plugins/GitHubPullRequestPlugin';
 import { GitLoginPage } from '../../pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from '../../pageobjects/third-parties/GitOauthAppsSettings';
@@ -26,11 +25,13 @@ import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
+import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const workspaceHandling: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSES.GitHubPullRequestPlugin);
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
 const gitOauthAppsSettings: GitOauthAppsSettings = e2eContainer.get(CLASSES.GitOauthAppsSettings);
@@ -38,18 +39,18 @@ const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-const branchName: string =  WorkspaceNameHandler.generateWorkspaceName('ghPrPlugin-', 10);
+const branchName: string =  workspaceNameHandler.generateWorkspaceName('ghPrPlugin-', 10);
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
 const changedFile: string = 'README.md';
 const currentDate: string = Date.now().toString();
+let workspaceName: string;
 
 suite(`The 'GitHubPullRequestPlugin' test`, async () => {
-    let workspaceName: string = '';
-
     suite('Setup github', async () => {
         test('Login to github', async () => {
             await gitOauthAppsSettings.openPage();
@@ -71,25 +72,26 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
 
     suite('Check the GH PR plugin', async () => {
         test('Create workspace using factory', async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 
             await gitHubPullRequestPlugin.waitViewIcon();
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, 'README.md');
-
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
-        
+
         test('Create new branch', async () => {
             await topMenu.selectOption('View', 'Find Command...');
             await quickOpenContainer.typeAndSelectSuggestion('branch', 'Git: Create Branch...');
             await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
-    
+
             await projectTree.expandPathAndOpenFile('Spoon-Knife', changedFile);
             await editor.type(changedFile, currentDate + '\n', 1);
             await gitPlugin.openGitPluginContainer();
@@ -99,7 +101,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitPlugin.typeCommitMessage(`ghPrPlugin-${currentDate}`);
             await gitPlugin.commitFromCommandMenu();
         });
-        
+
         test('Open GH PR plugin', async () => {
             await gitHubPullRequestPlugin.openView();
         });
@@ -125,10 +127,10 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await quickOpenContainer.clickOnContainerItem('chepullreq4:Spoon-Knife');
             await quickOpenContainer.clickOnContainerItem(`Choose target branch for chepullreq4/Spoon-Knife (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
             await quickOpenContainer.clickOnContainerItem(`The branch '${branchName}' is not published yet, pick a name for the upstream branch (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
-            
+
             await ide.waitNotificationAndClickOnButton(permissionsNotificationText, buttonText);
             await quickOpenContainer.clickOnContainerItem('commit');
-            await gitHubPullRequestPlugin.waitTreeItem(`ghPrPlugin-${currentDate}`)
+            await gitHubPullRequestPlugin.waitTreeItem(`ghPrPlugin-${currentDate}`);
         });
     });
 

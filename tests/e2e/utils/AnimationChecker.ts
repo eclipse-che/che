@@ -18,8 +18,8 @@ import { TimeoutConstants } from '../TimeoutConstants';
 export class AnimationChecker {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitDropDownAnimationEnd(){
-        Logger.debug('AnimationChecker.waitDropDownAnimationEnd')
+    async waitDropDownAnimationEnd() {
+        Logger.debug('AnimationChecker.waitDropDownAnimationEnd');
 
         await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_ANIMATION_END_DELAY);
     }

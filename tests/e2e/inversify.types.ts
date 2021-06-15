@@ -16,8 +16,6 @@ const TYPES = {
     WorkspaceUtil: Symbol.for('WorkspaceUtil'),
     IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
     ITokenHandler: Symbol.for('ITokenHandler')
-
-
 };
 
 const CLASSES = {
@@ -61,6 +59,7 @@ const CLASSES = {
     CodeExecutionTests: 'CodeExecutionTests',
     ProjectAndFileTests: 'ProjectAndFileTests',
     WorkspaceHandlingTests: 'WorkspaceHandlingTests',
+    WorkspaceNameHandler: 'WorkspaceNameHandler',
     GitHubPullRequestPlugin: 'GitHubPullRequestPlugin',
     GitLoginPage: 'GitLoginPage',
     GitOauthAppsSettings: 'GitOauthAppsSettings',
