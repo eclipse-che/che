@@ -63,6 +63,7 @@ import { LanguageServerTests } from './testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from './testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from './testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from './testsLibrary/WorkspaceHandlingTests';
+import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -122,5 +123,6 @@ e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageS
 e2eContainer.bind<CodeExecutionTests>(CLASSES.CodeExecutionTests).to(CodeExecutionTests);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
+e2eContainer.bind<WorkspaceNameHandler>(CLASSES.WorkspaceNameHandler).to(WorkspaceNameHandler);
 
 export { e2eContainer };

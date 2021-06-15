@@ -8,12 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -27,10 +28,17 @@ const tabTitle: string = 'HelloWorld.java';
 const codeNavigationClassName: string = 'String.class';
 const stack : string = 'Java Maven';
 const taskName: string = 'maven build';
+let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
+
+        test('Register running workspace', async () => {
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
+        });
+
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
@@ -51,12 +59,7 @@ suite(`${stack} test`, async () => {
         commonLanguageServerTests.goToImplementations(tabTitle, 9, 10, codeNavigationClassName, 30_000); // extended timout to give LS enough time to start
     });
 
-    suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
+    suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

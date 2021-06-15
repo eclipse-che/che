@@ -10,44 +10,45 @@
 
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Terminal } from '../../pageobjects/ide/Terminal';
-
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
-
-let workspaceName: string = '';
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/master/tests/e2e/files/devfiles/plugins/VscodeValePlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'che-docs';
 const pathToFile: string = `${projectName}/modules/administration-guide/partials`;
 const docFileName: string = 'assembly_authenticating-users.adoc';
+let workspaceName: string = '';
 
 suite('The "VscodeValePlugin" userstory', async () => {
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
+
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
         });
     });
 
@@ -75,9 +76,9 @@ suite('The "VscodeValePlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
-        test('Delete workspace', async () => {
-            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+    suite('Stopping and deleting the workspace', async () => {
+        test(`Stop and remowe workspace`, async () => {
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
     });
 });

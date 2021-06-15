@@ -16,8 +16,6 @@ const TYPES = {
     WorkspaceUtil: Symbol.for('WorkspaceUtil'),
     IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
     ITokenHandler: Symbol.for('ITokenHandler')
-
-
 };
 
 const CLASSES = {
@@ -59,7 +57,8 @@ const CLASSES = {
     LanguageServerTests: 'LanguageServerTests',
     CodeExecutionTests: 'CodeExecutionTests',
     ProjectAndFileTests: 'ProjectAndFileTests',
-    WorkspaceHandlingTests: 'WorkspaceHandlingTests'
+    WorkspaceHandlingTests: 'WorkspaceHandlingTests',
+    WorkspaceNameHandler: 'WorkspaceNameHandler'
 };
 
 export { TYPES, CLASSES };

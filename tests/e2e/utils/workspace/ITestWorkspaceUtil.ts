@@ -13,11 +13,12 @@ import { che } from '@eclipse-che/api';
 
 export interface ITestWorkspaceUtil {
     cleanUpAllWorkspaces() : void;
+    cleanUpRunningWorkspace(workspaceName: string) : void;
     waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) : void;
     waitPluginAdding(namespace: string, workspaceName: string, pluginId: string) : void;
     removeWorkspaceById(id: string) : void;
     stopWorkspaceById(id: string) : void;
-    getIdOfRunningWorkspace(namespace: string): Promise<string>;
+    getIdOfRunningWorkspace(workspaceName: string): Promise<string>;
     getIdOfRunningWorkspaces(): Promise<Array<string>>;
     createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile): void;
     getBaseDevfile(): Promise<che.workspace.devfile.Devfile>;
