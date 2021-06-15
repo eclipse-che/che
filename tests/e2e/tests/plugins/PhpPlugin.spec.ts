@@ -31,6 +31,7 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/PhpPluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -39,6 +40,7 @@ const subRootFolder: string = 'README.md';
 
 const fileFolderPath: string = `${projectName}`;
 const tabTitle: string = 'index.php';
+let workspaceName: string;
 
 suite(`The 'PhpPlugin' tests`, async () => {
     suite('Create workspace', async () => {
@@ -47,7 +49,8 @@ suite(`The 'PhpPlugin' tests`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
 
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
@@ -101,7 +104,6 @@ suite(`The 'PhpPlugin' tests`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                let workspaceName = await WorkspaceNameHandler.getNameFromUrl();
                 await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
                 return;
             }

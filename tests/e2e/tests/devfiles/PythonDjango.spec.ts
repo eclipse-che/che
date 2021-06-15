@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
@@ -28,6 +28,7 @@ const taskInstallDependencies: string = 'install dependencies';
 const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
 const taskExpectedDialogText: string = 'Process django is now listening on port 7000. Open it ?';
+let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -35,7 +36,8 @@ suite(`${workspaceStack} test`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -61,11 +63,6 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

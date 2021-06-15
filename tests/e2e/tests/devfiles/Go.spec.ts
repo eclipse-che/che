@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import { e2eContainer } from  '../../inversify.config';
 import 'reflect-metadata';
 import { Logger } from '../../utils/Logger';
@@ -34,6 +34,7 @@ const taskRunServer: string = '1.1 Run outyet';
 const taskStopServer: string = '1.2 Stop outyet';
 const taskTestOutyet: string = '1.3 Test outyet';
 const notificationText: string = 'Process 8080-tcp is now listening on port 8080. Open it ?';
+let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -45,7 +46,8 @@ suite(`${workspaceStack} test`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -74,11 +76,6 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Stop and remove workspace', async() => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

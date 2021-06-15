@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
@@ -27,6 +27,7 @@ const workspaceSampleName: string = 'python-hello-world';
 const taskRunName: string = 'run';
 const fileFolderPath: string = `${workspaceSampleName}`;
 const fileName: string = `hello-world.py`;
+let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
@@ -34,7 +35,8 @@ suite(`${workspaceStack} test`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
@@ -58,11 +60,6 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

@@ -215,12 +215,12 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         Logger.debug(`TestWorkspaceUtil.cleanUpRunningWorkspace ${workspaceName}`);
         const workspaceID: string = await this.getIdOfRunningWorkspace(workspaceName);
-        
+
         if (workspaceID === undefined || workspaceID.length === 0) {
           Logger.error(`Could nod delete workspace with name ${workspaceName} because workspaceID is undefined or empty`);
           return;
         }
-        
+
         Logger.trace(`TestWorkspaceUtil.cleanUpRunningWorkspace Stopping workspace:${workspaceName} with ID:${workspaceID}`);
         await this.stopWorkspaceById(workspaceID);
         Logger.trace(`TestWorkspaceUtil.cleanUpRunningWorkspace Deleting workspace ${workspaceName}`);

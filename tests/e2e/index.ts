@@ -9,6 +9,7 @@ export * from './driver/IDriver';
 export * from './utils/AnimationChecker';
 export * from './utils/BrowserTabsUtil';
 export * from './utils/DriverHelper';
+export * from './utils/IWorkspaceNameHandler';
 export * from './utils/KeycloackUrlHandler';
 export * from './utils/Logger';
 export * from './utils/PreferencesHandler';

@@ -9,7 +9,8 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
-import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { CLASSES } from '../../inversify.types';
+import { Editor } from '../../pageobjects/ide/Editor';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
@@ -29,13 +30,15 @@ const tabTitle: string = 'index.php';
 const depTaskName: string = 'Configure Apache Web Server DocumentRoot';
 const buildTaskName: string = 'Start Apache Web Server';
 const stack: string = 'PHP Simple';
+let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
@@ -63,11 +66,6 @@ suite(`${stack} test`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

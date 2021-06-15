@@ -9,7 +9,6 @@
  **********************************************************************/
 import { WorkspaceNameHandler } from '../..';
 import 'reflect-metadata';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
@@ -22,13 +21,15 @@ import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/Java11PluginTest.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -38,15 +39,17 @@ const subRootFolder: string = 'src';
 
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
+let workspaceName: string;
 
 suite(`The 'JavaPlugin' test`, async () => {
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
 
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
@@ -93,7 +96,6 @@ suite(`The 'JavaPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                let workspaceName = await WorkspaceNameHandler.getNameFromUrl();
                 await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
                 return;
             }

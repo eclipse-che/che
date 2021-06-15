@@ -37,7 +37,7 @@ class CheReporter extends mocha.reporters.Spec {
   private static latestWorkspace: string;
 
   public static registerRunningWorkspace(workspaceName: string) {
-    Logger.debug(`CheReporter.registerRunningWorkspace ${workspaceName}`);
+    Logger.debug(`CheReporter.registerRunningWorkspace {${workspaceName}}`);
     CheReporter.latestWorkspace = workspaceName;
   }
 

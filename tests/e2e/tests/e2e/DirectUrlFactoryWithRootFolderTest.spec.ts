@@ -11,34 +11,39 @@
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { WorkspaceNameHandler } from '../..';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
+
+const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://github.com/che-samples/console-java-simple`;
+const workspaceSampleName: string = 'console-java-simple';
+const workspaceRootFolderName: string = 'src';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
+const tabTitle: string = 'HelloWorld.java';
+let workspaceName: string;
 
 // the suite expect user to be logged in
 suite('Workspace creation via factory url', async () => {
-
-    let factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://github.com/che-samples/console-java-simple`;
-    const workspaceSampleName: string = 'console-java-simple';
-    const workspaceRootFolderName: string = 'src';
-    const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
-    const tabTitle: string = 'HelloWorld.java';
-
     suite('Open factory URL', async () => {
         test(`Navigating to factory URL`, async () => {
-            await driverHelper.navigateToUrl(factoryUrl);
+            await browserTabsUtil.navigateTo(factoryUrl);
         });
     });
 
     suite('Wait workspace readyness', async () => {
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            await dashboard.waitWorkspaceStartingPage();
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -51,10 +56,6 @@ suite('Workspace creation via factory url', async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup( async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
         test (`Stop workspace`, async () => {
             await workspaceHandlingTests.stopWorkspace(workspaceName);
         });

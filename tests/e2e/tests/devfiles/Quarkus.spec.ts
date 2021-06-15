@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
@@ -30,13 +30,15 @@ const fileName: string = `GreetingService.java`;
 const taskPackage: string = 'Package';
 const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
+let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -70,11 +72,6 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Stop and remove workspace', async() => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

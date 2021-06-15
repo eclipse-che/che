@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { CLASSES, WorkspaceNameHandler } from '../..';
+import { CLASSES } from '../../inversify.types';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
@@ -30,13 +30,15 @@ const codeNavigationClassName: string = 'SpringApplication.class';
 const buildTaskName: string = 'maven build';
 const runTaskName: string = 'run webapp';
 const runTaskExpectedDialogue: string = 'Process 8080-tcp is now listening on port 8080. Open it ?';
+let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite(`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
@@ -65,11 +67,6 @@ suite(`${stack} test`, async () => {
     });
 
     suite('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });

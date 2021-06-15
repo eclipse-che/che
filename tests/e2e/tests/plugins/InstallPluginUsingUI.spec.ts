@@ -27,22 +27,22 @@ const pluginsView: PluginsView = e2eContainer.get(CLASSES.PluginsView);
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandling: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/InstallPluginUsingUI.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 
 const pluginTitle: string = 'java11';
+let workspaceName: string;
 
 suite(`The 'InstallPluginUsingUI' test`, async () => {
-    let workspaceName: string = '';
-
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
         test('Wait until created workspace is started', async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
+            workspaceName = await workspaceNameHandler.getNameFromUrl();
             CheReporter.registerRunningWorkspace(workspaceName);
 
             await ide.waitAndSwitchToIdeFrame();

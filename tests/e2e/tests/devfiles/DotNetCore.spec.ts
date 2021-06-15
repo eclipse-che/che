@@ -8,8 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { WorkspaceNameHandler, Editor, CLASSES } from '../..';
+import { CLASSES } from '../../inversify.types';
 import { e2eContainer } from '../../inversify.config';
+import { Editor } from '../../pageobjects/ide/Editor';
 import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
@@ -31,13 +32,15 @@ const updateDependenciesTaskName: string = 'update dependencies';
 const buildTaskName: string = 'build';
 const runTaskName: string = 'run';
 const runTaskNameExpectedString: string = 'Process 5000-tcp is now listening on port 5000. Open it ?';
+let workspaceName: string;
 
 suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(await WorkspaceNameHandler.getNameFromUrl());
+            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+            CheReporter.registerRunningWorkspace(workspaceName);
         });
 
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
@@ -71,11 +74,6 @@ suite(`Test ${stack}`, async () => {
     });
 
     suite ('Stopping and deleting the workspace', async () => {
-        let workspaceName = 'not defined';
-        suiteSetup(async () => {
-            workspaceName = await WorkspaceNameHandler.getNameFromUrl();
-        });
-
         test(`Stop and remowe workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
         });
