@@ -8,17 +8,21 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { DriverHelper } from './DriverHelper';
-import { e2eContainer } from '../inversify.config';
 import { CLASSES } from '../inversify.types';
-let driverHelper : DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+import { inject, injectable } from 'inversify';
+import { BrowserTabsUtil } from './BrowserTabsUtil';
+import { Logger } from './Logger';
 
+@injectable()
 export class WorkspaceNameHandler {
 
-    public static generateWorkspaceName(prefix: string, randomLength: number): string {
+    constructor(@inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
+
+    public generateWorkspaceName(prefix: string, randomLength: number): string {
         const possibleCharacters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         const possibleCharactersLength: number = possibleCharacters.length;
         let randomPart: string = '';
+        Logger.debug('WorkspaceNameHandler.generateWorkspaceName');
 
         for (let i = 0; i < randomLength; i++) {
             let currentRandomIndex: number = Math.floor(Math.random() * Math.floor(possibleCharactersLength));
@@ -29,12 +33,16 @@ export class WorkspaceNameHandler {
         return prefix + randomPart;
     }
 
-    public static async getNameFromUrl() : Promise<string> {
-        let url : string = await driverHelper.getCurrentUrl();
-        url = url.split('?')[0];
-        let splittedUrl = url.split(`/`);
-        let wsname : string = splittedUrl[splittedUrl.length - 1];
-        return wsname;
-    }
+    public async getNameFromUrl(): Promise<string> {
+        let workspaceUrl: string = await this.browserTabsUtil.getCurrentUrl();
+        Logger.debug(`WorkspaceNameHandler.fromWorkspaceUrl  workspaceUrl: ${workspaceUrl}`);
 
+        const workspaceUrlParts: string[] = workspaceUrl.split('/');
+        const workspaceNameQueryString: string = workspaceUrlParts[workspaceUrlParts.length - 1];
+        const workspaceName: string = workspaceNameQueryString.split('?')[0];
+
+        Logger.debug(`workspaceName: ${workspaceName}`);
+
+        return workspaceName;
+    }
 }

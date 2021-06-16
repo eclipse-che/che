@@ -28,6 +28,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { By } from 'selenium-webdriver';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -42,14 +43,14 @@ const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
+const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
+const wsNameCheckGeneratingKeys = 'checkGeneratingSsh';
+const wsNameCheckPropagatingKeys = 'checkPropagatingSsh';
+const committedFile = 'README.md';
 
 suite('Git with ssh workflow', async () => {
-    const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-    const wsNameCheckGeneratingKeys = 'checkGeneratingSsh';
-    const wsNameCheckPropagatingKeys = 'checkPropagatingSsh';
-    const committedFile = 'README.md';
-
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
@@ -62,6 +63,7 @@ suite('Git with ssh workflow', async () => {
         await dashboard.openDashboard();
         await dashboard.waitPage();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
+        CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
@@ -76,7 +78,7 @@ suite('Git with ssh workflow', async () => {
     });
 
     test('Add a SSH key to GitHub side and clone by ssh link', async () => {
-        const sshName: string = WorkspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
+        const sshName: string = workspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
         const publicSshKey = await cheGitAPI.getPublicSSHKey();
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
@@ -114,6 +116,7 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         await dashboard.openDashboard();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckPropagatingKeys);
+        CheReporter.registerRunningWorkspace(wsNameCheckPropagatingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);

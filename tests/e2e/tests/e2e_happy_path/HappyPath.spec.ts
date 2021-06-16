@@ -29,9 +29,12 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import CheReporter from '../../driver/CheReporter';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
@@ -72,6 +75,10 @@ suite('Validation of workspace start', async () => {
         await dashboard.clickWorkspacesButton();
         await workspaces.waitPage();
         await workspaces.clickOpenButton(workspaceName);
+    });
+
+    test('Register running workspace', async () => {
+        CheReporter.registerRunningWorkspace(workspaceName);
     });
 
     projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
@@ -115,7 +122,7 @@ suite('Language server validation', async () => {
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
-            await driverHelper.reloadPage();
+            await browserTabsUtil.refreshPage();
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde();
             await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);

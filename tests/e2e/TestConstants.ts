@@ -181,6 +181,16 @@ export const TestConstants = {
     TS_SELENIUM_LOG_LEVEL: process.env.TS_SELENIUM_LOG_LEVEL || 'INFO',
 
     /**
+     * Enable Axios request interceptor, false by default
+     */
+    TS_SELENIUM_REQUEST_INTERCEPTOR: process.env.TS_SELENIUM_REQUEST_INTERCEPTOR === 'true',
+
+    /**
+     * Enable Axios response interceptor, false by default
+     */
+     TS_SELENIUM_RESPONSE_INTERCEPTOR: process.env.TS_SELENIUM_RESPONSE_INTERCEPTOR === 'true',
+
+    /**
      * Running test suite - possible variants can be found in package.json scripts part.
      */
     TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path',

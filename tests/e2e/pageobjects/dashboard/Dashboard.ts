@@ -22,6 +22,7 @@ export class Dashboard {
     private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`;
     private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
+    private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
@@ -109,6 +110,12 @@ export class Dashboard {
         Logger.debug('Dashboard.waitDisappearanceNavigationMenu');
 
         await this.driverHelper.waitDisappearance(By.id('chenavmenu'), timeout);
+    }
+
+    async waitWorkspaceStartingPage(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+        Logger.debug(`Dashboard.waitWorkspaceStartingPage`);
+
+        await this.driverHelper.waitPresence(By.css(Dashboard.WORKSPACE_STARTING_PAGE_CSS), timeout);
     }
 
 }
