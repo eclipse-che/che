@@ -23,7 +23,7 @@ Repository | Component | Description | Devfile | Documentation
 [che-theia](https://github.com/eclipse-che/che-theia) | | Theia IDE integrated in Che. | [devfile](https://github.com/eclipse-che/che-theia/blob/main/devfiles/che-theia-all.devfile.yaml) | [doc](https://github.com/eclipse-che/che-theia/blob/main/CONTRIBUTING.md)
 ---| [generator](https://github.com/eclipse-che/che-theia/tree/main/generator) | `che:theia init` CLI to prepare and build che-theia | | |
 [chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
-[dashboard](https://github.com/eclipse-che/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
+[dashboard](https://github.com/eclipse-che/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-dashboard/blob/main/CONTRIBUTING.md)
 [devfile-registry](https://github.com/eclipse-che/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 
 [docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
 [machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md)
@@ -86,78 +86,7 @@ or `https://<CheInstance>/f?url=https://raw.githubusercontent.com/eclipse/che-th
 
 ## Contribute to ...
 
-Let's cover the developer flow for theses projects:
-
-### Dashboard
-
-Dashboard source code is located in [https://github.com/eclipse-che/che-dashboard](https://github.com/eclipse-che/che-dashboard) repository.
-It is an AngularJS application. Here is the developer workflow if you want to contribute to it:
-
-#### Devfile for dashboard development
-
-The devfile: [https://github.com/eclipse-che/che-dashboard/blob/master/devfile.yaml](https://github.com/eclipse-che/che-dashboard/blob/master/devfile.yaml)
-
-In this section, we show how to setup a Che environment to work on the Che dashboard, and how to use it.
-For the whole workflows, we will need a workspace with such containers:
-
-- Dashboard Dev container (a.k.a dash-dev): Dashdev is a all in one container for running commands such as build, test or start the dashboard server.
-
-All containers have `/projects` folder mounted, which is shared among them.
-
-Developer workflow:
-
-1. Start the workspace with the devfile, it is cloning Che repo.
-2. Build
-3. Code ...
-4. Run unit test
-5. Start dashboard server and preview
-
-#### Step 1: Start the workspace with the devfile, it is cloning Che repo.
-
-In this section we are going to start a new workspace to work on che-theia. The new workspace will have few projects cloned: `theia` and `che-theia`. It will also setup the containers and commands in the `My workspace` view. We will use these commands in the next steps.
-
-The devfile could be started using `chectl`:
-
-```bash
-$ chectl workspace:start -f https://raw.githubusercontent.com/eclipse-che/che-dashboard/master/devfile.yaml
-```
-
-#### Step 2: Build
-
-In this section we are going to build the dashboard project.
-
-You can use the Che command `dashboard_build` (command pallette > Run task > … or containers view)
-Basically, this command will run
-
-```bash
-# [dash-dev]
-$ yarn
-```
-
-#### Step 3: Code ...
-
-#### Step 4: Run unit test (optional)
-
-In this step, we will run the Dashboard unit tests:
-
-You can use the Che command `dashboard_test` (command pallette > Run task > … or containers view)
-Basically, this command will run
-
-```bash
-# [dash-dev]
-$ yarn test
-```
-
-#### Step 5: Start dashboard server and preview
-
-In this step, we will run the dashboard server and see the live reloadable preview.
-
-You can use the Che command `dashboard_dev_server` (command pallette > Run task > … or containers view)
-
-```bash
-# [dashboard_dev_server]
-$ node_modules/.bin/gulp serve --server=<che_api_url>
-```
+Let's cover the developer flow for these projects:
 
 ### Che server
 There is a [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) for development of Che server in Che.
