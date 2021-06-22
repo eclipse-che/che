@@ -269,15 +269,15 @@ export class ProjectTree {
 
     async waitProjectImportedNoSubfolder(projectName: string,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
-        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 90) {
+        visibilityItemPolling: number = TimeoutConstants.TS_IMPORT_PROJECT_DEFAULT_POLLING,
+        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 60) {
 
         Logger.debug(`ProjectTree.waitProjectImportedNoSubfolder "${projectName}"`);
 
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`${projectName}`));
 
         for (let i = 0; i < attempts; i++) {
-            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 1, visibilityItemPolling);
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 5, visibilityItemPolling / 5);
 
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImportedNoSubfolder project not located, reloading page.`);
