@@ -109,6 +109,16 @@ export class CodeExecutionTests {
         });
     }
 
+    public runTaskWithNotificationAndOpenLinkPreviewNoUrl(taskName: string, notificationText: string, timeout: number) {
+        test(`Run command '${taskName}' expecting notification`, async () => {
+            await this.topMenu.runTask(taskName);
+            await this.ide.waitNotification(notificationText, timeout);
+            await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
+            await this.previewWidget.waitAndSwitchToWidgetFrame();
+            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
+        });
+    }
+
     public runTaskWithNotificationAndOpenLinkUnexposedPort(taskName: string, notificationText: string, portOpenText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification with unexposed port`, async () => {
             await this.topMenu.runTask(taskName);
