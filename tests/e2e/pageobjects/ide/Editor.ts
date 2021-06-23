@@ -398,10 +398,8 @@ export class Editor {
             `//parent::div[contains(@style, 'position')]`);
         let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style', TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
 
-        elementStyleValue = elementStyleValue.replace('position: absolute; top: ', '');
-        elementStyleValue = elementStyleValue.replace('px; width: 100%; height: 19px;', '');
-
-        const lineYCoordinate: number = Number.parseInt(elementStyleValue, 10);
+        Logger.trace(`Editor.getLineYCoordinates style string:${elementStyleValue}`);
+        const lineYCoordinate: number = Number.parseInt(elementStyleValue.split('top:')[1].split('px')[0], 10);
 
         if (Number.isNaN(lineYCoordinate)) {
             throw new error.UnsupportedOperationError(`Failed to parse the ${elementStyleValue} row to number format`);
