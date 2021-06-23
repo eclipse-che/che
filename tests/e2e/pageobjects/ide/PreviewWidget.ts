@@ -29,6 +29,12 @@ export class PreviewWidget {
         await this.driverHelper.waitAttributeValue(PreviewWidget.WIDGET_URL_LOCATOR, 'value', expectedUrl, timeout);
     }
 
+    async getUrl(timeout: number = TimeoutConstants.TS_WAIT_URL_TIMEOUT): Promise<string> {
+        Logger.debug(`PreviewWidget.getUrl`);
+
+        return await this.driverHelper.waitAndGetElementAttribute(PreviewWidget.WIDGET_URL_LOCATOR, 'value', timeout);
+    }
+
     async typeUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`PreviewWidget.typeUrl ${url}`);
 
