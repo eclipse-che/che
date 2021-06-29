@@ -13,6 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { TestConstants } from '../../TestConstants';
 
 @injectable()
 export class Terminal {
@@ -178,6 +179,7 @@ export class Terminal {
                 Logger.error('Task "' + taskName + '" failed.');
                 throw new Error('Task "' + taskName + '" failed.');
             }
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5);
             return false;
         }, timeout, 'Timed out waiting for task ' + taskName + ' to succeed.');
     }
