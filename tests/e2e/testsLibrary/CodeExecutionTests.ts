@@ -104,8 +104,8 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.topMenu.runTask(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            CodeExecutionTests.lastApplicationUrl = await this.ide.getApplicationUrlFromNotification(notificationText, timeout);
             await this.ide.clickOnNotificationButton(notificationText, buttonText);
+            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });
     }
 
@@ -114,7 +114,6 @@ export class CodeExecutionTests {
             await this.topMenu.runTask(taskName);
             await this.ide.waitNotification(notificationText, timeout);
             await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
-            await this.previewWidget.waitAndSwitchToWidgetFrame();
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });
     }
@@ -123,8 +122,8 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification with unexposed port`, async () => {
             await this.topMenu.runTask(taskName);
             await this.ide.waitNotificationAndConfirm(notificationText, timeout);
-            CodeExecutionTests.lastApplicationUrl = await this.ide.getApplicationUrlFromNotification(portOpenText, timeout);
             await this.ide.waitNotificationAndOpenLink(portOpenText, timeout);
+            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });
     }
 
