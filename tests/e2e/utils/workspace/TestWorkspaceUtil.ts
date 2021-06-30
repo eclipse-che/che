@@ -172,13 +172,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}/runtime`);
             throw err;
         }
-            
+
         // if workspace is already stopped, it will return 409: "Conflict"
         if (stopWorkspaceResponse.status === 409) {
             Logger.warn(`TestWorkspaceUtil.stopWorkspaceById Workspace {${id}} is already STOPPED`);
             return;
         }
-        
+
         // response code 204: "No Content" expected
         if (stopWorkspaceResponse.status !== 204) {
             throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
@@ -194,7 +194,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             }
             await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
         }
-        
+
         if (!stopped) {
             let waitTime = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS * TestConstants.TS_SELENIUM_DEFAULT_POLLING;
             throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${wsStatus.data.status}`);
