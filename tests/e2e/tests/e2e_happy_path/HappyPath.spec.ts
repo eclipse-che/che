@@ -253,13 +253,9 @@ suite('Validation of debug functionality', async () => {
                 throw err;
             }
 
-            Logger.debug(`Workaround to the https://github.com/eclipse/che/issues/19887`);
-            await browserTabsUtil.refreshPage();
-            await ide.waitAndSwitchToIdeFrame();
-            await ide.waitIde();
-            
+            Logger.debug(`Workaround to the https://github.com/eclipse/che/issues/20046`);
             await debugView.clickOnDebugConfigurationDropDown();
-            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (petclinic)');
+            await debugView.clickOnDebugConfigurationItem('Add Configuration...');
         }
 
         await debugView.clickOnRunDebugButton();
