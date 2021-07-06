@@ -15,12 +15,14 @@ import { By, Key, WebElement, error } from 'selenium-webdriver';
 import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { AnimationChecker } from '../../utils/AnimationChecker';
 
 
 @injectable()
 export class DebugView {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) { }
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.AnimationChecker) private readonly animationChecker: AnimationChecker) { }
 
     async clickOnDebugConfigurationDropDown() {
         Logger.debug('DebugView.clickOnDebugConfigurationDropDown');
@@ -28,12 +30,13 @@ export class DebugView {
         await this.driverHelper.waitAndClick(By.css('select.debug-configuration'));
     }
 
-    async clickOnDebugConfigurationItem(itemText: string) {
+    async clickOnDebugConfigurationItem(itemText: string, timeout: number = TimeoutConstants.TS_DEBUGGER_CONFIGURATION_VISIBILITY_TIMEOUT) {
         Logger.debug(`DebugView.clickOnDebugConfigurationItem "${itemText}"`);
 
         const configurationItemLocator: By = By.xpath(`//select[contains(@class,'debug-configuration')]//option[text()=\'${itemText}\']`);
 
-        await this.driverHelper.waitAndClick(configurationItemLocator);
+        await this.animationChecker.waitDropDownAnimationEnd();
+        await this.driverHelper.waitAndClick(configurationItemLocator, timeout);
         await this.ide.performKeyCombination(Key.ESCAPE);
     }
 
