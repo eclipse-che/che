@@ -24,13 +24,13 @@ components:
     memoryLimit: 512Mi
     type: dockerimage
     alias: nodejs
-    image: 'quay.io/eclipse/che-nodejs10-ubi:nightly'
+    image: 'quay.io/eclipse/che-nodejs10-ubi:next'
 commands:
   - name: run the web app (debugging enabled)
     actions:
       - workdir: '${CHE_PROJECTS_ROOT}/nodejs-web-app/app'
         type: exec
-        command: npm install && nodemon --inspect app.js
+        command: npm install && nodemon app.js
         component: nodejs
   - name: Attach remote debugger
     actions:

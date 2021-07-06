@@ -15,7 +15,7 @@ import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { Key, By } from 'selenium-webdriver';
+import { Key, By, error } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { DebugView } from '../../pageobjects/ide/DebugView';
@@ -68,7 +68,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         });
     });
 
-    suite('The Typescript plugin test', async () => {
+    suite.skip('The Typescript plugin test', async () => {
         test('Open file', async () => {
             await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
             await editor.selectTab(tabTitle);
@@ -134,6 +134,10 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await topMenu.selectOption('View', 'Debug');
             await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
             await debugView.clickOnDebugConfigurationDropDown();
+
+            // workaround for the issue: https://github.com/eclipse/che/issues/20067
+            await debugView.clickOnDebugConfigurationItem('Add Configuration...');
+            
             await debugView.clickOnDebugConfigurationItem('Attach to Remote (nodejs-web-app)');
             await debugView.clickOnRunDebugButton();
         });

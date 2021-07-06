@@ -133,6 +133,11 @@ export const TimeoutConstants = {
     TS_DEBUGGER_CONNECTION_TIMEOUT: Number(process.env.TS_DEBUGGER_CONNECTION_TIMEOUT) || 60_000,
 
     /**
+     * Timeout for waiting visibility of the debug configuration.
+     */
+    TS_DEBUGGER_CONFIGURATION_VISIBILITY_TIMEOUT: Number(process.env.TS_DEBUGGER_CONFIGURATION_VISIBILITY_TIMEOUT) || 30_000,
+
+    /**
      * Timeout for context menu manipulation, "10 000" by default
      */
     TS_DIALOG_WINDOW_DEFAULT_TIMEOUT: Number(process.env.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT) || 10_000,
