@@ -254,6 +254,10 @@ export const TestConstants = {
     /**
      * This variable determines whether to delete the workspace after the test or leave the workspace running.
      */
-    TS_DELETE_PLUGINS_TEST_WORKSPACE: process.env.TS_DELETE_PLUGINS_TEST_WORKSPACE || 'true'
+    TS_DELETE_PLUGINS_TEST_WORKSPACE: process.env.TS_DELETE_PLUGINS_TEST_WORKSPACE || 'true',
 
+    /**
+     * URL of the workspace created by devworkspace-controller.
+     */
+    TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080'
 };
