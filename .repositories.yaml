@@ -115,74 +115,15 @@ repositories:
     description: >-
       JS library to interact with a che-server.
     useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-bazel
-    name: che-sidecar-bazel
-    description: >-
-      Eclipse Che Sidecar container for Bazel tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-protobuf
-    name: che-sidecar-protobuf
-    description: >-
-      Eclipse Che Sidecar container for Protobuf tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-tekton
-    name: che-sidecar-tekton
-    description: >-
-      Eclipse Che Sidecar container for Tekton tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling
-    name: che-sidecar-kubernetes-tooling
-    description: >-
-      Eclipse Che Sidecar container for Kubernetes tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-openshift-connector
-    name: che-sidecar-openshift-connector
-    description: >-
-      Eclipse Che Sidecar container for OpenShift connector tooling
-    useCheReleaseLifecycle: false
   - url: https://github.com/che-dockerfiles/che-container-tools
     name: che-container-tools
     description: >-
       Base image used for sidecars that service container tooling plugins
     useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-python
-    name: che-sidecar-python
-    description: >-
-      Eclipse Che Sidecar container for python tooling
   - url: https://github.com/che-dockerfiles/che-custom-nodejs-deasync
     name: che-custom-nodejs-deasync
     description: >-
       Provides a custom nodejs binary embedding deasync node-gyp module as builtin module
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-go
-    name: che-sidecar-go
-    description: >-
-      Eclipse Che sidecar container for go
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-sonarlint
-    name: che-sidecar-sonarlint
-    description: >-
-      Eclipse Che sidecar container for sonalint extension
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-dotnet
-    name: che-sidecar-dotnet
-    description: >-
-      Eclipse Che sidecar container for dotnet
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-shellcheck
-    name: che-sidecar-shellcheck
-    description: >-
-      Eclipse Che sidecar container for shellcheck
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-camelk
-    name: che-sidecar-camelk
-    description: >-
-      Eclipse Che sidecar container for camelk
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-vale
-    name: che-sidecar-vale
-    description: >-
-      Eclipse Che sidecar container for vale
     useCheReleaseLifecycle: false
   - url: https://github.com/che-dockerfiles/che-cert-manager-ca-cert-generator-image
     name: che-cert-manager-ca-cert-generator-image
@@ -193,11 +134,6 @@ repositories:
     name: che-buildkit-base
     description: >-
       Eclipse Che Sidecar container for buildkit tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-scala
-    name: che-sidecar-scala
-    description: >-
-      Eclipse Che Sidecar container for scala tooling
     useCheReleaseLifecycle: false
   - url: https://github.com/che-dockerfiles/che-buildah-base
     name: che-buildah-base
@@ -228,31 +164,6 @@ repositories:
     name: che-sidecar-podman
     description: >-
       Eclipse Che Sidecar container for podman tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-clang
-    name: che-sidecar-clang
-    description: >-
-      Eclipse Che Sidecar container for clang tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-php
-    name: che-sidecar-php
-    description: >-
-      Eclipse Che Sidecar container for php tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-java
-    name: che-sidecar-java
-    description: >-
-      Eclipse Che Sidecar container for java tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-dependency-analytics
-    name: che-sidecar-dependency-analytics
-    description: >-
-      Eclipse Che Sidecar container for dependency analytics tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-sidecar-node
-    name: che-sidecar-node
-    description: >-
-      Eclipse Che Sidecar container for node tooling
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/che-theia-openshift-auth
     name: che-theia-openshift-auth
