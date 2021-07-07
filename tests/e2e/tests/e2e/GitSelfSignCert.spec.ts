@@ -40,10 +40,9 @@
 
  const workspaceName = 'gitSelfSignCert';
 
-
  suite('Checking git + self sign cert', async () => {
      const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-     const gitProjectUrl = 'https://10.0.104.86:10080/maxura/gitService.git';
+     const gitProjectUrl = `https://${TestConstants.TS_SELF_HOSTED_GIT_SERVER_URL}/maxura/gitService.git`;
      const committedFile = 'README.md';
 
      suiteSetup(async function () {
@@ -81,8 +80,8 @@
         await gitPlugin.typeCommitMessage(this.test!.title + currentDate);
         await gitPlugin.commitFromCommandMenu();
         await gitPlugin.pushChangesFromCommandMenu();
-        await quickOpenContainer.typeAndSelectSuggestion('git-admin', 'Git: https://10.0.104.86:10080 (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
-        await quickOpenContainer.typeAndSelectSuggestion('admin', 'Git: https://git-admin@10.0.104.86:10080 (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
+        await quickOpenContainer.typeAndSelectSuggestion('git-admin', 'Git: ' + `https://${TestConstants.TS_SELF_HOSTED_GIT_SERVER_URL}` + ' (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
+        await quickOpenContainer.typeAndSelectSuggestion('admin', 'Git: https://git-admin@' + `${TestConstants.TS_SELF_HOSTED_GIT_SERVER_URL}` + ' (Press \'Enter\' to confirm your input or \'Escape\' to cancel)');
         await gitPlugin.waitDataIsSynchronized();
     });
 
@@ -97,6 +96,8 @@
  async function cloneTestRepo(linkToRepo: string) {
      const confirmMessage = 'Clone from URL';
 
+     await topMenu.selectOption('View', 'Find Command...');
+     // workaround - reopen 'Find Command' container - https://github.com/eclipse/che/issues/19793
      await topMenu.selectOption('View', 'Find Command...');
      await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
      await quickOpenContainer.typeAndSelectSuggestion(linkToRepo, confirmMessage);
