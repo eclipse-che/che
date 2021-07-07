@@ -65,7 +65,7 @@ repositories:
     description: >-
      UI to manage workspaces, devfiles, etc.
     devfile: https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
+    doc: https://github.com/eclipse-che/che-dashboard/blob/main/CONTRIBUTING.md
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-devfile-registry
     name: devfile-registry
@@ -77,7 +77,7 @@ repositories:
     description: >-
       Eclipse Che documentation https://www.eclipse.org/che/docs/ source code.
     devfile: https://github.com/eclipse/che-docs/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
+    doc: https://github.com/eclipse/che-docs/blob/master/CONTRIBUTING.adoc
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-machine-exec
     name: machine-exec
