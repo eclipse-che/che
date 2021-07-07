@@ -190,6 +190,16 @@ repositories:
     description: >-
       ensures that all nodes in the cluster have those images cached
     useCheReleaseLifecycle: false
+  - url: https://github.com/devfile/devworkspace-operator
+    name: devworkspace-operator
+    description: >-
+      DevWorkspace engine used by Che for devfile v2
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/devworkspace-che-operator
+    name: devworkspace-che-operator
+    description: >-
+      Ooperator that enhances DevWorkspaces with Che specific functionality
+    useCheReleaseLifecycle: false
 
 
 

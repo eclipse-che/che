@@ -47,6 +47,8 @@ Repository | Component | Description | Devfile | Documentation
 [workspace-data-sync](https://github.com/che-incubator/workspace-data-sync) | | Provides the ability to increase I/O performance for a developer workspaces |  | 
 [che-workspace-telemetry-client](https://github.com/che-incubator/che-workspace-telemetry-client) | | abstract telemetry API and a Typescript implementation of the API. |  | 
 [kubernetes-image-puller](https://github.com/che-incubator/kubernetes-image-puller) | | ensures that all nodes in the cluster have those images cached |  | 
+[devworkspace-operator](https://github.com/devfile/devworkspace-operator) | | DevWorkspace engine used by Che for devfile v2 |  | 
+[devworkspace-che-operator](https://github.com/che-incubator/devworkspace-che-operator) | | Ooperator that enhances DevWorkspaces with Che specific functionality |  | 
 <!-- end repository list -->
 
 ## Devfile to contribute
