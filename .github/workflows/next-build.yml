@@ -63,7 +63,7 @@ jobs:
     - name: Create failure MM message
       if: ${{ failure() }}
       run: |
-        echo "{\"text\":\":no_entry_sign: Next Che build has failed: https://github.com/eclipse/che/actions/workflows/next-build.yml\"}" > mattermost.json
+        echo "{\"text\":\":no_entry_sign: Next Che E2E build has failed: https://github.com/eclipse/che/actions/workflows/next-build.yml\"}" > mattermost.json
     - name: Send MM message
       if: ${{ failure() }}
       uses: mattermost/action-mattermost-notify@1.0.2
