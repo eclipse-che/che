@@ -25,9 +25,9 @@ const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExec
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const workspaceStack: string = 'Go';
-const workspaceSampleName: string = 'src';
-const workspaceRootFolderName: string = 'github.com';
-const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/golang/example/outyet`;
+const workspaceSampleName: string = 'example';
+const workspaceSubfolderName: string = 'outyet';
+const fileFolderPath: string = `${workspaceSampleName}/${workspaceSubfolderName}`;
 const fileName: string = `main.go`;
 
 const taskRunServer: string = '1.1 Run outyet';
@@ -50,7 +50,7 @@ suite(`${workspaceStack} test`, async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
         });
 
-        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceSubfolderName);
     });
 
     suite('Test opening file', async () => {
