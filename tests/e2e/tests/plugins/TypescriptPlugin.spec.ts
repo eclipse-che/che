@@ -15,7 +15,7 @@ import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { Key, By, error } from 'selenium-webdriver';
+import { Key, By } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { DebugView } from '../../pageobjects/ide/DebugView';
@@ -137,7 +137,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             // workaround for the issue: https://github.com/eclipse/che/issues/20067
             await debugView.clickOnDebugConfigurationDropDown();
             await debugView.clickOnDebugConfigurationItem('Add Configuration...');
-            
+
             await debugView.clickOnDebugConfigurationDropDown();
             await debugView.clickOnDebugConfigurationItem('Attach to Remote (nodejs-web-app)');
             await debugView.clickOnRunDebugButton();
