@@ -11,13 +11,15 @@
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class CreateWorkspace {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+                @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) { }
 
     async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
         Logger.debug(`CreateWorkspace.waitTitleContains text: "${expectedText}"`);
@@ -46,7 +48,18 @@ export class CreateWorkspace {
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
 
-        await this.driverHelper.waitAndClick(sampleLocator, timeout);
+        try {
+            await this.driverHelper.waitAndClick(sampleLocator, timeout);
+        } catch (err) {
+            if (err instanceof error.StaleElementReferenceError) {
+                // for CRW 2.9.x create workspace sometimes fails with StakeElementReferenceError
+                // causing the tests to fail to create a workspace, when the dashboard is only
+                // partially initialized. Refreshing page and trying to click on workspace again.
+                await this.browserTabsUtil.refreshPage();
+                await this.waitPage();
+                await this.driverHelper.waitAndClick(sampleLocator, timeout);
+            }
+        }
     }
 
     private getSampleLocator(sampleName: string): By {
