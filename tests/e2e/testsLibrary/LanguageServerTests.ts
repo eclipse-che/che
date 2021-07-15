@@ -167,6 +167,10 @@ export class LanguageServerTests {
 
         test('Run debug', async () => {
             await this.debugView.clickOnDebugConfigurationDropDown();
+            // workaround for debug configuration not present
+            await this.debugView.clickOnDebugConfigurationItem('Add Configuration...');
+            await this.debugView.clickOnDebugConfigurationDropDown();
+            // ===
             await this.debugView.clickOnDebugConfigurationItem(configurationName);
             await this.debugView.clickOnRunDebugButton();
         });
