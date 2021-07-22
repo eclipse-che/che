@@ -243,9 +243,9 @@ suite('Validation of debug functionality', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await topMenu.selectOption('View', 'Debug');
         await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
-    })
-    
-    test('Choose debug configuration', async ()=> {
+    });
+
+    test('Choose debug configuration', async () => {
         // workaround to the https://github.com/eclipse/che/issues/19887
         await debugView.clickOnDebugConfigurationDropDown();
         await debugView.clickOnDebugConfigurationItem('Add Configuration...');
@@ -256,19 +256,19 @@ suite('Validation of debug functionality', async () => {
 
     test('Run debug', async () => {
         await debugView.clickOnRunDebugButton();
-        await waitDebugToConnect()
+        await waitDebugToConnect();
     });
 
-    test('Activate breakpoint', async ()=> {
+    test('Activate breakpoint', async () => {
         await editor.selectTab(weclomeControllerJavaFileName);
         await editor.activateBreakpoint(weclomeControllerJavaFileName, 27);
     });
-    
-    test('Check debugger stop at the breakpoint', async ()=> {
+
+    test('Check debugger stop at the breakpoint', async () => {
         await previewWidget.refreshPage();
         await waitStoppedBreakpoint(27);
     });
-        
+
 });
 
 async function checkErrorMessageInApplicationController() {
@@ -313,7 +313,7 @@ async function checkJavaPathCompletion() {
     }
 }
 
-async function waitDebugToConnect(){
+async function waitDebugToConnect() {
     try {
         await debugView.waitForDebuggerToConnect();
     } catch (err) {
@@ -324,7 +324,7 @@ async function waitDebugToConnect(){
     }
 }
 
-async function waitStoppedBreakpoint(lineNumber: number){
+async function waitStoppedBreakpoint(lineNumber: number) {
     try {
         await editor.waitStoppedDebugBreakpoint(weclomeControllerJavaFileName, lineNumber);
     } catch (err) {
