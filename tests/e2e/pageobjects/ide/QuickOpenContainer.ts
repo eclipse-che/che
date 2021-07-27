@@ -22,21 +22,21 @@ export class QuickOpenContainer {
     public async waitContainer(timeout: number = TimeoutConstants.TS_SELENIUM_TOP_MENU_QUICK_CONTAINER_TIMEOUT) {
         Logger.debug('QuickOpenContainer.waitContainer');
 
-        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\']');
+        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'quick-input-widget show-file-icons\']');
         await this.driverHelper.waitVisibility(monacoQuickOpenContainerLocator, timeout);
     }
 
     public async waitContainerDisappearance() {
         Logger.debug('QuickOpenContainer.waitContainerDisappearance');
 
-        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'monaco-quick-open-widget\' and @aria-hidden=\'true\']');
+        const monacoQuickOpenContainerLocator: By = By.xpath('//div[@class=\'quick-input-widget show-file-icons\' and @aria-hidden=\'true\']');
         await this.driverHelper.waitDisappearance(monacoQuickOpenContainerLocator);
     }
 
     public async clickOnContainerItem(itemText: string, timeout: number = TimeoutConstants.TS_SELENIUM_TOP_MENU_QUICK_CONTAINER_TIMEOUT) {
         Logger.debug(`QuickOpenContainer.clickOnContainerItem "${itemText}"`);
 
-        const quickContainerItemLocator: By = By.css(`div[aria-label="${itemText}, picker"]`);
+        const quickContainerItemLocator: By = By.css(`div[aria-label="${itemText}"]`);
         await this.waitContainer(timeout);
         await this.driverHelper.waitAndClick(quickContainerItemLocator, timeout);
         await this.waitContainerDisappearance();
