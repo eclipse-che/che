@@ -58,6 +58,7 @@ const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const globalTaskScope = 'Global';
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -155,13 +156,14 @@ suite('Language server validation', async () => {
 
 suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
-        let buildTaskName: string = 'build-file-output';
-        await topMenu.runTask(buildTaskName);
-        await terminal.waitIconSuccess(buildTaskName, 250_000);
+        const taskName: string = 'build-file-output';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+        await terminal.waitIconSuccess(taskName, 250_000);
     });
 
     test('Run application', async () => {
-        await topMenu.runTask('run');
+        const taskName: string = 'run';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
@@ -196,13 +198,14 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Build application with changes', async () => {
-        let buildTaskName: string = 'build';
-        await topMenu.runTask('build');
-        await terminal.waitIconSuccess(buildTaskName, 250_000);
+        const taskName: string = 'build';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+        await terminal.waitIconSuccess(taskName, 250_000);
     });
 
     test('Run application with changes', async () => {
-        await topMenu.runTask('run-with-changes');
+        const taskName: string = 'run-with-changes';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });
@@ -226,7 +229,8 @@ suite('Display source code changes in the running application', async () => {
 
 suite('Validation of debug functionality', async () => {
     test('Launch debug', async () => {
-        await topMenu.runTask('run-debug');
+        const taskName: string = 'run-debug';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
         await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
         await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In Preview');
     });

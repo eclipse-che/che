@@ -478,7 +478,7 @@ export class Editor {
     }
 
     private getEditorLineXpathLocator(lineNumber: number): string {
-        return `(//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line'])[${lineNumber}]`;
+        return `(//div[contains(@class,'lines-content')]//div[@class='view-lines monaco-mouse-cursor-text']/div[@class='view-line'])[${lineNumber}]`;
     }
 
     private getSuggestionLineXpathLocator(suggestionText: string): By {
