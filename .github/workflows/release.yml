@@ -92,7 +92,7 @@ jobs:
           echo "{\"text\":\":white_check_mark: Che ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}\"}" > mattermost.json
       - name: Send MM message
         if: ${{ success() }} || ${{ failure() }}
-        uses: mattermost/action-mattermost-notify@1.0.2
+        uses: mattermost/action-mattermost-notify@1.1.0
         env:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
           MATTERMOST_CHANNEL: eclipse-che-releases
