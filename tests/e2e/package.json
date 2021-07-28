@@ -14,6 +14,7 @@
     "test-wkspc-creation-and-ls": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-wkspc-creation-and-ls.opts",
     "test-java-vertx": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-java-vertx.opts",
     "test-git-ssh": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-ssh.opts",
+    "test-git-self-sign-cert": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-git-self-sign-cert.opts",
     "test-git-publish-branch": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-git-publish-branch.opts",
     "test-openshift-connector": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --opts mocha-connector.opts",
     "test-all-devfiles": "./generateIndex.sh && ./initDevfileTests.sh",
@@ -25,7 +26,7 @@
     "tsc": "tsc -p .",
     "init-mocha-opts": "tsc && mocha --opts mocha-single-devfile.opts --spec dist/tests/login/Login.spec.js",
     "test-plugin": "npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
-    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",   
+    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
     "test-all-plugins": "tsc && mocha --opts mocha-all-plugins.opts"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
