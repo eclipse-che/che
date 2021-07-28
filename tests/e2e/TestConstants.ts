@@ -257,7 +257,7 @@ export const TestConstants = {
     TS_DELETE_PLUGINS_TEST_WORKSPACE: process.env.TS_DELETE_PLUGINS_TEST_WORKSPACE || 'true',
 
     /**
-     * URL of the workspace created by devworkspace-controller.
+     * URL of Gogs self-hosted Git server.
      */
     TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080'
 };
