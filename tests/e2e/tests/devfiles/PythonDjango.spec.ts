@@ -23,11 +23,12 @@ const workspaceStack: string = 'Python Django';
 const workspaceSampleName: string = 'django-realworld-example-app';
 const workspaceRootFolderName: string = 'conduit';
 
-const taskSetUpVenv: string = 'set up venv';
 const taskInstallDependencies: string = 'install dependencies';
 const taskMigrate: string = 'migrate';
 const taskRunServer: string = 'run server';
+const taskRunServerInDebugMode: string = 'run server in debug mode';
 const taskExpectedDialogText: string = 'Process django is now listening on port 7000. Open it ?';
+const taskExpectedDialogTextInDebugMode: string = 'A new process is now listening on port 5678 but this port is not a current endpoint.          Would you want to add a redirect for this port so it becomes available ?';
 let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
@@ -43,11 +44,6 @@ suite(`${workspaceStack} test`, async () => {
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
-    suite('Set up venv', async () => {
-        codeExecutionTests.runTask(taskSetUpVenv, 60_000);
-        codeExecutionTests.closeTerminal(taskSetUpVenv);
-    });
-
     suite('Install dependencies', async () => {
         codeExecutionTests.runTask(taskInstallDependencies, 60_000);
         codeExecutionTests.closeTerminal(taskInstallDependencies);
@@ -59,7 +55,11 @@ suite(`${workspaceStack} test`, async () => {
     });
 
     suite('Run django server', async () => {
-        codeExecutionTests.runTaskWithNotification(taskRunServer, taskExpectedDialogText, 30_000);
+        codeExecutionTests.runTaskWithNotificationAndOpenLinkPreviewNoUrl(taskRunServer, taskExpectedDialogText, 30_000);
+    });
+
+    suite('Run django server in debug mode', async () => {
+        codeExecutionTests.runTaskWithNotification(taskRunServerInDebugMode, taskExpectedDialogTextInDebugMode, 30_000);
     });
 
     suite ('Stopping and deleting the workspace', async () => {
