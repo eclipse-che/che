@@ -1,0 +1,48 @@
+name: Task 🔧
+description: Internal things, technical debt, and to-do tasks to be performed
+labels: [kind/task]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Suggesting a new task 🔧
+        🔍  Before opening a new issue please search existing issues at https://github.com/eclipse/che/issues
+
+        🤔  To make it easier for us to help you, please include as much useful information as possible.
+        
+        Useful Links:
+        
+          - 📄  Documentation: https://www.eclipse.org/che/docs
+          - 📝  Contributing: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md
+      
+        💬  Eclipse Che has public chat on:
+          - Mattermost: https://mattermost.eclipse.org/eclipse/channels/eclipse-che
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your task related to a problem? Please describe
+      description: A clear and concise description of what the problem is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the enhancement here.
