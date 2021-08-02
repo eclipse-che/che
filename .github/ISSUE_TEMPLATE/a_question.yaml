@@ -1,0 +1,38 @@
+name: Question 🤔
+description: Usage question or discussion about Eclipse Che
+labels: [kind/question]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Asking a new Question 🤔
+        🔍  Before opening a new issue please search existing issues at https://github.com/eclipse/che/issues
+
+        🤔  To make it easier for us to help you, please include as much useful information as possible.
+        
+        Useful Links:
+        
+          - 📄  Documentation: https://www.eclipse.org/che/docs
+          - 📝  Contributing: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md
+      
+        💬  Eclipse Che has public chat on:
+          - Mattermost: https://mattermost.eclipse.org/eclipse/channels/eclipse-che
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Enter your question
+      placeholder: Summary of your question
+    validations:
+      required: true
+
+  - type: textarea
+    id: relevant-information
+    attributes:
+      label: Relevant information
+      description: Provide as much useful information as you can
+      placeholder: Provide as much useful information as you can
+    validations:
+      required: false
