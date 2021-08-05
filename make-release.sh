@@ -14,6 +14,7 @@ set -e
 REPO=git@github.com:eclipse-che/che-server
 MAIN_BRANCH="main"
 TMP=""
+ISSUE_TEMPLATE_FILE=".github/ISSUE_TEMPLATE/bug_report.yml"
 
 while [[ "$#" -gt 0 ]]; do
   case $1 in
@@ -22,6 +23,47 @@ while [[ "$#" -gt 0 ]]; do
   esac
   shift 1
 done
+
+sed_in_place() {
+    SHORT_UNAME=$(uname -s)
+  if [ "$(uname)" == "Darwin" ]; then
+    sed -i '' "$@"
+  elif [ "${SHORT_UNAME:0:5}" == "Linux" ]; then
+    sed -i "$@"
+  fi
+}
+
+
+# Update the issue template with released version and add current latest as previous item
+update_issue_template() {
+  local -r currentReleaseVersion=$1
+  local -r templateFile=$2
+
+  # take only two first digits of the version that we will release
+  # will get 7.35 from input 7.35.0-SNAPSHOT
+  local -r versionXY=$(echo "${currentReleaseVersion}" | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+
+  # now extract the current latest version specified in the issue template
+  # for example extract 7.34 if there is - "7.34@latest" as available item
+  local -r latestVersionInIssueTemplate=$(sed -n 's/.*- "\(.*\)@latest"/\1/p' "${templateFile}")
+
+  # if version to tag is not already seen as latest, add VERSION_X_Y as new latest
+  if [ "${versionXY}" != "${latestVersionInIssueTemplate}" ]; then
+
+    # replace 7.34@latest for example by ${versionXY}@latest
+    sed_in_place "s/${latestVersionInIssueTemplate}@latest/${versionXY}@latest/" "${templateFile}"
+  fi
+
+  # Now check if we have the previous version in the template
+  # if not, need to add it
+  if ! grep -q "\"${versionXY}\"" "${templateFile}" ; then
+
+    # add the version just after the current next version
+    # really want \'$'\n'
+    # shellcheck disable=SC1003
+    sed_in_place -e  '/- \"next (development version)\"/a\'$'\n''        - \"'"${latestVersionInIssueTemplate}"'\"' "${templateFile}"
+  fi
+}
 
 bump_version () {
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -117,6 +159,9 @@ docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
 docker push quay.io/eclipse/che-e2e:${VERSION}
 docker push quay.io/eclipse/che-e2e:latest
 
+# update template in the release tag
+update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
+
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
@@ -125,6 +170,9 @@ git commit -asm "${COMMIT_MSG}"
 
 # now update ${BASEBRANCH} to the new snapshot version
 git checkout "${BASEBRANCH}"
+
+# update template in the branch
+update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 
 # change VERSION file + commit change into ${BASEBRANCH} branch
 if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
