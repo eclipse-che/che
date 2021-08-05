@@ -33,7 +33,6 @@ sed_in_place() {
   fi
 }
 
-
 # Update the issue template with released version and add current latest as previous item
 update_issue_template() {
   local -r currentReleaseVersion=$1
@@ -57,7 +56,6 @@ update_issue_template() {
   # Now check if we have the previous version in the template
   # if not, need to add it
   if ! grep -q "\"${versionXY}\"" "${templateFile}" ; then
-
     # add the version just after the current next version
     # really want \'$'\n'
     # shellcheck disable=SC1003
