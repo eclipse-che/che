@@ -1,0 +1,136 @@
+name: Bug report 🐞
+description: Report a bug found in Eclipse Che
+labels: [kind/bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Creating a new Bug 🐞 
+        🔍  Before opening a new issue please search existing issues at https://github.com/eclipse/che/issues
+
+        🤔  To make it easier for us to help you, please include as much useful information as possible.
+        
+        Useful Links:
+        
+          - 📄  Documentation: https://www.eclipse.org/che/docs
+          - 📝  Contributing: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md
+      
+        💬  Eclipse Che has public chat on:
+          - Mattermost: https://mattermost.eclipse.org/eclipse/channels/eclipse-che
+
+  - type: textarea
+    id: describe-bug
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Che version
+      description: if workspace is running, version can be obtained with help/about menu
+      options:
+        - "7.34@latest"
+        - "next (development version)"
+        - "7.33"
+        - "7.32"
+        - "7.31"
+        - "7.30"
+        - "7.29"
+        - "7.28"
+        - "other (please specify in additional context)"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What are the steps to reproduce this bug ?
+      placeholder: |
+        1. Do '...'
+        2. Click on '....'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder:  
+    validations:
+      required: true      
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      description: What is the kubernetes flavor ?
+      multiple: true
+      options:
+        - Kubernetes (vanilla)
+        - OpenShift
+        - minikube
+        - CodeReady Container
+        - Docker Desktop
+        - other (please specify in additional context)
+    validations:
+      required: true
+      
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Installation method
+      multiple: true
+      options:
+        - chectl/latest
+        - chectl/next
+        - OperatorHub
+        - other (please specify in additional context)
+    validations:
+      required: true        
+        
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Amazon
+        - Azure
+        - GCE
+        - "Dev Sandbox (workspaces.openshift.com)"
+        - other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Eclipse Che Logs
+      placeholder: |
+        Please copy and paste any relevant log output.
+        
+        This will be automatically formatted into code, so no need for backticks
+      description: "How to collect logs: https://www.eclipse.org/che/docs/che-7/collecting-logs-using-chectl"
+      render: shell
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+      placeholder: 
