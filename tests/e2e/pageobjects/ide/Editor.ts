@@ -240,7 +240,7 @@ export class Editor {
     async getEditorVisibleText(tabTitle: string): Promise<string> {
         Logger.debug(`Editor.getEditorVisibleText "${tabTitle}"`);
 
-        const editorBodyLocator: By = By.xpath(`//div[contains(@data-uri, \'${tabTitle}')]//div[@class=\'view-lines\']`);
+        const editorBodyLocator: By = By.xpath(`//div[contains(@data-uri, \'${tabTitle}')]//div[contains(@class,\'view-lines\')]`);
         // const editorBodyLocator: By = By.xpath('//div[@class=\'view-lines\']');
         const editorText: string = await this.driverHelper.waitAndGetText(editorBodyLocator);
         return editorText;
