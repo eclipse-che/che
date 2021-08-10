@@ -1,3 +1,4 @@
+# Test (do not merge)
 
 # Module for launch E2E tests related to Che 7
 
