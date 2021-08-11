@@ -106,7 +106,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         let applicationPreviewWindow: string = '';
 
         test('Run application in debug mode', async () => {
-            await topMenu.runTask('run the web app (debugging enabled)');
+            await topMenu.runTask('run the web app (debugging enabled), Global');
             await ide.waitNotification('Process nodejs is now listening on port 3000.');
 
             currentWindow = await browserTabsUtil.getCurrentWindowHandle();
