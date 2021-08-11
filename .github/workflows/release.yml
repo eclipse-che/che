@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-name: Release Che
+name: Release Che E2E Tests 
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    name: Create Che Release
+    name: Create Che E2E Tests Release
     runs-on: ubuntu-20.04
     steps:
       -
@@ -86,10 +86,10 @@ jobs:
       - name: Create failure MM message
         if: ${{ failure() }}
         run: |
-          echo "{\"text\":\":no_entry_sign: Che ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse/che/actions/workflows/release.yml\"}" > mattermost.json
+          echo "{\"text\":\":no_entry_sign: Che E2E Tests ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse/che/actions/workflows/release.yml\"}" > mattermost.json
       - name: Create success MM message
         run: |
-          echo "{\"text\":\":white_check_mark: Che ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}\"}" > mattermost.json
+          echo "{\"text\":\":white_check_mark: Che E2E Tests ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}\"}" > mattermost.json
       - name: Send MM message
         if: ${{ success() }} || ${{ failure() }}
         uses: mattermost/action-mattermost-notify@1.1.0
