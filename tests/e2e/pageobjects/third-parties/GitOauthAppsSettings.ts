@@ -22,7 +22,7 @@ export class GitOauthAppsSettings {
     private static readonly GITHUB_OAUTH_APPS_SETTINGS_URL = 'https://github.com/settings/developers';
     private static readonly HOME_PAGE_FIELD_LOCATOR: By = By.xpath(`//input[@id='oauth_application_url']`);
     private static readonly CALLBACK_URL_FIELD_LOCATOR: By = By.xpath(`//input[@id='oauth_application_callback_url']`);
-    private static readonly UPDATE_APPLICATION_BUTTON_LOCATOR: By = By.xpath(`//button[text()='Update application']`);
+    private static readonly UPDATE_APPLICATION_BUTTON_LOCATOR: By = By.xpath(`//form[@class='edit_oauth_application']//button[@type='submit']`);
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) { }
