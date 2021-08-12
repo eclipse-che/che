@@ -95,7 +95,7 @@ export class KubernetesPlugin {
     }
 
     private getListItemPartialTextLocator(partialText: string): By {
-        return By.xpath(`//div[contains(@class, 'body')]//div[@class='theia-TreeContainer']//div[@class='theia-TreeNodeContent']//span[contains(text(), '${partialText}')]`);
+        return By.xpath(`//div[@id='extension.vsKubernetesExplorer']//div[contains(text(), "${partialText}")]`);
     }
 
     private getListItemTextLocator(expectedText: string): By {

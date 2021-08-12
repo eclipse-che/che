@@ -90,7 +90,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
         test('Create new branch', async () => {
             await topMenu.selectOption('View', 'Find Command...');
             await quickOpenContainer.typeAndSelectSuggestion('branch', 'Git: Create Branch...');
-            await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm your input or 'Escape' to cancel)`);
+            await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm or 'Escape' to cancel)`);
 
             await projectTree.expandPathAndOpenFile('Spoon-Knife', changedFile);
             await editor.type(changedFile, currentDate + '\n', 1);
