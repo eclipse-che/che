@@ -92,7 +92,7 @@ suite(`The 'PhpPlugin' tests`, async () => {
             await topMenu.selectOption('View', 'Debug');
             await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
 
-            // workaround for the issue: https://github.com/eclipse/che/issues/20067
+            // workaround for the issue: https://github.com/eclipse/che/issues/20046
             await debugView.clickOnDebugConfigurationDropDown();
             await debugView.clickOnDebugConfigurationItem('Add Configuration...');
             await editor.selectTab(tabTitle);
