@@ -91,6 +91,12 @@ suite(`The 'PhpPlugin' tests`, async () => {
         test('Run debug', async () => {
             await topMenu.selectOption('View', 'Debug');
             await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
+
+            // workaround for the issue: https://github.com/eclipse/che/issues/20046
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Add Configuration...');
+            await editor.selectTab(tabTitle);
+
             await debugView.clickOnDebugConfigurationDropDown();
             await debugView.clickOnDebugConfigurationItem('Launch currently open script (php-web-simple)');
             await debugView.clickOnRunDebugButton();
