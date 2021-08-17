@@ -154,7 +154,8 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         test('Refresh application sample window', async () => {
             await browserTabsUtil.switchToWindow(applicationPreviewWindow);
             await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000);
-            await browserTabsUtil.refreshPage();
+
+            await browserTabsUtil.refreshForDebug();
         });
 
         test('Check breakpoint stopped', async () => {

@@ -8,9 +8,6 @@ projects:
       branch: che-qe-tests
       type: git
 components:
-  - type: cheEditor
-    id: eclipse/che-theia/next
-    memoryLimit: 512Mi
   - id: vscode/typescript-language-features/latest
     type: chePlugin
   - id: ms-vscode/node-debug2/latest
@@ -30,7 +27,7 @@ commands:
     actions:
       - workdir: '${CHE_PROJECTS_ROOT}/nodejs-web-app/app'
         type: exec
-        command: npm install && nodemon app.js
+        command: npm install && nodemon --inspect app.js
         component: nodejs
   - name: Attach remote debugger
     actions:
