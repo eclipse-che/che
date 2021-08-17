@@ -9,7 +9,7 @@
  **********************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { CLASSES } from '../inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
@@ -78,6 +78,20 @@ export class BrowserTabsUtil {
         Logger.debug('BrowserTabsUtil.refreshPage');
 
         await (await this.driverHelper.getDriver()).navigate().refresh();
+    }
+
+    async refreshForDebug() {
+        Logger.debug('BrowserTabsUtil.refreshForDebug');
+
+        // if refresh triggers debug breakpoint test stucks of the refreshing
+        // and fail with a timeout error.
+        try {
+            await (await this.driverHelper.getDriver()).navigate().refresh();
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
+        }
     }
 
     async getCurrentUrl(): Promise<string> {
