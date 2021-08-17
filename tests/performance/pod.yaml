@@ -37,6 +37,8 @@ spec:
           value: "0"
         - name: VIDEO_RECORDING
           value: "false"
+        - name: DELETE_WORKSPACE_ON_FAILED_TEST
+          value: "true"
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container

@@ -144,7 +144,7 @@ echo "wait for ftp server to be running"
 status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
 while [[ $status != "Running" ]]
 do
-  echo "ftp-server is not running, sleep 1 sec and re-check"
+  echo "ftp-server is not running, sleep 5 sec and re-check"
   sleep 5
   status=$(oc get pod ftp-server | awk '{print $3}' | tail -n 1)
 done
@@ -161,10 +161,15 @@ oc exec ftp-server -- sed -i 's/ftp_data_port/#ftp_data_port/' /etc/vsftpd/vsftp
 oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 
 # set common variables to template.yaml
-if [ $SERVER_SETTING == "oauth" ]; then
+if [ $SERVER_SETTING == "oauth, multi-host" ]; then
   pod_spec="pod-oauth.yaml"
-elif [ $SERVER_SETTING == "no-oauth" ]; then
+  SINGLE_HOST="false"
+elif [ $SERVER_SETTING == "no-oauth (not maintained)" ]; then
   pod_spec="pod.yaml"
+  SINGLE_HOST="false"
+elif [ $SERVER_SETTING == "oauth, single-host"]; then
+  pod_spec="pod-oauth.yaml"
+  SINGLE_HOST="true"
 fi
 
 echo "set common variables to template.yaml"
@@ -177,6 +182,7 @@ sed -i "s/REPLACE_URL/\"$parsed_url\"/g" template.yaml
 sed -i "s/REPLACE_TIMESTAMP/\"$TIMESTAMP\"/g" template.yaml
 sed -i "s/REPLACE_IMAGE/\"$parsed_image\"/g" template.yaml
 sed -i "s/REPLACE_LOG_LEVEL/$LOG_LEVEL/g" template.yaml
+sed -i "s/REPLACE_SINGLE_HOST/$SINGLE_HOST/g" template.yaml
 if [ $TEST_SUITE == "load-test" ]; then
   sed -i_.bak '/USERSTORY/d' template.yaml
   sed -i "s/REPLACE_TEST_SUITE/$TEST_SUITE/g" template.yaml
@@ -185,9 +191,12 @@ if [ $TEST_SUITE == "load-test" ]; then
 else 
   sed -i_.bak '/TEST_SUITE/d' template.yaml
   sed -i "s/REPLACE_USERSTORY/$TEST_SUITE/g" template.yaml
-  sed -i "s/MEMORY_REQUEST/\"1Gi\"/g" template.yaml
-  sed -i "s/MEMORY_LIMIT/\"1Gi\"/g" template.yaml
+  sed -i "s/MEMORY_REQUEST/\"1300Mi\"/g" template.yaml
+  sed -i "s/MEMORY_LIMIT/\"2500Mi\"/g" template.yaml
 fi
+
+echo "File template.yaml that will be used for generating jobs:"
+cat template.yaml
 
 # ----------- RUNNING TEST ----------- #
 echo "-- Running pods with tests."
