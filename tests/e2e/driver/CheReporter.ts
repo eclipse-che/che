@@ -136,7 +136,7 @@ class CheReporter extends mocha.reporters.Spec {
       // raise flag for keeping the screencast
       deleteScreencast = false;
 
-      const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
+      const testFullTitle: string = test.fullTitle().replace(/[^a-z0-9\+]/gi, '_');
       const testTitle: string = test.title.replace(/\s/g, '_');
 
       const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
