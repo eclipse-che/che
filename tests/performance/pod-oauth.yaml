@@ -42,7 +42,7 @@ spec:
         - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
           value: "true"
         - name: TS_OCP_LOGIN_PAGE_PROVIDER_TITLE
-          value: "crw-qe-htpasswd-provider"
+          value: "load-test-provider"
         - name: TS_SELENIUM_OCP_USERNAME
           value: REPLACE_USERNAME
         - name: TS_SELENIUM_USERNAME

@@ -7,6 +7,7 @@ TEST_FOLDER=$(pwd)
 LOG_LEVEL="INFO"
 SERVER_SETTING="oauth"
 TEST_SUITE="load-test"
+POD_SPEC="pod-oauth.yaml"
 
 function printHelp {
   YELLOW="\\033[93;1m"
@@ -161,19 +162,14 @@ oc exec ftp-server -- sed -i 's/ftp_data_port/#ftp_data_port/' /etc/vsftpd/vsftp
 oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 
 # set common variables to template.yaml
-if [ $SERVER_SETTING == "oauth, multi-host" ]; then
-  pod_spec="pod-oauth.yaml"
+if [ $SERVER_SETTING == "multi-host" ]; then
   SINGLE_HOST="false"
-elif [ $SERVER_SETTING == "no-oauth (not maintained)" ]; then
-  pod_spec="pod.yaml"
-  SINGLE_HOST="false"
-elif [ $SERVER_SETTING == "oauth, single-host"]; then
-  pod_spec="pod-oauth.yaml"
+elif [ $SERVER_SETTING == "single-host"]; then
   SINGLE_HOST="true"
 fi
 
 echo "set common variables to template.yaml"
-cp $pod_spec template.yaml
+cp $POD_SPEC template.yaml
 parsed_url=$(echo $URL | sed 's/\//\\\//g')
 parsed_image=$(echo $TEST_IMAGE | sed 's/\//\\\//g')
 
@@ -182,7 +178,7 @@ sed -i "s/REPLACE_URL/\"$parsed_url\"/g" template.yaml
 sed -i "s/REPLACE_TIMESTAMP/\"$TIMESTAMP\"/g" template.yaml
 sed -i "s/REPLACE_IMAGE/\"$parsed_image\"/g" template.yaml
 sed -i "s/REPLACE_LOG_LEVEL/$LOG_LEVEL/g" template.yaml
-sed -i "s/REPLACE_SINGLE_HOST/$SINGLE_HOST/g" template.yaml
+sed -i "s/REPLACE_SINGLE_HOST/\"$SINGLE_HOST\"/g" template.yaml
 if [ $TEST_SUITE == "load-test" ]; then
   sed -i_.bak '/USERSTORY/d' template.yaml
   sed -i "s/REPLACE_TEST_SUITE/$TEST_SUITE/g" template.yaml
