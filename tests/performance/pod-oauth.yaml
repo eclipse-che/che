@@ -13,6 +13,10 @@ spec:
       labels:
         group: load-tests
     spec:
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
       containers:
       - env:                                 
         - name: TS_SELENIUM_BASE_URL
@@ -28,7 +32,7 @@ spec:
         - name: TS_SELENIUM_LOAD_PAGE_TIMEOUT
           value: "180000"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
-          value: "180000"
+          value: "300000"
         - name: TS_SELENIUM_LOG_LEVEL
           value: "REPLACE_LOG_LEVEL"
         - name: TS_IDE_LOAD_TIMEOUT
@@ -38,7 +42,7 @@ spec:
         - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
           value: "true"
         - name: TS_OCP_LOGIN_PAGE_PROVIDER_TITLE
-          value: "crw-qe-htpasswd-provider"
+          value: "load-test-provider"
         - name: TS_SELENIUM_OCP_USERNAME
           value: REPLACE_USERNAME
         - name: TS_SELENIUM_USERNAME
@@ -65,14 +69,23 @@ spec:
           value: "500000"
         - name: TS_LOAD_TESTS
           value: "true"
+        - name: DELETE_WORKSPACE_ON_FAILED_TEST
+          value: "true"
+        - name: TS_IMPORT_PROJECT_DEFAULT_POLLING
+          value: "300000"
+        - name: TS_SELENIUM_SINGLE_HOST
+          value: REPLACE_SINGLE_HOST
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container
+        volumeMounts:
+          - name: dshm
+            mountPath: /dev/shm
         resources:
           requests:
             memory: MEMORY_REQUEST
             cpu: "250m"
           limits:
             memory: MEMORY_LIMIT
-            cpu: "700m"
+            cpu: "750m"
       restartPolicy: Never    
