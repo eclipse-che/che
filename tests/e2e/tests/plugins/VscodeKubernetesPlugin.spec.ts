@@ -13,7 +13,6 @@ import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { KubernetesPlugin } from '../../pageobjects/ide/plugins/KubernetesPlugin';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
@@ -21,28 +20,28 @@ import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { TopMenu } from '../../pageobjects/ide/TopMenu';
+import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
+import { OpenDialogWidget, Buttons } from '../../pageobjects/ide/OpenDialogWidget';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
-const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
+const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
+const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
+const openDialogWidget: OpenDialogWidget = e2eContainer.get(CLASSES.OpenDialogWidget);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeKubernetesPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
-const vsKubernetesConfig = { 'vs-kubernetes.kubeconfig': '/projects/nodejs-web-app/config' };
 let workspaceName: string;
 
 suite(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Create workspace', async () => {
-        test('Set kubeconfig path', async () => {
-            await preferencesHandler.setVscodeKubernetesPluginConfig(vsKubernetesConfig);
-        });
-
         test('Create workspace using factory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
@@ -62,6 +61,13 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Check the "Kubernetes" plugin', async () => {
         test('Check plugin is added to workspace', async () => {
             await kubernetesPlugin.openView(240_000);
+        });
+
+        test('Set kubeconfig', async () => {
+            await topMenu.selectOption('View', 'Find Command...');
+            await quickOpenContainer.typeAndSelectSuggestion('Kubernetes: Set', 'Kubernetes: Set Kubeconfig');
+            await quickOpenContainer.clickOnContainerItem('+ Add new kubeconfig');
+            await openDialogWidget.expandPathAndSelectFile(`projects/${sampleName}`, 'config', Buttons.Open);
         });
 
         test('Check plugin basic functionality', async () => {
