@@ -25,6 +25,7 @@ export enum Locations {
 export enum Buttons {
     Cancel = 'Cancel',
     AddContext = 'Add context folder for component in workspace.',
+    Open = 'Open'
 }
 
 @injectable()
@@ -46,6 +47,13 @@ export class OpenDialogWidget {
         await this.openWorkspaceWidget.selectItemInTree(pathToItem);
     }
 
+    async waitItemInTreeSelected(pathToItem: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
+        Logger.debug(`OpenDialogWidget.waitItemInTreeSelected ${pathToItem}`);
+
+        const itemLocator: By = By.xpath(`//div[contains(@class, 'theia-mod-selected')]//div[@id='${pathToItem}']`);
+        await this.driverHelper.waitVisibility(itemLocator, timeout);
+    }
+
 
     async expandItemInTreeToPath(pathToItem: string, timeout: number = TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT) {
         Logger.debug(`OpenDialogWidget.expandItemInTreeToPath "${pathToItem}"`);
@@ -58,8 +66,24 @@ export class OpenDialogWidget {
     }
 
     async selectLocationAndAddContextFolder(location: Locations, path: string, button: Buttons) {
+        Logger.debug(`OpenDialogWidget.selectLocationAndAddContextFolder`);
+
         await this.selectLocation(location);
         await this.expandItemInTreeToPath(path);
+        await this.clickOnButton(button);
+        await this.dialogWindow.waitDialogDissappearance();
+    }
+
+    async expandPathAndSelectFile(path: string, fileName: string, button: Buttons) {
+        Logger.debug(`OpenDialogWidget.expandPathAndSelectFile`);
+
+        const filePath: string = `/${path}/${fileName}`;
+
+        await this.expandItemInTreeToPath(path);
+        await this.clickOnButton(button);
+
+        await this.selectItemInTree(filePath);
+        await this.waitItemInTreeSelected(filePath);
         await this.clickOnButton(button);
         await this.dialogWindow.waitDialogDissappearance();
     }
