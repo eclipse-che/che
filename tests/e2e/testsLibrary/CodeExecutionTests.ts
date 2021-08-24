@@ -12,7 +12,7 @@ import 'reflect-metadata';
 import Axios from 'axios';
 import { CLASSES } from '../inversify.types';
 import { inject, injectable } from 'inversify';
-import { By, Key } from 'selenium-webdriver';
+import { By, error, Key } from 'selenium-webdriver';
 import { Ide } from '../pageobjects/ide/Ide';
 import { Terminal } from '../pageobjects/ide/Terminal';
 import { TopMenu } from '../pageobjects/ide/TopMenu';
@@ -20,6 +20,7 @@ import { DialogWindow } from '../pageobjects/ide/DialogWindow';
 import { DriverHelper } from '../utils/DriverHelper';
 import { PreviewWidget } from '../pageobjects/ide/PreviewWidget';
 import { RightToolBar } from '../pageobjects/ide/RightToolBar';
+import { Logger } from '../utils/Logger';
 
 @injectable()
 export class CodeExecutionTests {
@@ -130,7 +131,19 @@ export class CodeExecutionTests {
     public verifyRunningApplication(locator: By, applicationCheckTimeout: number, polling: number) {
         test(`Verify running application by locator: '${locator}'`, async () => {
             await this.previewWidget.waitApplicationOpened(CodeExecutionTests.lastApplicationUrl, applicationCheckTimeout);
-            await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
+            try {
+                await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
+            } catch (err) {
+                // fix for preloader / application not available in preview widget
+                // https://issues.redhat.com/browse/CRW-2175
+                if (err instanceof error.TimeoutError) {
+                    Logger.warn(`CodeExecutionTests.verifyRunningApplication application not located, probably blocked by preloader or content not available. Retrying.`);
+                    await this.driverHelper.getDriver().switchTo().defaultContent();
+                    await this.ide.waitAndSwitchToIdeFrame();
+                    await this.previewWidget.refreshPage();
+                    await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
+                }
+            }
         });
     }
 

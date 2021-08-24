@@ -18,7 +18,10 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class PreviewWidget {
+    private static readonly WIDGET_LOCATOR: By = By.css('div.theia-mini-browser');
+    private static readonly WIDGET_IFRAME_LOCATOR: By = By.css('div.theia-mini-browser iframe');
     private static readonly WIDGET_URL_LOCATOR: By = By.css('div.theia-mini-browser input');
+    private static readonly WIDGET_REFRESH_BUTTON_LOCATOR: By = By.css('div.theia-mini-browser-refresh.theia-mini-browser-button');
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
@@ -75,15 +78,13 @@ export class PreviewWidget {
     async waitAndSwitchToWidgetFrame() {
         Logger.debug('PreviewWidget.waitAndSwitchToWidgetFrame');
 
-        const iframeLocator: By = By.css('div.theia-mini-browser iframe');
-        await this.driverHelper.waitAndSwitchToFrame(iframeLocator, TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
-
+        await this.driverHelper.waitAndSwitchToFrame(PreviewWidget.WIDGET_IFRAME_LOCATOR, TimeoutConstants.TS_SELENIUM_PREVIEW_WIDGET_DEFAULT_TIMEOUT);
     }
 
     async waitPreviewWidgetAbsence() {
         Logger.debug('PreviewWidget.waitPreviewWidgetAbsence');
 
-        await this.driverHelper.waitDisappearance(By.css('div.theia-mini-browser'));
+        await this.driverHelper.waitDisappearance(PreviewWidget.WIDGET_LOCATOR);
     }
 
     async waitContentAvailable(contentLocator: By,
@@ -120,8 +121,7 @@ export class PreviewWidget {
     async refreshPage() {
         Logger.debug('PreviewWidget.refreshPage');
 
-        const refreshButtonLocator: By = By.css('.theia-mini-browser .theia-mini-browser-refresh');
-        await this.driverHelper.waitAndClick(refreshButtonLocator);
+        await this.driverHelper.waitAndClick(PreviewWidget.WIDGET_REFRESH_BUTTON_LOCATOR);
     }
 
     async switchBackToIdeFrame() {
