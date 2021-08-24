@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2021 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,12 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { TestConstants } from '..';
+import { Sanitizer } from './Sanitizer';
 
 @injectable()
 export class ScreenCatcher {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+                @inject(CLASSES.Sanitizer) private readonly sanitizer: Sanitizer) { }
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number) {
         const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
@@ -34,7 +36,7 @@ export class ScreenCatcher {
         const date: Date = new Date();
         const timeStr: string = date.toLocaleTimeString('en-us', { hour12: false }) + '.' + new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(date.getMilliseconds());
 
-        const screenshotPath: string = `${executionScreenCastDir}/${formattedMethodIndex}${formattedScreenshotIndex}--(${timeStr}): ${methodName}.png`;
+        const screenshotPath: string = `${executionScreenCastDir}/${formattedMethodIndex}-${formattedScreenshotIndex}--(${this.sanitizer.sanitize(timeStr)})_${this.sanitizer.sanitize(methodName)}.png`;
 
         try {
             await this.catchScreen(screenshotPath);
