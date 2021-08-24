@@ -22,11 +22,13 @@ import { PreferencesHandler, AskForConfirmationType, TerminalRendererType } from
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
+import { Sanitizer } from '../utils/Sanitizer';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
+const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
 let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
@@ -136,8 +138,12 @@ class CheReporter extends mocha.reporters.Spec {
       // raise flag for keeping the screencast
       deleteScreencast = false;
 
-      const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
-      const testTitle: string = test.title.replace(/\s/g, '_');
+      Logger.trace(`FullTitle:${test.fullTitle()}`);
+      const testFullTitle: string = sanitizer.sanitize(test.fullTitle());
+      Logger.trace(`FullTitleSanitized:${testFullTitle}`);
+      Logger.trace(`TestTitle:${test.title}`);
+      const testTitle: string = sanitizer.sanitize(test.title);
+      Logger.trace(`TestTitleSanitized:${testTitle}`);
 
       const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
