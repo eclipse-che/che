@@ -63,7 +63,8 @@ const CLASSES = {
     GitHubPullRequestPlugin: 'GitHubPullRequestPlugin',
     GitLoginPage: 'GitLoginPage',
     GitOauthAppsSettings: 'GitOauthAppsSettings',
-    AnimationChecker: 'AnimationChecker'
+    AnimationChecker: 'AnimationChecker',
+    Sanitizer: 'Sanitizer'
 };
 
 export { TYPES, CLASSES };

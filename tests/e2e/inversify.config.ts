@@ -67,6 +67,7 @@ import { GitLoginPage } from './pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from './pageobjects/third-parties/GitOauthAppsSettings';
 import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
+import { Sanitizer } from './utils/Sanitizer';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -126,5 +127,6 @@ e2eContainer.bind<GitHubPullRequestPlugin>(CLASSES.GitHubPullRequestPlugin).to(G
 e2eContainer.bind<GitLoginPage>(CLASSES.GitLoginPage).to(GitLoginPage);
 e2eContainer.bind<GitOauthAppsSettings>(CLASSES.GitOauthAppsSettings).to(GitOauthAppsSettings);
 e2eContainer.bind<AnimationChecker>(CLASSES.AnimationChecker).to(AnimationChecker);
+e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 
 export { e2eContainer };
