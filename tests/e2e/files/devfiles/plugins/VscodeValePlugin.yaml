@@ -6,7 +6,7 @@ projects:
     source:
       location: 'https://github.com/eclipse/che-docs.git'
       type: git
-      branch: master
+      branch: che-qe
 components:
   - mountSources: true
     endpoints:
@@ -25,8 +25,18 @@ components:
     type: dockerimage
     alias: che-docs
     image: 'quay.io/eclipse/che-docs:latest'
-  - type: chePlugin
+  - preferences:
+      vale.core.useCLI: true
+    type: chePlugin
     reference: 'https://che-plugin-registry-main.surge.sh/v3/plugins/errata-ai/vale-server/latest/meta.yaml'
     alias: vale-server
-    preferences:
-      vale.core.useCLI: true
+  - id: redhat/vscode-yaml/latest
+    type: chePlugin
+  - id: redhat/vscode-xml/latest
+    type: chePlugin
+  - id: redhat/java/latest
+    type: chePlugin
+  - id: golang/go/latest
+    type: chePlugin
+  - id: vscode/typescript-language-features/latest
+    type: chePlugin
