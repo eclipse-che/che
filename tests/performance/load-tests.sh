@@ -291,4 +291,4 @@ oc delete service load-tests-ftp-service
 oc delete pvc load-test-pvc
 
 # ----------- PROCESSING TEST RESULTS ----------- #
-$TEST_FOLDER/process-logs.sh -t $TIMESTAMP -f $FOLDER -u $users_assigned -c $COMPLETITIONS_COUNT
+$TEST_FOLDER/process-logs.sh -t $TIMESTAMP -f $FOLDER -u $users_assigned -c $COMPLETITIONS_COUNT -s $SERVER_SETTING -v $TEST_SUITE
