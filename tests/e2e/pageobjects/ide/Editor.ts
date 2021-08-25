@@ -339,6 +339,13 @@ export class Editor {
         await this.driverHelper.waitVisibility(warningInLineLocator, timeout);
     }
 
+    async waitInfoInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+        Logger.debug(`Editor.waitInfoInLine line: "${lineNumber}"`);
+
+        const infoInLineLocator: By = await this.getInfoInLineLocator(lineNumber);
+        await this.driverHelper.waitVisibility(infoInLineLocator, timeout);
+    }
+
     async waitWarningInLineDisappearance(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitWarningInLineDisappearance line: "${lineNumber}"`);
 
@@ -499,6 +506,12 @@ export class Editor {
         const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-warning')]`);
+    }
+
+    private async getInfoInLineLocator(lineNumber: number): Promise<By> {
+        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
+
+        return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-info')]`);
     }
 
     private async waitSuggestionWithResettingCursor(editorTabTitle: string,
