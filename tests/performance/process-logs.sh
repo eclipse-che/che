@@ -6,9 +6,11 @@ function printHelp {
   echo "-t     timestamp of the run"
   echo "-c     completitions count"
   echo "-u     users count"
+  echo "-s     server settings"
+  echo "-v     test suite"
 }
 
-while getopts "f:t:c:u:h" opt; do 
+while getopts "f:t:c:u:hs:v:" opt; do 
   case $opt in
     h) printHelp
       ;;
@@ -19,6 +21,10 @@ while getopts "f:t:c:u:h" opt; do
     c) export COMPLETITIONS_COUNT=$OPTARG
       ;;
     u) export USERS_COUNT=$OPTARG
+      ;;
+    s) export SERVER_SETTING=$OPTARG
+      ;;
+    v) export TEST_SUITE=$OPTARG
       ;;
     \?) # invalid option
       exit 1
@@ -40,7 +46,7 @@ echo "-- Generate sum-up for load tests."
 sumupFile="$FOLDER/$TIMESTAMP/load-test-sumup.txt"
 touch $sumupFile
 
-# write users with failed tests
+# gather users with failed tests
 failedUsers=""
 i=1
 failedCounter=0
@@ -61,11 +67,11 @@ done
 cd $CURRENT_DIR
 
 echo "Tests setup: $USERS_COUNT users, each running $COMPLETITIONS_COUNT workspaces" 
-echo -e "Tests setup: $USERS_COUNT users, each running $COMPLETITIONS_COUNT workspaces \n \n" > $sumupFile
+echo -e "Tests setup: \n  $USERS_COUNT users, each running $COMPLETITIONS_COUNT workspaces \n  Server settings: $SERVER_SETTING \n  Test suite used: $TEST_SUITE \n \n" > $sumupFile
 
 if [[ $failedUsers == "" ]]; then
   echo "All tests has passed, yay!"
-  echo -e "Tests passed for all $TEST_COUNT workspaces, yay! \n" > $sumupFile
+  echo -e "Tests passed for all $TEST_COUNT workspaces, yay! \n" >> $sumupFile
 else
   echo "Test failed for $failedCounter/$TEST_COUNT workspaces: $failedUsers"
   echo -e "Test failed for $failedCounter/$TEST_COUNT workspaces: $failedUsers \n" >> $sumupFile
