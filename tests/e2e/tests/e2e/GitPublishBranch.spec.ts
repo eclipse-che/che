@@ -11,7 +11,7 @@
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { Editor } from '../../pageobjects/ide/Editor';
-import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
+import { GitPlugin } from '../../pageobjects/ide/plugins/GitPlugin';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';

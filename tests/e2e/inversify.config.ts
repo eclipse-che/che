@@ -32,7 +32,7 @@ import { Editor } from './pageobjects/ide/Editor';
 import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
-import { GitPlugin } from './pageobjects/ide/GitPlugin';
+import { GitPlugin } from './pageobjects/ide/plugins/GitPlugin';
 import { RightToolBar } from './pageobjects/ide/RightToolBar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
@@ -51,7 +51,7 @@ import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandl
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
 import { CreateWorkspace } from './pageobjects/dashboard/CreateWorkspace';
-import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
+import { OpenshiftPlugin } from './pageobjects/ide/plugins/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';
@@ -68,6 +68,7 @@ import { GitOauthAppsSettings } from './pageobjects/third-parties/GitOauthAppsSe
 import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
+import { WorkspacePlugin } from './pageobjects/ide/plugins/WorkspacePlugin';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -118,6 +119,7 @@ e2eContainer.bind<OpenDialogWidget>(CLASSES.OpenDialogWidget).to(OpenDialogWidge
 e2eContainer.bind<UpdateAccountInformationPage>(CLASSES.UpdateAccountInformationPage).to(UpdateAccountInformationPage);
 e2eContainer.bind<KubernetesPlugin>(CLASSES.KubernetesPlugin).to(KubernetesPlugin);
 e2eContainer.bind<PluginsView>(CLASSES.PluginsView).to(PluginsView);
+e2eContainer.bind<WorkspacePlugin>(CLASSES.WorkspacePlugin).to(WorkspacePlugin);
 e2eContainer.bind<LanguageServerTests>(CLASSES.LanguageServerTests).to(LanguageServerTests);
 e2eContainer.bind<CodeExecutionTests>(CLASSES.CodeExecutionTests).to(CodeExecutionTests);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);

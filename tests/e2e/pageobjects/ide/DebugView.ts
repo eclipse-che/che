@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
@@ -16,7 +17,6 @@ import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { AnimationChecker } from '../../utils/AnimationChecker';
-
 
 @injectable()
 export class DebugView {

@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
@@ -17,6 +18,7 @@ import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { WorkspacePlugin } from './plugins/WorkspacePlugin';
 
 @injectable()
 export class ProjectTree {
@@ -25,7 +27,8 @@ export class ProjectTree {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.Editor) private readonly editor: Editor) { }
+        @inject(CLASSES.Editor) private readonly editor: Editor,
+        @inject(CLASSES.WorkspacePlugin) private readonly workspacePlugin: WorkspacePlugin) { }
 
     async clickCollapseAllButton() {
         Logger.debug('ProjectTree.clickCollapseAllButton');
@@ -58,12 +61,14 @@ export class ProjectTree {
     async openProjectTreeContainer(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
-        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
         Logger.trace(`ProjectTree.openProjectTreeContainer waitLeftToolbarButtonPresence`);
         await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
+        Logger.trace(`ProjectTree.openProjectTreeContainer waitForExplorerToolbarButton`);
+        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
         const isButtonActive: boolean = await this.driverHelper.waitVisibilityBoolean(explorerButtonActiveLocator);
-        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
+
+        Logger.debug(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
         if (!isButtonActive) {
             await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
@@ -140,9 +145,6 @@ export class ProjectTree {
         const locator: string = await this.getExpandIconCssLocator(itemPath);
         const expandIconLocator: By = By.css(locator);
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
-
-
-
 
         await this.driverHelper.getDriver().wait(async () => {
             const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
@@ -241,6 +243,12 @@ export class ProjectTree {
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
+
+                const trustAuthorsNotification = await this.workspacePlugin.isTrustAuthorsNotificationVisible();
+                if (trustAuthorsNotification) {
+                    await this.workspacePlugin.confirmTrustAuthors();
+                }
+
                 continue;
             }
 

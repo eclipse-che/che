@@ -27,7 +27,7 @@ components:
       app.kubernetes.io/component: database
   - type: dockerimage
     alias: maven-container
-    image: quay.io/eclipse/happy-path:nightly
+    image: quay.io/eclipse/happy-path:next
     env:
       - name: MAVEN_CONFIG
         value: /home/user/.m2

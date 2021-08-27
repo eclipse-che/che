@@ -7,14 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { Ide, LeftToolbarButton } from './Ide';
-import { Logger } from '../../utils/Logger';
+import { CLASSES } from '../../../inversify.types';
+import { DriverHelper } from '../../../utils/DriverHelper';
+import { Ide, LeftToolbarButton } from '../Ide';
+import { Logger } from '../../../utils/Logger';
 import { By } from 'selenium-webdriver';
-import { ContextMenu } from './ContextMenu';
-import { TimeoutConstants } from '../../TimeoutConstants';
+import { ContextMenu } from '../ContextMenu';
+import { TimeoutConstants } from '../../../TimeoutConstants';
 
 export enum OpenshiftAppExplorerToolbar {
     ReportExtensionIssueOnGitHub = 'Report Extension Issue on GitHub',
@@ -31,13 +32,11 @@ export enum OpenshiftContextMenuItems {
 @injectable()
 export class OpenshiftPlugin {
 
-
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.ContextMenu) private readonly contextMenu: ContextMenu
     ) {
     }
-
 
     async clickOnOpenshiftToollBarIcon(timeout: number = TimeoutConstants.TS_WAIT_OPENSHIFT_CONNECTOR_TREE_TIMEOUT) {
         Logger.debug(`OpenshiftPlugin.clickOnOpenshiftTollBar`);
@@ -63,6 +62,7 @@ export class OpenshiftPlugin {
         Logger.debug(`OpenshiftPlugin.getClusterIP`);
         return await this.driverHelper.waitAndGetText(By.xpath('//div[@id=\'openshiftProjectExplorer\']//div[@title [contains(text(), https)]]'), timeout);
     }
+
     async waitItemInTree(item: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
         Logger.debug(`OpenshiftPlugin.waitItemInTree`);
         await this.driverHelper.waitPresence(By.xpath(`//div[contains(@id, ':${item}')]`), timeout);

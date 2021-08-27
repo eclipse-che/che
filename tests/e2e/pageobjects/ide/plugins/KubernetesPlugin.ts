@@ -1,3 +1,13 @@
+/*********************************************************************
+ * Copyright (c) 2019 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
+
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../../inversify.types';
@@ -6,8 +16,6 @@ import { Logger } from '../../../utils/Logger';
 import { By } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { LeftToolBar } from '../LeftToolBar';
-
-
 
 @injectable()
 export class KubernetesPlugin {
