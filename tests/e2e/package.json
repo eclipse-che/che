@@ -25,7 +25,7 @@
     "tsc": "tsc -p .",
     "init-mocha-opts": "tsc && mocha --opts mocha-single-devfile.opts --spec dist/tests/login/Login.spec.js",
     "test-plugin": "npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
-    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",   
+    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
     "test-all-plugins": "tsc && mocha --opts mocha-all-plugins.opts"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
@@ -44,7 +44,7 @@
     "selenium-webdriver": "3.6.0",
     "ts-node": "8.0.3",
     "tslint": "5.10.0",
-    "typed-rest-client": "1.2.0",
+    "typed-rest-client": "1.8.5",
     "typescript": "3.9.9"
   },
   "dependencies": {
