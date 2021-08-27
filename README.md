@@ -80,11 +80,5 @@ If you are interested in fixing issues and contributing directly to the code bas
 ### Roadmap
 We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open way. We welcome anyone to ask question and contribute to the roadmap by joining our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings).
 
-## CI
-There are several [GitHub Actions](https://github.com/eclipse-che/che-server/actions) workflows implemented for this repository:
-
-- [`nightly`](https://github.com/eclipse-che/che-server/actions/workflows/nightly-build.yml) - builds Maven artifacts, builds container images and pushes them to [quay.io](https://quay.io/organization/eclipse) on a daily basis from the [`master`](https://github.com/eclipse-che/che-server/tree/master) branch.
-- [`release`](https://github.com/eclipse-che/che-server/actions/workflows/release.yml) - builds Maven artifacts and container images. Images are public and pushed to [quay.io](https://quay.io/organization/eclipse). See [RELEASE.md](https://github.com/eclipse-che/che-server/blob/master/RELEASE.md) for more information about this workflow.
-
 ### License
 Che is open sourced under the Eclipse Public License 2.0.
