@@ -158,7 +158,7 @@ suite('Validation of workspace build and run', async () => {
     test('Build application', async () => {
         const taskName: string = 'build-file-output';
         await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
-        await terminal.waitIconSuccess(taskName, 250_000);
+        await terminal.waitIconSuccess(taskName, 500_000);
     });
 
     test('Run application', async () => {

@@ -7,6 +7,7 @@ projects:
     source:
       type: git
       location: "https://github.com/spring-projects/spring-petclinic.git"
+      commitId: e7c879ed3abe10e446ff103887ad665ca6acf04e
 components:
   - type: cheEditor
     id: eclipse/che-theia/next
