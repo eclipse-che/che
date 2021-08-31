@@ -82,7 +82,7 @@ suite('Validation of workspace start', async () => {
         await ide.waitAndSwitchToIdeFrame();
         await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await projectTree.openProjectTreeContainer();
-        await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust');
+        await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
         await projectTree.waitProjectImported(projectName, workspaceRootFolderName);
     });
 });
