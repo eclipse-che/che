@@ -44,7 +44,6 @@ export * from './pageobjects/ide/plugins/GitPlugin';
 export * from './pageobjects/ide/plugins/KubernetesPlugin';
 export * from './pageobjects/ide/plugins/OpenshiftPlugin';
 export * from './pageobjects/ide/plugins/PluginsView';
-export * from './pageobjects/ide/plugins/WorkspacePlugin';
 export * from './pageobjects/ide/PreviewWidget';
 export * from './pageobjects/ide/ProjectTree';
 export * from './pageobjects/ide/QuickOpenContainer';

@@ -18,7 +18,6 @@ import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
-import { WorkspacePlugin } from './plugins/WorkspacePlugin';
 
 @injectable()
 export class ProjectTree {
@@ -27,8 +26,7 @@ export class ProjectTree {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.Editor) private readonly editor: Editor,
-        @inject(CLASSES.WorkspacePlugin) private readonly workspacePlugin: WorkspacePlugin) { }
+        @inject(CLASSES.Editor) private readonly editor: Editor) { }
 
     async clickCollapseAllButton() {
         Logger.debug('ProjectTree.clickCollapseAllButton');
@@ -243,12 +241,6 @@ export class ProjectTree {
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
-
-                const trustAuthorsNotification = await this.workspacePlugin.isTrustAuthorsNotificationVisible();
-                if (trustAuthorsNotification) {
-                    await this.workspacePlugin.confirmTrustAuthors();
-                }
-
                 continue;
             }
 
