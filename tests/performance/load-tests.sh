@@ -164,7 +164,7 @@ oc exec ftp-server -- sh /usr/sbin/run-vsftpd.sh &
 # set common variables to template.yaml
 if [ $SERVER_SETTING == "multi-host" ]; then
   SINGLE_HOST="false"
-elif [ $SERVER_SETTING == "single-host"]; then
+elif [ $SERVER_SETTING == "single-host" ]; then
   SINGLE_HOST="true"
 fi
 
