@@ -32,7 +32,7 @@ import { Editor } from './pageobjects/ide/Editor';
 import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
 import { PreviewWidget } from './pageobjects/ide/PreviewWidget';
-import { GitPlugin } from './pageobjects/ide/GitPlugin';
+import { GitPlugin } from './pageobjects/ide/plugins/GitPlugin';
 import { RightToolBar } from './pageobjects/ide/RightToolBar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
@@ -51,7 +51,7 @@ import { CheApiRequestHandler } from './utils/requestHandlers/CheApiRequestHandl
 import { CheGitApi } from './utils/VCS/CheGitApi';
 import { GitHubUtil } from './utils/VCS/github/GitHubUtil';
 import { CreateWorkspace } from './pageobjects/dashboard/CreateWorkspace';
-import { OpenshiftPlugin } from './pageobjects/ide/OpenshiftPlugin';
+import { OpenshiftPlugin } from './pageobjects/ide/plugins/OpenshiftPlugin';
 import { OpenDialogWidget } from './pageobjects/ide/OpenDialogWidget';
 import { UpdateAccountInformationPage } from './pageobjects/login/UpdateAccountInformationPage';
 import { LeftToolBar } from './pageobjects/ide/LeftToolBar';

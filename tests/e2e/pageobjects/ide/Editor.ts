@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
@@ -15,7 +16,6 @@ import { TestConstants } from '../../TestConstants';
 import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
-
 
 @injectable()
 export class Editor {

@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
@@ -58,12 +59,14 @@ export class ProjectTree {
     async openProjectTreeContainer(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug('ProjectTree.openProjectTreeContainer');
 
-        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
         Logger.trace(`ProjectTree.openProjectTreeContainer waitLeftToolbarButtonPresence`);
         await this.ide.waitLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
 
+        Logger.trace(`ProjectTree.openProjectTreeContainer waitForExplorerToolbarButton`);
+        const explorerButtonActiveLocator: By = this.getLeftToolbarButtonActiveLocator(LeftToolbarButton.Explorer);
         const isButtonActive: boolean = await this.driverHelper.waitVisibilityBoolean(explorerButtonActiveLocator);
-        Logger.trace(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
+
+        Logger.debug(`ProjectTree.openProjectTreeContainer leftToolbarButtonActive:${isButtonActive}`);
         if (!isButtonActive) {
             await this.ide.waitAndClickLeftToolbarButton(LeftToolbarButton.Explorer, timeout);
         }
@@ -140,9 +143,6 @@ export class ProjectTree {
         const locator: string = await this.getExpandIconCssLocator(itemPath);
         const expandIconLocator: By = By.css(locator);
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
-
-
-
 
         await this.driverHelper.getDriver().wait(async () => {
             const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);

@@ -7,13 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { Buttons, Locations, OpenDialogWidget } from '../../pageobjects/ide/OpenDialogWidget';
-import { OpenshiftAppExplorerToolbar, OpenshiftContextMenuItems, OpenshiftPlugin } from '../../pageobjects/ide/OpenshiftPlugin';
+import { OpenshiftAppExplorerToolbar, OpenshiftContextMenuItems, OpenshiftPlugin } from '../../pageobjects/ide/plugins/OpenshiftPlugin';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Terminal } from '../../pageobjects/ide/Terminal';
@@ -26,7 +27,6 @@ import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import CheReporter from '../../driver/CheReporter';
-
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);

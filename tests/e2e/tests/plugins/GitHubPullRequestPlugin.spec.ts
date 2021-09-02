@@ -21,7 +21,7 @@ import { GitLoginPage } from '../../pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from '../../pageobjects/third-parties/GitOauthAppsSettings';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { KeycloackUrlHandler } from '../../utils/KeycloackUrlHandler';
-import { GitPlugin } from '../../pageobjects/ide/GitPlugin';
+import { GitPlugin } from '../../pageobjects/ide/plugins/GitPlugin';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';

@@ -1,10 +1,3 @@
-import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
-import { Logger } from '../../utils/Logger';
-import { TimeoutConstants } from '../../TimeoutConstants';
-
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -14,6 +7,13 @@ import { TimeoutConstants } from '../../TimeoutConstants';
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
+import { injectable, inject } from 'inversify';
+import { CLASSES } from '../../inversify.types';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { By } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class QuickOpenContainer {

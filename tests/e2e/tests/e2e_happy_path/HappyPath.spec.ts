@@ -27,11 +27,9 @@ import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
-import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import CheReporter from '../../driver/CheReporter';
 
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -80,7 +78,13 @@ suite('Validation of workspace start', async () => {
         CheReporter.registerRunningWorkspace(workspaceName);
     });
 
-    projectAndFileTests.waitWorkspaceReadiness(projectName, workspaceRootFolderName);
+    test('Wait for workspace readiness', async () => {
+        await ide.waitAndSwitchToIdeFrame();
+        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        await projectTree.openProjectTreeContainer();
+        await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+        await projectTree.waitProjectImported(projectName, workspaceRootFolderName);
+    });
 });
 
 suite('Language server validation', async () => {

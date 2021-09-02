@@ -1,13 +1,3 @@
-import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
-import { Logger } from '../../utils/Logger';
-import { TimeoutConstants } from '../../TimeoutConstants';
-import { DialogWindow } from './DialogWindow';
-import { TopMenu } from './TopMenu';
-import { QuickOpenContainer } from './QuickOpenContainer';
-
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -17,6 +7,16 @@ import { QuickOpenContainer } from './QuickOpenContainer';
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
+import { injectable, inject } from 'inversify';
+import { CLASSES } from '../../../inversify.types';
+import { DriverHelper } from '../../../utils/DriverHelper';
+import { By } from 'selenium-webdriver';
+import { Logger } from '../../../utils/Logger';
+import { TimeoutConstants } from '../../../TimeoutConstants';
+import { DialogWindow } from '../DialogWindow';
+import { TopMenu } from '../TopMenu';
+import { QuickOpenContainer } from '../QuickOpenContainer';
 
 @injectable()
 export class GitPlugin {
@@ -94,7 +94,6 @@ export class GitPlugin {
         await this.topMenu.selectOption('View', 'Find Command...');
         await this.quickOpenContainer.typeAndSelectSuggestion('Push', 'Git: Push');
     }
-
 
     async stageAllChanges(expectedStagedItem: string, timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
         Logger.debug('GitPlugin.stageAllChanges');

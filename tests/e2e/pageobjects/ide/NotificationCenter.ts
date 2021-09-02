@@ -15,8 +15,6 @@ import { Logger } from '../../utils/Logger';
 import { By } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
-
-
 @injectable()
 export class NotificationCenter {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
