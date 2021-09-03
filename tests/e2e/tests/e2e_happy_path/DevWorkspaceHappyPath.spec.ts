@@ -24,7 +24,7 @@ const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.Work
 suite('Workspace creation via factory url', async () => {
 
     let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
-    const workspaceSampleName: string = 'spring-petclinic';
+    const workspaceSampleName: string = 'java-spring-petclinic';
     const workspaceRootFolderName: string = 'src';
 
     suite('Open factory URL', async () => {
