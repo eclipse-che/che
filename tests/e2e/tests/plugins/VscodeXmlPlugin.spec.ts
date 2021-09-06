@@ -48,6 +48,7 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
 
             await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
         });
     });
 
