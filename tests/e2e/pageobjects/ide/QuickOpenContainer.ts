@@ -44,13 +44,13 @@ export class QuickOpenContainer {
 
     public async type(text: string) {
         Logger.debug(`QuickOpenContainer.type "${text}"`);
-        await this.driverHelper.enterValue(By.css('.quick-open-input input'), text);
+        await this.driverHelper.type(By.css('div.monaco-inputbox  input.input'), text);
     }
 
     public async typeAndSelectSuggestion(text: string, suggestedText: string) {
         Logger.debug('QuickOpenContainer.typeAndSelectSuggestion');
 
-        await this.driverHelper.type(By.css('div.monaco-inputbox  input.input'), text);
+        await this.type(text);
         // sometimes the UI dropdawn may closed unexpectedly for more stability add 500ms delay.
         await this.driverHelper.wait(2000);
         await this.clickOnContainerItem(suggestedText);
