@@ -27,6 +27,7 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { Key } from 'selenium-webdriver';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -91,7 +92,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
         test('Create new branch', async () => {
             await topMenu.selectOption('View', 'Find Command...');
             await quickOpenContainer.typeAndSelectSuggestion('branch', 'Git: Create Branch...');
-            await quickOpenContainer.typeAndSelectSuggestion(branchName, `Please provide a new branch name (Press 'Enter' to confirm or 'Escape' to cancel)`);
+            await quickOpenContainer.type(`${branchName}${Key.ENTER}`);
 
             await projectTree.expandPathAndOpenFile('Spoon-Knife', changedFile);
             await editor.type(changedFile, currentDate + '\n', 1);
