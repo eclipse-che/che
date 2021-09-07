@@ -165,6 +165,7 @@ export class LanguageServerTests {
                 await this.browserTabsUtil.refreshPage();
                 await this.driverHelper.wait(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
                 await this.ide.waitAndSwitchToIdeFrame();
+                await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
                 await this.debugView.clickOnRunDebugButton();
             }
         });
@@ -187,6 +188,7 @@ export class LanguageServerTests {
                 await this.browserTabsUtil.refreshPage();
                 await this.driverHelper.wait(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
                 await this.ide.waitAndSwitchToIdeFrame();
+                await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
                 await this.debugView.clickOnDebugConfigurationDropDown();
                 await this.debugView.clickOnDebugConfigurationItem(configurationName);
                 await this.debugView.clickOnRunDebugButton();
