@@ -36,7 +36,7 @@ const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfil
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
-const yamlSchema = { 'https://raw.githubusercontent.com/apache/camel-k-runtime/camel-k-runtime-parent-1.5.0/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json': '*.yaml' };
+const yamlSchema = { 'yaml-schema/yaml-schema.json': '*.yaml' };
 let workspaceName: string = '';
 
 suite('The "VscodeYamlPlugin" userstory', async () => {
