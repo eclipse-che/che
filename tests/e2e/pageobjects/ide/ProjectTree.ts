@@ -156,7 +156,7 @@ export class ProjectTree {
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
-                    throw err('Unexpected error during project tree expanding');
+                    throw Error('Unexpected error during project tree expanding');
                 }
 
                 console.log(`The '${itemPath}' item has not been expanded, try again`);
