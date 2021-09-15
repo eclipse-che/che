@@ -35,6 +35,7 @@ body:
       options:
         - "7.36@latest"
         - "next (development version)"
+        - "7.36"
         - "7.35"
         - "7.34"
         - "7.33"
