@@ -18,8 +18,6 @@ import { TopMenu } from '../pageobjects/ide/TopMenu';
 import { DebugView } from '../pageobjects/ide/DebugView';
 import { Key, error } from 'selenium-webdriver';
 import { Logger } from '../utils/Logger';
-import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
-import { DriverHelper } from '../utils/DriverHelper';
 
 @injectable()
 export class LanguageServerTests {
@@ -28,9 +26,7 @@ export class LanguageServerTests {
         @inject(CLASSES.Editor) private readonly editor: Editor,
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
-        @inject(CLASSES.DebugView) private readonly debugView: DebugView,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+        @inject(CLASSES.DebugView) private readonly debugView: DebugView) { }
 
     public errorHighlighting(openedTab: string, textToWrite: string, line: number) {
         test('Error highlighting', async () => {
@@ -158,16 +154,7 @@ export class LanguageServerTests {
         });
 
         test('Run debug', async () => {
-            try {
-                await this.debugView.clickOnRunDebugButton();
-            } catch (err) {
-                // debug config is probably missing, refresh IDE and try again
-                await this.browserTabsUtil.refreshPage();
-                await this.driverHelper.wait(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-                await this.ide.waitAndSwitchToIdeFrame();
-                await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
-                await this.debugView.clickOnRunDebugButton();
-            }
+            await this.debugView.clickOnRunDebugButton();
         });
     }
 
@@ -179,20 +166,9 @@ export class LanguageServerTests {
         });
 
         test('Run debug', async () => {
-            try {
-                await this.debugView.clickOnDebugConfigurationDropDown();
-                await this.debugView.clickOnDebugConfigurationItem(configurationName);
-                await this.debugView.clickOnRunDebugButton();
-            } catch (err) {
-                // debug config is probably missing, refresh IDE and try again
-                await this.browserTabsUtil.refreshPage();
-                await this.driverHelper.wait(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-                await this.ide.waitAndSwitchToIdeFrame();
-                await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
-                await this.debugView.clickOnDebugConfigurationDropDown();
-                await this.debugView.clickOnDebugConfigurationItem(configurationName);
-                await this.debugView.clickOnRunDebugButton();
-            }
+            await this.debugView.clickOnDebugConfigurationDropDown();
+            await this.debugView.clickOnDebugConfigurationItem(configurationName);
+            await this.debugView.clickOnRunDebugButton();
         });
     }
 
