@@ -13,6 +13,7 @@ import { CLASSES } from '../inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { TestConstants } from '..';
 import { Sanitizer } from './Sanitizer';
+import { error } from 'selenium-webdriver';
 
 @injectable()
 export class ScreenCatcher {
@@ -47,7 +48,9 @@ export class ScreenCatcher {
 
             let errorLogFilePath: string = screenshotPath.replace('.png', '.txt');
             errorLogFilePath = errorLogFilePath.replace(executionScreenCastDir, executionScreenCastErrorsDir);
-            await this.writeErrorLog(errorLogFilePath, err);
+            if (err instanceof error.IError) {
+                await this.writeErrorLog(errorLogFilePath, err);
+            }
         }
     }
 
@@ -58,7 +61,7 @@ export class ScreenCatcher {
         screenshotStream.end();
     }
 
-    async writeErrorLog(errorLogPath: string, err: Error) {
+    async writeErrorLog(errorLogPath: string, err: error.IError) {
         console.log(`Failed to save screenshot, additional information in the ${errorLogPath}`);
 
         if (err.stack) {
