@@ -36,7 +36,7 @@ const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfil
 const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
-const yamlSchema = { 'yaml-schema/yaml-schema.json': '*.yaml' };
+const yamlSchema = { 'yaml-schema.json': '*.yaml' };
 let workspaceName: string = '';
 
 suite('The "VscodeYamlPlugin" userstory', async () => {
