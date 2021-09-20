@@ -66,10 +66,10 @@ suite('Workspace creation via factory url', async () => {
         });
 
         test('Register running workspace', async () => {
-        await ide.waitAndSwitchToIdeFrame();
-        await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-        await projectTree.openProjectTreeContainer();
-        await projectTree.waitProjectImported(projectName, workspaceRootFolderName);
+            await ide.waitAndSwitchToIdeFrame();
+            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await projectTree.openProjectTreeContainer();
+            await projectTree.waitProjectImported(projectName, workspaceRootFolderName);
         });
     });
     });
