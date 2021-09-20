@@ -186,7 +186,7 @@ async function switchApptWindowAndCheck(contentLocator: By) {
     await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
     const isApplicationTitleVisible: boolean = await driverHelper.isVisible(contentLocator);
         if (!isApplicationTitleVisible) {
-            await driverHelper.getDriver().sleep(5000);
+            await driverHelper.getDriver().sleep(TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
             await driverHelper.getDriver().navigate().refresh();
             await browserTabsUtil.switchToWindow(mainWindowHandle);
             await ide.waitAndSwitchToIdeFrame();
