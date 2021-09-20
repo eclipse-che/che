@@ -135,27 +135,27 @@ suite('Workspace creation via factory url', async () => {
 });
     suite('Validation of workspace build and run', async () => {
         test('Build application', async () => {
-        const taskName: string = 'build';
-        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
-        await terminal.waitIconSuccess(taskName, 500_000);
+           const taskName: string = 'build';
+           await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+           await terminal.waitIconSuccess(taskName, 500_000);
         });
 
-    test('Run application', async () => {
-        const taskName: string = 'run';
-        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
-        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
-        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
+        test('Run application', async () => {
+           const taskName: string = 'run';
+           await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+           await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
+           await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
        });
 
-    test('Check the running application', async () => {
-        await switchApptWindowAndCheck(SpringAppLocators.springTitleLocator);
+        test('Check the running application', async () => {
+            await switchAppWindowAndCheck(SpringAppLocators.springTitleLocator);
        });
 
-    test('Close the terminal running tasks', async () => {
-        await terminal.rejectTerminalProcess('run');
-        await terminal.closeTerminalTab('run');
-        await warningDialog.waitAndCloseIfAppear();
-        await terminal.closeTerminalTab('build');
+        test('Close the terminal running tasks', async () => {
+            await terminal.rejectTerminalProcess('run');
+            await terminal.closeTerminalTab('run');
+            await warningDialog.waitAndCloseIfAppear();
+            await terminal.closeTerminalTab('build');
        });
 });
 
@@ -181,7 +181,7 @@ async function checkJavaPathCompletion() {
 }
 
 // when we use devfile v.2 the test app. is opened in the separate window instead of widget
-async function switchApptWindowAndCheck(contentLocator: By) {
+async function switchAppWindowAndCheck(contentLocator: By) {
     const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
     await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
     const isApplicationTitleVisible: boolean = await driverHelper.isVisible(contentLocator);
