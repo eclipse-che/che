@@ -15,16 +15,14 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { TestConstants } from '../../TestConstants';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { Key, error, By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
-import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
-import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
-import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
 import * as fs from 'fs';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -41,8 +39,6 @@ const codeNavigationClassName: string = 'SpringApplication.class';
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const globalTaskScope = 'Global';
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
-const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
-const rightToolBar: RightToolBar = e2eContainer.get(CLASSES.RightToolBar);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 
 
@@ -78,7 +74,7 @@ suite('Workspace creation via factory url', async () => {
     });
     });
 
-    suite.skip('Language server validation', async () => {
+    suite('Language server validation', async () => {
         test('Java LS initialization', async () => {
             await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
             await ide.waitNotificationAndClickOnButton('The workspace contains Java projects. Would you like to import them?', 'Yes');
@@ -138,8 +134,7 @@ suite('Workspace creation via factory url', async () => {
         });
 });
     suite('Validation of workspace build and run', async () => {
-
-        test.skip('Build application', async () => {
+        test('Build application', async () => {
         const taskName: string = 'build';
         await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
         await terminal.waitIconSuccess(taskName, 500_000);
@@ -156,16 +151,11 @@ suite('Workspace creation via factory url', async () => {
         await switchApptWindowAndCheck(SpringAppLocators.springTitleLocator);
        });
 
-    test('Close preview widget', async () => {
-        await rightToolBar.clickOnToolIcon('Preview');
-        await previewWidget.waitPreviewWidgetAbsence();
-       });
-
     test('Close the terminal running tasks', async () => {
-        await terminal.closeTerminalTab('build-file-output');
         await terminal.rejectTerminalProcess('run');
         await terminal.closeTerminalTab('run');
         await warningDialog.waitAndCloseIfAppear();
+        await terminal.closeTerminalTab('build');
        });
 });
 
@@ -190,10 +180,15 @@ async function checkJavaPathCompletion() {
     }
 }
 
-// when we  use devfile v.2 the test app. is opened in the separete window insrtead of widget
+// when we use devfile v.2 the test app. is opened in the separate window instead of widget
 async function switchApptWindowAndCheck(contentLocator: By) {
     const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
     await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
-    await driverHelper.waitPresence(contentLocator);
-    await browserTabsUtil.switchToWindow(mainWindowHandle);
+    const isApplicationTitleVisible: boolean = await driverHelper.isVisible(contentLocator);
+        if (!isApplicationTitleVisible) {
+            await driverHelper.getDriver().sleep(5000);
+            await driverHelper.getDriver().navigate().refresh();
+            await browserTabsUtil.switchToWindow(mainWindowHandle);
+            await ide.waitAndSwitchToIdeFrame();
+        }
 }
