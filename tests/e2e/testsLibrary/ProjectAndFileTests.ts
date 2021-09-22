@@ -31,6 +31,7 @@ export class ProjectAndFileTests {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
             await this.projectTree.openProjectTreeContainer();
             await this.projectTree.waitProjectImported(sampleName, folder);
         });
@@ -40,6 +41,7 @@ export class ProjectAndFileTests {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
             await this.projectTree.openProjectTreeContainer();
             await this.projectTree.waitProjectImportedNoSubfolder(sampleName);
         });
