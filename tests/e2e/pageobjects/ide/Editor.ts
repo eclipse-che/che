@@ -27,6 +27,13 @@ export class Editor {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
+    public async deleteAllText(editorTab: string) {
+        Logger.debug('Editor.deleteAllText');
+
+        await this.selectTab(editorTab);
+        await this.type(editorTab, Key.chord(Key.CONTROL, 'a', Key.DELETE), 1);
+    }
+
     public async waitSuggestionContainer(timeout: number = TimeoutConstants.TS_SUGGESTION_TIMEOUT) {
         Logger.debug('Editor.waitSuggestionContainer');
 

@@ -22,8 +22,6 @@ import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -32,8 +30,6 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
-const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
-const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeYamlPlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -41,14 +37,11 @@ const projectName: string = 'nodejs-web-app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
 const yamlSchema = { 'yaml-schema.json': '*.yaml' };
+
 let workspaceName: string = '';
 
 suite('The "VscodeYamlPlugin" userstory', async () => {
     suite('Create workspace', async () => {
-        test('Set yaml schema', async () => {
-            await preferencesHandler.setPreference('yaml.schemas', yamlSchema);
-        });
-
         test('Create workspace using factory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
@@ -71,11 +64,8 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
     });
 
     suite('Check the "vscode-yaml" plugin', async () => {
-        test('Check preferences setup', async () => {
-            await topMenu.selectOption('View', 'Find Command...');
-            await quickOpenContainer.typeAndSelectSuggestion('Preferences:', 'Preferences: Open Preferences (JSON)');
-            await editor.selectTab('settings.json');
-            await editor.waitText('settings.json', 'yaml-schema.json', 60_000, 10_000);
+        test('Set the yaml schema path', async () => {
+            await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
         });
 
         test('Check autocomplete', async () => {
