@@ -69,8 +69,8 @@ export class PreferencesHandler {
         try {
             response = await this.requestHandler.get('api/preferences');
         } catch (e) {
-            Logger.error(`PreferencesHandler.setPreferences failed to get user preferences`);
-            throw e;
+            Logger.error(`PreferencesHandler.setPreferences failed to get user preferences: ${e}`);
+            return;
         }
         let userPref = response.data;
         try {
@@ -86,8 +86,8 @@ export class PreferencesHandler {
             try {
                 await this.requestHandler.post('api/preferences', userPref);
             } catch (e) {
-                Logger.error(`PreferencesHandler.setPreference failed to manually set preferences value.`);
-                throw e;
+                Logger.error(`PreferencesHandler.setPreference failed to manually set preferences value: ${e}`);
+                return;
             }
         }
         Logger.trace(`PreferencesHandler.setPreferences ${attribute} to ${value} done.`);
