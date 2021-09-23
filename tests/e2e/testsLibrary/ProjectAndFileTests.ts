@@ -27,21 +27,25 @@ export class ProjectAndFileTests {
         @inject(CLASSES.ProjectTree) private readonly projectTree: ProjectTree,
         @inject(CLASSES.Editor) private readonly editor: Editor) {}
 
-    public waitWorkspaceReadiness(sampleName : string, folder: string) {
+    public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true) {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+            if (checkNotification) {
+                await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+            }
             await this.projectTree.openProjectTreeContainer();
             await this.projectTree.waitProjectImported(sampleName, folder);
         });
     }
 
-    public waitWorkspaceReadinessNoSubfolder(sampleName : string) {
+    public waitWorkspaceReadinessNoSubfolder(sampleName : string, checkNotification: boolean = true) {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+            if (checkNotification) {
+                await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+            }
             await this.projectTree.openProjectTreeContainer();
             await this.projectTree.waitProjectImportedNoSubfolder(sampleName);
         });
