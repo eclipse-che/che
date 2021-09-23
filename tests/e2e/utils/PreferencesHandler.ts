@@ -12,6 +12,10 @@ import { injectable, inject } from 'inversify';
 import { Logger } from './Logger';
 import { CLASSES } from '../inversify.types';
 import { CheApiRequestHandler } from './requestHandlers/CheApiRequestHandler';
+import { Editor } from '../pageobjects/ide/Editor';
+import { QuickOpenContainer } from '../pageobjects/ide/QuickOpenContainer';
+import { TopMenu } from '../pageobjects/ide/TopMenu';
+import { Key } from 'selenium-webdriver';
 
 export enum TerminalRendererType {
     canvas = 'canvas',
@@ -27,7 +31,28 @@ export enum AskForConfirmationType {
 @injectable()
 export class PreferencesHandler {
 
-    constructor(@inject(CLASSES.CheApiRequestHandler) private readonly requestHandler: CheApiRequestHandler) {
+    constructor(@inject(CLASSES.CheApiRequestHandler) private readonly requestHandler: CheApiRequestHandler,
+        @inject(CLASSES.Editor) private readonly editor: Editor,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
+        @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu) {
+    }
+
+    /**
+     * Works properly only for the running workspace.
+     */
+    public async setPreferenceUsingUI(property: string, value: any) {
+        const tabTitle: string = 'settings.json';
+
+        await this.topMenu.selectOption('View', 'Find Command...');
+        await this.quickOpenContainer.typeAndSelectSuggestion('Preferences:', 'Preferences: Open Preferences (JSON)');
+
+        let editorText: string = await this.editor.getEditorVisibleText(tabTitle);
+        let preferences = JSON.parse(editorText);
+        preferences[property] = value;
+
+        await this.editor.deleteAllText(tabTitle);
+        await this.editor.type(tabTitle, JSON.stringify(preferences), 1);
+        await this.editor.type(tabTitle, Key.chord(Key.CONTROL, Key.SHIFT, 'i'), 1);
     }
 
     /**
