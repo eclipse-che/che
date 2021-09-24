@@ -11,10 +11,12 @@ import 'reflect-metadata';
 import { CLASSES } from '../../inversify.types';
 import CheReporter from '../../driver/CheReporter';
 import { e2eContainer } from '../../inversify.config';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 
 const workspaceSampleName: string = 'console-java-simple';
@@ -32,6 +34,10 @@ suite(`${stack} test`, async () => {
         });
 
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+
+        test('Set application.confirmExit user preferences to "never"', async () => {
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
+        });
     });
 
     suite ('Stopping and deleting the workspace', async () => {
