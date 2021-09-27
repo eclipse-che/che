@@ -33,7 +33,7 @@ suite(`${stack} test`, async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
         });
 
-        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
 
         test('Set application.confirmExit user preferences to "never"', async () => {
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
