@@ -41,7 +41,7 @@ suite(`${stack} test`, async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
         });
 
-        projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName);
+        projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
     suite('Test opening file', async () => {

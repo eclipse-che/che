@@ -42,7 +42,7 @@ suite(`${workspaceStack} test`, async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
         });
 
-        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
+        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
     suite('Test opening file', async () => {
