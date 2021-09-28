@@ -8,6 +8,9 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+# This is the script that is run as PR check to make sure test changes
+# don't break DevWorkspace Happy Path E2E test
+
 #!/usr/bin/env bash
 # exit immediately when a command fails
 set -e
@@ -42,12 +45,6 @@ export CI="openshift"
 export GIT_COMMITTER_NAME="CI BOT"
 export GIT_COMMITTER_EMAIL="ci_bot@notused.com"
 
-deployDWO() {
-  export NAMESPACE="devworkspace-controller"
-  export DWO_IMG="${DEVWORKSPACE_OPERATOR}"
-  make install
-}
-
 deployChe() {
   # create fake DWO CSV to prevent Che Operator getting
   # ownerships of DWO resources
@@ -59,10 +56,10 @@ deployChe() {
     --batch \
     --telemetry=off \
     --installer=operator \
-    --workspace-engine=dev-workspace
+    --workspace-engine=dev-workspace"
+  exit 1
 }
 
 installChectl
-deployDWO
 deployChe
 "${SCRIPT_DIR}/che-happy-path.sh"
