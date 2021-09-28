@@ -8,24 +8,34 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+# exit immediately when a command fails
 set -e
-
-export ARTIFACT_DIR=${ARTIFACT_DIR:-"/tmp/che-happy-path"}
-mkdir -p "${ARTIFACT_DIR}"
+# only exit with zero if all commands of the pipeline exit successfully
+set -o pipefail
+# error on unset variables
+set -u
+# print each command before executing it
+set -x
 
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
-export CHE_NAMESPACE="eclipse-che"
+export WORKDIR="${WORKDIR:-${SCRIPT_DIR}/workdir}"
+export CHE_NAMESPACE="${CHE_NAMESPACE:-eclipse-che}"
+export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-quay.io/eclipse/che-e2e:next}"
 export HAPPY_PATH_POD_NAME=happy-path-che
 export HAPPY_PATH_TEST_PROJECT='https://github.com/che-samples/java-spring-petclinic/tree/devfilev2'
 
-# Create cluster-admin user inside of openshift cluster and login
+rm -rf ${WORKDIR}
+mkdir -p ${WORKDIR}
+
+# Create cluster-admin user inside of OpenShift cluster and login
 function provisionOpenShiftOAuthUser() {
   if oc login -u che-user -p user --insecure-skip-tls-verify=false; then
     echo "Che User already exists. Using it"
     return 0
   fi
   echo "Che User does not exist. Setting up htpassw oauth for it."
+  SCRIPT_DIR=$(dirname $(readlink -f "$0"))
   oc delete secret che-htpass-secret -n openshift-config || true
   oc create secret generic che-htpass-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
@@ -53,10 +63,11 @@ startHappyPathTest() {
   ECLIPSE_CHE_URL=http://$(oc get route -n "${CHE_NAMESPACE}" che -o jsonpath='{.status.ingress[0].host}')
   TS_SELENIUM_DEVWORKSPACE_URL="${ECLIPSE_CHE_URL}/#${HAPPY_PATH_TEST_PROJECT}"
   HAPPY_PATH_POD_FILE=${SCRIPT_DIR}/resources/pod-che-happy-path.yaml
-  sed -i "s@CHE_URL@${ECLIPSE_CHE_URL}@g" ${HAPPY_PATH_POD_FILE}
-  sed -i "s@WORKSPACE_ROUTE@${TS_SELENIUM_DEVWORKSPACE_URL}@g" ${HAPPY_PATH_POD_FILE}
-  sed -i "s@CHE-NAMESPACE@${CHE_NAMESPACE}@g" ${HAPPY_PATH_POD_FILE}
-
+  cp $HAPPY_PATH_POD_FILE ${WORKDIR}/e2e-pod.yaml
+  sed -i "s@CHE_URL@${ECLIPSE_CHE_URL}@g" ${WORKDIR}/e2e-pod.yaml
+  sed -i "s@WORKSPACE_ROUTE@${TS_SELENIUM_DEVWORKSPACE_URL}@g" ${WORKDIR}/e2e-pod.yaml
+  sed -i "s@CHE-NAMESPACE@${CHE_NAMESPACE}@g" ${WORKDIR}/e2e-pod.yaml
+  sed -i "s@image: .*@image: ${E2E_TEST_IMAGE}@g" ${WORKDIR}/e2e-pod.yaml
   echo "[INFO] Applying the following patched Che Happy Path Pod:"
   cat ${HAPPY_PATH_POD_FILE}
   echo "[INFO] --------------------------------------------------"
