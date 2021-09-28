@@ -1,0 +1,34 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  name: devworkspace-operator
+  namespace: eclipse-che
+spec:
+  customresourcedefinitions: {}
+  cleanup:
+    enabled: false
+  apiservicedefinitions:
+    owned: []
+  keywords:
+    - devworkspace-operator
+    - fake-csv
+  displayName: DevWorkspace Operator
+  provider:
+    name: DWO
+  maturity: alpha
+  installModes:
+    - supported: false
+      type: OwnNamespace
+    - supported: false
+      type: SingleNamespace
+    - supported: false
+      type: MultiNamespace
+    - supported: true
+      type: AllNamespaces
+  version: 0.1.0
+  minKubeVersion: 1.11.0
+  install:
+    spec:
+      clusterPermissions: []
+      deployments: []
+    strategy: deployment
