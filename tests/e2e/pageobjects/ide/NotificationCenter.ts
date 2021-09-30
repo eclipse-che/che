@@ -44,7 +44,7 @@ export class NotificationCenter {
     async clickCloseAllNotificationsButton(timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
         Logger.debug(`NotificationCenter.clickCloseAllNotificationsButton`);
 
-        const closeAllButtonLocator: By = By.css('.theia-notification-center-header-actions .clear-all');
+        const closeAllButtonLocator: By = By.css('li.codicon.codicon-clear-all.action-item[title="Clear All"]');
 
         await this.driverHelper.waitAndClick(closeAllButtonLocator, timeout);
     }
