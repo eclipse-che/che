@@ -21,6 +21,7 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { PreviewWidget } from '../pageobjects/ide/PreviewWidget';
 import { RightToolBar } from '../pageobjects/ide/RightToolBar';
 import { Logger } from '../utils/Logger';
+import { QuickOpenContainer } from '../pageobjects/ide/QuickOpenContainer';
 
 @injectable()
 export class CodeExecutionTests {
@@ -34,18 +35,19 @@ export class CodeExecutionTests {
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.PreviewWidget) private readonly previewWidget: PreviewWidget,
-        @inject(CLASSES.RightToolBar) private readonly rightToolBar: RightToolBar) {}
+        @inject(CLASSES.RightToolBar) private readonly rightToolBar: RightToolBar,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) {}
 
     public runTask(taskName: string, timeout: number) {
         test(`Run command '${taskName}'`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.terminal.waitIconSuccess(taskName, timeout);
         });
     }
 
     public runTaskInputText(taskName: string, expectedQuery: string, inputText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.terminal.waitText(taskName, expectedQuery, timeout);
             await this.terminal.clickOnTab(taskName);
             await this.terminal.type(taskName, inputText);
@@ -56,21 +58,21 @@ export class CodeExecutionTests {
 
     public runTaskConsoleOutput(taskName: string, expectedText: string, timeout: number) {
         test(`Run command '${taskName}' expecting console putput: ${expectedText}`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.terminal.waitText(taskName, expectedText, timeout);
         });
     }
 
     public runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.dialogWindow.waitDialogAndOpenLink(expectedDialogText, timeout);
         });
     }
 
     public runTaskWithDialogShellDjangoWorkaround(taskName: string, expectedDialogText: string, urlSubPath: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.dialogWindow.waitDialog(expectedDialogText, timeout);
             const dialogRedirectUrl: string = await this.dialogWindow.getApplicationUrlFromDialog(expectedDialogText);
             const augmentedPreviewUrl: string = dialogRedirectUrl + urlSubPath;
@@ -87,7 +89,7 @@ export class CodeExecutionTests {
 
     public runTaskWithDialogShellAndClose(taskName: string, expectedDialogText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.dialogWindow.waitDialog(expectedDialogText, timeout);
             await this.dialogWindow.closeDialog();
             await this.dialogWindow.waitDialogDissappearance();
@@ -96,14 +98,14 @@ export class CodeExecutionTests {
 
     public runTaskWithNotification(taskName: string, notificationText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification pops up`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
         });
     }
 
     public runTaskWithNotificationAndOpenLink(taskName: string, notificationText: string, buttonText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
             await this.ide.clickOnNotificationButton(notificationText, buttonText);
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
@@ -112,7 +114,7 @@ export class CodeExecutionTests {
 
     public runTaskWithNotificationAndOpenLinkPreviewNoUrl(taskName: string, notificationText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
             await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
@@ -121,7 +123,7 @@ export class CodeExecutionTests {
 
     public runTaskWithNotificationAndOpenLinkUnexposedPort(taskName: string, notificationText: string, portOpenText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification with unexposed port`, async () => {
-            await this.topMenu.runTask(taskName);
+            await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotificationAndConfirm(notificationText, timeout);
             await this.ide.waitNotificationAndOpenLink(portOpenText, timeout);
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
@@ -178,5 +180,17 @@ export class CodeExecutionTests {
             await this.terminal.closeTerminalTab(taskName);
             await this.dialogWindow.waitAndCloseIfAppear();
         });
+    }
+
+    private async runTaskUsingQuickOpenContainer(taskName: string) {
+        await this.topMenu.selectOption('Terminal', 'Run Task...');
+            try {
+                await this.quickOpenContainer.waitContainer();
+            } catch (err) {
+                Logger.warn(`CodeExecutionTests.runTaskInputText quickOpenContainer failed to open, retrying.`);
+                await this.topMenu.selectOption('Terminal', 'Run Task...');
+                await this.quickOpenContainer.waitContainer();
+            }
+            await this.quickOpenContainer.type(`${taskName}${Key.ENTER}`);
     }
 }
