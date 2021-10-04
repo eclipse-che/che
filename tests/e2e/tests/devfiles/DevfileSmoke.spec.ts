@@ -14,10 +14,14 @@ import { e2eContainer } from '../../inversify.config';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import { NavigationBar } from '../../pageobjects/ide/NavigationBar';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+const navigationBar: NavigationBar = e2eContainer.get(CLASSES.NavigationBar);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
@@ -42,7 +46,9 @@ suite(`${stack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            // await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await navigationBar.openNavigationBar();
+            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
         });
     });
 });
