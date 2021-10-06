@@ -91,7 +91,7 @@ startHappyPathTest() {
   exit 1
 }
 
-#provisionOpenShiftOAuthUser
+provisionOpenShiftOAuthUser
 
 startHappyPathTest
 
