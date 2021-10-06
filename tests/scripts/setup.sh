@@ -17,16 +17,16 @@ export HAPPY_PATH_REPO="${HAPPY_PATH_REPO:-https://github.com/eclipse/che.git}"
 export HAPPY_PATH_REPO_BRANCH="${HAPPY_PATH_REPO_BRANCH:-main}"
 
 prepareAndCloneCodebase(){
-    if [ -n "${WORKDIR}" ]; then
-        #clean up workdir before clonning codebase
-        rm -rf $WORKDIR/*
+    if [ -n "${CODE_BASE_DIR}" ]; then
+        #clean up CODE_BASE_DIR before clonning codebase
+        rm -rf $CODE_BASE_DIR/*
     else
-        export WORKDIR="/tmp/che-devworkspace-happy-path"
-        mkdir $WORKDIR
+        export CODE_BASE_DIR="/tmp/che-devworkspace-happy-path"
+        mkdir $CODE_BASE_DIR
     fi
     # downoad git repo as arhive
     # make scripts available in WORK_DIR
-    cd $WORKDIR
+    cd $CODE_BASE_DIR
     git clone $HAPPY_PATH_REPO
     cd che
     git fetch
@@ -36,5 +36,5 @@ setUpCheAndLaunchHappyPath(){
  cd /tmp/che-devworkspace-happy-path/che/.oci && ./devworkspace-happy-path-test.sh
 }
 
-#prepareAndCloneCodebase
+prepareAndCloneCodebase
 setUpCheAndLaunchHappyPath

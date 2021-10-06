@@ -62,7 +62,7 @@ startHappyPathTest() {
   # patch happy-path-che.yaml
   ECLIPSE_CHE_URL=http://$(oc get route -n "${CHE_NAMESPACE}" che -o jsonpath='{.status.ingress[0].host}')
   TS_SELENIUM_DEVWORKSPACE_URL="${ECLIPSE_CHE_URL}/#${HAPPY_PATH_TEST_PROJECT}"
-  HAPPY_PATH_POD_FILE=${SCRIPT_DIR}/workdir/pod-che-happy-path.yaml
+  HAPPY_PATH_POD_FILE=${SCRIPT_DIR}/resources/pod-che-happy-path.yaml
   cp $HAPPY_PATH_POD_FILE ${WORKDIR}/e2e-pod.yaml
   sed -i "s@CHE_URL@${ECLIPSE_CHE_URL}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@WORKSPACE_ROUTE@${TS_SELENIUM_DEVWORKSPACE_URL}@g" ${WORKDIR}/e2e-pod.yaml
@@ -91,7 +91,7 @@ startHappyPathTest() {
   exit 1
 }
 
-provisionOpenShiftOAuthUser
+#provisionOpenShiftOAuthUser
 
 startHappyPathTest
 
