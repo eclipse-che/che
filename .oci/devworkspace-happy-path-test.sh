@@ -21,7 +21,8 @@ set -u
 # print each command before executing it
 set -x
 
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+OCI_DIR=$(dirname $(readlink -f "$0"))
+SCRIPT_DIR="${OCI_DIR%/*}"/tests/scripts
 source "${SCRIPT_DIR}"/common.sh
 # Catch the finish of the job and write logs in artifacts.
 
@@ -56,10 +57,9 @@ deployChe() {
     --batch \
     --telemetry=off \
     --installer=operator \
-    --workspace-engine=dev-workspace"
-  exit 1
+    --workspace-engine=dev-workspace
 }
 
 installChectl
 deployChe
-"${SCRIPT_DIR}/che-happy-path.sh"
+"${SCRIPT_DIR}"/che-devworkspace-happy-path.sh

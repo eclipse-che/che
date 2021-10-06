@@ -11,14 +11,30 @@
 # This scripts helps you to set up temporary folder with everything
 # needed for running Che DevWorkspace Happy Path test which is located
 # remotely, like in another git repo
+set -e
 
 export HAPPY_PATH_REPO="${HAPPY_PATH_REPO:-https://github.com/eclipse/che.git}"
-export HAPPY_PATH_REPO_BRANCH="${HAPPY_PATH_REPO:-main}"
+export HAPPY_PATH_REPO_BRANCH="${HAPPY_PATH_REPO_BRANCH:-main}"
 
-if [ $WORKDIR != ""] {
-    export WORKDIR="/tmp/che-devworkspace-happy-path"
-    rm -rf $WORKDIR/*
+prepareAndCloneCodebase(){
+    if [ -n "${WORKDIR}" ]; then
+        #clean up workdir before clonning codebase
+        rm -rf $WORKDIR/*
+    else
+        export WORKDIR="/tmp/che-devworkspace-happy-path"
+        mkdir $WORKDIR
+    fi
+    # downoad git repo as arhive
+    # make scripts available in WORK_DIR
+    cd $WORKDIR
+    git clone $HAPPY_PATH_REPO
+    cd che
+    git fetch
+    git checkout $HAPPY_PATH_REPO_BRANCH
+}
+setUpCheAndLaunchHappyPath(){
+ cd /tmp/che-devworkspace-happy-path/che/.oci && ./devworkspace-happy-path-test.sh
 }
 
-# downoad git repo as arhive
-# make scripts available in WORK_DIR
+#prepareAndCloneCodebase
+setUpCheAndLaunchHappyPath
