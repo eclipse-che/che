@@ -39,11 +39,14 @@ function provisionOpenShiftOAuthUser() {
   oc delete secret che-htpass-secret -n openshift-config || true
   oc create secret generic che-htpass-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
-# The idea was to patch oauth not to break existing ones but our selenium test is not adapted to it yet.
-# So, just override ATM
-#  oc patch oauth/cluster --type=json \
-#    -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpass-secret"}}}}]'
-  oc apply -f "$SCRIPT_DIR/resources/htpasswdProvider.yaml"
+  # provision che-htpasswd user if it does not exist
+  if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]] {
+    echo "che-htpasswd oauth provider is not found. Provisioning it"
+    oc patch oauth/cluster --type=json \
+      -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpass-secret"}}}}]'
+  } else {
+    echo "che-htpasswd oauth provider is found. Using it"
+  }
 
   oc adm policy add-cluster-role-to-user cluster-admin che-user
 

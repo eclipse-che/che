@@ -38,7 +38,7 @@ spec:
         - name: TS_SELENIUM_PASSWORD
           value: 'admin'
         - name: TS_OCP_LOGIN_PAGE_PROVIDER_TITLE
-          value: "htpasswd"
+          value: "che-htpasswd"
         - name: DELETE_WORKSPACE_ON_FAILED_TEST
           value: "true"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
