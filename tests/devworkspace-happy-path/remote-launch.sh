@@ -12,9 +12,8 @@
 # needed for running Che DevWorkspace Happy Path test which is located
 # remotely, like in another git repo
 set -e
-
-export HAPPY_PATH_REPO="${HAPPY_PATH_REPO:-https://github.com/eclipse/che.git}"
-export HAPPY_PATH_REPO_BRANCH="${HAPPY_PATH_REPO_BRANCH:-main}"
+CHE_REPO_BRANCH="${CHE_REPO_BRANCH:-CHE-20421}"
+CHE_REPO_ARCHIVE="${CHE_REPO_ARCHIVE:-https://github.com/eclipse/che/archive/refs/heads/${CHE_REPO_BRANCH}.zip}"
 
 prepareAndCloneCodebase(){
   if [ -n "${CODE_BASE_DIR}" ]; then
