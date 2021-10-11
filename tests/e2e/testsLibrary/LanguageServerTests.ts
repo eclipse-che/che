@@ -154,6 +154,12 @@ export class LanguageServerTests {
         });
 
         test('Run debug', async () => {
+            // workaround for the issue: https://github.com/eclipse/che/issues/20067
+            await this.debugView.clickOnDebugConfigurationDropDown();
+            await this.debugView.clickOnDebugConfigurationItem('Add Configuration...');
+
+            await this.editor.selectTab(openedFile);
+
             await this.debugView.clickOnRunDebugButton();
         });
     }
@@ -166,6 +172,12 @@ export class LanguageServerTests {
         });
 
         test('Run debug', async () => {
+            // workaround for the issue: https://github.com/eclipse/che/issues/20067
+            await this.debugView.clickOnDebugConfigurationDropDown();
+            await this.debugView.clickOnDebugConfigurationItem('Add Configuration...');
+
+            await this.editor.selectTab(openedFile);
+
             await this.debugView.clickOnDebugConfigurationDropDown();
             await this.debugView.clickOnDebugConfigurationItem(configurationName);
             await this.debugView.clickOnRunDebugButton();
