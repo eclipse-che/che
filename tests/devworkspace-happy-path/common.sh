@@ -8,8 +8,6 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-set -e
-
 # Evaluate default and prepare artifacts directory
 export ARTIFACT_DIR=${ARTIFACT_DIR:-"/tmp/devworkspace-happy-path-artifacts"}
 rm -rf "${ARTIFACT_DIR}"
