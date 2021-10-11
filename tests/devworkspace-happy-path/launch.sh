@@ -17,6 +17,7 @@ set -u
 # uncomment to print each command before executing it
 # set -x
 
+START=$(date +%s.%N)
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
 export WORKDIR="${WORKDIR:-${SCRIPT_DIR}/workdir}"
@@ -122,3 +123,6 @@ if [[ ${EXIT_CODE} != "+ EXIT_CODE=0" ]]; then
     exit 1
 fi
 echo "[INFO] Happy-path test succeed."
+
+END=$(date +%s.%N)
+echo "[INFO] Happy-path execution took $(echo "$END - $START" | bc) seconds."
