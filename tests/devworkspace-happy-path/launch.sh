@@ -47,7 +47,7 @@ function provisionOpenShiftOAuthUser() {
   if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
     echo "che-htpasswd oauth provider is not found. Provisioning it"
     oc patch oauth/cluster --type=json \
-      -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpass-secret"}}}}]'
+      -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpasswd-secret"}}}}]'
   else
     echo "che-htpasswd oauth provider is found. Using it"
   fi
