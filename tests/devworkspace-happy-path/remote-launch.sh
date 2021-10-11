@@ -27,6 +27,7 @@ prepareAndCloneCodebase(){
     mkdir "$CODE_BASE_DIR"
   fi
 
+  echo "Setting up DevWorkspace Happy path scripts into $CODE_BASE_DIR"
   cd $CODE_BASE_DIR
   git clone $HAPPY_PATH_REPO
   cd che
@@ -34,4 +35,5 @@ prepareAndCloneCodebase(){
 }
 
 prepareAndCloneCodebase
-./devworkspace-happy-path-test.sh
+echo "Launching DevWorkspace Happy path from $CODE_BASE_DIR"
+./devworkspace-happy-path/launch.sh
