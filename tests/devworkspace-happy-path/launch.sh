@@ -66,6 +66,7 @@ function provisionOpenShiftOAuthUser() {
 }
 
 startHappyPathTest() {
+  oc delete pod happy-path-che -n eclipse-che --grace-period=30 --ignore-not-found
   # patch happy-path-che.yaml
   ECLIPSE_CHE_URL=http://$(oc get route -n "${CHE_NAMESPACE}" che -o jsonpath='{.status.ingress[0].host}')
   TS_SELENIUM_DEVWORKSPACE_URL="${ECLIPSE_CHE_URL}/#${HAPPY_PATH_TEST_PROJECT}"
@@ -117,7 +118,7 @@ oc rsync -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME}:/tmp/e2e/report/ ${ARTIFACT_
 oc exec -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME} -c download-reports -- touch /tmp/done
 EXIT_CODE=$(oc logs -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME} -c happy-path-test | grep EXIT_CODE)
 if [[ ${EXIT_CODE} != "+ EXIT_CODE=0" ]]; then
-    echo "[ERROR] Happy-path test failed. Check report at ${ARTIFACT_DIR}"
+    echo "[ERROR] Happy-path test failed. Check report at ${ARTIFACT_DIR}. Or happy path pod in eclipse-che namespace"
     exit 1
 fi
 echo "[INFO] Happy-path test succeed."
