@@ -19,21 +19,26 @@ export HAPPY_PATH_REPO_BRANCH="${HAPPY_PATH_REPO_BRANCH:-main}"
 prepareAndCloneCodebase(){
   if [ -n "${CODE_BASE_DIR}" ]; then
     # custom dir is specified. Cleaning up that before using
+    echo "Found custom CODE_BASE_DIR. Cleaning up $CODE_BASE_DIR/*"
     rm -rf "$CODE_BASE_DIR/*"
   else
     # custom dir is not specified. Preparing the default location
     export CODE_BASE_DIR="/tmp/che-devworkspace-happy-path"
+    echo "CODE_BASE_DIR is not set. Using $CODE_BASE_DIR"
+    set -x
     rm -rf "$CODE_BASE_DIR"
     mkdir "$CODE_BASE_DIR"
   fi
 
-  echo "Setting up DevWorkspace Happy path scripts into $CODE_BASE_DIR"
+  CHE_REPO_ARCHIVE="https://github.com/eclipse/che/archive/refs/heads/CHE-20421.zip"
+  echo "Downloading $CHE_REPO_ARCHIVE into $CODE_BASE_DIR"
   cd $CODE_BASE_DIR
-  git clone $HAPPY_PATH_REPO
-  cd che
-  git checkout $HAPPY_PATH_REPO_BRANCH
+  curl -f -L -sS ${CHE_REPO_ARCHIVE} > "${CODE_BASE_DIR}/archive.zip"
+  unzip "${CODE_BASE_DIR}/archive.zip"
+  rm archive.zip
+  cd ./*
 }
 
 prepareAndCloneCodebase
 echo "Launching DevWorkspace Happy path from $CODE_BASE_DIR"
-./devworkspace-happy-path/launch.sh
+./tests/devworkspace-happy-path/launch.sh
