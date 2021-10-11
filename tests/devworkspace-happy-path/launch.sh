@@ -98,6 +98,10 @@ startHappyPathTest() {
 
 provisionOpenShiftOAuthUser
 
+source "${SCRIPT_DIR}"/common.sh
+# Catch the finish of the job and write logs in artifacts.
+trap 'collectLogs $?' EXIT SIGINT
+
 startHappyPathTest
 
 echo "Waiting until happy path pod finished"

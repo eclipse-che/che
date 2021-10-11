@@ -24,11 +24,6 @@ set -u
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 TEST_SCRIPT_DIR="${SCRIPT_DIR%/*}/tests/devworkspace-happy-path"
 
-source "${TEST_SCRIPT_DIR}"/common.sh
-
-# Catch the finish of the job and write logs in artifacts.
-trap 'collectLogs $?' EXIT SIGINT
-
 # ENV used by PROW ci
 export CI="openshift"
 # Pod created by openshift ci don't have user. Using this envs should avoid errors with git user.
