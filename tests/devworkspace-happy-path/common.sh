@@ -43,7 +43,7 @@ function bumpPodsInfo() {
             oc logs ${POD} -c ${CONTAINER} -n ${NS} > $LOGS_FILE || true
         done
     done
-    echo "======== Bumping events -n ${NS} ========"
+    echo "[INFO] Bumping events in namespace ${NS}"
     oc get events -n $NS -o=yaml > $TARGET_DIR/events.log || true
 }
 
