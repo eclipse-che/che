@@ -57,10 +57,12 @@ function provisionOpenShiftOAuthUser() {
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
       if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
-          break
+          return 0
       fi
       sleep 10
   done
+  echo "[ERROR] Che htpasswd changes are not affected after timeout."
+  exit 1
 }
 
 startHappyPathTest() {
