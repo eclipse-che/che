@@ -11,7 +11,8 @@
 set -e
 
 # Evaluate default and prepare artifacts directory
-export ARTIFACT_DIR=${ARTIFACT_DIR:-"/tmp/dwo-e2e-artifacts"}
+export ARTIFACT_DIR=${ARTIFACT_DIR:-"/tmp/devworkspace-happy-path-artifacts"}
+rm -rf "${ARTIFACT_DIR}"
 mkdir -p "${ARTIFACT_DIR}"
 
 # Collect logs from Che and DevWorkspace Operator
@@ -26,6 +27,8 @@ function collectLogs() {
     oc get devworkspacetemplate -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-templates.yaml || true
     oc get devworkspacerouting -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-routings.yaml || true
     chectl server:logs --directory=${ARTIFACT_DIR}/chectl-server-logs --telemetry=off
+
+    echo "[INFO] Logs are collected and can be found in $ARTIFACT_DIR"
 }
 
 function bumpPodsInfo() {
