@@ -32,14 +32,9 @@ function bumpPodsInfo() {
     NS=$1
     TARGET_DIR="${ARTIFACT_DIR}/${NS}-info"
     mkdir -p "$TARGET_DIR"
-
-    oc get pods -n ${NS}
-
     for POD in $(oc get pods -o name -n ${NS}); do
         for CONTAINER in $(oc get -n ${NS} ${POD} -o jsonpath="{.spec.containers[*].name}"); do
-            echo ""
-            echo "======== Getting logs from container $POD/$CONTAINER in $NS"
-            echo ""
+            echo "[INFO] Downloading logs $POD/$CONTAINER in $NS"
             # container name includes `pod/` prefix. remove it
             LOGS_FILE=$TARGET_DIR/$(echo ${POD}-${CONTAINER}.log | sed 's|pod/||g')
             oc logs ${POD} -c ${CONTAINER} -n ${NS} > $LOGS_FILE || true
