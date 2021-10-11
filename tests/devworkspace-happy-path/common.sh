@@ -9,11 +9,24 @@
 #
 
 set -e
-set -x
 
 # Evaluate default and prepare artifacts directory
 export ARTIFACT_DIR=${ARTIFACT_DIR:-"/tmp/dwo-e2e-artifacts"}
 mkdir -p "${ARTIFACT_DIR}"
+
+# Collect logs from Che and DevWorkspace Operator
+# which is supposed to be executed after test finishes
+function collectLogs() {
+    bumpPodsInfo "devworkspace-controller"
+    bumpPodsInfo "eclipse-che"
+    USERS_CHE_NS="che-user-che"
+    bumpPodsInfo $USERS_CHE_NS
+    # Fetch DW related CRs but do not fail when CRDs are not installed yet
+    oc get devworkspace -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspaces.yaml || true
+    oc get devworkspacetemplate -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-templates.yaml || true
+    oc get devworkspacerouting -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-routings.yaml || true
+    /tmp/chectl/bin/chectl server:logs --directory=${ARTIFACT_DIR}/chectl-server-logs --telemetry=off
+}
 
 function bumpPodsInfo() {
     NS=$1

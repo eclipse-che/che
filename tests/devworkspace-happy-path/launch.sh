@@ -14,8 +14,8 @@ set -e
 set -o pipefail
 # error on unset variables
 set -u
-# print each command before executing it
-set -x
+# uncomment to print each command before executing it
+# set -x
 
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 
@@ -30,31 +30,33 @@ mkdir -p ${WORKDIR}
 
 # Create cluster-admin user inside of OpenShift cluster and login
 function provisionOpenShiftOAuthUser() {
-  if oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+  # preparing temp kubeconfig for testing che user availability
+  KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
+  cp "$KUBECONFIG" "$WORKDIR/kubeconfig"
+  KUBECONFIG="$WORKDIR/kubeconfig"
+
+  if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
     echo "Che User already exists. Using it"
     return 0
   fi
-  echo "Che User does not exist. Setting up htpassw oauth for it."
-  SCRIPT_DIR=$(dirname $(readlink -f "$0"))
-  oc delete secret che-htpass-secret -n openshift-config || true
-  oc create secret generic che-htpass-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
+  echo "Che User does not exist. Setting up htpasswd oauth for it."
+  oc delete secret che-htpasswd-secret -n openshift-config || true
+  oc create secret generic che-htpasswd-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
   # provision che-htpasswd user if it does not exist
-  if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]] {
+  if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
     echo "che-htpasswd oauth provider is not found. Provisioning it"
     oc patch oauth/cluster --type=json \
       -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpass-secret"}}}}]'
-  } else {
+  else
     echo "che-htpasswd oauth provider is found. Using it"
-  }
-
-  oc adm policy add-cluster-role-to-user cluster-admin che-user
+  fi
 
   echo -e "[INFO] Waiting for htpasswd auth to be working up to 5 minutes"
   CURRENT_TIME=$(date +%s)
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
-      if oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+      if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
           break
       fi
       sleep 10

@@ -48,8 +48,6 @@ maven-eclipse.xml
 *.war
 *.ear
 
-
-
 # Logs and databases #
 ######################
 *.log
@@ -73,11 +71,6 @@ assembly/**/overlays/
 dockerfiles/che/eclipse-che.tar.gz
 dockerfiles/che/eclipse-che/
 .unison*
-docs/_site
-docs/.sass-cache
-docs/.jekyll-metadata
-docs/assets/imgs
-!assembly/assembly-main/src/assembly/bin/
 
 # NodeJs modules #
 ##################
@@ -88,6 +81,7 @@ tests/e2e/dist/
 tests/e2e/node_modules/
 tests/e2e/report/
 tests/e2e/load-test-folder
+tests/devworkspace-happy-path/workdir
 
 # Cypress modules #
 ###################
