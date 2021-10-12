@@ -24,7 +24,9 @@ function collectLogs() {
     oc get devworkspace -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspaces.yaml || true
     oc get devworkspacetemplate -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-templates.yaml || true
     oc get devworkspacerouting -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspace-routings.yaml || true
-    chectl server:logs --directory=${ARTIFACT_DIR}/chectl-server-logs --telemetry=off
+
+    # grab logs with chectl but don't fail if it's not available
+    chectl server:logs --directory=${ARTIFACT_DIR}/chectl-server-logs --telemetry=off || true
 
     echo "[INFO] Logs are collected and can be found in $ARTIFACT_DIR"
 }
@@ -43,11 +45,4 @@ function bumpPodsInfo() {
     done
     echo "[INFO] Bumping events in namespace ${NS}"
     oc get events -n $NS -o=yaml > $TARGET_DIR/events.log || true
-}
-
-installChectl() {
-  wget $(curl https://che-incubator.github.io/chectl/download-link/next-linux-x64)
-  tar -xzf chectl-linux-x64.tar.gz
-  mv chectl /tmp
-  chectl --version
 }
