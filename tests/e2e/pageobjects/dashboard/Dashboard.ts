@@ -53,7 +53,7 @@ export class Dashboard {
     async stopAndRemoveWorkspaceByUI(workspaceName: string) {
         Logger.debug(`Dashboard.stopAndRemoveWorkspaceByUI "${workspaceName}"`);
 
-        this.stopWorkspaceByUI(workspaceName);
+        await this.stopWorkspaceByUI(workspaceName);
         await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
