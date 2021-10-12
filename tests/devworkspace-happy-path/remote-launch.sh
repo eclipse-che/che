@@ -12,7 +12,7 @@
 # needed for running Che DevWorkspace Happy Path test which is located
 # remotely, like in another git repo
 set -e
-CHE_REPO_BRANCH="${CHE_REPO_BRANCH:-CHE-20421}"
+CHE_REPO_BRANCH="${CHE_REPO_BRANCH:-main}"
 CHE_REPO_ARCHIVE="${CHE_REPO_ARCHIVE:-https://github.com/eclipse/che/archive/refs/heads/${CHE_REPO_BRANCH}.zip}"
 
 prepareAndCloneCodebase(){
@@ -29,7 +29,6 @@ prepareAndCloneCodebase(){
     mkdir "$CODE_BASE_DIR"
   fi
 
-  CHE_REPO_ARCHIVE="https://github.com/eclipse/che/archive/refs/heads/CHE-20421.zip"
   echo "Downloading $CHE_REPO_ARCHIVE into $CODE_BASE_DIR"
   cd $CODE_BASE_DIR
   curl -f -L -sS ${CHE_REPO_ARCHIVE} > "${CODE_BASE_DIR}/archive.zip"
