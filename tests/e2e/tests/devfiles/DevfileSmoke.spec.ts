@@ -46,7 +46,6 @@ suite(`${stack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            // await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
             await navigationBar.openNavigationBar();
             await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
         });
