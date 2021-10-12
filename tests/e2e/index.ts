@@ -36,6 +36,7 @@ export * from './pageobjects/ide/DialogWindow';
 export * from './pageobjects/ide/Editor';
 export * from './pageobjects/ide/Ide';
 export * from './pageobjects/ide/LeftToolBar';
+export * from './pageobjects/ide/NavigationBar';
 export * from './pageobjects/ide/NotificationCenter';
 export * from './pageobjects/ide/OpenDialogWidget';
 export * from './pageobjects/ide/OpenWorkspaceWidget';
