@@ -15,7 +15,7 @@ set -e
 CHE_REPO_BRANCH="${CHE_REPO_BRANCH:-main}"
 CHE_REPO_ARCHIVE="${CHE_REPO_ARCHIVE:-https://github.com/eclipse/che/archive/refs/heads/${CHE_REPO_BRANCH}.zip}"
 
-prepareAndCloneCodebase(){
+prepareAndCloneCodebase() {
   if [ -n "${CODE_BASE_DIR}" ]; then
     # custom dir is specified. Cleaning up that before using
     echo "Found custom CODE_BASE_DIR. Cleaning up $CODE_BASE_DIR/*"
@@ -24,7 +24,6 @@ prepareAndCloneCodebase(){
     # custom dir is not specified. Preparing the default location
     export CODE_BASE_DIR="/tmp/che-devworkspace-happy-path"
     echo "CODE_BASE_DIR is not set. Using $CODE_BASE_DIR"
-    set -x
     rm -rf "$CODE_BASE_DIR"
     mkdir "$CODE_BASE_DIR"
   fi
