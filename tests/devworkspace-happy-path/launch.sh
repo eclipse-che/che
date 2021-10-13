@@ -44,9 +44,11 @@ function provisionOpenShiftOAuthUser() {
   oc delete secret che-htpasswd-secret -n openshift-config || true
   oc create secret generic che-htpasswd-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
-  # provision che-htpasswd user if it does not exist
-  if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
-    echo "che-htpasswd oauth provider is not found. Provisioning it"
+  if [[ $(oc get oauth cluster --ignore-not-found) == "" ]]; then
+    echo "[INFO] Creating a new OAuth Cluster since it's not found."
+    oc apply -f ${SCRIPT_DIR}/resources/cluster-oauth.yaml
+  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
+    echo "[INFO] OAuth Cluster is found but che-htpasswd missing. Provisioning it."
     oc patch oauth/cluster --type=json \
       -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpasswd-secret"}}}}]'
   else
