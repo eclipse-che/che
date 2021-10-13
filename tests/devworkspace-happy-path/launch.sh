@@ -48,7 +48,7 @@ function provisionOpenShiftOAuthUser() {
   if [[ $(oc get oauth cluster --ignore-not-found) == "" ]]; then
     echo "[INFO] Creating a new OAuth Cluster since it's not found."
     oc apply -f ${SCRIPT_DIR}/resources/cluster-oauth.yaml
-  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
+  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[]?.name? | select ( . == ("che-htpasswd"))') ]]; then
     echo "[INFO] OAuth Cluster is found but che-htpasswd missing. Provisioning it."
     oc patch oauth/cluster --type=json \
       -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpasswd-secret"}}}}]'
