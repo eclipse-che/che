@@ -63,6 +63,7 @@ suite('Git with ssh workflow', async () => {
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
+        await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
     });

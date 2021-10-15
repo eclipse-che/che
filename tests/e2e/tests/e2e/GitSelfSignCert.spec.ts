@@ -57,6 +57,7 @@
          await dashboard.waitPage();
          await browserTabsUtil.navigateTo(workspacePrefixUrl + workspaceName);
          await ide.waitWorkspaceAndIde();
+         await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
          await projectTree.openProjectTreeContainer();
          await driverHelper.wait(TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
      });
