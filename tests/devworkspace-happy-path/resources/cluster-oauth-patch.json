@@ -1,0 +1,16 @@
+{
+  "spec": {
+    "identityProviders": [
+      {
+        "name": "che-htpasswd",
+        "mappingMethod": "claim",
+        "type": "HTPasswd",
+        "htpasswd": {
+          "fileData": {
+            "name": "che-htpasswd-secret"
+          }
+        }
+      }
+    ]
+  }
+}
