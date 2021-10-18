@@ -20,7 +20,7 @@
     async clickOnShowNavigationBar() {
         Logger.debug('CodereadyNavigationBar.clickOnShowNavigationBar');
 
-        const showNavBarButton: By = By.css('[title=\'Show navigation bar\']');
+        const showNavBarButton: By = By.css(`[title='Show navigation bar']`);
         await this.driverHelper.waitAndClick(showNavBarButton);
     }
 
@@ -33,6 +33,8 @@
     }
 
     async openNavigationBar() {
+        Logger.debug('CodereadyNavigationBar.openNavigationBar');
+
         await this.clickOnShowNavigationBar();
         await this.waitNavigationBar();
     }
