@@ -64,7 +64,8 @@ const CLASSES = {
     GitLoginPage: 'GitLoginPage',
     GitOauthAppsSettings: 'GitOauthAppsSettings',
     AnimationChecker: 'AnimationChecker',
-    Sanitizer: 'Sanitizer'
+    Sanitizer: 'Sanitizer',
+    NavigationBar: 'NavigationBar'
 };
 
 export { TYPES, CLASSES };
