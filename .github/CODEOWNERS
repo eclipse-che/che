@@ -1,41 +1,11 @@
 # Global Owners
-* @nickboldt @sparkoo
+* @nickboldt
 
 # dockerfiles
 dockerfiles/** @benoitf @nickboldt
 
-# assembly
-assembly/** @skabashnyuk @nickboldt
-assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @nickboldt @themr0c @boczkowska @MichalMaler
-
-# core
-core/** @skabashnyuk @nickboldt
-
-# workspace runtime infrastructure implementations
-infrastructures/** @skabashnyuk @amisevsk @metlos @nickboldt @sleshchenko
-
-# multiuser che
-multiuser/api/**  @skabashnyuk @nickboldt
-multiuser/integration-tests/**  @mshaposhnik @skabashnyuk @nickboldt
-multiuser/keycloak/**  @mshaposhnik @nickboldt
-multiuser/machine-auth/**  @mshaposhnik @nickboldt
-multiuser/permission/**  @skabashnyuk @nickboldt
-multiuser/personal-account/**  @skabashnyuk @nickboldt
-multiuser/sql-schema/**  @mshaposhnik @sleshchenko @nickboldt
-
-# wsmaster
-wsmaster/** @skabashnyuk @nickboldt
-wsmaster/che-core-api-factory/** @mshaposhnik @nickboldt
-wsmaster/che-core-api-factory-shared/**   @mshaposhnik @nickboldt
-wsmaster/che-core-api-workspace-activity/**   @mshaposhnik @nickboldt
-wsmaster/che-core-api-workspace/**  @skabashnyuk @mshaposhnik @metlos @nickboldt @sleshchenko
-
-# deploy
-deploy/** @tolusha @nickboldt
-deploy/openshift/templates/monitoring/** @skabashnyuk @metlos @nickboldt
-
 # e2e tests
-tests/e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTSW
+tests/e2e/** @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTSW
 
-# e2e tests infra
-tests/.infra/centos-ci/** @musienko-maxim @rhopp @nickboldt
+# devworkspace happy path test
+tests/devworkspace-happy-path/** @musienko-maxim

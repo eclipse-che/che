@@ -188,11 +188,20 @@ async function checkJavaPathCompletion() {
 async function switchAppWindowAndCheck(contentLocator: By) {
     const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
     await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
-    const isApplicationTitleVisible: boolean = await driverHelper.isVisible(contentLocator);
-        if (!isApplicationTitleVisible) {
+
+    // make 3 attempts for waiting application availability with the configured period
+    for (let index = 0; index < 3; index++) {
+        let isApplicationTitleVisible: boolean = await driverHelper.isVisible(contentLocator);
+        if (isApplicationTitleVisible) {
+            console.log('----------- The Spring app is available.');
+            break;
+        } else {
+            console.log(`----------- The Spring app is not available. Attempt # ${index}. Waiting ${TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT}s`);
             await driverHelper.getDriver().sleep(TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
             await driverHelper.getDriver().navigate().refresh();
-            await browserTabsUtil.switchToWindow(mainWindowHandle);
-            await ide.waitAndSwitchToIdeFrame();
         }
+    }
+    await driverHelper.waitVisibility(contentLocator);
+    await browserTabsUtil.switchToWindow(mainWindowHandle);
+    await ide.waitAndSwitchToIdeFrame();
 }

@@ -31,26 +31,29 @@ mkdir -p ${WORKDIR}
 
 # Create cluster-admin user inside of OpenShift cluster and login
 function provisionOpenShiftOAuthUser() {
+  echo "[INFO] Testing if Che User exists."
   # preparing temp kubeconfig for testing che user availability
   KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
   cp "$KUBECONFIG" "$WORKDIR/kubeconfig"
   KUBECONFIG="$WORKDIR/kubeconfig"
 
   if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
-    echo "Che User already exists. Using it"
+    echo "[INFO] Che User already exists. Using it"
     return 0
   fi
-  echo "Che User does not exist. Setting up htpasswd oauth for it."
+  echo "[INFO] Che User does not exist. Setting up htpasswd oauth for it."
   oc delete secret che-htpasswd-secret -n openshift-config || true
   oc create secret generic che-htpasswd-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
-  # provision che-htpasswd user if it does not exist
-  if [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[].name | select ( . == ("che-htpasswd"))') ]]; then
-    echo "che-htpasswd oauth provider is not found. Provisioning it"
+  if [[ $(oc get oauth cluster --ignore-not-found) == "" ]]; then
+    echo "[INFO] Creating a new OAuth Cluster since it's not found."
+    oc apply -f ${SCRIPT_DIR}/resources/cluster-oauth.yaml
+  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[]?.name? | select ( . == ("che-htpasswd"))') ]]; then
+    echo "[INFO] OAuth Cluster is found but che-htpasswd missing. Provisioning it."
     oc patch oauth/cluster --type=json \
       -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpasswd-secret"}}}}]'
   else
-    echo "che-htpasswd oauth provider is found. Using it"
+    echo "[INFO] che-htpasswd oauth provider is found. Using it"
   fi
 
   echo -e "[INFO] Waiting for htpasswd auth to be working up to 5 minutes"
@@ -78,7 +81,7 @@ startHappyPathTest() {
   sed -i "s@CHE-NAMESPACE@${CHE_NAMESPACE}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@image: .*@image: ${E2E_TEST_IMAGE}@g" ${WORKDIR}/e2e-pod.yaml
   echo "[INFO] Applying the following patched Che Happy Path Pod:"
-  cat ${HAPPY_PATH_POD_FILE}
+  cat ${WORKDIR}/e2e-pod.yaml
   echo "[INFO] --------------------------------------------------"
   oc apply -f ${WORKDIR}/e2e-pod.yaml
   # wait for the pod to start
@@ -108,12 +111,12 @@ trap 'collectLogs $?' EXIT SIGINT
 
 startHappyPathTest
 
-echo "Waiting until happy path pod finished"
+echo "[INFO] Waiting until happy path pod finished"
 oc logs -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME} -c happy-path-test -f
 # just to sleep
 sleep 3
 
-echo "Downloading test report."
+echo "[INFO] Downloading test report."
 mkdir ${ARTIFACT_DIR}/e2e
 oc rsync -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME}:/tmp/e2e/report/ ${ARTIFACT_DIR}/e2e -c download-reports
 oc exec -n ${CHE_NAMESPACE} ${HAPPY_PATH_POD_NAME} -c download-reports -- touch /tmp/done
