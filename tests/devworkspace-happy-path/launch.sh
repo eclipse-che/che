@@ -34,10 +34,10 @@ function provisionOpenShiftOAuthUser() {
   echo "[INFO] Testing if Che User exists."
   # preparing temp kubeconfig for testing che user availability
   KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
-  cp "$KUBECONFIG" "$WORKDIR/kubeconfig"
-  KUBECONFIG="$WORKDIR/kubeconfig"
+  TMP_KUBECONFIG="$WORKDIR/kubeconfig"
+  cp "$KUBECONFIG" "TMP_KUBECONFIG"
 
-  if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+  if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG  --insecure-skip-tls-verify=false; then
     echo "[INFO] Che User already exists. Using it"
     return 0
   fi
@@ -48,10 +48,26 @@ function provisionOpenShiftOAuthUser() {
   if [[ $(oc get oauth cluster --ignore-not-found) == "" ]]; then
     echo "[INFO] Creating a new OAuth Cluster since it's not found."
     oc apply -f ${SCRIPT_DIR}/resources/cluster-oauth.yaml
+  # CustomResources don't support strategic merge. So, we need to merge or add array item depending on the object state
+  elif [[ $(oc get oauth/cluster -o=json | jq -e 'select (.spec.identityProviders == null)') ]]; then
+    # there are no identity providers. We can do merge and set the whole .spec.identityProviders field
+    echo "[INFO] No identity providers found, provisioning Che one."
+    oc patch oauth/cluster --type=merge -p "$(cat $SCRIPT_DIR/resources/cluster-oauth-patch.json)"
   elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[]?.name? | select ( . == ("che-htpasswd"))') ]]; then
-    echo "[INFO] OAuth Cluster is found but che-htpasswd missing. Provisioning it."
-    oc patch oauth/cluster --type=json \
-      -p '[{"op": "add", "path": "/spec/identityProviders/0", "value": {"name":"che-htpasswd","mappingMethod":"claim","type":"HTPasswd","htpasswd":{"fileData":{"name":"che-htpasswd-secret"}}}}]'
+    # there are some identity providers. We should do add patch not to override existing identity providers
+    echo "[INFO] OAuth Cluster is found but che-htpasswd provider missing. Provisioning it."
+    oc patch oauth/cluster --type=json -p '[{
+      "op": "add", 
+      "path": "/spec/identityProviders/0",
+      "value": {
+        "name":"che-htpasswd",
+        "mappingMethod":"claim",
+        "type":"HTPasswd",
+        "htpasswd": {
+          "fileData":{"name":"che-htpasswd-secret"}
+        }
+      }
+    }]'
   else
     echo "[INFO] che-htpasswd oauth provider is found. Using it"
   fi
@@ -60,7 +76,7 @@ function provisionOpenShiftOAuthUser() {
   CURRENT_TIME=$(date +%s)
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
-      if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+      if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG --insecure-skip-tls-verify=false; then
           return 0
       fi
       sleep 10

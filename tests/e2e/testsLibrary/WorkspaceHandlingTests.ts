@@ -52,14 +52,17 @@ export class WorkspaceHandlingTests {
     }
 
     public async stopWorkspace(workspaceName: string) {
+        await this.dashboard.openDashboard();
         await this.dashboard.stopWorkspaceByUI(workspaceName);
     }
 
     public async removeWorkspace(workspaceName: string) {
-        await this.dashboard.deleteWorkspaceByUI(workspaceName);
+        await this.dashboard.openDashboard();
+        await this.dashboard.deleteStoppedWorkspaceByUI(workspaceName);
     }
 
     public async stopAndRemoveWorkspace(workspaceName: string) {
+        await this.dashboard.openDashboard();
         await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
     }
 }
