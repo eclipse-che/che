@@ -34,10 +34,10 @@ function provisionOpenShiftOAuthUser() {
   echo "[INFO] Testing if Che User exists."
   # preparing temp kubeconfig for testing che user availability
   KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
-  cp "$KUBECONFIG" "$WORKDIR/kubeconfig"
-  KUBECONFIG="$WORKDIR/kubeconfig"
+  TMP_KUBECONFIG="$WORKDIR/kubeconfig"
+  cp "$KUBECONFIG" "TMP_KUBECONFIG"
 
-  if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+  if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG  --insecure-skip-tls-verify=false; then
     echo "[INFO] Che User already exists. Using it"
     return 0
   fi
@@ -74,7 +74,7 @@ function provisionOpenShiftOAuthUser() {
   CURRENT_TIME=$(date +%s)
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
-      if KUBECONFIG="$KUBECONFIG" oc login -u che-user -p user --insecure-skip-tls-verify=false; then
+      if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG --insecure-skip-tls-verify=false; then
           return 0
       fi
       sleep 10
