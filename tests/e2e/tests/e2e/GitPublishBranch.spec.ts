@@ -102,4 +102,6 @@ async function cloneTestRepo() {
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
     await gitPlugin.clickOnSelectRepositoryButton();
+
+    await ide.waitAndApplyTrustNotification();
 }

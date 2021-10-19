@@ -102,4 +102,6 @@
      await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
      await quickOpenContainer.typeAndSelectSuggestion(linkToRepo, confirmMessage);
      await gitPlugin.clickOnSelectRepositoryButton();
+
+     await ide.waitAndApplyTrustNotification();
  }
