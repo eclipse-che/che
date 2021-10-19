@@ -340,6 +340,12 @@ export class Ide {
         }, timeout);
     }
 
+    async waitAndApplyTrustNotification() {
+        Logger.debug(`Ide.waitAndApplyTrustNotification`);
+
+        await this.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+    }
+
     private getSelectedRightToolbarButtonLocator(buttonTitle: string): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
             `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);

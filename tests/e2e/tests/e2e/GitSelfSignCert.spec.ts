@@ -103,5 +103,5 @@
      await quickOpenContainer.typeAndSelectSuggestion(linkToRepo, confirmMessage);
      await gitPlugin.clickOnSelectRepositoryButton();
 
-     await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
+     await ide.waitAndApplyTrustNotification();
  }
