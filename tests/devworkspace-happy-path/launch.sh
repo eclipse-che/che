@@ -32,12 +32,11 @@ mkdir -p ${WORKDIR}
 # Create cluster-admin user inside of OpenShift cluster and login
 function provisionOpenShiftOAuthUser() {
   echo "[INFO] Testing if Che User exists."
-  # preparing temp kubeconfig for testing che user availability
   KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
   TMP_KUBECONFIG="$WORKDIR/kubeconfig"
-  cp "$KUBECONFIG" "TMP_KUBECONFIG"
+  cp "$KUBECONFIG" "$TMP_KUBECONFIG"
 
-  if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG  --insecure-skip-tls-verify=false; then
+  if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG; then
     echo "[INFO] Che User already exists. Using it"
     return 0
   fi
@@ -76,7 +75,7 @@ function provisionOpenShiftOAuthUser() {
   CURRENT_TIME=$(date +%s)
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
-      if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG --insecure-skip-tls-verify=false; then
+      if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG; then
           return 0
       fi
       sleep 10
