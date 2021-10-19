@@ -14,7 +14,7 @@ components:
   id: felixfbecker/php-debug/latest
 - type: dockerimage
   alias: php
-  image: quay.io/eclipse/che-php-7:nightly
+  image: quay.io/eclipse/che-php-7:next
   memoryLimit: 512Mi
   mountSources: true
   endpoints:
