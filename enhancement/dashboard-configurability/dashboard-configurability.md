@@ -18,9 +18,9 @@ According to the latest trends, every configuration file is in yaml format, sinc
 
 ### CheCluster vs ConfigMap
 
-We're able to define it on CheCluster level in two way:
+#### 1. Part of CheCluster on model level
 
-- define detailed model on CheCluster CRD level which would be backward compatible in terms of Kubernetes API and easier to discover/configure. But it would require changes on Che Operator side each time when Dashboard configuration is changed:
+Define detailed model on CheCluster CRD level:
 
 ```yaml
 spec:
@@ -32,7 +32,20 @@ spec:
         url: "https://example-app.com
 ```
 
-- define the ability to define inclined yaml file content on CheCluster CR level. It would not be 100% safe to use in terms of backward compatibility and letting users know about their mistakes, but it would allows define once on Che Operator side, expose link on documentation and then fully support on Dashboard/docs sides:
+**Pros:**
+
+- self-documenting on CheCluster CRD level;
+- backward compatible in terms of K8s API;
+- admin configuration is validated by K8s API;
+
+**Cons:**
+
+- each dashboard configuration change would require changes and build on CheOperator side;
+- controversial: CheCluster CRD grows with component specific configuration;
+
+#### 2. Part of CheCluster as field with inlined content
+
+Define the ability to define inclined yaml file content on CheCluster CR level. 
 
 ```yaml
 spec:
@@ -45,7 +58,19 @@ spec:
             url: "https://example-app.com
 ```
 
-- define an ability to configure dashboard with help of standalone configmap mounted with Che Operator mechanism:
+**Pros:**
+
+- is defined in Che Operator side once;
+- controversial: CheCluster is kept for more deployment configuration than component-specific behavior;
+
+**Cons:**
+
+- ideally, this way needs a separate versioned piece of documentation;
+- backward compatibility and content validation is done later on dashboard component side and it may be late lifecycle phase to report that;
+
+#### 3. Separated ConfigMap
+
+Define an ability to configure dashboard with help of standalone configmap mounted with Che Operator mechanism:
 
 ```yaml
 CHE_NAMESPACE="eclipse-che"
@@ -71,6 +96,12 @@ data:
 EOF
 ```
 
-TODOs:
+**Pros:**
 
-- clearly describe pros and cons each of the way;
+- that's the cheapest way to get it working since nothing should be done on Dashboard side if we go with JSON, or only YAML to JSON conversion should be done;
+
+**Cons:**
+
+- not easy to discover such an ability;
+- the format is described separately from configuration;
+- no validation available;
