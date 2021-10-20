@@ -2,9 +2,9 @@
 
 ## Motivation
 
-Dashboard has [product.json](https://github.com/eclipse-che/che-dashboard#branding) configuration file which can be overridden on container build phase and which would some dashboard appearance stuff like Product Title, Product icon.
+Dashboard has [product.json](https://github.com/eclipse-che/che-dashboard#branding) configuration file which can be overridden on container build phase and which would override some dashboard appearance stuff like Product Title, Product icon.
 
-But apart from that there is some settings which an Admin would like to override on the CheCluster level without rebuilding container, like warning.
+In addition from that, there are some settings which an Admin would like to override on the CheCluster level without rebuilding container, like warning.
 
 The potential user of this would be at least Hosted Che, which sometime needs to inform users about upcoming upgrade.
 
