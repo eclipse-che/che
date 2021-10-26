@@ -66,7 +66,6 @@ suite('Workspace creation via factory url', async () => {
         });
 
         test('Register running workspace', async () => {
-            await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             // in this place we do not check 'Do you trust the authors of', 'Yes, I trust' message
             // it  is  DevWorkspace test specific. After consuming the factory the notification does not appear
@@ -79,7 +78,6 @@ suite('Workspace creation via factory url', async () => {
     suite('Language server validation', async () => {
         test('Java LS initialization', async () => {
             await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-            await ide.waitNotificationAndClickOnButton('The workspace contains Java projects. Would you like to import them?', 'Yes');
             await editor.selectTab(javaFileName);
             try {
                 await ide.checkLsInitializationStart('Activating Language Support for Java');
@@ -203,5 +201,4 @@ async function switchAppWindowAndCheck(contentLocator: By) {
     }
     await driverHelper.waitVisibility(contentLocator);
     await browserTabsUtil.switchToWindow(mainWindowHandle);
-    await ide.waitAndSwitchToIdeFrame();
 }
