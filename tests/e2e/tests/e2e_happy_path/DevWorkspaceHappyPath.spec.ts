@@ -78,7 +78,6 @@ suite('Workspace creation via factory url', async () => {
     suite('Language server validation', async () => {
         test('Java LS initialization', async () => {
             await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-            // await ide.waitNotificationAndClickOnButton('The workspace contains Java projects. Would you like to import them?', 'Yes');
             await editor.selectTab(javaFileName);
             try {
                 await ide.checkLsInitializationStart('Activating Language Support for Java');
