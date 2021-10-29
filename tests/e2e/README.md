@@ -57,3 +57,30 @@ For running tests without docker, please perform next steps:**
     <https://gist.githubusercontent.com/Ohrimenko1988/93f5426f4ebc1705c55feb8ff0396a49/raw/cbea89ad145ba33ed34a151a12c50f045f9f3b78/yaml-ls-bug.yaml>
 - Provide the **```'TS_SELENIUM_BASE_URL'```** environment variable as described above
 - perform command **```'npm run test-happy-path'```**
+
+## Plugins tests launching for the Che without oauth authentication
+
+**Setup next environment variables:**
+
+- export TS_SELENIUM_BASE_URL=\<Che-URL\>
+- export USERSTORY=\<Test you want to run \>
+- (skip if login is "admin") export TS_SELENIUM_USERNAME=\<Login\>
+- (skip if password is "admin") export TS_SELENIUM_PASSWORD=\<Password\>
+
+**Run command:**
+
+- npm run test-plugin
+
+## Plugins tests launching for the Che wit oauth authentication
+
+**Setup next environment variables:**
+
+- export TS_SELENIUM_BASE_URL=\<Che-URL\>
+- export USERSTORY=\<test-you-want-to-run\>
+- export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH="true"
+- export TS_SELENIUM_OCP_USERNAME=\<cluster-username\>
+- export TS_SELENIUM_OCP_PASSWORD=\<cluster-password\>
+
+**Run command:**
+
+- npm run test-plugin

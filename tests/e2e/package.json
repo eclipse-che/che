@@ -25,7 +25,7 @@
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p .",
     "init-mocha-opts": "tsc && mocha --opts mocha-single-devfile.opts --spec dist/tests/login/Login.spec.js",
-    "test-plugin": "npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
+    "test-plugin": "./initPluginTest.sh",
     "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
     "test-all-plugins": "tsc && mocha --opts mocha-all-plugins.opts"
   },
