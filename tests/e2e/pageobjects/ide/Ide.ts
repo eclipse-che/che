@@ -349,8 +349,8 @@ export class Ide {
     async closeRestartYourWorkspaceDialog() {
         Logger.debug('Ide.closeRestartYourWorkspaceDialog');
 
-        const yesButtonLocator: string = `//div[@class='dialogBlock']//button[text()='Cancel']`;
-        await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
+        const cancelButtonLocator: string = `//div[@class='dialogBlock']//button[text()='Cancel']`;
+        await this.driverHelper.waitAndClick(By.xpath(cancelButtonLocator));
     }
 
     private getSelectedRightToolbarButtonLocator(buttonTitle: string): By {
