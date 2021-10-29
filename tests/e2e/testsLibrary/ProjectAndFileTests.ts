@@ -27,15 +27,15 @@ export class ProjectAndFileTests {
         @inject(CLASSES.ProjectTree) private readonly projectTree: ProjectTree,
         @inject(CLASSES.Editor) private readonly editor: Editor) {}
 
-    public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceMessageDialog: boolean = false) {
+    public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             if (checkNotification) {
                 await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
             }
-            if (restartWorkspaceMessageDialog) {
-                await this.ide.closeRestartYourWorkspaceDialog();
+            if (restartWorkspaceDialogIsExpected) {
+                await this.ide.clickOnCancelDialogButton();
 
             }
             await this.projectTree.openProjectTreeContainer();

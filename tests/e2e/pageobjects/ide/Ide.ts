@@ -346,7 +346,7 @@ export class Ide {
         await this.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
     }
 
-    async closeRestartYourWorkspaceDialog() {
+    async clickOnCancelDialogButton() {
         Logger.debug('Ide.closeRestartYourWorkspaceDialog');
 
         const cancelButtonLocator: string = `//div[@class='dialogBlock']//button[text()='Cancel']`;
