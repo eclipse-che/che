@@ -73,8 +73,11 @@ bump_version () {
 
   echo "Updating project version to ${NEXT_VERSION}"
   echo "${NEXT_VERSION}" > VERSION
-  git add VERSION
-  COMMIT_MSG="[release] Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
+
+  npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
+  sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
+  git add VERSION package.json
+  COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
   git pull origin "${BUMP_BRANCH}"
 
@@ -149,6 +152,9 @@ set -e
 echo "${VERSION}" > VERSION
 git add VERSION
 
+sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
+npm --no-git-tag-version version --allow-same-version "${VERSION}"
+
 echo "Copying source code to dockerfile directory"
 cp -r "tests/e2e" "dockerfiles/e2e/e2e"
 
@@ -163,7 +169,7 @@ update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
-COMMIT_MSG="[release] Release ${VERSION}"
+COMMIT_MSG="chore: Release ${VERSION}"
 git commit -asm "${COMMIT_MSG}"
 
 # now update ${BASEBRANCH} to the new snapshot version
