@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
       - 
         name: Check existing tags
-        if: github.event.inputs.performRelease == 'true'
+        if: github.event.inputs.forceRecreateTags == 'true'
         run: |
           set +e
           RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
