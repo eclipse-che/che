@@ -65,7 +65,7 @@ repositories:
     description: >-
      UI to manage workspaces, devfiles, etc.
     devfile: https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/main/CONTRIBUTING.md#dashboard
+    doc: https://github.com/eclipse-che/che-dashboard/blob/main/README.md#eclipse-che-dashboard
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-devfile-registry
     name: devfile-registry
