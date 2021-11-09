@@ -9,7 +9,7 @@ spec:
   - name: load-tests-ftp-container
     securityContext:
       privileged: true
-    image: fauria/vsftpd
+    image: quay.io/sskoryk/ftp
     ports:
     - containerPort: 21
       protocol: TCP
