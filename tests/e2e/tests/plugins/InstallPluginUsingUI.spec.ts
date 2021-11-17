@@ -42,10 +42,10 @@ suite(`The 'InstallPluginUsingUI' test`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
+            await ide.waitAndSwitchToIdeFrame();
             workspaceName = await workspaceNameHandler.getNameFromUrl();
             CheReporter.registerRunningWorkspace(workspaceName);
 
-            await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 
             await projectTree.openProjectTreeContainer();
