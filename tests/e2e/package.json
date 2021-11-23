@@ -1,6 +1,6 @@
 {
-  "name": "e2e",
-  "version": "1.0.0",
+  "name": "@eclipse-che/che-e2e",
+  "version": "7.39.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -49,7 +49,7 @@
     "typescript": "3.9.9"
   },
   "dependencies": {
-    "@eclipse-che/api": "7.5.0-SNAPSHOT",
+    "@eclipse-che/api": "7.38.1",
     "inversify": "5.0.1",
     "reflect-metadata": "0.1.13"
   },
