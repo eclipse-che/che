@@ -77,12 +77,12 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
 
             await editor.type(yamlFileName, Key.SPACE, 19);
-            await editor.waitErrorInLine(19);
+            await editor.waitErrorInLine(19, yamlFileName);
         });
 
         test('Check error disappearance', async () => {
             await editor.performKeyCombination(yamlFileName, Key.BACK_SPACE);
-            await editor.waitErrorInLineDisappearance(19);
+            await editor.waitErrorInLineDisappearance(19, yamlFileName);
         });
 
         test('To unformat the "yaml" file', async () => {

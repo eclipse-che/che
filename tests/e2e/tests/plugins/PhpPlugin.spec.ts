@@ -77,9 +77,9 @@ suite(`The 'PhpPlugin' tests`, async () => {
         test('Error highlighting', async () => {
             const textForErrorDisplaying: string = '*';
             await editor.type(tabTitle, textForErrorDisplaying, 13);
-            await editor.waitErrorInLine(13, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
+            await editor.waitErrorInLine(13, tabTitle, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
             await editor.type(tabTitle, Key.chord(Key.DELETE), 13);
-            await editor.waitErrorInLineDisappearance(13);
+            await editor.waitErrorInLineDisappearance(13, tabTitle);
         });
     });
 

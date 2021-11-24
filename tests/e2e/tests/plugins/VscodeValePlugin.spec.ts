@@ -64,7 +64,7 @@ suite('The "VscodeValePlugin" userstory', async () => {
     suite('Check the "vale" plugin', async () => {
         test('Check warning in the editor appearance', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, docFileName);
-            await editor.waitInfoInLine(16);
+            await editor.waitInfoInLine(16,docFileName);
         });
 
         test('Open the "Problems" terminal tab', async () => {
