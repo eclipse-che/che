@@ -36,7 +36,7 @@ export class LanguageServerTests {
         test('Error highlighting', async () => {
             await this.editor.type(openedTab, textToWrite, line);
             try {
-                await this.editor.waitErrorInLine(line);
+                await this.editor.waitErrorInLine(line, openedTab);
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
@@ -45,7 +45,7 @@ export class LanguageServerTests {
             for (let i = 0; i < textToWrite.length; i++) {
                 await this.editor.performKeyCombination(openedTab, Key.BACK_SPACE);
             }
-            await this.editor.waitErrorInLineDisappearance(line);
+            await this.editor.waitErrorInLineDisappearance(line, openedTab);
         });
     }
 

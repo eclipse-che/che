@@ -72,16 +72,16 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
 
             await projectTree.expandPathAndOpenFile(pathToFile, fileName);
             await editor.type(fileName, errorText, 4);
-            await editor.waitErrorInLine(4);
+            await editor.waitErrorInLine(4, fileName);
         });
 
         test('Check errors highlighting disappearance', async () => {
             await editor.type(fileName, Key.DELETE, 4);
-            await editor.waitErrorInLineDisappearance(4);
+            await editor.waitErrorInLineDisappearance(4, fileName);
         });
 
         test('Check warning highlighting', async () => {
-            await editor.waitWarningInLine(5);
+            await editor.waitWarningInLine(5, fileName);
         });
 
         test('Uncomment the 4-th row', async () => {
@@ -89,7 +89,7 @@ suite(`The 'VscodeShellcheckPlugin' test`, async () => {
         });
 
         test('Check warning highlighting disappearance', async () => {
-            await editor.waitWarningInLineDisappearance(5);
+            await editor.waitWarningInLineDisappearance(5, fileName);
         });
     });
 

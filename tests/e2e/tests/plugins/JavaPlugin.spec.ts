@@ -81,9 +81,9 @@ suite(`The 'JavaPlugin' test`, async () => {
         test('Error highlighting', async () => {
             const textForErrorDisplaying: string = '$';
             await editor.type(tabTitle, textForErrorDisplaying, 10);
-            await editor.waitErrorInLine(10, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
+            await editor.waitErrorInLine(10, tabTitle, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
             await editor.performKeyCombination(tabTitle, Key.chord(Key.BACK_SPACE));
-            await editor.waitErrorInLineDisappearance(10);
+            await editor.waitErrorInLineDisappearance(10, tabTitle);
         });
 
         test('Codenavigation', async () => {

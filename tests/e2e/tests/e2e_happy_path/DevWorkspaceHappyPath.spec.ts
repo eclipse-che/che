@@ -111,16 +111,16 @@ suite('Workspace creation via factory url', async () => {
             await editor.type(javaFileName, textForErrorDisplaying, 30);
 
             try {
-                await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
+                await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
             } catch (err) {
                 Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
                 await browserTabsUtil.refreshPage();
                 await ide.waitAndSwitchToIdeFrame();
                 await ide.waitIde();
-                await editor.waitErrorInLine(30, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
+                await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
             }
             await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE));
-            await editor.waitErrorInLineDisappearance(30);
+            await editor.waitErrorInLineDisappearance(30, javaFileName);
         });
 
         test('Suggestion', async () => {
