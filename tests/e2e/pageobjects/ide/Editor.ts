@@ -325,38 +325,38 @@ export class Editor {
         await this.performKeyCombination(editorTabTitle, text);
     }
 
-    async waitErrorInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+    async waitErrorInLine(lineNumber: number, fileName: string, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitErrorInLine line: "${lineNumber}"`);
 
-        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
+        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber, fileName);
         await this.driverHelper.waitVisibility(errorInLineLocator, timeout);
     }
 
-    async waitErrorInLineDisappearance(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+    async waitErrorInLineDisappearance(lineNumber: number, fileName: string, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitErrorInLineDisappearance line: "${lineNumber}"`);
 
-        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber);
+        const errorInLineLocator: By = await this.getErrorInLineLocator(lineNumber, fileName);
         await this.driverHelper.waitDisappearanceWithTimeout(errorInLineLocator, timeout);
     }
 
-    async waitWarningInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+    async waitWarningInLine(lineNumber: number, fileName: string, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitWarningInLine line: "${lineNumber}"`);
 
-        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber);
+        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber, fileName);
         await this.driverHelper.waitVisibility(warningInLineLocator, timeout);
     }
 
-    async waitInfoInLine(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+    async waitInfoInLine(lineNumber: number, fileName: string, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitInfoInLine line: "${lineNumber}"`);
 
-        const infoInLineLocator: By = await this.getInfoInLineLocator(lineNumber);
+        const infoInLineLocator: By = await this.getInfoInLineLocator(lineNumber, fileName);
         await this.driverHelper.waitVisibility(infoInLineLocator, timeout);
     }
 
-    async waitWarningInLineDisappearance(lineNumber: number, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
+    async waitWarningInLineDisappearance(lineNumber: number, fileName: string, timeout: number = TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT) {
         Logger.debug(`Editor.waitWarningInLineDisappearance line: "${lineNumber}"`);
 
-        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber);
+        const warningInLineLocator: By = await this.getWarningInLineLocator(lineNumber, fileName);
         await this.driverHelper.waitDisappearanceWithTimeout(warningInLineLocator, timeout);
     }
 
@@ -405,10 +405,11 @@ export class Editor {
         }
     }
 
-    async getLineYCoordinates(lineNumber: number): Promise<number> {
+    async getLineYCoordinates(lineNumber: number, fileName: string): Promise<number> {
         Logger.debug(`Editor.getLineYCoordinates line: "${lineNumber}"`);
 
-        const lineNumberLocator: By = By.xpath(`//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
+        const lineNumberLocator: By = By.xpath(`//div[contains(@data-uri, '${fileName}')]` +
+            `//div[contains(@class, 'line-numbers') and text()='${lineNumber}']` +
             `//parent::div[contains(@style, 'position')]`);
         let elementStyleValue: string = await this.driverHelper.waitAndGetElementAttribute(lineNumberLocator, 'style', TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
 
@@ -422,10 +423,10 @@ export class Editor {
         return lineYCoordinate;
     }
 
-    async clickOnLineAndChar(line: number, char: number) {
+    async clickOnLineAndChar(line: number, char: number, fileName: string) {
         Logger.debug(`Editor.clickOnLineAndChar line: "${line}" char: "${char}"`);
 
-        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
         const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
 
         new ActionSequence(this.driverHelper.getDriver()).
@@ -434,10 +435,10 @@ export class Editor {
             perform();
     }
 
-    async goToDefinitionWithMouseClicking(line: number, char: number) {
+    async goToDefinitionWithMouseClicking(line: number, char: number, fileName: string) {
         Logger.debug(`Editor.goToDefinitionWithMouseClicking line: "${line}" char: "${char}"`);
 
-        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
 
         new ActionSequence(this.driverHelper.getDriver()).
             keyDown(Key.CONTROL).
@@ -447,10 +448,10 @@ export class Editor {
             perform();
     }
 
-    async mouseRightButtonClick(line: number, char: number) {
+    async mouseRightButtonClick(line: number, char: number, fileName: string) {
         Logger.debug(`Editor.mouseRightButtonClick line: "${line}" char: "${char}"`);
 
-        const yPosition: number = await this.getLineYCoordinates(line) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
 
         new ActionSequence(this.driverHelper.getDriver()).
             mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
@@ -503,20 +504,20 @@ export class Editor {
         return `//li[contains(@class, 'p-TabBar-tab')]//div[text()='${tabTitle}']`;
     }
 
-    private async getErrorInLineLocator(lineNumber: number): Promise<By> {
-        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
+    private async getErrorInLineLocator(lineNumber: number, fileName: string): Promise<By> {
+        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber, fileName);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-error')]`);
     }
 
-    private async getWarningInLineLocator(lineNumber: number): Promise<By> {
-        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
+    private async getWarningInLineLocator(lineNumber: number, fileName: string): Promise<By> {
+        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber, fileName);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-warning')]`);
     }
 
-    private async getInfoInLineLocator(lineNumber: number): Promise<By> {
-        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber);
+    private async getInfoInLineLocator(lineNumber: number, fileName: string): Promise<By> {
+        const lineYCoordinates: number = await this.getLineYCoordinates(lineNumber, fileName);
 
         return By.xpath(`//div[contains(@style, 'top:${lineYCoordinates}px')]//div[contains(@class, 'squiggly-info')]`);
     }

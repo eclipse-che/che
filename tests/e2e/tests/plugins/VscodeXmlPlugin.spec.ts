@@ -69,12 +69,12 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, xmlFileName);
 
             await editor.type(xmlFileName, '\$\%\^\#', 16);
-            await editor.waitErrorInLine(16);
+            await editor.waitErrorInLine(16, xmlFileName);
         });
 
         test('Check error disappearance', async () => {
             await editor.performKeyCombination(xmlFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
-            await editor.waitErrorInLineDisappearance(16);
+            await editor.waitErrorInLineDisappearance(16, xmlFileName);
         });
 
         test('Check auto-close tags', async () => {
