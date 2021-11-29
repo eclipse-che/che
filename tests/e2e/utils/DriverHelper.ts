@@ -109,7 +109,7 @@ export class DriverHelper {
             try {
                 element = await this.driver.wait(until.elementLocated(elementLocator), polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.waitVisibility - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -269,7 +269,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.waitAndClick - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -314,7 +314,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.waitAndGetElementAttribute - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -357,7 +357,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.waitAndGetCssValue - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -415,7 +415,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.type - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -457,7 +457,7 @@ export class DriverHelper {
             try {
                 element = await this.waitPresence(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.typeToInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -499,7 +499,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.clear - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -541,7 +541,7 @@ export class DriverHelper {
             try {
                 element = await this.waitPresence(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.clearInvisible - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -599,7 +599,7 @@ export class DriverHelper {
             try {
                 element = await this.waitVisibility(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.waitAndGetText - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }
@@ -702,7 +702,7 @@ export class DriverHelper {
             try {
                 element = await this.waitPresence(elementLocator, polling);
             } catch (err) {
-                if (i >= attempts) {
+                if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
                     throw err;
                 }

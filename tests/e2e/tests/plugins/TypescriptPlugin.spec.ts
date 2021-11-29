@@ -90,9 +90,9 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         test('Error highlighting', async () => {
             const textForErrorDisplaying: string = '//';
             await editor.type(tabTitle, textForErrorDisplaying, 5);
-            await editor.waitErrorInLine(4, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
+            await editor.waitErrorInLine(4, tabTitle, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
             await editor.type(tabTitle, Key.chord(Key.DELETE, Key.DELETE), 5);
-            await editor.waitErrorInLineDisappearance(4);
+            await editor.waitErrorInLineDisappearance(4, tabTitle);
         });
 
         test('Codenavigation', async () => {
