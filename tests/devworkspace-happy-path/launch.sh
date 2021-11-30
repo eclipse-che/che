@@ -56,7 +56,7 @@ function provisionOpenShiftOAuthUser() {
     # there are some identity providers. We should do add patch not to override existing identity providers
     echo "[INFO] OAuth Cluster is found but che-htpasswd provider missing. Provisioning it."
     oc patch oauth/cluster --type=json -p '[{
-      "op": "add", 
+      "op": "add",
       "path": "/spec/identityProviders/0",
       "value": {
         "name":"che-htpasswd",
@@ -67,6 +67,10 @@ function provisionOpenShiftOAuthUser() {
         }
       }
     }]'
+  # apply just added identity providers, we need to rollout deployment for make sure
+  # that new IDP item will appear in the IDP table
+  # https://github.com/eclipse/che/issues/20822
+  oc rollout status -n openshift-authentication deployment/oauth-openshift
   else
     echo "[INFO] che-htpasswd oauth provider is found. Using it"
   fi
