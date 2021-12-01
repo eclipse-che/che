@@ -14,10 +14,10 @@ installed Docker on your machine.
 These tests serves for testing Che 7 happy path. You can see description about these tests here: https://github.com/eclipse/che/tree/master/tests/e2e.
 
 ## How to run it
-The easiest way is to run them via Docker. To build locally you have go to ` dockerfiles ` folder and execute following command: 
+The easiest way is to run them via Docker. To build locally you have execute the following command: 
 
 ``` 
-./e2e/build.sh 
+docker build -f build/dockerfiles/Dockerfile -t eclipse/che-e2e:next .
 ```
 This command builds docker image named ` eclipse/che-e2e:nightly `. This image is build nightly and pushed to registry, so you don't have to build that image locally.   
 You can run the tests inside this docker image. You have to set URL of running Che and increase shared memory size (low shared memory makes chrome driver crash).
