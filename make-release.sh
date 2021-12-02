@@ -78,7 +78,7 @@ bump_version () {
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
   sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
   popd  >/dev/null || exit
-  
+
   git add VERSION package.json
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
@@ -171,11 +171,12 @@ docker push quay.io/eclipse/che-e2e:latest
 # update template in the release tag
 update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 
+COMMIT_MSG="chore: Release ${VERSION}"
+git commit -asm "${COMMIT_MSG}"
+
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
-COMMIT_MSG="chore: Release ${VERSION}"
-git commit -asm "${COMMIT_MSG}"
 
 # now update ${BASEBRANCH} to the new snapshot version
 git checkout "${BASEBRANCH}"
