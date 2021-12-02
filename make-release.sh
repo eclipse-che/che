@@ -74,10 +74,11 @@ bump_version () {
   echo "Updating project version to ${NEXT_VERSION}"
   echo "${NEXT_VERSION}" > VERSION
 
-  cd tests/e2e
+  pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
   sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
-  cd ..
+  popd  >/dev/null || exit
+  
   git add VERSION package.json
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
@@ -154,10 +155,10 @@ set -e
 echo "${VERSION}" > VERSION
 git add VERSION
 
-cd tests/e2e
+pushd tests/e2e >/dev/null || exit
 sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
-cd ../..
+popd >/dev/null || exit
 
 echo "Copying source code to dockerfile directory"
 cp -r "tests/e2e" "dockerfiles/e2e/e2e"
