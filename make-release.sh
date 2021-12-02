@@ -79,7 +79,6 @@ bump_version () {
   sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
   popd  >/dev/null || exit
 
-  git add VERSION package.json
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
   git pull origin "${BUMP_BRANCH}"
@@ -153,7 +152,6 @@ set -e
 
 # change VERSION file
 echo "${VERSION}" > VERSION
-git add VERSION
 
 pushd tests/e2e >/dev/null || exit
 sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
