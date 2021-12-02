@@ -74,11 +74,11 @@ bump_version () {
   echo "Updating project version to ${NEXT_VERSION}"
   echo "${NEXT_VERSION}" > VERSION
 
-  cd tests/e2e
+  pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
   sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
-  cd ..
-  git add VERSION package.json
+  popd  >/dev/null || exit
+
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
   git pull origin "${BUMP_BRANCH}"
@@ -152,12 +152,11 @@ set -e
 
 # change VERSION file
 echo "${VERSION}" > VERSION
-git add VERSION
 
-cd tests/e2e
+pushd tests/e2e >/dev/null || exit
 sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
-cd ../..
+popd >/dev/null || exit
 
 docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
 docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
@@ -167,11 +166,12 @@ docker push quay.io/eclipse/che-e2e:latest
 # update template in the release tag
 update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 
+COMMIT_MSG="chore: Release ${VERSION}"
+git commit -asm "${COMMIT_MSG}"
+
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
-COMMIT_MSG="chore: Release ${VERSION}"
-git commit -asm "${COMMIT_MSG}"
 
 
 
