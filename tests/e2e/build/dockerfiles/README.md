@@ -14,7 +14,7 @@ installed Docker on your machine.
 These tests serves for testing Che 7 happy path. You can see description about these tests here: https://github.com/eclipse/che/tree/master/tests/e2e.
 
 ## How to run it
-The easiest way is to run them via Docker. To build locally you have execute the following command: 
+The easiest way is to run them via Docker. To build locally you have to execute the following command: 
 
 ``` 
 docker build -f build/dockerfiles/Dockerfile -t eclipse/che-e2e:next .
