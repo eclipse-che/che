@@ -61,7 +61,7 @@ do
 done
 
 # Print information about launching tests
-if mount | grep 'e2e'; then
+if mount | grep 'e2e' && ! mount | grep 'e2e/report'; then
 	echo "The local code is mounted. Executing local code."
 	cd /tmp/e2e || exit
 	npm install
