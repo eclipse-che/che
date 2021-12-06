@@ -32,7 +32,6 @@ jobs:
           fetch-depth: 0
       - 
         name: Check existing tags
-        if: github.event.inputs.forceRecreateTags == 'true'
         run: |
           set +e
           RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
@@ -42,6 +41,7 @@ jobs:
             if [[ ${RECREATE_TAGS} == "true" ]]; then
               echo "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
               git push origin :$VERSION
+              git tag -d || true
             else
               echo "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
               exit 1
