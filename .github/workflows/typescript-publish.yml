@@ -1,0 +1,55 @@
+#
+# Copyright (c) 2021 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+name: typescript-publish-next
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - main
+      - 7.**.x
+    paths:
+    - 'tests/e2e/**'
+    - '.github/workflows/typescript-publish.yml'
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+        registry-url: 'https://registry.npmjs.org'
+        scope: '@eclipse-che'
+    - name: Clone source code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: publish
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
+      run: |
+        if [[ ${GITHUB_REF##*/} == "7."**".x" ]]; then
+          echo "[INFO] using ${GITHUB_REF##*/} tag"
+          DIST_TAG=${GITHUB_REF##*/}
+        else
+          echo "[INFO] using "next" tag"
+          DIST_TAG=next
+        fi
+
+        cd tests/e2e
+        npm ci && npm run tsc
+
+        SHORT_SHA1=$(git rev-parse --short=7 HEAD)
+        CURRENT_VERSION=$(sed -r 's/(.*)-SNAPSHOT/\1/' ../../VERSION)
+        NEW_VERSION="${CURRENT_VERSION}-dev-${SHORT_SHA1}"
+        sed -i -r -e "s/(\"version\": )(\".*\")/\1\"$NEW_VERSION\"/" package.json
+
+        npm publish --tag $DIST_TAG
