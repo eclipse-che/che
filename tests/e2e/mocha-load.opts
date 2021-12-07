@@ -1,7 +1,0 @@
---timeout 2200000
---reporter 'dist/driver/CheReporter.js'
--u tdd 
---bail
---full-trace
---spec dist/tests/load_test/LoadTest.spec
---require source-map-support/register

@@ -1,0 +1,7 @@
+{
+    "timeout": "1200000",
+    "reporter": "dist/driver/CheReporter.js",
+    "ui": "tdd",
+    "bail": true,
+    "full-trace": true
+}
