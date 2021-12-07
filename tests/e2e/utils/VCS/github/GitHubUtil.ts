@@ -73,6 +73,25 @@ export class GitHubUtil {
     }
   }
 
+  async deletePublicSshKeyByName(authToken: string, keyName: string) {
+    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRIPOINT_URL + 'user/keys';
+    const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
+    try {
+      const response = await axios.get(gitHubApiSshURL, authHeader);
+      const stringified = JSON.stringify(response.data);
+      const arrayOfPublicKeys = JSON.parse(stringified);
+      for (let entry of arrayOfPublicKeys) {
+        if (entry.title === keyName) {
+          this.removePublicSshKey(authToken, entry.id);
+          break;
+        }
+      }
+    } catch (error) {
+      console.error('Cannot delete the ' + keyName + ' public key from the GitHub account');
+      console.error(error);
+      throw error;
+    }
+  }
 
   async removeAllPublicSshKeys(authToken: string) {
     try {
