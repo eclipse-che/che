@@ -1,6 +1,0 @@
---timeout 1200000
--u tdd
---bail
---full-trace
---reporter './dist/driver/CheReporter.js'
---spec './dist/tests/login/LinkCheAndOcpUsers.spec.js'
