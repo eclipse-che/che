@@ -158,7 +158,7 @@ sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-c
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
 popd >/dev/null || exit
 
-docker build -t quay.io/eclipse/che-e2e:${VERSION} .
+docker build -t quay.io/eclipse/che-e2e:${VERSION} . -f /build/dockerfiles/Dockerfile
 docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
 docker push quay.io/eclipse/che-e2e:${VERSION}
 docker push quay.io/eclipse/che-e2e:latest
