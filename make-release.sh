@@ -156,12 +156,10 @@ echo "${VERSION}" > VERSION
 pushd tests/e2e >/dev/null || exit
 sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
+npm publish --tag "latest"
 popd >/dev/null || exit
 
-echo "Copying source code to dockerfile directory"
-cp -r "tests/e2e" "dockerfiles/e2e/e2e"
-
-docker build -t quay.io/eclipse/che-e2e:${VERSION} dockerfiles/e2e/
+docker build -t quay.io/eclipse/che-e2e:${VERSION} .
 docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
 docker push quay.io/eclipse/che-e2e:${VERSION}
 docker push quay.io/eclipse/che-e2e:latest

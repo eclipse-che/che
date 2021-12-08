@@ -25,6 +25,11 @@ jobs:
     name: Create Che E2E Tests Release
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@eclipse-che'
       -
         name: "Checkout source code"
         uses: actions/checkout@v2
@@ -76,6 +81,8 @@ jobs:
           sudo chmod +x /usr/bin/yq
       - 
         name: Perform a release
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
         run: |
           git config --global user.name "Mykhailo Kuznietsov"
           git config --global user.email "mkuznets@redhat.com"
