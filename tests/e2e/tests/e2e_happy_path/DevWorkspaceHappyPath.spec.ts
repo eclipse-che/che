@@ -141,7 +141,7 @@ suite('Workspace creation via factory url', async () => {
         });
 
         test('Run application', async () => {
-           const taskName: string = 'run';
+           const taskName: string = 'run-with-hsqldb';
            await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
            await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
             // devWs specific. After running test application we can open it just in the new window.
@@ -154,8 +154,8 @@ suite('Workspace creation via factory url', async () => {
        });
 
         test('Close the terminal running tasks', async () => {
-            await terminal.rejectTerminalProcess('run');
-            await terminal.closeTerminalTab('run');
+            await terminal.rejectTerminalProcess('run-with-hsqldb');
+            await terminal.closeTerminalTab('run-with-hsqldb');
             await warningDialog.waitAndCloseIfAppear();
             await terminal.closeTerminalTab('build');
        });

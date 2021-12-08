@@ -28,9 +28,9 @@ spec:
         - name: TS_SELENIUM_LOG_LEVEL
           value: TRACE
         - name: TS_SELENIUM_OCP_USERNAME
-          value: 'che-user'
+          value: 'happypath-dev'
         - name: TS_SELENIUM_OCP_PASSWORD
-          value: "user"
+          value: "dev"
         - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
           value: 'true'
         - name: TS_SELENIUM_USERNAME
@@ -38,7 +38,7 @@ spec:
         - name: TS_SELENIUM_PASSWORD
           value: 'admin'
         - name: TS_OCP_LOGIN_PAGE_PROVIDER_TITLE
-          value: "che-htpasswd"
+          value: "dev-htpasswd"
         - name: DELETE_WORKSPACE_ON_FAILED_TEST
           value: "true"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
@@ -57,7 +57,7 @@ spec:
         limits:
           memory: "4Gi"
           cpu: "2"
-    # Download results    
+    # Download results
     - name: download-reports
       image: eeacms/rsync
       imagePullPolicy: IfNotPresent
