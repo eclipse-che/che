@@ -208,51 +208,6 @@ export class Terminal {
         throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.`);
     }
 
-    private async getTerminalIndex(terminalTitle: string): Promise<number> {
-        for (let i: number = 0; i < 10; i++) {
-            try {
-                return await this.searchTerminalIndex(terminalTitle);
-            } catch (err) {
-                if (!(err instanceof error.NoSuchElementError)) {
-                    throw err;
-                }
-
-                if ((err instanceof error.NoSuchElementError) && (i === 9)) {
-                    throw err;
-                }
-
-                await this.driverHelper.wait(2000);
-            }
-        }
-
-        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.`);
-    }
-
-    private async searchTerminalIndex(terminalTitle: string): Promise<number> {
-        const terminalTabTitleXpathLocator: string = `//div[@id='theia-bottom-content-panel']` +
-            `//li[contains(@id, 'shell-tab-terminal') or contains(@id, 'shell-tab-plugin')]` +
-            `//div[@class='p-TabBar-tabLabel']`;
-
-        const terminalTabs: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(terminalTabTitleXpathLocator));
-        let terminalTitles: string[] = [];
-
-
-        for (let i: number = 1; i <= terminalTabs.length; i++) {
-            const terminalTabLocator: By = By.xpath(`(${terminalTabTitleXpathLocator})[${i}]`);
-            const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
-
-            if (currentTerminalTitle.search(terminalTitle) > -1) {
-                return i;
-            }
-
-            terminalTitles.push(currentTerminalTitle);
-        }
-
-        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
-            ` > List of the tabs:\n > ${terminalTitles}`);
-
-    }
-
     private getTerminalEditorInteractionEditorLocator(terminalID: string): By {
         return By.xpath(`//div[@id='${terminalID}']//textarea[@aria-label='Terminal input']`);
     }
