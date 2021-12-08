@@ -158,10 +158,7 @@ sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-c
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
 popd >/dev/null || exit
 
-echo "Copying source code to dockerfile directory"
-cp -r "tests/e2e" "dockerfiles/e2e/e2e"
-
-docker build -t quay.io/eclipse/che-e2e:${VERSION} dockerfiles/e2e/
+docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
 docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
 docker push quay.io/eclipse/che-e2e:${VERSION}
 docker push quay.io/eclipse/che-e2e:latest
@@ -175,6 +172,8 @@ git commit -asm "${COMMIT_MSG}"
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
+
+
 
 # now update ${BASEBRANCH} to the new snapshot version
 git checkout "${BASEBRANCH}"
