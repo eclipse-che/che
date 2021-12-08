@@ -156,7 +156,6 @@ echo "${VERSION}" > VERSION
 pushd tests/e2e >/dev/null || exit
 sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
-npm publish --tag "latest"
 popd >/dev/null || exit
 
 docker build -t quay.io/eclipse/che-e2e:${VERSION} .
@@ -173,6 +172,8 @@ git commit -asm "${COMMIT_MSG}"
 # tag the release
 git tag "${VERSION}"
 git push origin "${VERSION}"
+
+npm publish
 
 # now update ${BASEBRANCH} to the new snapshot version
 git checkout "${BASEBRANCH}"
