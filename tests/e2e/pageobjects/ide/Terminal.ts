@@ -18,7 +18,6 @@ import { TestConstants } from '../../TestConstants';
 
 @injectable()
 export class Terminal {
-    private static readonly TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX = '(//div[contains(@class, \'terminal-container\')]//div[contains(@class, \'terminal\')]//div[contains(@class, \'xterm-rows\')])';
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTab(tabTitle: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT) {
@@ -79,8 +78,8 @@ export class Terminal {
     async type(terminalTabTitle: string, text: string) {
         Logger.debug(`Terminal.type "${terminalTabTitle}"`);
 
-        const terminalIndex: number = await this.getTerminalIndex(terminalTabTitle);
-        const terminalInteractionContainer: By = this.getTerminalEditorInteractionEditorLocator(terminalIndex);
+        const terminalID: string = await this.getTerminalID(terminalTabTitle);
+        const terminalInteractionContainer: By = this.getTerminalEditorInteractionEditorLocator(terminalID);
 
         await this.driverHelper.typeToInvisible(terminalInteractionContainer, text);
     }
@@ -95,9 +94,10 @@ export class Terminal {
     async getText(terminalTab: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT): Promise<string> {
         Logger.debug(`Terminal.getText tab: ${terminalTab}`);
 
-        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+        const terminalID: string = await this.getTerminalID(terminalTab);
+        const terminalRowsLocator: By = this.getTerminalEditorTerminalRowsLocator(terminalID);
         await this.selectTerminalTab(terminalTab, timeout);
-        return await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+        return await this.driverHelper.waitAndGetText(terminalRowsLocator, timeout);
     }
 
     async getTextFromProblemsTab(timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT): Promise<string> {
@@ -112,13 +112,13 @@ export class Terminal {
         Logger.debug(`Terminal.selectTabByPrefixAndWaitText tab: ${terminalTab} text: ${expectedText}`);
 
         const terminalTabLocatorWithPreffix: string = `//li[contains(@title, '${terminalTab}')]`;
-        const terminalIndex: number = await this.getTerminalIndex(terminalTab);
+        const terminalID: string = await this.getTerminalID(terminalTab);
+        const terminalRowsLocator: By = this.getTerminalEditorTerminalRowsLocator(terminalID);
 
         await this.driverHelper.waitAndClick(By.xpath(terminalTabLocatorWithPreffix), timeout);
         await this.driverHelper.waitUntilTrue(async () => {
-            const terminalText: string = await this.driverHelper.waitAndGetText(By.xpath(Terminal.TERMINAL_ROWS_XPATH_LOCATOR_PREFFIX + `[${terminalIndex}]`), timeout);
+            const terminalText: string = await this.driverHelper.waitAndGetText(terminalRowsLocator, timeout);
             return terminalText.includes(expectedText);
-
         }, timeout);
     }
 
@@ -193,53 +193,27 @@ export class Terminal {
         return By.css(`li[title='${tabTitle}'].p-mod-current.theia-mod-active`);
     }
 
-    private async getTerminalIndex(terminalTitle: string): Promise<number> {
-        for (let i: number = 0; i < 10; i++) {
-            try {
-                return await this.searchTerminalIndex(terminalTitle);
-            } catch (err) {
-                if (!(err instanceof error.NoSuchElementError)) {
-                    throw err;
-                }
+    private async getTerminalID(terminalTitle: string): Promise<string> {
+        const terminalTabXpathLocator: string = `//div[@id='theia-bottom-content-panel']//li[contains(@title, '${terminalTitle}')]`;
 
-                if ((err instanceof error.NoSuchElementError) && (i === 9)) {
-                    throw err;
-                }
+        const terminalTabs: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(terminalTabXpathLocator));
 
-                await this.driverHelper.wait(2000);
-            }
+        if (terminalTabs.length > 1) {
+            throw new error.InvalidSelectorError(`Terminal.getTerminalID Selector is too generic, found more than one terminal with title:${terminalTitle}`);
+        }
+        if (terminalTabs.length === 1) {
+            return await (await terminalTabs[0].getAttribute('id')).replace('shell-tab-', '');
         }
 
         throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.`);
     }
 
-    private async searchTerminalIndex(terminalTitle: string): Promise<number> {
-        const terminalTabTitleXpathLocator: string = `//div[@id='theia-bottom-content-panel']` +
-            `//li[contains(@id, 'shell-tab-terminal') or contains(@id, 'shell-tab-plugin')]` +
-            `//div[@class='p-TabBar-tabLabel']`;
-
-        const terminalTabs: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(terminalTabTitleXpathLocator));
-        let terminalTitles: string[] = [];
-
-
-        for (let i: number = 1; i <= terminalTabs.length; i++) {
-            const terminalTabLocator: By = By.xpath(`(${terminalTabTitleXpathLocator})[${i}]`);
-            const currentTerminalTitle: string = await this.driverHelper.waitAndGetText(terminalTabLocator);
-
-            if (currentTerminalTitle.search(terminalTitle) > -1) {
-                return i;
-            }
-
-            terminalTitles.push(currentTerminalTitle);
-        }
-
-        throw new error.NoSuchElementError(`The terminal with title '${terminalTitle}' has not been found.\n` +
-            ` > List of the tabs:\n > ${terminalTitles}`);
-
+    private getTerminalEditorInteractionEditorLocator(terminalID: string): By {
+        return By.xpath(`//div[@id='${terminalID}']//textarea[@aria-label='Terminal input']`);
     }
 
-    private getTerminalEditorInteractionEditorLocator(terminalIndex: number): By {
-        return By.xpath(`(//textarea[@aria-label='Terminal input'])[${terminalIndex}]`);
+    private getTerminalEditorTerminalRowsLocator(terminalID: string): By {
+        return By.xpath(`//div[@id='${terminalID}']//div[@class='xterm-rows xterm-focus']`);
     }
 
 }
