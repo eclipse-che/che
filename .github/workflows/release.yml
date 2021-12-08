@@ -19,6 +19,10 @@ on:
         description: If true, tags will be recreated. Use with caution
         required: false
         default: 'false'
+      publishToNpmJs:
+        description: If true, Project will be published to npmjs. The version tag must exist.
+        required: false
+        default: 'true'
 
 jobs:
   build:
@@ -90,7 +94,13 @@ jobs:
 
           export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
           ./make-release.sh --version ${{ github.event.inputs.version}}
-
+      - name: Publish to npmjs
+        if: github.event.inputs.publishToNpmJs == 'true'
+        run: |
+          git checkout ${VERSION}
+          pushd tests/e2e >/dev/null || exit
+            npm ci && npm run tsc && npm publish
+          popd  >/dev/null || exit
       - name: Create failure MM message
         if: ${{ failure() }}
         run: |
