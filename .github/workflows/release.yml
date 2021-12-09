@@ -19,6 +19,10 @@ on:
         description: If true, tags will be recreated. Use with caution
         required: false
         default: 'false'
+      makeRelease:
+        description: If true, release script will be performed (new version tag and images will be created)
+        required: false
+        default: 'true'
       publishToNpmJs:
         description: If true, Project will be published to npmjs. The version tag must exist.
         required: false
