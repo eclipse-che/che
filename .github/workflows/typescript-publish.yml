@@ -38,7 +38,7 @@ jobs:
       run: |
         if [[ ${GITHUB_REF##*/} == "7."**".x" ]]; then
           echo "[INFO] using ${GITHUB_REF##*/} tag"
-          DIST_TAG=${GITHUB_REF##*/}
+          DIST_TAG=next-${GITHUB_REF##*/}
         else
           echo "[INFO] using "next" tag"
           DIST_TAG=next
