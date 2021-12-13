@@ -263,10 +263,10 @@ async function waitStoppedBreakpoint(lineNumber: number) {
         await editor.waitStoppedDebugBreakpoint(welcomeControllerJavaFileName, lineNumber);
     }
 }
-// we need to send a request to test app. under debugging because when we try to make it with webdriver
+// we need to send a request to test app. under debugging because when we try to make it with WebDriver
 // the WebDriver will hang. Because the test application does not respond under debugging,
 // for avoiding this problem we send http request with axios and set the request timeout. We expect that request will fail with
-// timeout error, we check it in the catch block and wait breakpoint activating in the WebDriver after this
+// timeout error, we check it in the catch block and wait breakpoint activating in the WebDriver after this.
 async function sendRequestToDebugApp(urlToApp: string) {
   const httpClient = axios.create();
   httpClient.defaults.timeout = 1000;
