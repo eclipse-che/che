@@ -10,9 +10,6 @@
 name: Release changelog
 
 on:
-  push:
-    tags:
-    - '7.*'
   workflow_dispatch:
     inputs:
       version:
