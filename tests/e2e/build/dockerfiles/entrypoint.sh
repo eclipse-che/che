@@ -64,7 +64,7 @@ done
 if mount | grep 'e2e' && ! mount | grep 'e2e/report'; then
 	echo "The local code is mounted. Executing local code."
 	cd /tmp/e2e || exit
-	npm install
+	npm ci
 else
 	echo "Executing e2e tests from an image."
 	cd /tmp/e2e || exit
@@ -85,13 +85,13 @@ if [ $TS_LOAD_TESTS ]; then
   echo "Tarring files and sending them via FTP..."
   tar -cf $user_folder.tar ./$user_folder
 
-  ftp -vn load-tests-ftp-service << End_script 
+  ftp -vn load-tests-ftp-service << End_script
   user user pass1234
   binary
   put $user_folder.tar
   quit
 End_script
-  
+
   echo "Files sent to load-tests-ftp-service."
 else
   SCREEN_RECORDING=${VIDEO_RECORDING:-true}
