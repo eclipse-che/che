@@ -12,7 +12,9 @@
 **Perform commands:**
 
 - ```export TS_SELENIUM_BASE_URL=<Che7 URL>```
-- ```npm install```
+- ```npm ci```
+
+Note: If there is any modifications in package.json, manually execute the `npm install` to update the package-lock.json. So that errors can be avoided while executing npm ci
 
 ## Default launch
 
