@@ -84,7 +84,7 @@ suite('Workspace creation via factory url', async () => {
             await editor.selectTab(javaFileName);
             try {
                 await ide.checkLsInitializationStart('Activating Language Support for Java');
-                await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 900_000);
+                await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 3600_000);
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
