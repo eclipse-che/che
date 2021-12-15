@@ -107,7 +107,7 @@ jobs:
           echo "{\"text\":\":no_entry_sign: Che E2E Tests ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse/che/actions/workflows/release.yml\"}" > mattermost.json
       - name: Create success MM message
         run: |
-          echo "{\"text\":\":white_check_mark: Che E2E Tests ${{ github.event.inputs.version }} has been released: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}\"}" > mattermost.json
+          echo "{\"text\":\":white_check_mark: Che E2E Tests image and generator ${{ github.event.inputs.version }} release job is complete: \n Performed tagging and container build of new image: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}. \n Published package to npmjs https://www.npmjs.com/package/@eclipse-che/che-e2e/v/${{ github.event.inputs.version }}.\"}" > mattermost.json
       - name: Send MM message
         if: ${{ success() }} || ${{ failure() }}
         uses: mattermost/action-mattermost-notify@1.1.0
