@@ -19,6 +19,10 @@ on:
         description: If true, tags will be recreated. Use with caution
         required: false
         default: 'false'
+      makeRelease:
+        description: If true, release script will be performed (new version tag and images will be created)
+        required: false
+        default: 'true'
       publishToNpmJs:
         description: If true, Project will be published to npmjs. The version tag must exist.
         required: false
@@ -41,6 +45,7 @@ jobs:
           fetch-depth: 0
       - 
         name: Check existing tags
+        if: github.event.inputs.makeRelease == 'true'
         run: |
           set +e
           RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
@@ -85,6 +90,7 @@ jobs:
           sudo chmod +x /usr/bin/yq
       - 
         name: Perform a release
+        if: github.event.inputs.makeRelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
         run: |
@@ -96,8 +102,10 @@ jobs:
           ./make-release.sh --version ${{ github.event.inputs.version}}
       - name: Publish to npmjs
         if: github.event.inputs.publishToNpmJs == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
         run: |
-          git checkout ${VERSION}
+          git checkout ${{ github.event.inputs.version}}
           pushd tests/e2e >/dev/null || exit
             npm ci && npm run tsc && npm publish
           popd  >/dev/null || exit
