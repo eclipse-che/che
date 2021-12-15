@@ -7,23 +7,24 @@
 //  *
 //  * SPDX-License-Identifier: EPL-2.0
 //  **********************************************************************/
-
-import { e2eContainer } from '../../inversify.config';
-import { CLASSES } from '../../inversify.types';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { CLASSES } from '../../inversify.types';
+import { DebugView } from '../../pageobjects/ide/DebugView';
+import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { e2eContainer } from '../../inversify.config';
+import { Editor } from '../../pageobjects/ide/Editor';
+import { Ide, LeftToolbarButton } from '../../pageobjects/ide/Ide';
+import { Key, error, By } from 'selenium-webdriver';
+import { Logger } from '../../utils/Logger';
+import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
+import { Terminal } from '../../pageobjects/ide/Terminal';
 import { TestConstants } from '../../TestConstants';
-import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
-import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { Editor } from '../../pageobjects/ide/Editor';
-import { Key, error, By } from 'selenium-webdriver';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { Logger } from '../../utils/Logger';
-import { Terminal } from '../../pageobjects/ide/Terminal';
-import { DialogWindow } from '../../pageobjects/ide/DialogWindow';
 import * as fs from 'fs';
+import axios from 'axios';
+import CheReporter from '../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -40,6 +41,8 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const globalTaskScope = 'Global';
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
+const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
+const welcomeControllerJavaFileName: string = 'WelcomeController.java';
 
 
 const SpringAppLocators = {
@@ -161,6 +164,51 @@ suite('Workspace creation via factory url', async () => {
        });
 });
 
+    suite('Validation of debug functionality', async () => {
+        let urlToPetClinicApp = '';
+        test('Launch debug', async () => {
+            const taskName: string = 'run-debug';
+            await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+            await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
+            await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
+        });
+
+        test('Check content of the launched application', async () => {
+            const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
+            await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
+            urlToPetClinicApp = await browserTabsUtil.getCurrentUrl();
+            await browserTabsUtil.switchToWindow(mainWindowHandle);
+        });
+
+        test('Open debug view', async () => {
+            await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', welcomeControllerJavaFileName);
+            await editor.selectTab(welcomeControllerJavaFileName);
+            await topMenu.selectOption('View', 'Debug');
+            await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
+        });
+
+        test('Choose debug configuration', async () => {
+            await debugView.clickOnDebugConfigurationDropDown();
+            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (java-spring-petclinic)');
+        });
+
+        test('Run debug', async () => {
+            await debugView.clickOnRunDebugButton();
+            await waitDebugToConnect();
+        });
+
+        test('Activate breakpoint', async () => {
+            await editor.selectTab(welcomeControllerJavaFileName);
+            await editor.activateBreakpoint(welcomeControllerJavaFileName, 27);
+        });
+
+        test('Check debugger stop at the breakpoint', async () => {
+            await sendRequestToDebugApp(urlToPetClinicApp);
+            await waitStoppedBreakpoint(27);
+        });
+
+    });
+
 async function checkJavaPathCompletion() {
     if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
         const classpathText: string = fs.readFileSync('./files/happy-path/petclinic-classpath.txt', 'utf8');
@@ -200,5 +248,44 @@ async function switchAppWindowAndCheck(contentLocator: By) {
         }
     }
     await driverHelper.waitVisibility(contentLocator);
+    await driverHelper.getDriver().close();
     await browserTabsUtil.switchToWindow(mainWindowHandle);
 }
+
+async function waitStoppedBreakpoint(lineNumber: number) {
+    try {
+        await editor.waitStoppedDebugBreakpoint(welcomeControllerJavaFileName, lineNumber);
+    } catch (err) {
+        const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
+        await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
+        await driverHelper.getDriver().navigate().refresh();
+        await browserTabsUtil.switchToWindow(mainWindowHandle);
+        await editor.waitStoppedDebugBreakpoint(welcomeControllerJavaFileName, lineNumber);
+    }
+}
+// we need to send a request to test app. under debugging because when we try to make it with WebDriver
+// the WebDriver will hang. Because the test application does not respond under debugging,
+// for avoiding this problem we send http request with axios and set the request timeout. We expect that request will fail with
+// timeout error, we check it in the catch block and wait breakpoint activating in the WebDriver after this.
+async function sendRequestToDebugApp(urlToApp: string) {
+  const httpClient = axios.create();
+  httpClient.defaults.timeout = 1000;
+    try {
+      await httpClient.get(urlToApp);
+    } catch (error) {
+      if (error.message === 'timeout of 1000ms exceeded') {
+      console.log('>>>>The debugger is set >>>>>>>>>>>>>>>>>>> ' + error.message);
+      }
+  }
+}
+
+async function waitDebugToConnect() {
+    try {
+        await debugView.waitForDebuggerToConnect();
+    } catch (err) {
+        Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18034 issue.');
+        await debugView.clickOnThreadsViewTitle();
+        await debugView.waitForDebuggerToConnect();
+    }
+}
+
