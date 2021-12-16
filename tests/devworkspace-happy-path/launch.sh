@@ -41,8 +41,8 @@ function provisionOpenShiftOAuthUser() {
     return 0
   fi
   echo "[INFO] Che User does not exist. Setting up htpasswd oauth for it."
-  oc delete secret che-htpasswd-secret -n openshift-config || true
-  oc create secret generic che-htpasswd-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
+  oc delete secret dev-htpasswd-secret -n openshift-config || true
+  oc create secret generic dev-htpasswd-secret --from-file=htpasswd="$SCRIPT_DIR/resources/users.htpasswd" -n openshift-config
 
   if [[ $(oc get oauth cluster --ignore-not-found) == "" ]]; then
     echo "[INFO] Creating a new OAuth Cluster since it's not found."
@@ -52,34 +52,37 @@ function provisionOpenShiftOAuthUser() {
     # there are no identity providers. We can do merge and set the whole .spec.identityProviders field
     echo "[INFO] No identity providers found, provisioning Che one."
     oc patch oauth/cluster --type=merge -p "$(cat $SCRIPT_DIR/resources/cluster-oauth-patch.json)"
-  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[]?.name? | select ( . == ("che-htpasswd"))') ]]; then
+  elif [[ ! $(oc get oauth/cluster -o=json | jq -e '.spec.identityProviders[]?.name? | select ( . == ("dev-htpasswd"))') ]]; then
     # there are some identity providers. We should do add patch not to override existing identity providers
-    echo "[INFO] OAuth Cluster is found but che-htpasswd provider missing. Provisioning it."
+    echo "[INFO] OAuth Cluster is found but dev-htpasswd provider missing. Provisioning it."
     oc patch oauth/cluster --type=json -p '[{
       "op": "add",
       "path": "/spec/identityProviders/0",
       "value": {
-        "name":"che-htpasswd",
-        "mappingMethod":"claim",
+        "name":"dev-htpasswd",
+        "mappingMethod":"add",
         "type":"HTPasswd",
         "htpasswd": {
-          "fileData":{"name":"che-htpasswd-secret"}
+          "fileData":{"name":"dev-htpasswd-secret"}
         }
       }
     }]'
+
+  else
+    echo "[INFO] dev-htpasswd oauth provider is found. Using it"
+  fi
+
+  echo "[INFO] rollout oauth-openshift pods for applying OAuth configuration"
   # apply just added identity providers, we need to rollout deployment for make sure
   # that new IDP item will appear in the IDP table
   # https://github.com/eclipse/che/issues/20822
-  oc rollout status -n openshift-authentication deployment/oauth-openshift
-  else
-    echo "[INFO] che-htpasswd oauth provider is found. Using it"
-  fi
 
+  oc rollout status -n openshift-authentication deployment/oauth-openshift
   echo -e "[INFO] Waiting for htpasswd auth to be working up to 5 minutes"
   CURRENT_TIME=$(date +%s)
   ENDTIME=$(($CURRENT_TIME + 300))
   while [ $(date +%s) -lt $ENDTIME ]; do
-      if oc login -u che-user -p user --kubeconfig $TMP_KUBECONFIG; then
+      if oc login -u happypath-dev -p dev --kubeconfig $TMP_KUBECONFIG; then
           return 0
       fi
       sleep 10
