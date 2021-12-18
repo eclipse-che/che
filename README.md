@@ -82,3 +82,4 @@ We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in th
 
 ### License
 Che is open sourced under the Eclipse Public License 2.0.
+
