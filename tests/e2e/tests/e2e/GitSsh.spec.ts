@@ -16,11 +16,10 @@ import { GitPlugin } from '../../pageobjects/ide/plugins/GitPlugin';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
-import { CheGitApi } from '../../utils/VCS/CheGitApi';
+// import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
@@ -28,15 +27,15 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../..';
 import CheReporter from '../../driver/CheReporter';
+import { Logger } from '../../utils/Logger';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
-const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const gitHubUtils: GitHubUtil = e2eContainer.get<GitHubUtil>(CLASSES.GitHubUtil);
-const cheGitAPI: CheGitApi = e2eContainer.get(CLASSES.CheGitApi);
+// const cheGitAPI: CheGitApi = e2eContainer.get(CLASSES.CheGitApi);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
 const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
@@ -44,34 +43,33 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
+const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
-const wsNameCheckGeneratingKeys = 'checkGeneratingSsh';
+const wsNameCheckGeneratingKeys = 'yaml-plugin';
 const wsNameCheckPropagatingKeys = 'checkPropagatingSsh';
 const committedFile = 'README.md';
 
 suite('Git with ssh workflow', async () => {
-    suiteSetup(async function () {
-        const wsConfig = await testWorkspaceUtils.getBaseDevfile();
-        wsConfig.metadata!.name = wsNameCheckGeneratingKeys;
-        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
-        await loginPage.login();
-        await testWorkspaceUtils.createWsFromDevFile(wsConfig);
+    test('Create workspace using factory', async () => {
+        await browserTabsUtil.navigateTo(factoryUrl);
     });
 
-    test('Login into workspace and open tree container', async () => {
-        await dashboard.openDashboard();
-        await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
+
+    test('Wait for workspace creation and open tree container', async () => {
+        // await dashboard.openDashboard();
+        // await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
-        await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
+        // await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
     });
 
     test('Generate a SSH key', async () => {
         await topMenu.selectOption('View', 'Find Command...');
         // workaround - reopen 'Find Command' container - https://github.com/eclipse/che/issues/19793
         await topMenu.selectOption('View', 'Find Command...');
-        await quickOpenContainer.typeAndSelectSuggestion('SSH', 'SSH: Generate Key...');
+        await quickOpenContainer.typeAndSelectSuggestion('SSH: Generate', 'SSH: Generate Key...');
         await ide.waitNotificationAndClickOnButton('Key pair successfully generated, do you want to view the public key', 'View');
         await editor.waitEditorOpened('Untitled-0');
         await editor.waitText('Untitled-0', 'ssh-rsa');
@@ -80,7 +78,9 @@ suite('Git with ssh workflow', async () => {
 
     test('Add a SSH key to GitHub side and clone by ssh link', async () => {
         const sshName: string = workspaceNameHandler.generateWorkspaceName('test-SSH-', 5);
-        const publicSshKey = await cheGitAPI.getPublicSSHKey();
+        // const publicSshKey = await cheGitAPI.getPublicSSHKey();
+        const publicSshKey = await editor.getEditorVisibleText('Untitled-0');
+        Logger.debug('publicSshKey = ' + publicSshKey);
         await gitHubUtils.addPublicSshKeyToUserAccount(TestConstants.TS_GITHUB_TEST_REPO_ACCESS_TOKEN, sshName, publicSshKey);
         await cloneTestRepo();
 

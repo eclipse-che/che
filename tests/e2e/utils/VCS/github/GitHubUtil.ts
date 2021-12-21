@@ -3,7 +3,7 @@ import axios from 'axios';
 
 @injectable()
 export class GitHubUtil {
-  private static readonly GITHUB_API_ENTRIPOINT_URL = 'https://api.github.com/';
+  private static readonly GITHUB_API_ENTRYPOINT_URL = 'https://api.github.com/';
   /**
    * add public part of ssh key to the defied github account
    * @param authToken
@@ -11,8 +11,9 @@ export class GitHubUtil {
    * @param key
    */
   async addPublicSshKeyToUserAccount(authToken: string, title: string, key: string) {
-    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRIPOINT_URL + 'user/keys';
-    const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
+    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRYPOINT_URL + 'user/keys';
+    // const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
+    const authHeader = { headers: { 'Authorization': authToken, 'Accept': 'application/vnd.github.v3+json' } };
 
     const data = {
       title: `${title}`,
@@ -45,7 +46,7 @@ export class GitHubUtil {
   }
 
   async getPublicSshKeys(authToken: string): Promise<Array<string>> {
-    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRIPOINT_URL + 'user/keys';
+    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRYPOINT_URL + 'user/keys';
     const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
     try {
       const response = await axios.get(gitHubApiSshURL, authHeader);
@@ -64,7 +65,7 @@ export class GitHubUtil {
   }
 
   async removePublicSshKey(authToken: string, keyId: string) {
-    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRIPOINT_URL + 'user/keys/' + keyId;
+    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRYPOINT_URL + 'user/keys/' + keyId;
     const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
     try { await axios.delete(gitHubApiSshURL, authHeader); } catch (error) {
       console.error('Cannot delete the public key from the GitHub account: ');
@@ -74,7 +75,7 @@ export class GitHubUtil {
   }
 
   async deletePublicSshKeyByName(authToken: string, keyName: string) {
-    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRIPOINT_URL + 'user/keys';
+    const gitHubApiSshURL: string = GitHubUtil.GITHUB_API_ENTRYPOINT_URL + 'user/keys';
     const authHeader = { headers: { 'Authorization': 'token ' + authToken, 'Content-Type': 'application/json' } };
     try {
       const response = await axios.get(gitHubApiSshURL, authHeader);

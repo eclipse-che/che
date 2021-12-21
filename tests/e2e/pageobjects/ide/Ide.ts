@@ -34,7 +34,8 @@ export class Ide {
     private static readonly TOP_MENU_PANEL_CSS: string = '#theia-app-shell #theia-top-panel .p-MenuBar-content';
     private static readonly LEFT_CONTENT_PANEL_CSS: string = '#theia-left-content-panel';
     private static readonly PRELOADER_CSS: string = '.theia-preload';
-    private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-iframe';
+    // private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-iframe';
+    private static readonly IDE_CSS: string = '#theia-main-content-panel';
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -48,30 +49,22 @@ export class Ide {
     async waitAndSwitchToIdeFrame(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
         try {
-            await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
+            await this.driverHelper.waitVisibilityBoolean(By.css(Ide.IDE_CSS), timeout);
         } catch (err) {
             if (err instanceof error.StaleElementReferenceError) {
                 Logger.warn('StaleElementException occurred during waiting for IDE. Sleeping for 2 secs and retrying.');
-                this.driverHelper.wait(2000);
-                try {
-                    await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
-                } catch (err) {
-                    if (err instanceof error.TimeoutError) {
-                        Logger.warn(`Iframe is not available even after ${timeout} milliseconds, checking for visibility of #theia-main-content-panel.`);
-                        await this.driverHelper.isVisible(By.css('#theia-main-content-panel'));
-                        return;
-                    }
-                    throw err;
-                }
                 return;
             }
 
             if (err instanceof error.TimeoutError) {
-                Logger.warn(`Iframe is not available even after ${timeout} milliseconds, checking for visibility of #theia-main-content-panel.`);
-                await this.driverHelper.isVisible(By.css('#theia-main-content-panel'));
+                Logger.warn(`IDE is not visible even after ${timeout} milliseconds`);
+                try {
+                await this.driverHelper.waitVisibilityBoolean(By.css(Ide.IDE_CSS));
+                } catch (err) {
+                    Logger.warn(`theia editor is not displayed even after ${timeout} milliseconds.`);
+                    return;
+                }
             }
-
-            Logger.error(`Switching to IDE frame failed.`);
             throw err;
         }
     }
@@ -199,7 +192,7 @@ export class Ide {
                 }
 
                 if (err instanceof error.TimeoutError) {
-                    Logger.error(`Waiting for ${idePartLocator} timeouted after ${timeout} timeout.`);
+                    Logger.error(`Waiting for ${idePartLocator} timed out after ${timeout} milliseconds.`);
                     throw err;
                 }
 
