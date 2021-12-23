@@ -37,7 +37,7 @@
     "@types/node": "11.13.4",
     "@types/rimraf": "2.0.2",
     "@types/selenium-webdriver": "3.0.16",
-    "axios": "0.21.1",
+    "axios": "0.21.2",
     "chai": "4.2.0",
     "chromedriver": "95.0.0",
     "mocha": "^9.1.3",
