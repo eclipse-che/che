@@ -130,7 +130,7 @@ suite('Cleanup', async () => {
 
 async function cloneTestRepo() {
     const sshLinkToRepo: string = 'git@github.com:' + TestConstants.TS_GITHUB_TEST_REPO + '.git';
-    const confirmMessage = 'Clone from URL';
+    const confirmMessage = 'Clone from URL, ' + sshLinkToRepo;
 
     await topMenu.selectOption('View', 'Find Command...');
     // workaround - reopen 'Find Command' container - https://github.com/eclipse/che/issues/19793
@@ -138,6 +138,4 @@ async function cloneTestRepo() {
     await quickOpenContainer.typeAndSelectSuggestion('clone', 'Git: Clone');
     await quickOpenContainer.typeAndSelectSuggestion(sshLinkToRepo, confirmMessage);
     await gitPlugin.clickOnSelectRepositoryButton();
-
-    await ide.waitAndApplyTrustNotification();
 }
