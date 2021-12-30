@@ -134,3 +134,4 @@ TEST_DURATION=$((END_TIME-TIMESTAMP))
 echo "Tests are done! :) "
 echo "Tests lasted $TEST_DURATION seconds."
 echo "You can see load tests sum up here: $sumupFile"
+cat $sumupFile
