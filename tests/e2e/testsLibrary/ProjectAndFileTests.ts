@@ -13,6 +13,7 @@ import { inject, injectable } from 'inversify';
 import { By } from 'selenium-webdriver';
 import { Ide } from '../pageobjects/ide/Ide';
 import { ProjectTree } from '../pageobjects/ide/ProjectTree';
+import { OpenEditors } from '../pageobjects/ide/OpenEditors';
 import { Editor } from '../pageobjects/ide/Editor';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { DriverHelper } from '../utils/DriverHelper';
@@ -25,6 +26,7 @@ export class ProjectAndFileTests {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.ProjectTree) private readonly projectTree: ProjectTree,
+        @inject(CLASSES.OpenEditors) private readonly openEditors: OpenEditors,
         @inject(CLASSES.Editor) private readonly editor: Editor) {}
 
     public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
@@ -39,6 +41,9 @@ export class ProjectAndFileTests {
 
             }
             await this.projectTree.openProjectTreeContainer();
+            if (!await this.openEditors.isExpansionToggleCollapsed()) {
+                await this.openEditors.waitAndClickExpansionToggle();
+            }
             await this.projectTree.waitProjectImported(sampleName, folder);
         });
     }
@@ -51,6 +56,9 @@ export class ProjectAndFileTests {
                 await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
             }
             await this.projectTree.openProjectTreeContainer();
+            if (!await this.openEditors.isExpansionToggleCollapsed()) {
+                await this.openEditors.waitAndClickExpansionToggle();
+            }
             await this.projectTree.waitProjectImportedNoSubfolder(sampleName);
         });
     }
