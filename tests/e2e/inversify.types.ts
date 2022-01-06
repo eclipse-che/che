@@ -27,6 +27,7 @@ const CLASSES = {
     WorkspaceDetailsPlugins: 'WorkspaceDetailsPlugins',
     Ide: 'Ide',
     ProjectTree: 'ProjectTree',
+    OpenEditors: 'OpenEditors',
     Editor: 'Editor',
     TopMenu: 'TopMenu',
     QuickOpenContainer: 'QuickOpenContainer',
