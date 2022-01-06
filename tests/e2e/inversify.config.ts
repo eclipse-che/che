@@ -28,6 +28,7 @@ import { WorkspaceDetails } from './pageobjects/dashboard/workspace-details/Work
 import { WorkspaceDetailsPlugins } from './pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
 import { Ide } from './pageobjects/ide/Ide';
 import { ProjectTree } from './pageobjects/ide/ProjectTree';
+import { OpenEditors } from './pageobjects/ide/OpenEditors';
 import { Editor } from './pageobjects/ide/Editor';
 import { TopMenu } from './pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from './pageobjects/ide/QuickOpenContainer';
@@ -94,6 +95,7 @@ e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetail
 e2eContainer.bind<WorkspaceDetailsPlugins>(CLASSES.WorkspaceDetailsPlugins).to(WorkspaceDetailsPlugins);
 e2eContainer.bind<Ide>(CLASSES.Ide).to(Ide);
 e2eContainer.bind<ProjectTree>(CLASSES.ProjectTree).to(ProjectTree);
+e2eContainer.bind<OpenEditors>(CLASSES.OpenEditors).to(OpenEditors);
 e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor);
 e2eContainer.bind<TopMenu>(CLASSES.TopMenu).to(TopMenu);
 e2eContainer.bind<QuickOpenContainer>(CLASSES.QuickOpenContainer).to(QuickOpenContainer);
