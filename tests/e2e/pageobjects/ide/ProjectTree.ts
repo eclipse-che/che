@@ -21,7 +21,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class ProjectTree {
-    private static readonly PROJECT_TREE_CONTAINER_CSS: string = '#theia-left-side-panel .theia-TreeContainer';
+    private static readonly PROJECT_TREE_CONTAINER_LOCATOR: By = By.css('#theia-left-side-panel #explorer-view-container--files .theia-TreeContainer');
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -94,7 +94,7 @@ export class ProjectTree {
     async waitProjectTreeContainer(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
         Logger.debug('ProjectTree.waitProjectTreeContainer');
 
-        await this.driverHelper.waitPresence(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
+        await this.driverHelper.waitPresence(ProjectTree.PROJECT_TREE_CONTAINER_LOCATOR, timeout);
     }
 
     async waitProjectTreeContainerClosed(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
@@ -102,7 +102,7 @@ export class ProjectTree {
 
         Logger.debug('ProjectTree.waitProjectTreeContainerClosed');
 
-        await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling);
+        await this.driverHelper.waitDisappearance(ProjectTree.PROJECT_TREE_CONTAINER_LOCATOR, attempts, polling);
     }
 
     async waitItem(itemPath: string, timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {
