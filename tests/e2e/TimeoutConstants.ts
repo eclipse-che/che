@@ -74,7 +74,6 @@ export const TimeoutConstants = {
      */
     TS_ERROR_HIGHLIGHTING_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 90_000,
 
-
     // -------------------------------------------- PROJECT TREE --------------------------------------------
 
     /**
@@ -96,6 +95,18 @@ export const TimeoutConstants = {
      * Timeout for waiting workspace sample import, 50_000 by default.
      */
     TS_IMPORT_PROJECT_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 50_000,
+
+    // ---------------------------------------- OPEN EDITORS ------------------------------------------
+
+    /**
+     * Wait for IDE showing open editors tab, "60 000" by default.
+     */
+    TS_OPEN_EDITORS_TIMEOUT: Number(process.env.TS_OPEN_EDITORS_TIMEOUT) || 60_000,
+
+    /**
+     * Click on item timeout (open editors), "10 000" by default.
+     */
+    TS_OPEN_EDITORS_CLICK_ON_ITEM_TIMEOUT: Number(process.env.TS_PROJECT_TREE_CLICK_ON_ITEM_TIMEOUT) || 10_000,
 
     // -------------------------------------------- EDITOR --------------------------------------------
 
