@@ -24,13 +24,13 @@ export class CheLoginPage {
     async waitEclipseCheLoginFormPage() {
             Logger.debug('CheLoginPage.waitEclipseCheLoginFormPage');
 
-            await this.driverHelper.waitVisibility(By.id('kc-form-login'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+            await this.driverHelper.waitVisibility(By.id('login'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async inputUserNameEclipseCheLoginPage(userName: string) {
             Logger.debug(`CheLoginPage.inputUserNameEclipseCheLoginPage username: "${userName}"`);
 
-            await this.driverHelper.enterValue(By.id('username'), userName);
+            await this.driverHelper.enterValue(By.id('login'), userName);
     }
 
     async inputPaswordEclipseCheLoginPage(passw: string) {
@@ -42,7 +42,7 @@ export class CheLoginPage {
     async clickEclipseCheLoginButton() {
         Logger.debug('CheLoginPage.clickEclipseCheLoginButton');
 
-        await this.driverHelper.waitAndClick(By.id('kc-login'));
+        await this.driverHelper.waitAndClick(By.id('submit-login'));
     }
 
     async isFirstBrokerLoginPageVisible(): Promise<boolean> {
