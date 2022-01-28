@@ -276,6 +276,10 @@ async function sendRequestToDebugApp(urlToApp: string) {
       if (error.message === 'timeout of 1000ms exceeded') {
       console.log('>>>>The debugger is set >>>>>>>>>>>>>>>>>>> ' + error.message);
       }
+      else {
+          const {data} = await httpClient.get(urlToApp);
+          console.log('>>>>>>>seems the app. is not set under debug properly: >>>>>>>>>>>>>>'+ data)
+      }
   }
 }
 
