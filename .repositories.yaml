@@ -60,6 +60,13 @@ repositories:
     devfile: https://github.com/che-incubator/chectl/blob/master/devfile.yaml
     doc: https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: true
+  - url: https://github.com/che-incubator/che-code
+    name: che-code
+    description: >-
+      Fork of "Code - OSS" to work with Eclipse Che
+    devfile: https://github.com/che-incubator/che-code/blob/main/devfile.yaml
+    doc: https://github.com/che-incubator/che-code/blob/main/README.md
+    useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-dashboard
     name: dashboard
     description: >-
