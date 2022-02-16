@@ -138,7 +138,7 @@ suite('Workspace creation via factory url', async () => {
 });
     suite('Validation of workspace build and run', async () => {
         test('Build application', async () => {
-           const taskName: string = 'build';
+           const taskName: string = 'maven-build';
            await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
            await terminal.waitIconSuccess(taskName, 500_000);
         });
@@ -275,10 +275,8 @@ async function sendRequestToDebugApp(urlToApp: string) {
     } catch (error) {
       if (error.message === 'timeout of 1000ms exceeded') {
       console.log('>>>>The debugger is set >>>>>>>>>>>>>>>>>>> ' + error.message);
-      }
-      else {
-          const {data} = await httpClient.get(urlToApp);
-          console.log('>>>>>>>seems the app. is not set under debug properly: >>>>>>>>>>>>>>'+ data)
+      } else {          const {data} = await httpClient.get(urlToApp);
+          console.log('>>>>>>>seems the app. is not set under debug properly: >>>>>>>>>>>>>>' + data);
       }
   }
 }
