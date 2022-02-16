@@ -14,10 +14,8 @@ import { CLASSES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
@@ -27,18 +25,16 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeYamlPlugin.yaml';
+const devfileUrl: string = 'https://github.com/SkorikSergey/web-nodejs-sample/tree/yaml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-const projectName: string = 'nodejs-web-app';
+const projectName: string = 'web-nodejs-sample';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
 const yamlSchema = { 'yaml-schema.json': '*.yaml' };
 
-let workspaceName: string = '';
+let workspaceName: string = 'yaml-plugin';
 
 suite('The "VscodeYamlPlugin" userstory', async () => {
     suite('Create workspace', async () => {
@@ -47,12 +43,9 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         });
 
         test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
             CheReporter.registerRunningWorkspace(workspaceName);
 
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
         });
     });
 
@@ -64,25 +57,21 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
     });
 
     suite('Check the "vscode-yaml" plugin', async () => {
-        test('Set the yaml schema path', async () => {
-            await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
-        });
-
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
-            await editor.waitSuggestion(yamlFileName, 'from', 60000, 18, 5);
+            await editor.waitSuggestion(yamlFileName, 'for', 60000, 18, 5);
         });
 
         test('Check error appearance', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
 
-            await editor.type(yamlFileName, Key.SPACE, 19);
-            await editor.waitErrorInLine(19, yamlFileName);
+            await editor.type(yamlFileName, Key.SPACE, 20);
+            await editor.waitErrorInLine(20, yamlFileName);
         });
 
         test('Check error disappearance', async () => {
             await editor.performKeyCombination(yamlFileName, Key.BACK_SPACE);
-            await editor.waitErrorInLineDisappearance(19, yamlFileName);
+            await editor.waitErrorInLineDisappearance(20, yamlFileName);
         });
 
         test('To unformat the "yaml" file', async () => {

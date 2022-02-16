@@ -24,7 +24,6 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -35,12 +34,11 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/TypescriptNodeDebug2PluginTest.yaml';
+const devfileUrl: string = 'https://github.com/SkorikSergey/web-nodejs-sample/tree/typescript-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const codeNavigationClassName: string = 'OpenDefinition.ts';
-const projectName: string = 'nodejs-web-app';
+const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
 const sampleBodyLocator: By = By.xpath(`//body[text()='Hello World!']`);
 
@@ -48,7 +46,7 @@ const fileFolderPath: string = `${projectName}`;
 const debugFileFolderPath: string = `${projectName}/app`;
 const debugFile: string = 'app.js';
 const tabTitle: string = 'typescript-node-debug.ts';
-let workspaceName: string;
+let workspaceName: string = 'typescript-plugin';
 
 suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
     suite('Create workspace', async () => {
@@ -57,13 +55,9 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         });
 
         test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
             CheReporter.registerRunningWorkspace(workspaceName);
 
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
-
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, subRootFolder);
         });
@@ -106,15 +100,15 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
         let currentWindow: string = '';
         let applicationPreviewWindow: string = '';
 
-        test('Run application in debug mode', async () => {
-            await topMenu.runTask('run the web app (debugging enabled), Global');
-            await ide.waitNotification('Process nodejs is now listening on port 3000.');
-
-            currentWindow = await browserTabsUtil.getCurrentWindowHandle();
-        });
-
         test('Open application in the new editor window', async () => {
-            await ide.clickOnNotificationButton('Process nodejs is now listening on port 3000.', 'Open In New Tab');
+            currentWindow = await browserTabsUtil.getCurrentWindowHandle();
+
+            await topMenu.runTask('run-the-web-app, Global');
+            await ide.waitNotification('A new process is now listening on port 3000', TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
+            await ide.clickOnNotificationButton('A new process is now listening on port 3000', 'yes');
+
+            await ide.waitNotification('Redirect is now enabled on port 3000.', TimeoutConstants.TS_DEBUGGER_CONNECTION_TIMEOUT);
+            await ide.clickOnNotificationButton('Redirect is now enabled on port 3000.', 'Open In New Tab');
             await browserTabsUtil.waitAndSwitchToAnotherWindow(currentWindow, 60_000);
             await browserTabsUtil.waitContentAvailableInTheNewTab(sampleBodyLocator, 60_000);
 
@@ -123,7 +117,6 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
 
         test('Switch back to the IDE window', async () => {
             await browserTabsUtil.switchToWindow(currentWindow);
-            await ide.waitAndSwitchToIdeFrame(60_000);
         });
 
         test('Activate breakpoint', async () => {
@@ -135,12 +128,8 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await topMenu.selectOption('View', 'Debug');
             await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
 
-            // workaround for the issue: https://github.com/eclipse/che/issues/20067
             await debugView.clickOnDebugConfigurationDropDown();
-            await debugView.clickOnDebugConfigurationItem('Add Configuration...');
-
-            await debugView.clickOnDebugConfigurationDropDown();
-            await debugView.clickOnDebugConfigurationItem('Attach to Remote (nodejs-web-app)');
+            await debugView.clickOnDebugConfigurationItem('Attach (web-nodejs-sample)');
             await debugView.clickOnRunDebugButton();
         });
 
@@ -160,7 +149,6 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
 
         test('Check breakpoint stopped', async () => {
             await browserTabsUtil.switchToWindow(currentWindow);
-            await ide.waitAndSwitchToIdeFrame(60000);
 
             await editor.waitStoppedDebugBreakpoint(debugFile, 19, 60_000);
         });
