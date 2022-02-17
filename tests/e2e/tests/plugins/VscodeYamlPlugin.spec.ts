@@ -27,8 +27,8 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
-const devFileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
-const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devFileUrl}`;
+const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'web-nodejs-sample';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';

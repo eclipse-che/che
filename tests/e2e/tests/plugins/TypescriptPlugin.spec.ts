@@ -35,8 +35,8 @@ const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-const devFileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/typescript-plugin';
-const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devFileUrl}`;
+const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/typescript-plugin';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const codeNavigationClassName: string = 'OpenDefinition.ts';
 const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
