@@ -20,12 +20,14 @@ import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -53,6 +55,8 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         test('Wait until project is imported', async () => {
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, 'app');
+
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
 

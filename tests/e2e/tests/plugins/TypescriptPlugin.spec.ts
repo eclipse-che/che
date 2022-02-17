@@ -24,6 +24,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -34,6 +35,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/typescript-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -60,6 +62,8 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await projectTree.openProjectTreeContainer();
             await projectTree.waitProjectImported(projectName, subRootFolder);
+
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
 
