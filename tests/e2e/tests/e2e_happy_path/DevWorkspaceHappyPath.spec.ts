@@ -137,15 +137,15 @@ suite('Workspace creation via factory url', async () => {
         });
 });
     suite('Validation of workspace build and run', async () => {
+        const mavenBuildTaskName: string = 'maven-build';
+        const runAppTaskName: string = 'run-with-hsqldb';
         test('Build application', async () => {
-           const taskName: string = 'maven-build';
-           await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
-           await terminal.waitIconSuccess(taskName, 500_000);
+           await topMenu.runTask(`${mavenBuildTaskName}, ${globalTaskScope}`);
+           await terminal.waitIconSuccess(mavenBuildTaskName, 500_000);
         });
 
         test('Run application', async () => {
-           const taskName: string = 'run-with-hsqldb';
-           await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+           await topMenu.runTask(`${runAppTaskName}, ${globalTaskScope}`);
            await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
             // devWs specific. After running test application we can open it just in the new window.
             // the preview widget is not available yet.
@@ -157,10 +157,10 @@ suite('Workspace creation via factory url', async () => {
        });
 
         test('Close the terminal running tasks', async () => {
-            await terminal.rejectTerminalProcess('run-with-hsqldb');
-            await terminal.closeTerminalTab('run-with-hsqldb');
+            await terminal.rejectTerminalProcess(runAppTaskName);
+            await terminal.closeTerminalTab(runAppTaskName);
             await warningDialog.waitAndCloseIfAppear();
-            await terminal.closeTerminalTab('build');
+            await terminal.closeTerminalTab(mavenBuildTaskName);
        });
 });
 
