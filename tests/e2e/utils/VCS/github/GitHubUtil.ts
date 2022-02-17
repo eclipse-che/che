@@ -16,7 +16,7 @@ export class GitHubUtil {
 
     const data = {
       title: `${title}`,
-      key: `${key}`
+      key: `${key}`,
     };
 
     try { await axios.post(gitHubApiSshURL, JSON.stringify(data), authHeader); } catch (error) {

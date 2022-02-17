@@ -22,7 +22,7 @@ export enum LeftToolbarButton {
     Explorer = 'Explorer',
     Git = 'Git',
     Debug = 'Debug',
-    Openshift = 'OpenShift'
+    Openshift = 'OpenShift',
 }
 
 @injectable()
@@ -38,7 +38,7 @@ export class Ide {
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter
+        @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter,
     ) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {

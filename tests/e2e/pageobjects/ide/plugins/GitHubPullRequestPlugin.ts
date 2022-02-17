@@ -25,7 +25,7 @@ export class GitHubPullRequestPlugin {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.LeftToolBar) private readonly leftToolbar: LeftToolBar,
         @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
-        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
     ) { }
 
     async openView(timeout: number = TimeoutConstants.TS_PROJECT_TREE_TIMEOUT) {

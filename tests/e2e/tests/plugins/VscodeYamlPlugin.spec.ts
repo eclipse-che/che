@@ -34,7 +34,6 @@ const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
-const yamlSchema = { 'yaml-schema.json': '*.yaml' };
 
 let workspaceName: string = 'yaml-plugin';
 
