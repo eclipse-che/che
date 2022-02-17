@@ -68,6 +68,7 @@ export class LanguageServerTests {
             await this.editor.pressControlSpaceCombination(openedTab);
             await this.editor.waitSuggestionContainer();
             await this.editor.waitSuggestionWithScrolling(openedTab, expectedText);
+            await this.editor.waitTabWithSavedStatus(openedTab);
         });
     }
 

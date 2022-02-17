@@ -20,7 +20,6 @@ import { GitHubPullRequestPlugin } from '../../pageobjects/ide/plugins/GitHubPul
 import { GitLoginPage } from '../../pageobjects/third-parties/GitLoginPage';
 import { GitOauthAppsSettings } from '../../pageobjects/third-parties/GitOauthAppsSettings';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
-import { KeycloackUrlHandler } from '../../utils/KeycloackUrlHandler';
 import { GitPlugin } from '../../pageobjects/ide/plugins/GitPlugin';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
@@ -48,6 +47,8 @@ const branchName: string =  workspaceNameHandler.generateWorkspaceName('ghPrPlug
 const projectName: string = 'Spoon-Knife';
 const oAuthAppName: string = 'eclipse-che';
 const changedFile: string = 'README.md';
+// added call back url, but needs to be re-verified
+const identityCallbackUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/oauth/callback`;
 const currentDate: string = Date.now().toString();
 let workspaceName: string;
 
@@ -66,7 +67,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await gitOauthAppsSettings.scrollToUpdateApplicationButton();
 
             await gitOauthAppsSettings.typeHomePageUrl(TestConstants.TS_SELENIUM_BASE_URL);
-            await gitOauthAppsSettings.typeCallbackUrl(KeycloackUrlHandler.getIdentityCallbackUrl());
+            await gitOauthAppsSettings.typeCallbackUrl(identityCallbackUrl);
             await gitOauthAppsSettings.clickUpdateApplicationButton();
         });
     });
