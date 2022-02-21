@@ -57,6 +57,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await projectTree.waitProjectImported(projectName, 'app');
 
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
+            await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
         });
     });
 
