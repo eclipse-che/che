@@ -57,11 +57,14 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await projectTree.waitProjectImported(projectName, 'app');
 
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
-            await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
         });
     });
 
     suite('Check the "vscode-yaml" plugin', async () => {
+        test('Set the yaml schema path', async () => {
+            await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
+        });
+
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
             await editor.waitSuggestion(yamlFileName, 'for', 60000, 18, 5);
