@@ -67,7 +67,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, yamlFileName);
-            await editor.waitSuggestion(yamlFileName, 'for', 60000, 18, 5);
+            await editor.waitSuggestion(yamlFileName, 'from', 60000, 18, 5);
         });
 
         test('Check error appearance', async () => {
