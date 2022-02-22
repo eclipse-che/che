@@ -47,6 +47,9 @@ export class PreferencesHandler {
         await this.quickOpenContainer.typeAndSelectSuggestion('Preferences:', 'Preferences: Open Preferences (JSON)');
 
         let editorText: string = await this.editor.getEditorVisibleText(tabTitle);
+        if (!editorText) {
+            editorText = '{}';
+        }
         let preferences = JSON.parse(editorText);
         preferences[property] = value;
 

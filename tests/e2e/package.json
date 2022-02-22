@@ -26,7 +26,7 @@
     "tsc": "tsc -p .",
     "init-mocha-opts": "tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js",
     "test-plugin": "./initPluginTest.sh",
-    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=false && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
+    "test-plugin-ci": "export TS_DELETE_PLUGINS_TEST_WORKSPACE=true && npm run init-mocha-opts -- --spec dist/tests/plugins/${USERSTORY}.spec.js",
     "test-all-plugins": "tsc && mocha --config mocha-all-plugins.json"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
