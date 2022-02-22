@@ -63,6 +63,23 @@ export class ProjectAndFileTests {
         });
     }
 
+    public waitWorkspaceReadinessDevworkspace(sampleName : string, folder: string, restartWorkspaceDialogIsExpected: boolean = false) {
+        test('Wait for workspace readiness', async () => {
+            await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+
+            if (restartWorkspaceDialogIsExpected) {
+                await this.ide.clickOnCancelDialogButton();
+            }
+
+            await this.projectTree.openProjectTreeContainer();
+            if (!await this.openEditors.isExpansionToggleCollapsed()) {
+                await this.openEditors.waitAndClickExpansionToggle();
+            }
+
+            await this.projectTree.waitProjectImported(sampleName, folder);
+        });
+    }
+
     public openFile(filePath: string, fileName: string) {
         test('Expand project and open file in editor', async () => {
             await this.projectTree.expandPathAndOpenFile(filePath, fileName);
