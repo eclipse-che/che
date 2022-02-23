@@ -11,18 +11,17 @@
 import { Key } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
-import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
-import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
-const ide: Ide = e2eContainer.get(CLASSES.Ide);
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
@@ -32,6 +31,7 @@ const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.Preferen
 const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'web-nodejs-sample';
+const subRootFolder: string = 'app';
 const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
 const yamlSchema = { 'yaml-schema.json': '*.yaml' };
@@ -44,17 +44,10 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
+
         test('Wait until created workspace is started', async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
-
-            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-        });
-    });
-
-    suite('Check workspace readiness to work', async () => {
-        test('Wait until project is imported', async () => {
-            await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(projectName, 'app');
 
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });

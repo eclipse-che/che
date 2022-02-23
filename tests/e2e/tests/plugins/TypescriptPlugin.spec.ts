@@ -25,7 +25,9 @@ import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTest
 import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -43,7 +45,6 @@ const codeNavigationClassName: string = 'OpenDefinition.ts';
 const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
 const sampleBodyLocator: By = By.xpath(`//body[text()='Hello World!']`);
-
 const fileFolderPath: string = `${projectName}`;
 const debugFileFolderPath: string = `${projectName}/app`;
 const debugFile: string = 'app.js';
@@ -56,12 +57,10 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
+
         test('Wait until created workspace is started', async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
-
-            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(projectName, subRootFolder);
 
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
