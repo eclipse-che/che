@@ -57,8 +57,8 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        projectAndFileTests.waitWorkspaceReadinessDevworkspace(projectName, subRootFolder);
-        
+        projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
+
         test('Wait until created workspace is started', async () => {
             CheReporter.registerRunningWorkspace(workspaceName);
 

@@ -31,19 +31,17 @@ export class ProjectAndFileTests {
 
     public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
         test('Wait for workspace readiness', async () => {
-            await this.ide.waitAndSwitchToIdeFrame();
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            if (checkNotification) {
-                await this.ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
-            }
+
             if (restartWorkspaceDialogIsExpected) {
                 await this.ide.clickOnCancelDialogButton();
-
             }
+
             await this.projectTree.openProjectTreeContainer();
             if (!await this.openEditors.isExpansionToggleCollapsed()) {
                 await this.openEditors.waitAndClickExpansionToggle();
             }
+
             await this.projectTree.waitProjectImported(sampleName, folder);
         });
     }
@@ -60,23 +58,6 @@ export class ProjectAndFileTests {
                 await this.openEditors.waitAndClickExpansionToggle();
             }
             await this.projectTree.waitProjectImportedNoSubfolder(sampleName);
-        });
-    }
-
-    public waitWorkspaceReadinessDevworkspace(sampleName : string, folder: string, restartWorkspaceDialogIsExpected: boolean = false) {
-        test('Wait for workspace readiness', async () => {
-            await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-
-            if (restartWorkspaceDialogIsExpected) {
-                await this.ide.clickOnCancelDialogButton();
-            }
-
-            await this.projectTree.openProjectTreeContainer();
-            if (!await this.openEditors.isExpansionToggleCollapsed()) {
-                await this.openEditors.waitAndClickExpansionToggle();
-            }
-
-            await this.projectTree.waitProjectImported(sampleName, folder);
         });
     }
 
