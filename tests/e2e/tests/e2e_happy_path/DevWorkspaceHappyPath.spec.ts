@@ -43,7 +43,7 @@ const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const welcomeControllerJavaFileName: string = 'WelcomeController.java';
-
+const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -55,7 +55,8 @@ const SpringAppLocators = {
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
-    let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
+    // let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
+
     const workspaceRootFolderName: string = 'src';
 
     suite('Open factory URL', async () => {
@@ -76,138 +77,138 @@ suite('Workspace creation via factory url', async () => {
             await projectTree.waitProjectImported(projectName, workspaceRootFolderName);
         });
     });
-    });
-
-    suite('Language server validation', async () => {
-        test('Java LS initialization', async () => {
-            await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-            await editor.selectTab(javaFileName);
-            try {
-                await ide.checkLsInitializationStart('Activating Language Support for Java');
-                await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 900_000);
-            } catch (err) {
-                if (!(err instanceof error.TimeoutError)) {
-                    throw err;
-                }
-
-                console.log('Known flakiness has occurred https://github.com/eclipse/che/issues/17864');
-                await ide.waitStatusBarContains('Activating Java Test Runner');
-                await ide.waitStatusBarTextAbsence('Activating Java Test Runner', 900_000);
-            }
-
-            await checkJavaPathCompletion();
-        });
-
-        test('Autocomplete', async () => {
-            await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-            await editor.pressControlSpaceCombination(javaFileName);
-            await editor.waitSuggestionContainer();
-            await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
-        });
-
-        test('Error highlighting', async () => {
-            await driverHelper.getDriver().sleep(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
-
-            const textForErrorDisplaying: string = '$';
-            await editor.type(javaFileName, textForErrorDisplaying, 30);
-
-            try {
-                await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
-            } catch (err) {
-                Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
-                await browserTabsUtil.refreshPage();
-                await ide.waitAndSwitchToIdeFrame();
-                await ide.waitIde();
-                await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
-            }
-            await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE));
-            await editor.waitErrorInLineDisappearance(30, javaFileName);
-        });
-
-        test('Suggestion', async () => {
-            await editor.moveCursorToLineAndChar(javaFileName, 32, 21);
-            await editor.pressControlSpaceCombination(javaFileName);
-            await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120_000);
-        });
-
-        test('Codenavigation', async () => {
-            await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-            await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
-            await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 4);
-        });
-});
-    suite('Validation of workspace build and run', async () => {
-        const mavenBuildTaskName: string = 'maven-build';
-        const runAppTaskName: string = 'run-with-hsqldb';
-        test('Build application', async () => {
-           await topMenu.runTask(`${mavenBuildTaskName}, ${globalTaskScope}`);
-           await terminal.waitIconSuccess(mavenBuildTaskName, 500_000);
-        });
-
-        test('Run application', async () => {
-           await topMenu.runTask(`${runAppTaskName}, ${globalTaskScope}`);
-           await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
-            // devWs specific. After running test application we can open it just in the new window.
-            // the preview widget is not available yet.
-           await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
-       });
-        // this is DevWorkspace test specific since Theia does not provide yet preview as a widget
-        test('Check the running application', async () => {
-            await switchAppWindowAndCheck(SpringAppLocators.springTitleLocator);
-       });
-
-        test('Close the terminal running tasks', async () => {
-            await terminal.rejectTerminalProcess(runAppTaskName);
-            await terminal.closeTerminalTab(runAppTaskName);
-            await warningDialog.waitAndCloseIfAppear();
-            await terminal.closeTerminalTab(mavenBuildTaskName);
-       });
 });
 
-    suite('Validation of debug functionality', async () => {
-        let urlToPetClinicApp = '';
-        test('Launch debug', async () => {
-            const taskName: string = 'run-debug';
-            await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
-            await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
-            await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
-        });
+suite('Language server validation', async () => {
+    test('Java LS initialization', async () => {
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
+        await editor.selectTab(javaFileName);
+        try {
+            await ide.checkLsInitializationStart('Activating Language Support for Java');
+            await ide.waitStatusBarTextAbsence('Activating Language Support for Java', 900_000);
+        } catch (err) {
+            if (!(err instanceof error.TimeoutError)) {
+                throw err;
+            }
 
-        test('Check content of the launched application', async () => {
-            const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
-            await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
-            urlToPetClinicApp = await browserTabsUtil.getCurrentUrl();
-            await browserTabsUtil.switchToWindow(mainWindowHandle);
-        });
+            console.log('Known flakiness has occurred https://github.com/eclipse/che/issues/17864');
+            await ide.waitStatusBarContains('Activating Java Test Runner');
+            await ide.waitStatusBarTextAbsence('Activating Java Test Runner', 900_000);
+        }
 
-        test('Open debug view', async () => {
-            await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', welcomeControllerJavaFileName);
-            await editor.selectTab(welcomeControllerJavaFileName);
-            await topMenu.selectOption('View', 'Debug');
-            await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
-        });
-
-        test('Choose debug configuration', async () => {
-            await debugView.clickOnDebugConfigurationDropDown();
-            await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (java-spring-petclinic)');
-        });
-
-        test('Run debug', async () => {
-            await debugView.clickOnRunDebugButton();
-            await waitDebugToConnect();
-        });
-
-        test('Activate breakpoint', async () => {
-            await editor.selectTab(welcomeControllerJavaFileName);
-            await editor.activateBreakpoint(welcomeControllerJavaFileName, 27);
-        });
-
-        test('Check debugger stop at the breakpoint', async () => {
-            await sendRequestToDebugApp(urlToPetClinicApp);
-            await waitStoppedBreakpoint(27);
-        });
-
+        await checkJavaPathCompletion();
     });
+
+    test('Autocomplete', async () => {
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
+        await editor.pressControlSpaceCombination(javaFileName);
+        await editor.waitSuggestionContainer();
+        await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
+    });
+
+    test('Error highlighting', async () => {
+        await driverHelper.getDriver().sleep(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
+
+        const textForErrorDisplaying: string = '$';
+        await editor.type(javaFileName, textForErrorDisplaying, 30);
+
+        try {
+            await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT);
+        } catch (err) {
+            Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
+            await browserTabsUtil.refreshPage();
+            await ide.waitAndSwitchToIdeFrame();
+            await ide.waitIde();
+            await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
+        }
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE));
+        await editor.waitErrorInLineDisappearance(30, javaFileName);
+    });
+
+    test('Suggestion', async () => {
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 21);
+        await editor.pressControlSpaceCombination(javaFileName);
+        await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120_000);
+    });
+
+    test('Codenavigation', async () => {
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
+        await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 4);
+    });
+});
+
+suite('Validation of workspace build and run', async () => {
+    const mavenBuildTaskName: string = 'maven-build';
+    const runAppTaskName: string = 'run-with-hsqldb';
+    test('Build application', async () => {
+        await topMenu.runTask(`${mavenBuildTaskName}, ${globalTaskScope}`);
+        await terminal.waitIconSuccess(mavenBuildTaskName, 500_000);
+    });
+
+    test('Run application', async () => {
+        await topMenu.runTask(`${runAppTaskName}, ${globalTaskScope}`);
+        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 120_000);
+        // devWs specific. After running test application we can open it just in the new window.
+        // the preview widget is not available yet.
+        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
+    });
+    // this is DevWorkspace test specific since Theia does not provide yet preview as a widget
+    test('Check the running application', async () => {
+        await switchAppWindowAndCheck(SpringAppLocators.springTitleLocator);
+    });
+
+    test('Close the terminal running tasks', async () => {
+        await terminal.rejectTerminalProcess(runAppTaskName);
+        await terminal.closeTerminalTab(runAppTaskName);
+        await warningDialog.waitAndCloseIfAppear();
+        await terminal.closeTerminalTab(mavenBuildTaskName);
+    });
+});
+
+suite('Validation of debug functionality', async () => {
+    let urlToPetClinicApp = '';
+    test('Launch debug', async () => {
+        const taskName: string = 'run-debug';
+        await topMenu.runTask(`${taskName}, ${globalTaskScope}`);
+        await ide.waitNotification('Process 8080-tcp is now listening on port 8080. Open it ?', 180_000);
+        await ide.clickOnNotificationButton('Process 8080-tcp is now listening on port 8080. Open it ?', 'Open In New Tab');
+    });
+
+    test('Check content of the launched application', async () => {
+        const mainWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
+        await browserTabsUtil.waitAndSwitchToAnotherWindow(mainWindowHandle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
+        urlToPetClinicApp = await browserTabsUtil.getCurrentUrl();
+        await browserTabsUtil.switchToWindow(mainWindowHandle);
+    });
+
+    test('Open debug view', async () => {
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder + '/system', welcomeControllerJavaFileName);
+        await editor.selectTab(welcomeControllerJavaFileName);
+        await topMenu.selectOption('View', 'Debug');
+        await ide.waitLeftToolbarButton(LeftToolbarButton.Debug);
+    });
+
+    test('Choose debug configuration', async () => {
+        await debugView.clickOnDebugConfigurationDropDown();
+        await debugView.clickOnDebugConfigurationItem('Debug (Attach) - Remote (java-spring-petclinic)');
+    });
+
+    test('Run debug', async () => {
+        await debugView.clickOnRunDebugButton();
+        await waitDebugToConnect();
+    });
+
+    test('Activate breakpoint', async () => {
+        await editor.selectTab(welcomeControllerJavaFileName);
+        await editor.activateBreakpoint(welcomeControllerJavaFileName, 27);
+    });
+
+    test('Check debugger stop at the breakpoint', async () => {
+        await sendRequestToDebugApp(urlToPetClinicApp);
+        await waitStoppedBreakpoint(27);
+    });
+});
 
 async function checkJavaPathCompletion() {
     if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
@@ -268,17 +269,20 @@ async function waitStoppedBreakpoint(lineNumber: number) {
 // for avoiding this problem we send http request with axios and set the request timeout. We expect that request will fail with
 // timeout error, we check it in the catch block and wait breakpoint activating in the WebDriver after this.
 async function sendRequestToDebugApp(urlToApp: string) {
-  const httpClient = axios.create();
-  httpClient.defaults.timeout = 1000;
+    const httpClient = axios.create();
+    httpClient.defaults.timeout = 1000;
     try {
       await httpClient.get(urlToApp);
     } catch (error) {
-      if (error.message === 'timeout of 1000ms exceeded') {
-      console.log('>>>>The debugger is set >>>>>>>>>>>>>>>>>>> ' + error.message);
-      } else {          const {data} = await httpClient.get(urlToApp);
-          console.log('>>>>>>>seems the app. is not set under debug properly: >>>>>>>>>>>>>>' + data);
-      }
-  }
+        if (error instanceof Error) {
+            if (error.message === 'timeout of 1000ms exceeded') {
+                console.log('>>>>The debugger is set >>>>>>>>>>>>>>>>>>> ' + error.message);
+            } else {
+                const {data} = await httpClient.get(urlToApp);
+                console.log('>>>>>>>seems the app. is not set under debug properly: >>>>>>>>>>>>>>' + data);
+            }
+        }
+    }
 }
 
 async function waitDebugToConnect() {
@@ -290,4 +294,3 @@ async function waitDebugToConnect() {
         await debugView.waitForDebuggerToConnect();
     }
 }
-
