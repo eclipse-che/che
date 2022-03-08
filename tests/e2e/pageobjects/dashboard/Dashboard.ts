@@ -16,6 +16,7 @@ import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class Dashboard {
@@ -25,7 +26,8 @@ export class Dashboard {
     private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
+        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabUtil: BrowserTabsUtil) { }
 
     async stopWorkspaceByUI(workspaceName: string) {
         Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
@@ -60,7 +62,11 @@ export class Dashboard {
 
     async openDashboard() {
         Logger.debug('Dashboard.openDashboard');
-
+        const windowHandles = await this.browserTabUtil.getAllWindowHandles();
+        if (windowHandles.length > 1) {
+            const windowHandle = await this.browserTabUtil.getCurrentWindowHandle();
+            await this.browserTabUtil.waitAndSwitchToAnotherWindow(windowHandle, 1000);
+        }
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
         await this.waitPage();
 
@@ -107,6 +113,12 @@ export class Dashboard {
         Logger.debug(`Dashboard.waitWorkspaceStartingPage`);
 
         await this.driverHelper.waitPresence(By.css(Dashboard.WORKSPACE_STARTING_PAGE_CSS), timeout);
+    }
+
+    async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+        Logger.debug(`Dashboard.recentWorkspaceName`);
+
+        return await this.driverHelper.waitAndGetText(By.css('[data-testid="recent-workspace-item"]'), timeout);
     }
 
 }

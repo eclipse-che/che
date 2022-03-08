@@ -18,6 +18,7 @@ import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class ProjectTree {
@@ -26,7 +27,8 @@ export class ProjectTree {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.Editor) private readonly editor: Editor) { }
+        @inject(CLASSES.Editor) private readonly editor: Editor,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) { }
 
     async clickCollapseAllButton() {
         Logger.debug('ProjectTree.clickCollapseAllButton');
@@ -237,7 +239,7 @@ export class ProjectTree {
 
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
-                await this.driverHelper.reloadPage();
+                await this.browserTabsUtil.refreshPage();
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
@@ -253,13 +255,12 @@ export class ProjectTree {
 
             if (!isRootSubItemVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
-                await this.driverHelper.reloadPage();
+                await this.browserTabsUtil.refreshPage();
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();
                 await this.openProjectTreeContainer();
                 continue;
             }
-
             return;
         }
 
@@ -281,7 +282,7 @@ export class ProjectTree {
 
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImportedNoSubfolder project not located, reloading page.`);
-                await this.driverHelper.reloadPage();
+                await this.browserTabsUtil.refreshPage();
                 await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
                 await this.ide.waitIde();

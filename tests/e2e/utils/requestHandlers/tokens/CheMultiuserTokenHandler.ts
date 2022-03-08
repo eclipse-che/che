@@ -12,28 +12,30 @@ import querystring from 'querystring';
 import { injectable } from 'inversify';
 import { TestConstants } from '../../../TestConstants';
 import { ITokenHandler } from './ITokenHandler';
-import { KeycloackUrlHandler } from '../../KeycloackUrlHandler';
+
 
 @injectable()
 export class CheMultiuserTokenHandler implements ITokenHandler {
-    async get(): Promise<string> {
-        const keycloakUrl = KeycloackUrlHandler.getTokenEndpointUrl();
+  async get(): Promise<string> {
+    //   to-do: Login to the che-dashboard and fetch the authorization related info
+    const keycloakUrl = '';
 
-        const params = {
-            client_id: 'che-public',
-            username: TestConstants.TS_SELENIUM_USERNAME,
-            password: TestConstants.TS_SELENIUM_PASSWORD,
-            grant_type: 'password'
-        };
+    const params = {
+      client_id: 'che-public',
+      username: TestConstants.TS_SELENIUM_USERNAME,
+      password: TestConstants.TS_SELENIUM_PASSWORD,
+      grant_type: 'password',
+    };
 
-        try {
-            const responseToObtainBearerToken = await axios.post(keycloakUrl, querystring.stringify(params));
-            return responseToObtainBearerToken.data.access_token;
-        } catch (err) {
-            console.log(`Can not get bearer token. URL used: ${keycloakUrl}`);
-            throw err;
-        }
-
+    try {
+      const responseToObtainBearerToken = await axios.post(
+        keycloakUrl,
+        querystring.stringify(params)
+      );
+      return responseToObtainBearerToken.data.access_token;
+    } catch (err) {
+      console.log(`Can not get bearer token. URL used: ${keycloakUrl}`);
+      throw err;
     }
-
+  }
 }

@@ -8,20 +8,14 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { AxiosRequestConfig } from 'axios';
-
-import { TYPES } from '../../../inversify.types';
 import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
-import { injectable, inject } from 'inversify';
-import { ITokenHandler } from '../tokens/ITokenHandler';
+import { injectable } from 'inversify';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
 
-    constructor(@inject(TYPES.ITokenHandler) private readonly tokenHandler: ITokenHandler) {
-    }
-
     async get(): Promise<AxiosRequestConfig> {
-        const token = await this.tokenHandler.get();
-        return { headers: { 'Authorization': `Bearer ${token}` } };
+        //  to-do : Fetch the cookies from user api and pass it here
+        return { headers: { 'cookie': `` } };
     }
 }

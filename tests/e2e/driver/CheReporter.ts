@@ -18,7 +18,7 @@ import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
-import { PreferencesHandler, AskForConfirmationType, TerminalRendererType } from '../utils/PreferencesHandler';
+// import { PreferencesHandler } from '../utils/PreferencesHandler';
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
@@ -32,7 +32,7 @@ const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
 let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-let preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+// let preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 class CheReporter extends mocha.reporters.Spec {
 
@@ -86,8 +86,8 @@ class CheReporter extends mocha.reporters.Spec {
       if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
         CheApiRequestHandler.enableResponseInterceptor();
       }
-      await preferencesHandler.setConfirmExit(AskForConfirmationType.never);
-      await preferencesHandler.setTerminalType(TerminalRendererType.dom);
+      // await preferencesHandler.setConfirmExit(AskForConfirmationType.never);
+      // await preferencesHandler.setTerminalType(TerminalRendererType.dom);
     });
 
     runner.on('test', async function (test: mocha.Test) {
