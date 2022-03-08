@@ -59,14 +59,14 @@ suite('Openshift connector user story', async () => {
           'location': 'https://github.com/maxura/nodejs-hello-world.git',
           'type': 'git'
         }
-      }
+      },
     ],
 
       wsConfig.components = [
         {
           'id': 'redhat/vscode-openshift-connector/latest',
           'type': 'chePlugin'
-        }
+        },
       ];
 
     await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);

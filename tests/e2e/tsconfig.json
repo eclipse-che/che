@@ -11,6 +11,7 @@
     "types": ["reflect-metadata", "@types/mocha", "@types/node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "noImplicitReturns": false,
     "sourceMap": true
   }
 }
