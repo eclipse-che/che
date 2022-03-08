@@ -17,7 +17,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 
 export enum WorkspaceStatusUI {
     Running = 'green',
-    Stopped = 'grey',
+    Stopped = 'grey'
 }
 
 @injectable()

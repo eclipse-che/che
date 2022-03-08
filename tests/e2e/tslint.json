@@ -59,12 +59,15 @@
     "no-eval": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
-    "trailing-comma": [true,
-      {
-        "multiline": "always",
-        "singleline": "never"
+    "trailing-comma": [true, {
+      "singleline": "never",
+      "multiline": {
+        "objects": "ignore",
+        "arrays": "always",
+        "functions": "never",
+        "typeLiterals": "ignore"
       }
-    ],
+    }],
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
     "no-unused-variable": true,

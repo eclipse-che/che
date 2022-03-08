@@ -226,6 +226,6 @@ export const TimeoutConstants = {
     /**
      * Common timeout for plugins.
      */
-    TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 20_000,
+    TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 20_000
 
 };

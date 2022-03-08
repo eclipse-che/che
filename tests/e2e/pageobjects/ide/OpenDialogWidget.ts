@@ -20,13 +20,13 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 export enum Locations {
     Theia = 'theia',
     Home = 'home',
-    Root = '/',
+    Root = '/'
 }
 
 export enum Buttons {
     Cancel = 'Cancel',
     AddContext = 'Add context folder for component in workspace.',
-    Open = 'Open',
+    Open = 'Open'
 }
 
 @injectable()
@@ -35,7 +35,7 @@ export class OpenDialogWidget {
     constructor(
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.OpenWorkspaceWidget) private readonly openWorkspaceWidget: OpenWorkspaceWidget,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper
     ) { }
 
     async selectLocation(location: Locations, timeout: number = TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT) {

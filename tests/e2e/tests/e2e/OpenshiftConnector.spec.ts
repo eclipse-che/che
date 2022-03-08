@@ -57,15 +57,15 @@ suite('Openshift connector user story', async () => {
         'name': 'node-js',
         'source': {
           'location': 'https://github.com/maxura/nodejs-hello-world.git',
-          'type': 'git',
-        },
+          'type': 'git'
+        }
       },
     ],
 
       wsConfig.components = [
         {
           'id': 'redhat/vscode-openshift-connector/latest',
-          'type': 'chePlugin',
+          'type': 'chePlugin'
         },
       ];
 

@@ -19,13 +19,13 @@ import { Key } from 'selenium-webdriver';
 
 export enum TerminalRendererType {
     canvas = 'canvas',
-    dom = 'dom',
+    dom = 'dom'
 }
 
 export enum AskForConfirmationType {
     never = 'never',
     ifRquired = 'ifRequired',
-    always = 'always',
+    always = 'always'
 }
 
 @injectable()

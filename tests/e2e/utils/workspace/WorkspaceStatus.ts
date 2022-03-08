@@ -11,5 +11,5 @@
  export enum WorkspaceStatus {
     RUNNING = 'RUNNING',
     STOPPED = 'STOPPED',
-    STARTING = 'STARTING',
+    STARTING = 'STARTING'
 }

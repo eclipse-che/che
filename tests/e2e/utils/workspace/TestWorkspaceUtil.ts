@@ -27,7 +27,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler,
+        @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler
     ) { }
 
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
@@ -254,8 +254,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         const baseDevfile: che.workspace.devfile.Devfile = {
             apiVersion: '1.0.0',
             metadata: {
-                name: 'test-workspace',
-            },
+                name: 'test-workspace'
+            }
         };
 
         return baseDevfile;

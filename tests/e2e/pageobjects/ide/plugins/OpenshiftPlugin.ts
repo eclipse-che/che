@@ -21,12 +21,12 @@ export enum OpenshiftAppExplorerToolbar {
     ReportExtensionIssueOnGitHub = 'Report Extension Issue on GitHub',
     RefreshView = 'Refresh View',
     SwitchContexts = 'Switch Contexts',
-    LogIntoCluster = 'Login into Cluster',
+    LogIntoCluster = 'Login into Cluster'
 }
 
 export enum OpenshiftContextMenuItems {
     NewComponent = 'New Component',
-    Push = 'Push',
+    Push = 'Push'
 }
 
 @injectable()
@@ -34,7 +34,7 @@ export class OpenshiftPlugin {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.ContextMenu) private readonly contextMenu: ContextMenu,
+        @inject(CLASSES.ContextMenu) private readonly contextMenu: ContextMenu
     ) {
     }
 

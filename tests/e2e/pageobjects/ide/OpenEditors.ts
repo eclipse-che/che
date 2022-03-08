@@ -25,7 +25,7 @@ export class OpenEditors {
     private static readonly OPEN_EDITORS_CLOSE_ALL_BUTTON_LOCATOR: By = By.id('navigator.close.all.editors.toolbar');
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper
     ) { }
 
     async waitOpenEditors(timeout: number = TimeoutConstants.TS_OPEN_EDITORS_TIMEOUT) {

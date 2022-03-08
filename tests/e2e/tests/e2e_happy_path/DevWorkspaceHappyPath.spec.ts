@@ -50,7 +50,7 @@ const SpringAppLocators = {
     springMenuButtonLocator: By.css('button[data-target=\'#main-navbar\']'),
     springErrorButtonLocator: By.xpath('//div[@id=\'main-navbar\']//span[text()=\'Error\']'),
     springHomeButtonLocator: By.className('navbar-brand'),
-    springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`),
+    springErrorMessageLocator: By.xpath(`//h2[text()='Something happened...']`)
 };
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.

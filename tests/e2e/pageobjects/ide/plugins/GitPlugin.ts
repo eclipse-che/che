@@ -26,7 +26,7 @@ export class GitPlugin {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.TopMenu) private readonly topMenu: TopMenu,
-        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer
     ) { }
 
     async openGitPluginContainer(timeout: number = TimeoutConstants.TS_GIT_CONAINER_INTERACTION_TIMEOUT) {
