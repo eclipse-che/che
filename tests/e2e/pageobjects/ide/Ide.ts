@@ -55,9 +55,9 @@ export class Ide {
                     if (err instanceof error.TimeoutError) {
                         Logger.warn(`Iframe is not available even after ${timeout} milliseconds, checking for visibility of #theia-main-content-panel.`);
                         await this.driverHelper.isVisible(By.css('#theia-main-content-panel'));
-                        return
+                        return;
                     }
-                    throw err
+                    throw err;
                 }
                 return;
             }
