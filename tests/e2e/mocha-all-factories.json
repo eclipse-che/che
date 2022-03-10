@@ -7,6 +7,7 @@
     "require": "source-map-support/register",
     "spec": [
         "dist/tests/login/Login.spec.js",
-        "dist/tests/e2e/factories/*.spec.js"
+        "dist/tests/e2e/factories/DirectUrlFactoryWithRootFolderTest.spec.js",
+        "dist/tests/e2e/factories/DirectUrlFactoryWithSpecificBranchTest.spec.js"
     ]
 }
