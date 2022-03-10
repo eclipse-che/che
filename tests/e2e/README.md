@@ -73,7 +73,7 @@ For running tests without docker, please perform next steps:**
 
 - npm run test-plugin
 
-## Plugins tests launching for the Che wit oauth authentication
+## Plugins tests launching for the Che with oauth authentication
 
 **Setup next environment variables:**
 
@@ -86,3 +86,18 @@ For running tests without docker, please perform next steps:**
 **Run command:**
 
 - npm run test-plugin
+
+
+## Launching the DevWorkspaceHappyPath spec file using Che with oauth authentication
+
+**Setup next environment variables:**
+
+- export TS_SELENIUM_BASE_URL=\<Che-URL\>
+- export TS_SELENIUM_OCP_USERNAME=\<cluster-username\>
+- export TS_SELENIUM_OCP_PASSWORD=\<cluster-password\>
+- export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH="true"
+- export TS_OCP_LOGIN_PAGE_PROVIDER_TITLE=\<login-provide-title\>
+- export TS_SELENIUM_DEVWORKSPACE_URL=\<devworkspace-url\>
+
+**Execute the npm command:**
+- npm run test-devworkspace-happy-path

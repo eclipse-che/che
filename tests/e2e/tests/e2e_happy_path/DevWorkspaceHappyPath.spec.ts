@@ -43,7 +43,6 @@ const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const warningDialog: DialogWindow = e2eContainer.get(CLASSES.DialogWindow);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
 const welcomeControllerJavaFileName: string = 'WelcomeController.java';
-const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -55,7 +54,7 @@ const SpringAppLocators = {
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
-    // let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
+    let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
 
     const workspaceRootFolderName: string = 'src';
 
@@ -131,7 +130,7 @@ suite('Language server validation', async () => {
         await editor.waitSuggestionWithScrolling(javaFileName, 'run(Class<?> primarySource, String... args) : ConfigurableApplicationContext', 120_000);
     });
 
-    test('Codenavigation', async () => {
+    test('CodeNavigation', async () => {
         await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
         await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, Key.F12));
         await editor.waitEditorAvailable(codeNavigationClassName, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT * 4);
