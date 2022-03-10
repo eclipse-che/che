@@ -25,6 +25,7 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://github.com/che-samples/console-java-simple/tree/master/src`;
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
+const fileName: string = 'pom.xml';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 let workspaceName: string = 'console-java-simple';
@@ -48,6 +49,8 @@ suite('Workspace creation via factory url', async () => {
 
     suite('Check imported project', async () => {
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
+        projectAndFileTests.checkFileNotExists(`${workspaceSampleName}/${fileName}`);
+
         projectAndFileTests.checkProjectBranchName('master');
     });
 
