@@ -115,7 +115,7 @@ export class Dashboard {
         await this.driverHelper.waitPresence(By.css(Dashboard.WORKSPACE_STARTING_PAGE_CSS), timeout);
     }
 
-    async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+    async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug(`Dashboard.recentWorkspaceName`);
 
         return await this.driverHelper.waitAndGetText(By.css('[data-testid="recent-workspace-item"]'), timeout);

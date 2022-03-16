@@ -13,6 +13,7 @@ import { inject, injectable } from 'inversify';
 import { CLASSES } from '../inversify.types';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
+import { Ide } from '../pageobjects/ide/Ide';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { Logger } from '..';
@@ -30,6 +31,7 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
+        @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
 
     public createAndOpenWorkspace(stack: string) {
@@ -39,8 +41,10 @@ export class WorkspaceHandlingTests {
             await this.createWorkspace.waitPage();
             const parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
             await this.createWorkspace.clickOnSample(stack);
+            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, 10000);
+            await this.ide.waitIde();
             await this.browserTabsUtil.switchToWindow(parentGUID);
-            WorkspaceHandlingTests.workspaceName = await this.dashboard.getRecentWorkspaceName(10000);
+            WorkspaceHandlingTests.workspaceName = await this.dashboard.getRecentWorkspaceName();
             Logger.debug(`Workspace Name is: ${WorkspaceHandlingTests.workspaceName}`);
             await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, 10000);
         });

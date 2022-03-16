@@ -49,6 +49,22 @@ export class CreateWorkspace {
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
     }
 
+    async typeGitRepoUrl(repoUrl: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug(`CreateWorkspace.typeGitRepoUrl: "${repoUrl}"`);
+
+        const gitRepoURLLocator: By = By.id('git-repo-url');
+
+        await this.driverHelper.type(gitRepoURLLocator, repoUrl, timeout);
+    }
+
+    async clickOnCreateAndOpen(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        Logger.debug(`CreateWorkspace.clickOnCreateAndOpen`);
+
+        const createAndOpenLocator: By = By.id('create-and-open-button');
+
+        await this.driverHelper.waitAndClick(createAndOpenLocator, timeout);
+    }
+
     private getSampleLocator(sampleName: string): By {
         Logger.trace(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}`);
 
