@@ -10,7 +10,6 @@
 import 'reflect-metadata';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
-import { Ide } from '../../pageobjects/ide/Ide';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { TestConstants } from '../../TestConstants';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
@@ -20,23 +19,24 @@ import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTest
 import { Logger } from '../../utils/Logger';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
-const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/PythonPluginTest.yaml';
-const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
-const sampleName: string = 'python-hello-world';
-const subRootFile: string = 'README.md';
+const devFileUrl: string = 'https://github.com/che-samples/python-hello-world/tree/devfilev2';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devFileUrl}`;
+const projectName: string = 'python-hello-world';
+const subRootFolder: string = '.vscode';
 
-const fileFolderPath: string = `${sampleName}`;
+const fileFolderPath: string = `${projectName}`;
 const tabTitle: string = 'hello-world.py';
-let workspaceName: string;
+let workspaceName: string = 'python-hello-world';
 
 suite(`The 'PythonPlugin' test`, async () => {
     suite('Create workspace', async () => {
@@ -44,16 +44,12 @@ suite(`The 'PythonPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
+
         test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
             CheReporter.registerRunningWorkspace(workspaceName);
 
-            await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-            await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
-
-            await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectImported(sampleName, subRootFile);
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
 

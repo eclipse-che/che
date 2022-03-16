@@ -140,8 +140,7 @@ export class CodeExecutionTests {
                 // https://issues.redhat.com/browse/CRW-2175
                 if (err instanceof error.TimeoutError) {
                     Logger.warn(`CodeExecutionTests.verifyRunningApplication application not located, probably blocked by preloader or content not available. Retrying.`);
-                    await this.driverHelper.getDriver().switchTo().defaultContent();
-                    await this.ide.waitAndSwitchToIdeFrame();
+                    await this.ide.waitIde();
                     await this.previewWidget.refreshPage();
                     await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
                 }

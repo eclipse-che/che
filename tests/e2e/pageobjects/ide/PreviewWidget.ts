@@ -76,6 +76,9 @@ export class PreviewWidget {
         }, timeout);
     }
 
+    /**
+     * @deprecated Method deprecated. Iframe is not available anymore
+     */
     async waitAndSwitchToWidgetFrame() {
         Logger.debug('PreviewWidget.waitAndSwitchToWidgetFrame');
 
@@ -98,8 +101,6 @@ export class PreviewWidget {
         await this.driverHelper.getDriver().wait(async () => {
             const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
             if (isApplicationTitleVisible) {
-                await this.driverHelper.getDriver().switchTo().defaultContent();
-                await this.ide.waitAndSwitchToIdeFrame();
                 return true;
             }
 
@@ -125,6 +126,9 @@ export class PreviewWidget {
         await this.driverHelper.waitAndClick(PreviewWidget.WIDGET_REFRESH_BUTTON_LOCATOR);
     }
 
+    /**
+     * @deprecated Method deprecated. Iframe is not available.
+     */
     async switchBackToIdeFrame() {
         Logger.debug('PreviewWidget.switchBackToIdeFrame');
 
