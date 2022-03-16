@@ -116,7 +116,6 @@ suite('Language server validation', async () => {
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
             await browserTabsUtil.refreshPage();
-            await ide.waitAndSwitchToIdeFrame();
             await ide.waitIde();
             await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
         }

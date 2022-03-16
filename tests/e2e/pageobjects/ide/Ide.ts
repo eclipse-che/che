@@ -29,7 +29,7 @@ export enum LeftToolbarButton {
 export class Ide {
     public static readonly EXPLORER_BUTTON_ID: string = 'shell-tab-explorer-view-container';
     public static readonly SELECTED_EXPLORER_BUTTON_CSS: string = 'li#shell-tab-explorer-view-container.theia-mod-active';
-    public static readonly ACTIVATED_IDE_IFRAME_CSS: string = '#ide-iframe-window[aria-hidden=\'false\']';
+    public static readonly THEIA_EDITOR_CSS: string = '#theia-main-content-panel';
     public static readonly SELECTED_GIT_BUTTON_XPATH: string = '(//ul[@class=\'p-TabBar-content\']//li[@title=\'Git\' and contains(@class, \'p-mod-current\')])[1]';
     private static readonly TOP_MENU_PANEL_CSS: string = '#theia-app-shell #theia-top-panel .p-MenuBar-content';
     private static readonly LEFT_CONTENT_PANEL_CSS: string = '#theia-left-content-panel';
@@ -41,6 +41,10 @@ export class Ide {
         @inject(CLASSES.NotificationCenter) private readonly notificationCenter: NotificationCenter
     ) { }
 
+    /**
+     * @deprecated Method deprecated. Iframe is not available, Replace it with waitForEditor() or waitIde() method incase for conditional wait
+     * @see Ide.waitForEditor()
+     */
     async waitAndSwitchToIdeFrame(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitAndSwitchToIdeFrame');
         try {
@@ -68,6 +72,16 @@ export class Ide {
             }
 
             Logger.error(`Switching to IDE frame failed.`);
+            throw err;
+        }
+    }
+
+    async waitForEditor(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+        Logger.debug('Ide.waitForEditor');
+        try {
+            await this.driverHelper.waitVisibility(By.css(Ide.THEIA_EDITOR_CSS), timeout);
+        } catch (err) {
+            Logger.warn(`Editor is not displayed even after ${timeout} milliseconds.`);
             throw err;
         }
     }
@@ -166,11 +180,11 @@ export class Ide {
 
         Logger.debug('Ide.waitWorkspaceAndIde');
 
-        await this.waitAndSwitchToIdeFrame(timeout);
+        await this.waitForEditor(timeout);
         await this.waitIde(timeout);
     }
 
-    async waitIde(timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT) {
+    async waitIde(timeout: number = TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
         Logger.debug('Ide.waitIde');
 
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
