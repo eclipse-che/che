@@ -240,8 +240,7 @@ export class ProjectTree {
             if (!isProjectFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
                 await this.browserTabsUtil.refreshPage();
-                await this.ide.waitAndSwitchToIdeFrame();
-                await this.ide.waitIde();
+                await this.ide.waitWorkspaceAndIde();
                 await this.openProjectTreeContainer();
                 continue;
             }
@@ -256,8 +255,7 @@ export class ProjectTree {
             if (!isRootSubItemVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
                 await this.browserTabsUtil.refreshPage();
-                await this.ide.waitAndSwitchToIdeFrame();
-                await this.ide.waitIde();
+                await this.ide.waitWorkspaceAndIde();
                 await this.openProjectTreeContainer();
                 continue;
             }
@@ -284,8 +282,7 @@ export class ProjectTree {
                 Logger.trace(`ProjectTree.waitProjectImportedNoSubfolder project not located, reloading page.`);
                 await this.browserTabsUtil.refreshPage();
                 await this.driverHelper.wait(triesPolling);
-                await this.ide.waitAndSwitchToIdeFrame();
-                await this.ide.waitIde();
+                await this.ide.waitWorkspaceAndIde();
                 await this.openProjectTreeContainer();
                 continue;
             }

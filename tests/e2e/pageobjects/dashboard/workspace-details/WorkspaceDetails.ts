@@ -85,7 +85,7 @@ export class WorkspaceDetails {
         Logger.debug(`WorkspaceDetails.openWorkspace "${namespace}/${workspaceName}"`);
 
         await this.clickOnOpenButton(timeout);
-        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS), TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
+        await this.driverHelper.waitVisibility(By.css(Ide.THEIA_EDITOR_CSS), TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
         await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
