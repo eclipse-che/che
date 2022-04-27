@@ -235,13 +235,16 @@ export class ProjectTree {
 
         for (let i = 0; i < attempts; i++) {
             // do five checks of the item in one fifth of the time given for root folder item (was causing frequent reloads of the workspace)
-            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 5, visibilityItemPolling / 5);
+            const isRootFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, 5, visibilityItemPolling / 5);
 
-            if (!isProjectFolderVisible) {
+            if (!isRootFolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported project not located, reloading page.`);
                 await this.browserTabsUtil.refreshPage();
                 await this.ide.waitWorkspaceAndIde();
                 await this.openProjectTreeContainer();
+                if (i === attempts - 1) {
+                    throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported [unable to locate project root folder]');
+                }
                 continue;
             }
 
@@ -250,20 +253,22 @@ export class ProjectTree {
             await this.waitItemExpanded(rootItem);
 
             // do five checks of the item in one fifth of the time given for root folder item (was causing frequent reloads of the workspace)
-            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, 5, visibilityItemPolling / 5);
+            const isSubfolderVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, 5, visibilityItemPolling / 5);
 
-            if (!isRootSubItemVisible) {
+            if (!isSubfolderVisible) {
                 Logger.trace(`ProjectTree.waitProjectImported sub-items not found, reloading page.`);
                 await this.browserTabsUtil.refreshPage();
                 await this.ide.waitWorkspaceAndIde();
                 await this.openProjectTreeContainer();
+                if (i === attempts - 1) {
+                    throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported [unable to locate project subfolder]');
+                }
                 continue;
             }
-            return;
+
+            Logger.trace(`ProjectTree.waitProjectImported project successfully imported`);
+            break;
         }
-
-        throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
-
     }
 
     async waitProjectImportedNoSubfolder(projectName: string,
