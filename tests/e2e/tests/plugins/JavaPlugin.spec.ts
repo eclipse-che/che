@@ -18,7 +18,6 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
@@ -37,7 +36,6 @@ const subRootFolder: string = 'backend';
 
 const fileFolderPath: string = `${projectName}/backend/src/main/java/cloudcode/guestbook/backend`;
 const tabTitle: string = 'GuestBookEntry.java';
-let workspaceName: string = 'java-guestbook';
 
 suite(`The 'JavaPlugin' test`, async () => {
     suite('Create workspace', async () => {
@@ -45,11 +43,11 @@ suite(`The 'JavaPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
 
-        test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(workspaceName);
-
+        test('Set confirmExit preference to never', async () => {
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
@@ -91,7 +89,7 @@ suite(`The 'JavaPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

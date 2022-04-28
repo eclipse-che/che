@@ -39,7 +39,8 @@ export class CodeExecutionTests {
         @inject(CLASSES.PreviewWidget) private readonly previewWidget: PreviewWidget,
         @inject(CLASSES.RightToolBar) private readonly rightToolBar: RightToolBar,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests) {}
 
     public runTask(taskName: string, timeout: number) {
         test(`Run command '${taskName}'`, async () => {
@@ -69,7 +70,7 @@ export class CodeExecutionTests {
     public runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
-            WorkspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.dialogWindow.waitDialogAndOpenLink(expectedDialogText, timeout);
         });
     }
@@ -111,7 +112,7 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            WorkspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.clickOnNotificationButton(notificationText, buttonText);
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });
@@ -121,7 +122,7 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            WorkspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });
@@ -131,7 +132,7 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification with unexposed port`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotificationAndConfirm(notificationText, timeout);
-            WorkspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.waitNotificationAndOpenLink(portOpenText, timeout);
             CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
         });

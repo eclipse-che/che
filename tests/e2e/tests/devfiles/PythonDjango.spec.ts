@@ -13,7 +13,6 @@ import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { e2eContainer } from '../../inversify.config';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -29,18 +28,12 @@ const taskRunServer: string = 'run server';
 const taskRunServerInDebugMode: string = 'run server in debug mode';
 const taskExpectedDialogText: string = 'Process django is now listening on port 7000. Open it ?';
 const taskExpectedDialogTextInDebugMode: string = 'A new process is now listening on port 5678 but this port is not a current endpoint.          Would you want to add a redirect for this port so it becomes available ?';
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-
-        test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
-        });
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
@@ -64,7 +57,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

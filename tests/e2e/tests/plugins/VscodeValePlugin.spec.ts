@@ -16,11 +16,9 @@ import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -29,14 +27,12 @@ const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeValePlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'che-docs';
 const pathToFile: string = `${projectName}/modules/administration-guide/partials`;
 const docFileName: string = 'assembly_authenticating-users.adoc';
-let workspaceName: string = '';
 
 suite('The "VscodeValePlugin" userstory', async () => {
     suite('Create workspace', async () => {
@@ -44,11 +40,9 @@ suite('The "VscodeValePlugin" userstory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
-            CheReporter.registerRunningWorkspace(workspaceName);
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
+        test('Wait until created workspace is started', async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
         });
@@ -81,7 +75,7 @@ suite('The "VscodeValePlugin" userstory', async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

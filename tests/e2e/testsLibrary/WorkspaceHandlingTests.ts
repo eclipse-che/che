@@ -16,17 +16,15 @@ import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { Logger } from '../utils/Logger';
-import { Editor } from '../pageobjects/ide/Editor';
 import { TimeoutConstants } from '../TimeoutConstants';
-import { ProjectAndFileTests } from './ProjectAndFileTests';
-import CheReporter from '../driver/CheReporter';
 import { DriverHelper } from '../utils/DriverHelper';
 import { Ide } from '../pageobjects/ide/Ide';
-import { error } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 
 @injectable()
 export class WorkspaceHandlingTests {
 
+    private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
     private static workspaceName: string = 'undefined';
     private static parentGUID: string;
 
@@ -34,11 +32,15 @@ export class WorkspaceHandlingTests {
         return WorkspaceHandlingTests.workspaceName;
     }
 
-    public static setWindowHandle(guid: string) {
+    public static setWorkspaceName(workspaceName: string) {
+        WorkspaceHandlingTests.workspaceName = workspaceName;
+    }
+
+    public setWindowHandle(guid: string) {
         WorkspaceHandlingTests.parentGUID = guid;
     }
 
-    public static getWindowHandle(): string {
+    public getWindowHandle(): string {
         return WorkspaceHandlingTests.parentGUID;
     }
 
@@ -48,9 +50,7 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.Editor) private readonly editor: Editor,
-        @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.ProjectAndFileTests) private readonly projectAndFileTests: ProjectAndFileTests) {}
+        @inject(CLASSES.Ide) private readonly ide: Ide) {}
 
     public createAndOpenWorkspace(stack: string) {
         test(`Create and open new workspace, stack:${stack}`, async () => {
@@ -72,13 +72,20 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public obtainWorkspaceNameFromApplicationYaml(yamlPath: string, fileName: string, editorLine: number) {
-        this.projectAndFileTests.openFile(yamlPath, fileName);
-        test(`Obtain workspace name from ${yamlPath}/${fileName}`, async() => {
-            let workspaceNameLine: string = await this.editor.getLineText(fileName, editorLine);
-            Logger.info(`Obtained name from application.yaml: ${workspaceNameLine}`);
-            WorkspaceHandlingTests.workspaceName = workspaceNameLine.split(`: `)[1];
-            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.workspaceName);
+    public obtainWorkspaceNameFromStartingPage() {
+        test('Obtain workspace name from workspace loader page', async() => {
+            try {
+                await this.driverHelper.waitVisibility(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+                // it takes a while to update the element with the workspace name
+                await this.driverHelper.wait(10_000);
+                let startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
+                // cutting away leading text
+                WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
+                Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
+            } catch (err) {
+                Logger.error(`Failed to obtain workspace name from workspace loader page: ${err}`);
+                throw err;
+            }
         });
     }
 

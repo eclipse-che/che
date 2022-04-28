@@ -17,7 +17,6 @@ import { Key } from 'selenium-webdriver';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
@@ -36,7 +35,6 @@ const subRootFolder: string = '.vscode';
 
 const fileFolderPath: string = `${projectName}`;
 const tabTitle: string = 'hello-world.py';
-let workspaceName: string = 'python-hello-world';
 
 suite(`The 'PythonPlugin' test`, async () => {
     suite('Create workspace', async () => {
@@ -44,11 +42,11 @@ suite(`The 'PythonPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
 
-        test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(workspaceName);
-
+        test('Set confirmExit preference to never', async () => {
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
@@ -78,7 +76,7 @@ suite(`The 'PythonPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 
