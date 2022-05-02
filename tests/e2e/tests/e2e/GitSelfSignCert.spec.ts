@@ -48,6 +48,7 @@ suite('Checking git + self sign cert', async () => {
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = workspaceName;
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
         await loginPage.login();
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);

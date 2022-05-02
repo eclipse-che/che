@@ -90,7 +90,7 @@ export interface ITestWorkspaceUtil {
      * @deprecated Method deprecated. Works with CHE server only
      */
     getBaseDevfile(): Promise<che.workspace.devfile.Devfile>;
-    
+
     /**
      * @deprecated Method deprecated. Works with CHE server only
      */

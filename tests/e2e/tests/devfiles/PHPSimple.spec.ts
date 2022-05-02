@@ -15,7 +15,6 @@ import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -30,17 +29,11 @@ const tabTitle: string = 'index.php';
 const depTaskName: string = 'Configure Apache Web Server DocumentRoot';
 const buildTaskName: string = 'Start Apache Web Server';
 const stack: string = 'PHP Simple';
-let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
-
-        test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
-        });
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
@@ -67,7 +60,7 @@ suite(`${stack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 

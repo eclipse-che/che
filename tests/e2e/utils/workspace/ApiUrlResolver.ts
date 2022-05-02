@@ -14,10 +14,10 @@ import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
 
 @injectable()
 export class ApiUrlResolver {
-    static USER_NAMESPACE: string = '';
+    private static readonly DASHBOARD_API_URL: string = 'dashboard/api/namespace';
+    private static readonly KUBERNETES_API_URL: string = 'api/kubernetes/namespace';
 
-    private dashboardApiUrl: string = 'dashboard/api/namespace';
-    private kubernetesApiUrl: string = 'api/kubernetes/namespace';
+    private userNamespace: string = '';
 
     constructor(@inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler) {}
 
@@ -27,24 +27,24 @@ export class ApiUrlResolver {
 
     public async getWorkspacesApiUrl(): Promise<string> {
         const namespace = await this.obtainUserNamespace();
-        return `${this.dashboardApiUrl}/${namespace}/devworkspaces`;
+        return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
     }
 
     public getKubernetesApiUrl(): string {
-        return this.kubernetesApiUrl;
+        return ApiUrlResolver.KUBERNETES_API_URL;
     }
 
     private async obtainUserNamespace() : Promise<string> {
-        Logger.debug(`ApiUrlResolver.obtainUserNamespace ${ApiUrlResolver.USER_NAMESPACE}`);
-        if (ApiUrlResolver.USER_NAMESPACE.length === 0) {
+        Logger.debug(`ApiUrlResolver.obtainUserNamespace ${this.userNamespace}`);
+        if (this.userNamespace.length === 0) {
             Logger.trace(`ApiUrlResolver.obtainUserNamespace USER_NAMESPACE.length = 0, calling kubernetes API`);
-            const kubernetesResponse = await this.processRequestHandler.get(this.kubernetesApiUrl);
+            const kubernetesResponse = await this.processRequestHandler.get(ApiUrlResolver.KUBERNETES_API_URL);
             if (kubernetesResponse.status !== 200) {
                 throw new Error(`Cannot get user namespace from kubernetes API. Code: ${kubernetesResponse.status} Data: ${kubernetesResponse.data}`);
             }
-            ApiUrlResolver.USER_NAMESPACE = kubernetesResponse.data[0].name;
-            Logger.debug(`ApiUrlResolver.obtainUserNamespace kubeapi success: ${ApiUrlResolver.USER_NAMESPACE}`);
+            this.userNamespace = kubernetesResponse.data[0].name;
+            Logger.debug(`ApiUrlResolver.obtainUserNamespace kubeapi success: ${this.userNamespace}`);
         }
-        return ApiUrlResolver.USER_NAMESPACE;
+        return this.userNamespace;
     }
 }

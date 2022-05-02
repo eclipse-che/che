@@ -16,22 +16,24 @@ import { Logger } from '../../Logger';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
-    static AUTHORIZATION_TOKEN: string;
+    private authorizationToken: string = '';
+
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async get(): Promise<AxiosRequestConfig> {
         try {
             let token = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
-            if (CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN !== token.value) {
-                CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN = token.value;
+            if (this.authorizationToken !== token.value) {
+                this.authorizationToken = token.value;
             }
         } catch (err) {
-            if (CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN.length > 0) {
+            if (this.authorizationToken.length > 0) {
                 Logger.warn(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.`);
             } else {
                 throw new Error(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. No stored token present!`);
             }
         }
-        return { headers: { 'cookie': `_oauth_proxy=${CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN}` } };
+
+        return { headers: { 'cookie': `_oauth_proxy=${this.authorizationToken}` } };
     }
 }

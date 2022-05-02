@@ -12,20 +12,18 @@ import { e2eContainer } from '../../inversify.config';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests);
 
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
-let workspaceName: string;
 
 // the suite expect user to be logged in
 suite('Workspace creation via factory url', async () => {
@@ -36,15 +34,13 @@ suite('Workspace creation via factory url', async () => {
     });
 
     suite('Wait workspace readyness', async () => {
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
     });
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
-            CheReporter.registerRunningWorkspace(workspaceName);
-
-            await testWorkspaceUtils.cleanUpRunningWorkspace(workspaceName);
+            await testWorkspaceUtils.cleanUpRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 

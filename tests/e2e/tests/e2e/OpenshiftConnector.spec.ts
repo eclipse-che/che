@@ -25,8 +25,8 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { PreferencesHandler, TerminalRendererType } from '../../utils/PreferencesHandler';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import CheReporter from '../../driver/CheReporter';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -77,7 +77,7 @@ suite('Openshift connector user story', async () => {
   test('Login into workspace and open plugin', async () => {
     await dashboard.openDashboard();
     await browserTabsUtil.navigateTo(workspacePrefixUrl + wsName);
-    CheReporter.registerRunningWorkspace(wsName);
+    WorkspaceHandlingTests.setWorkspaceName(wsName);
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');

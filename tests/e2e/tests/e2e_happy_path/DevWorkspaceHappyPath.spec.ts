@@ -24,7 +24,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import * as fs from 'fs';
 import axios from 'axios';
-import CheReporter from '../../driver/CheReporter';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -65,7 +65,7 @@ suite('Workspace creation via factory url', async () => {
         });
 
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(projectName);
+            WorkspaceHandlingTests.setWorkspaceName(projectName);
         });
 
         test('Register running workspace', async () => {

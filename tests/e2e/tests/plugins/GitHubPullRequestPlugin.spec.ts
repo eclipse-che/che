@@ -24,7 +24,6 @@ import { GitPlugin } from '../../pageobjects/ide/plugins/GitPlugin';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Key } from 'selenium-webdriver';
 
@@ -40,6 +39,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 const devfileUrl: string = `https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/GitHubPullRequestPlugin.yaml`;
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -50,7 +50,6 @@ const changedFile: string = 'README.md';
 // added call back url, but needs to be re-verified
 const identityCallbackUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/oauth/callback`;
 const currentDate: string = Date.now().toString();
-let workspaceName: string;
 
 suite(`The 'GitHubPullRequestPlugin' test`, async () => {
     suite('Setup github', async () => {
@@ -77,11 +76,9 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
-            CheReporter.registerRunningWorkspace(workspaceName);
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
+        test('Wait until created workspace is started', async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
 
@@ -140,7 +137,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandling.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandling.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

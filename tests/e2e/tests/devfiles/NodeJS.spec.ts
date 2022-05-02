@@ -14,7 +14,6 @@ import { e2eContainer } from '../../inversify.config';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -30,18 +29,12 @@ const fileName: string = `app.js`;
 const taskDownloadDependencies: string = 'download dependencies';
 const taskRunWebApp: string = 'run the web app';
 const taskExpectedDialogText: string = 'Process nodejs is now listening on port 3000. Open it ?';
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-
-        test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
-        });
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
@@ -68,7 +61,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Stop and remove workspace', async() => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

@@ -9,7 +9,6 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { CLASSES } from '../../inversify.types';
-import CheReporter from '../../driver/CheReporter';
 import { e2eContainer } from '../../inversify.config';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
@@ -26,17 +25,11 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const workspaceSampleName: string = 'console-java-simple';
 const workspaceRootFolderName: string = 'src';
 const stack: string = 'Java Maven';
-let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
-
-        test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
-        });
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
 
         test('Set application.confirmExit user preferences to "never"', async () => {
@@ -47,7 +40,7 @@ suite(`${stack} test`, async () => {
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
             await navigationBar.openNavigationBar();
-            await dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+            await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });
