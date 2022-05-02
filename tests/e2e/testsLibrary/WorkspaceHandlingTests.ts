@@ -15,43 +15,100 @@ import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
-import { Logger } from '..';
+import { Logger } from '../utils/Logger';
+import { TimeoutConstants } from '../TimeoutConstants';
+import { DriverHelper } from '../utils/DriverHelper';
+import { Ide } from '../pageobjects/ide/Ide';
+import { By, error } from 'selenium-webdriver';
 
 @injectable()
 export class WorkspaceHandlingTests {
 
+    private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
     private static workspaceName: string = 'undefined';
+    private static parentGUID: string;
 
     public static getWorkspaceName(): string {
         return WorkspaceHandlingTests.workspaceName;
+    }
+
+    public static setWorkspaceName(workspaceName: string) {
+        WorkspaceHandlingTests.workspaceName = workspaceName;
+    }
+
+    public setWindowHandle(guid: string) {
+        WorkspaceHandlingTests.parentGUID = guid;
+    }
+
+    public getWindowHandle(): string {
+        return WorkspaceHandlingTests.parentGUID;
     }
 
     constructor(
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+        @inject(CLASSES.Ide) private readonly ide: Ide) {}
 
     public createAndOpenWorkspace(stack: string) {
-        test(`Open 'New Workspace' page`, async () => {
+        test(`Create and open new workspace, stack:${stack}`, async () => {
             await this.dashboard.waitPage();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
-            const parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
+            WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
             await this.createWorkspace.clickOnSample(stack);
-            await this.browserTabsUtil.switchToWindow(parentGUID);
-            WorkspaceHandlingTests.workspaceName = await this.dashboard.getRecentWorkspaceName(10000);
-            Logger.debug(`Workspace Name is: ${WorkspaceHandlingTests.workspaceName}`);
-            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, 10000);
+            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
         });
     }
 
     public openExistingWorkspace(workspaceName: string) {
-        test('Start workspace', async () => {
+        test('Open and start existing workspace', async () => {
             await this.dashboard.waitPage();
             await this.dashboard.clickWorkspacesButton();
             await this.workspaces.waitPage();
             await this.workspaces.clickOpenButton(workspaceName);
+        });
+    }
+
+    public obtainWorkspaceNameFromStartingPage() {
+        test('Obtain workspace name from workspace loader page', async() => {
+            try {
+                await this.driverHelper.waitVisibility(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+                // it takes a while to update the element with the workspace name
+                await this.driverHelper.wait(10_000);
+                let startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
+                // cutting away leading text
+                WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
+                Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
+            } catch (err) {
+                Logger.error(`Failed to obtain workspace name from workspace loader page: ${err}`);
+                throw err;
+            }
+        });
+    }
+
+    public switchBackToFirstOpenIdeTabFromLeftToRight() {
+        test('WorkspaceHandlingTests.switchBackToIdeTab', async () => {
+            let tabs = await this.driverHelper.getDriver().getAllWindowHandles();
+            Logger.trace(`WorkspaceHandlingTests.switchBackToIdeTab Found ${tabs.length} window handles, iterating...`);
+            for (let i = 0; i < tabs.length; i++) {
+                await this.browserTabsUtil.switchToWindow(tabs[i]);
+                try {
+                    await this.ide.waitIde(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
+                    Logger.info(`WorkspaceHandlingTests.switchBackToIdeTab located and switched to IDE tab`);
+                    return;
+                } catch (err) {
+                    if (err instanceof error.TimeoutError) {
+                        Logger.warn(`WorkspaceHandlingTests.switchBackToIdeTab Locator timed out, trying with another window handle.`);
+                        continue;
+                    }
+                    Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Received unexpected exception while trying to locate IDE tab:${err}`);
+                    throw err;
+                }
+            }
+            Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Failed to locate IDE tab, out of window handles.`);
         });
     }
 

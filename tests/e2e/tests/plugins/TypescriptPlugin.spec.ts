@@ -23,7 +23,6 @@ import { Terminal } from '../../pageobjects/ide/Terminal';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import CheReporter from '../../driver/CheReporter';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
@@ -49,7 +48,6 @@ const fileFolderPath: string = `${projectName}`;
 const debugFileFolderPath: string = `${projectName}/app`;
 const debugFile: string = 'app.js';
 const tabTitle: string = 'typescript-node-debug.ts';
-let workspaceName: string = 'typescript-plugin';
 
 suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
     suite('Create workspace', async () => {
@@ -57,11 +55,11 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
 
-        test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(workspaceName);
-
+        test('Set confirmExit preference to never', async () => {
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
@@ -160,7 +158,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

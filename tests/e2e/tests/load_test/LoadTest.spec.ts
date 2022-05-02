@@ -15,8 +15,8 @@ import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TestConstants, WorkspaceNameHandler } from '../..';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -44,7 +44,7 @@ suite('Load test suite', async () => {
     });
 
     test('Wait loading workspace and get time', async () => {
-        CheReporter.registerRunningWorkspace(workspaceName);
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
     });

@@ -8,14 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { TestConstants, DriverHelper, CLASSES, TYPES } from '../..';
+import { TestConstants, CLASSES, TYPES } from '../..';
 import { e2eContainer } from '../../inversify.config';
 import { IOcpLoginPage } from '../../pageobjects/login/IOcpLoginPage';
 import { UpdateAccountInformationPage } from '../../pageobjects/login/UpdateAccountInformationPage';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ocpLogin: IOcpLoginPage = e2eContainer.get<IOcpLoginPage>(TYPES.OcpLogin);
 const updateAccountInformation: UpdateAccountInformationPage = e2eContainer.get(CLASSES.UpdateAccountInformationPage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
@@ -24,7 +25,7 @@ const commonTimeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT * 2
 
 suite('Link users', async () => {
     test('Login to OCP', async () => {
-        await driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
+        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
 
         await ocpLogin.login();
         await updateAccountInformation.clickToAllowSelectedPermissionsButton(commonTimeout);

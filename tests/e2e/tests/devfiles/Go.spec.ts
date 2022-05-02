@@ -16,7 +16,6 @@ import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -34,16 +33,12 @@ const taskRunServer: string = 'run-outyet';
 const taskStopServer: string = 'stop-outyet';
 const taskTestOutyet: string = 'test-outyet';
 const notificationText: string = 'Process 8080-tcp is now listening on port 8080. Open it ?';
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-        test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
-        });
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceSubfolderName, false);
         test('Workaround for issue #16113', async () => {
             Logger.warn(`Manually setting a preference for golang devFile LS based on issue: https://github.com/eclipse/che/issues/16113`);
@@ -75,7 +70,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Stop and remove workspace', async() => {
         test(`Stop and remove workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 

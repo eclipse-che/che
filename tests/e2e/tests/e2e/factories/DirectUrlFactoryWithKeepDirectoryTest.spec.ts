@@ -12,7 +12,6 @@ import { e2eContainer } from '../../../inversify.config';
 import { CLASSES } from '../../../inversify.types';
 import { TestConstants } from '../../../TestConstants';
 import { ProjectAndFileTests } from '../../../testsLibrary/ProjectAndFileTests';
-import CheReporter from '../../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { PreferencesHandler } from '../../../utils/PreferencesHandler';
@@ -28,7 +27,6 @@ const workspaceRootFolderName: string = 'src';
 const fileName: string = 'pom.xml';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
-let workspaceName: string = 'console-java-simple';
 
 suite('Workspace creation via factory url', async () => {
     suite('Open factory URL', async () => {
@@ -38,11 +36,10 @@ suite('Workspace creation via factory url', async () => {
     });
 
     suite('Wait workspace readyness', async () => {
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName);
 
         test('Set confirmExit preference to never', async () => {
-            CheReporter.registerRunningWorkspace(workspaceName);
-
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
@@ -56,7 +53,7 @@ suite('Workspace creation via factory url', async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 
