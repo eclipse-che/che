@@ -1,4 +1,5 @@
 it is fork one
+test merge
 ### Eclipse Che Server has moved!
 
 If you're looking for the sources of the Eclipse Che Server, it has been relocated here:
