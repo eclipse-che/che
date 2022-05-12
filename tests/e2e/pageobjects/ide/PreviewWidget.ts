@@ -17,6 +17,9 @@ import { Ide } from './Ide';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
+/**
+ * @deprecated Preview widget is no longer a valid page fragment.
+ */
 @injectable()
 export class PreviewWidget {
     private static readonly WIDGET_LOCATOR: By = By.css('div.theia-mini-browser');
