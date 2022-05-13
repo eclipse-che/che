@@ -183,7 +183,7 @@ export class Editor {
     async closeTab(tabTitle: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         Logger.debug(`Editor.closeTab "${tabTitle}"`);
 
-        const tabCloseButtonLocator: By = By.xpath(`//div[text()='${tabTitle}']/parent::li//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
+        const tabCloseButtonLocator: By = By.xpath(`//li[contains(@id,'${tabTitle}')]//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
 
         await this.driverHelper.waitAndClick(tabCloseButtonLocator, timeout);
     }
