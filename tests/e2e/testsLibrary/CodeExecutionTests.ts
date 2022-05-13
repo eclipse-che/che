@@ -18,8 +18,6 @@ import { Terminal } from '../pageobjects/ide/Terminal';
 import { TopMenu } from '../pageobjects/ide/TopMenu';
 import { DialogWindow } from '../pageobjects/ide/DialogWindow';
 import { DriverHelper } from '../utils/DriverHelper';
-import { PreviewWidget } from '../pageobjects/ide/PreviewWidget';
-import { RightToolBar } from '../pageobjects/ide/RightToolBar';
 import { Logger } from '../utils/Logger';
 import { QuickOpenContainer } from '../pageobjects/ide/QuickOpenContainer';
 import { WorkspaceHandlingTests } from './WorkspaceHandlingTests';
@@ -36,8 +34,6 @@ export class CodeExecutionTests {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.PreviewWidget) private readonly previewWidget: PreviewWidget,
-        @inject(CLASSES.RightToolBar) private readonly rightToolBar: RightToolBar,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
         @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests) {}
@@ -114,17 +110,22 @@ export class CodeExecutionTests {
             await this.ide.waitNotification(notificationText, timeout);
             this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.clickOnNotificationButton(notificationText, buttonText);
-            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
+            await this.driverHelper.wait(5_000);
+            CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
         });
     }
 
+    /**
+     * @deprecated This method should not be used, preview widget is no longer a valid page fragment.
+     */
     public runTaskWithNotificationAndOpenLinkPreviewNoUrl(taskName: string, notificationText: string, timeout: number) {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
             this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
-            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
+            await this.driverHelper.wait(5_000);
+            CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
         });
     }
 
@@ -134,23 +135,30 @@ export class CodeExecutionTests {
             await this.ide.waitNotificationAndConfirm(notificationText, timeout);
             this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.waitNotificationAndOpenLink(portOpenText, timeout);
-            CodeExecutionTests.lastApplicationUrl = await this.previewWidget.getUrl();
+            await this.driverHelper.wait(5_000);
+            CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
         });
     }
 
     public verifyRunningApplication(locator: By, applicationCheckTimeout: number, polling: number) {
         test(`Verify running application by locator: '${locator}'`, async () => {
-            await this.previewWidget.waitApplicationOpened(CodeExecutionTests.lastApplicationUrl, applicationCheckTimeout);
-            try {
-                await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
-            } catch (err) {
-                // fix for preloader / application not available in preview widget
-                // https://issues.redhat.com/browse/CRW-2175
-                if (err instanceof error.TimeoutError) {
-                    Logger.warn(`CodeExecutionTests.verifyRunningApplication application not located, probably blocked by preloader or content not available. Retrying.`);
-                    await this.ide.waitIde();
-                    await this.previewWidget.refreshPage();
-                    await this.previewWidget.waitContentAvailable(locator, applicationCheckTimeout, polling);
+            let timeout: number = applicationCheckTimeout / polling;
+            let attempts: number = applicationCheckTimeout / timeout;
+            for (let i = 0; i < attempts; i++) {
+                try {
+                    await this.driverHelper.waitPresence(locator, timeout);
+                } catch (err) {
+                    if (err instanceof error.TimeoutError) {
+                        if (i === attempts - 1) {
+                            Logger.error(`CodeExecutionTests.verifyRunningApplication out of retries to wait for ${locator} presence.`);
+                            throw err;
+                        } else {
+                            Logger.trace(`CodeExecutionTests.verifyRunningApplication timed out waiting for ${locator} presence. Retrying ${i}.`);
+                        }
+                    } else {
+                        Logger.error(`CodeExecutionTests.verifyRunningApplication failed with unexpected exception.`);
+                        throw err;
+                    }
                 }
             }
         });
@@ -160,16 +168,21 @@ export class CodeExecutionTests {
         return CodeExecutionTests.lastApplicationUrl;
     }
 
+    /**
+     * @deprecated This method should not be used, preview widget is no longer a valid page fragment.
+     */
     public refreshPreviewWindow() {
         test('Refreshing preview widget', async () => {
-            await this.previewWidget.refreshPage();
+            Logger.warn(`Method is deprecated.`);
         });
     }
 
+    /**
+     * @deprecated This method should not be used, preview widget is no longer a valid page fragment.
+     */
     public closePreviewWidget() {
         test('Close preview widget', async () => {
-            await this.rightToolBar.clickOnToolIcon('Preview');
-            await this.previewWidget.waitPreviewWidgetAbsence();
+            Logger.warn(`Method is deprecated.`);
         });
     }
 
