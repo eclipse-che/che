@@ -62,8 +62,8 @@ export class Dashboard {
     }
 
      async stopAndRemoveWorkspaceWithSelectingTab(workspaceName: string) {
-        Logger.debug(`Dashboard.stopAndRemoveWorkspaceByUI "${workspaceName}"`);
-        await this.openDashboardTab()
+        Logger.debug(`Dashboard.stopAndRemoveWorkspaceWithSelectingTab "${workspaceName}"`);
+        await this.switchToDashboardTab()
         await this.stopWorkspaceByUI(workspaceName);
         await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
@@ -73,13 +73,15 @@ export class Dashboard {
         Logger.debug('Dashboard.openDashboard');
         //sometimes we can have opened files. In this case we get Alert dialog. We should perform it.
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
+        let alertText:string='';
         try {
             await this.waitPage();
         } catch (err) {
             if (err instanceof error.UnexpectedAlertOpenError) {
+                alertText = await this.driverHelper.getDriver().switchTo().alert().getText()
                 this.driverHelper.getDriver().switchTo().alert().accept();
             } else {
-                throw err;
+                throw new Error(`${alertText} ${err}`);
             }
 
         }
@@ -87,7 +89,7 @@ export class Dashboard {
     }
 
     // click on the Browser tab which has been registered in the WorkspaceHandlingTests class
-    async openDashboardTab() {
+    async switchToDashboardTab() {
         Logger.debug('Dashboard.openDashboardTab');
        
         await this.findAndClickDashboardTab();
@@ -158,7 +160,7 @@ export class Dashboard {
             await this.browserTabsUtil.switchToWindow(windowHandle);
             try {
                 this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH));
-                Logger.error('Dashboard tab has been selected')
+                Logger.info('Dashboard tab has been selected')
                 return;
             }
             catch {
