@@ -20,8 +20,6 @@ import { DialogWindow } from '../pageobjects/ide/DialogWindow';
 import { DriverHelper } from '../utils/DriverHelper';
 import { Logger } from '../utils/Logger';
 import { QuickOpenContainer } from '../pageobjects/ide/QuickOpenContainer';
-import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTests } from './WorkspaceHandlingTests';
 
 @injectable()
 export class CodeExecutionTests {
@@ -34,9 +32,7 @@ export class CodeExecutionTests {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests) {}
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer) {}
 
     public runTask(taskName: string, timeout: number) {
         test(`Run command '${taskName}'`, async () => {
