@@ -9,13 +9,16 @@
  **********************************************************************/
 import { AxiosRequestConfig } from 'axios';
 import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { DriverHelper } from '../../DriverHelper';
+import { CLASSES } from '../../../inversify.types';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async get(): Promise<AxiosRequestConfig> {
-        //  to-do : Fetch the cookies from user api and pass it here
-        return { headers: { 'cookie': `` } };
+        let token = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
+        return { headers: { 'cookie': `_oauth_proxy=${token.value}` } };
     }
 }
