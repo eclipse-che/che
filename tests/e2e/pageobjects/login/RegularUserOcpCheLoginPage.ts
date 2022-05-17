@@ -15,16 +15,27 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
+import { By } from 'selenium-webdriver';
+import { DriverHelper } from '../../utils/DriverHelper';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 
+    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = `//div[@class='panel-login']`;
+    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
+
     constructor(
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage) { }
+        @inject(CLASSES.CheLoginPage) private readonly cheLogin: CheLoginPage,
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async login() {
         Logger.debug('RegularUserOcpCheLoginPage.login');
+
+        Logger.debug('OcpRedHatLoginPage.login wait for LogInWithOpenShift page and click button');
+        await this.driverHelper.waitPresence(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
 
         if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
             await this.ocpLogin.clickOnLoginProviderTitle();
