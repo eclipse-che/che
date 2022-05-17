@@ -20,8 +20,6 @@ import { DialogWindow } from '../pageobjects/ide/DialogWindow';
 import { DriverHelper } from '../utils/DriverHelper';
 import { Logger } from '../utils/Logger';
 import { QuickOpenContainer } from '../pageobjects/ide/QuickOpenContainer';
-import { WorkspaceHandlingTests } from './WorkspaceHandlingTests';
-import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 
 @injectable()
 export class CodeExecutionTests {
@@ -34,9 +32,8 @@ export class CodeExecutionTests {
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.DialogWindow) private readonly dialogWindow: DialogWindow,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests) {}
+        @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer
+     ) {}
 
     public runTask(taskName: string, timeout: number) {
         test(`Run command '${taskName}'`, async () => {
@@ -66,7 +63,6 @@ export class CodeExecutionTests {
     public runTaskWithDialogShellAndOpenLink(taskName: string, expectedDialogText: string, timeout: number) {
         test(`Run command '${taskName}' expecting dialog shell`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
-            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.dialogWindow.waitDialogAndOpenLink(expectedDialogText, timeout);
         });
     }
@@ -108,8 +104,12 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            // the application can have delay before running. Sometimes it consume about  sec.
+            // todo improve the check of avalibility test application
+            await this.driverHelper.wait(10_000);
             await this.ide.clickOnNotificationButton(notificationText, buttonText);
+            // delay for openning an app. window
+            // todo may be improved.
             await this.driverHelper.wait(5_000);
             CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
         });
@@ -122,8 +122,12 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
+            // the application can have delay before running. Sometimes it consume about  sec.
+            // todo improve the check of avalibility test application
+            await this.driverHelper.wait(10_000);
             await this.ide.clickOnNotificationButton(notificationText, 'Open In Preview');
+            // delay for openning an app. window
+            // todo may be improved.
             await this.driverHelper.wait(5_000);
             CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
         });
@@ -133,7 +137,6 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification with unexposed port`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotificationAndConfirm(notificationText, timeout);
-            this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
             await this.ide.waitNotificationAndOpenLink(portOpenText, timeout);
             await this.driverHelper.wait(5_000);
             CodeExecutionTests.lastApplicationUrl = await this.driverHelper.getDriver().getCurrentUrl();
