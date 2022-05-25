@@ -77,10 +77,10 @@ else
   echo -e "Test failed for $failedCounter/$TEST_COUNT workspaces: $failedUsers \n" >> $sumupFile
 fi
 
-if [[ $user_for_getting_test_names == "" ]]; then
-  echo "Tests failed for all users. Skipping generation logs."
-  exit
-fi
+# if [[ $user_for_getting_test_names == "" ]]; then
+#   echo "Tests failed for all users. Skipping generation logs."
+#   exit
+# fi
 
 # change \r to \n in files
 for file in $(find $FOLDER/$TIMESTAMP -name 'load-test-results.txt'); do
