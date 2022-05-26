@@ -32,7 +32,7 @@ spec:
         - name: TS_SELENIUM_LOAD_PAGE_TIMEOUT
           value: "180000"
         - name: TS_SELENIUM_START_WORKSPACE_TIMEOUT
-          value: "300000"
+          value: "420000"
         - name: TS_SELENIUM_LOG_LEVEL
           value: "REPLACE_LOG_LEVEL"
         - name: TS_IDE_LOAD_TIMEOUT
