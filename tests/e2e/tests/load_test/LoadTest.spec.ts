@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2022 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,46 +9,37 @@
  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
-import { Ide } from '../../pageobjects/ide/Ide';
-import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
-import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
-import { TestConstants, WorkspaceNameHandler } from '../..';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { CLASSES } from '../../inversify.types';
+import { TestConstants } from '../../TestConstants';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
+const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const ide: Ide = e2eContainer.get(CLASSES.Ide);
-const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const cheLoginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
-const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
-const workspaceName: string = workspaceNameHandler.generateWorkspaceName('wksp-test-', 5);
-const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
+const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/devfilev2';
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
+const projectName: string = 'web-nodejs-sample';
+const subRootFolder: string = 'app';
+let workspaceName: string = 'nodejs-web-app';
 
 suite('Load test suite', async () => {
+    suite('Create workspace', async () => {
+        test('Create workspace using factory', async () => {
+            await browserTabsUtil.navigateTo(factoryUrl);
+        });
 
-    suiteTeardown (async function () { await testWorkspaceUtils.cleanUpAllWorkspaces(); });
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
-    suiteSetup(async function () {
-        const wsConfig = await testWorkspaceUtils.getBaseDevfile();
-        wsConfig.metadata!.name = workspaceName;
-        await testWorkspaceUtils.createWsFromDevFile(wsConfig);
+        projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
     });
 
-    test('Login into workspace and open tree container', async () => {
-        await browserTabsUtil.navigateTo(workspacePrefixUrl + workspaceName);
-        await cheLoginPage.login();
-    });
-
-    test('Wait loading workspace and get time', async () => {
-        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
-        await ide.waitWorkspaceAndIde();
-        await projectTree.openProjectTreeContainer();
+    suite ('Stopping and deleting the workspace', async () => {
+        test('Stop and remove workspace', async () => {
+            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+        });
     });
 
 });
-
-
