@@ -5,5 +5,8 @@
     "bail": true,
     "full-trace": true,
     "support": "source-map-support/register",
-    "spec": ["dist/tests/load_test/LoadTest.spec.js"]
+    "spec": [
+        "dist/tests/login/Login.spec.js",
+        "dist/tests/load_test/LoadTest.spec.js"
+    ]
 }
