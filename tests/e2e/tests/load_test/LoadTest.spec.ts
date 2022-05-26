@@ -20,10 +20,9 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/devfilev2';
-const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
+const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}#${devfileUrl}?new`;
 const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
-let workspaceName: string = 'nodejs-web-app';
 
 suite('Load test suite', async () => {
     suite('Create workspace', async () => {
@@ -38,7 +37,7 @@ suite('Load test suite', async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 
