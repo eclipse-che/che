@@ -73,15 +73,14 @@ export class Dashboard {
         Logger.debug('Dashboard.openDashboard');
         //sometimes we can have opened files. In this case we get Alert dialog. We should perform it.
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
-        let alertText:string='';
+        
         try {
             await this.waitPage();
         } catch (err) {
             if (err instanceof error.UnexpectedAlertOpenError) {
-                alertText = await this.driverHelper.getDriver().switchTo().alert().getText()
                 this.driverHelper.getDriver().switchTo().alert().accept();
             } else {
-                throw new Error(`${alertText} ${err}`);
+                throw err;
             }
 
         }
