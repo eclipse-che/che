@@ -18,6 +18,9 @@ on:
   pull_request:
     paths:
       - '.repositories.yaml'
+permissions:
+  contents: read
+
 jobs:
   check-contributing-up-to-date:
     runs-on: ubuntu-latest

@@ -19,6 +19,9 @@ on:
     - 'tests/e2e/**'
     - '.github/workflows/typescript-publish.yml'
 
+permissions:
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-20.04
