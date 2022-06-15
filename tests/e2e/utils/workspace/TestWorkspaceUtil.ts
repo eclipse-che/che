@@ -125,7 +125,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         await this.deleteWorkspaceByName(namespace, workspaceName);
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
@@ -157,7 +157,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             await this.driverHelper.wait(polling);
         }
     }
-     /**
+
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async getListOfWorkspaceId(): Promise<string[]> {
@@ -181,7 +182,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         return wsList;
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async getIdOfRunningWorkspace(wsName: string): Promise<string> {
@@ -192,7 +193,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async getIdOfRunningWorkspaces(): Promise<Array<string>> {
@@ -222,7 +223,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async removeWorkspaceById(id: string) {
@@ -240,7 +241,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async stopWorkspaceById(id: string) {
@@ -277,7 +278,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     public async cleanUpAllWorkspaces() {
@@ -319,7 +320,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         await this.removeWorkspaceById(workspaceID);
     }
 
-     /**
+    /**
      * @deprecated Method deprecated. Works with CHE server only
      */
     async createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile) {
