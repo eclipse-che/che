@@ -56,7 +56,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
 
         if (!expectedStatus) {
-            let waitTime = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS * TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+            let waitTime = this.attempts * this.polling;
             throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${workspaceStatus}`);
         }
     }
@@ -70,7 +70,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         try {
             stopWorkspaceResponse = await this.processRequestHandler.patch(stopWorkspaceApiUrl, [{'op': 'replace', 'path': '/spec/started', 'value': false}]);
         } catch (err) {
-            console.log(`Stop workspace call failed. URL used: stopWorkspaceApiUrl`);
+            console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
         }
 
@@ -90,9 +90,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         let deleteWorkspaceStatus: boolean = false;
         try {
             deleteWorkspaceResponse = await this.processRequestHandler.delete(deleteWorkspaceApiUrl);
-        } catch (err) {
-            console.log(`Stop workspace call failed. URL used: stopWorkspaceApiUrl`);
-            throw err;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                Logger.error(`The workspace :${workspaceName} not found`);
+                throw error;
+            }
+            Logger.error(`Stop workspace call failed. URL used: ${deleteWorkspaceStatus}`);
+            throw error;
         }
 
         if (deleteWorkspaceResponse.status !== 204) {
@@ -109,10 +113,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
                     break;
                 }
             }
-
         }
+
         if (!deleteWorkspaceStatus) {
-            let waitTime = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS * TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+            let waitTime = this.attempts * this.polling;
             throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms.`);
         }
     }
