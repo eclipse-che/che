@@ -99,6 +99,10 @@ export class CheApiRequestHandler {
         return await axios.delete(this.assembleUrl(relativeUrl), await this.headerHandler.get());
     }
 
+    async patch(relativeUrl: string, patchParams: object): Promise<AxiosResponse> {
+       return await axios.patch(this.assembleUrl(relativeUrl), patchParams, await this.headerHandler.get());
+    }
+
     private assembleUrl(relativeUrl: string): string {
         return `${TestConstants.TS_SELENIUM_BASE_URL}/${relativeUrl}`;
     }

@@ -9,7 +9,7 @@
  **********************************************************************/
 
  export enum WorkspaceStatus {
-    RUNNING = 'RUNNING',
-    STOPPED = 'STOPPED',
-    STARTING = 'STARTING'
+    RUNNING = 'Running',
+    STOPPED = 'Stopped',
+    STARTING = 'Starting'
 }

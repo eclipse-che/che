@@ -19,12 +19,14 @@ import { error } from 'selenium-webdriver';
 import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
 import { CLASSES } from '../../inversify.types';
 import { Logger } from '../Logger';
+import axios from 'axios';
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
-    static readonly WORKSPACE_API_URL: string = 'api/workspace';
-
+    static readonly WORKSPACE_API_URL: string = 'dashboard/api/namespace';
+    readonly attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
+    readonly polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler
@@ -33,31 +35,103 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
-        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
-        const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
-        const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
+        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
         let workspaceStatus: string = '';
-
-        for (let i = 0; i < attempts; i++) {
+        let expectedStatus: boolean = false;
+        for (let i = 0; i < this.attempts; i++) {
             const response = await this.processRequestHandler.get(workspaceStatusApiUrl);
 
             if (response.status !== 200) {
-                await this.driverHelper.wait(polling);
-                continue;
+                throw new Error(`Can not get status of a workspace. Code: ${response.status} Data: ${response.data}`);
             }
 
-            workspaceStatus = await response.data.status;
+            workspaceStatus = await response.data.status.phase;
 
             if (workspaceStatus === expectedWorkspaceStatus) {
-                return;
+                expectedStatus = true;
+                break;
             }
 
-            await this.driverHelper.wait(polling);
+            await this.driverHelper.wait(this.polling);
         }
 
-        throw new error.TimeoutError(`Exceeded the maximum number of checking attempts, workspace status is: '${workspaceStatus}' different to '${expectedWorkspaceStatus}'`);
+        if (!expectedStatus) {
+            let waitTime = this.attempts * this.polling;
+            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${workspaceStatus}`);
+        }
     }
 
+    public async stopWorkspaceByName(namespace: string, workspaceName: string) {
+        Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
+
+        const stopWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
+        let stopWorkspaceResponse;
+
+        try {
+            stopWorkspaceResponse = await this.processRequestHandler.patch(stopWorkspaceApiUrl, [{'op': 'replace', 'path': '/spec/started', 'value': false}]);
+        } catch (err) {
+            console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
+            throw err;
+        }
+
+        if (stopWorkspaceResponse.status !== 200) {
+            throw new Error(`Cannot stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
+        }
+
+        await this.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STOPPED);
+    }
+
+    // delete a worksapce without stopping phase (similar with force deleting)
+    public async deleteWorkspaceByName(namespace: string, workspaceName: string) {
+        Logger.debug('TestWorkspaceUtil.deleteWorkspaceByName');
+
+        const deleteWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
+        let deleteWorkspaceResponse;
+        let deleteWorkspaceStatus: boolean = false;
+        try {
+            deleteWorkspaceResponse = await this.processRequestHandler.delete(deleteWorkspaceApiUrl);
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
+                Logger.error(`The workspace :${workspaceName} not found`);
+                throw error;
+            }
+            Logger.error(`Stop workspace call failed. URL used: ${deleteWorkspaceStatus}`);
+            throw error;
+        }
+
+        if (deleteWorkspaceResponse.status !== 204) {
+            throw new Error(`Can not stop workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
+        }
+
+        for (let i = 0; i < this.attempts; i++) {
+
+            try {
+                deleteWorkspaceResponse = await this.processRequestHandler.get(deleteWorkspaceApiUrl);
+            } catch (error) {
+                if (axios.isAxiosError(error) && error.response?.status === 404) {
+                    deleteWorkspaceStatus = true;
+                    break;
+                }
+            }
+        }
+
+        if (!deleteWorkspaceStatus) {
+            let waitTime = this.attempts * this.polling;
+            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms.`);
+        }
+    }
+
+    // stop workspace before deleting with checking stopping phase
+    public async stopAndDeleteWorkspaceByName(namespace: string, workspaceName: string) {
+        Logger.debug('TestWorkspaceUtil.stopAndDeleteWorkspaceByName');
+
+        await this.stopWorkspaceByName(namespace, workspaceName);
+        await this.deleteWorkspaceByName(namespace, workspaceName);
+    }
+
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
         Logger.debug('TestWorkspaceUtil.waitPluginAdding');
 
@@ -88,6 +162,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async getListOfWorkspaceId(): Promise<string[]> {
         Logger.debug('TestWorkspaceUtil.getListOfWorkspaceId');
 
@@ -109,6 +186,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         return wsList;
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async getIdOfRunningWorkspace(wsName: string): Promise<string> {
         Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspace');
 
@@ -117,6 +197,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async getIdOfRunningWorkspaces(): Promise<Array<string>> {
         Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspaces');
 
@@ -144,13 +227,15 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async removeWorkspaceById(id: string) {
         Logger.debug('TestWorkspaceUtil.removeWorkspaceById');
 
         const workspaceIdUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
         try {
             const deleteWorkspaceResponse = await this.processRequestHandler.delete(workspaceIdUrl);
-            // response code 204: "No Content" expected
             if (deleteWorkspaceResponse.status !== 204) {
                 throw new Error(`Can not remove workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
             }
@@ -160,6 +245,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async stopWorkspaceById(id: string) {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceById');
 
@@ -167,20 +255,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         let stopWorkspaceResponse;
 
         try {
-            stopWorkspaceResponse = await this.processRequestHandler.delete(`${stopWorkspaceApiUrl}/runtime`);
+            stopWorkspaceResponse = await this.processRequestHandler.delete(`${stopWorkspaceApiUrl}`);
         } catch (err) {
-            console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}/runtime`);
+            console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
         }
 
-        // if workspace is already stopped, it will return 409: "Conflict"
-        if (stopWorkspaceResponse.status === 409) {
-            Logger.warn(`TestWorkspaceUtil.stopWorkspaceById Workspace {${id}} is already STOPPED`);
-            return;
-        }
-
-        // response code 204: "No Content" expected
-        if (stopWorkspaceResponse.status !== 204) {
+        if (stopWorkspaceResponse.status !== 200) {
             throw new Error(`Can not stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
         }
 
@@ -188,7 +269,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         let wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
         for (let i = 0; i < TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS; i++) {
             wsStatus = await this.processRequestHandler.get(stopWorkspaceApiUrl);
-            if (wsStatus.data.status === 'STOPPED') {
+            if (wsStatus.data.status === WorkspaceStatus.STOPPED) {
                 stopped = true;
                 break;
             }
@@ -201,6 +282,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async cleanUpAllWorkspaces() {
         Logger.debug('TestWorkspaceUtil.cleanUpAllWorkspaces');
 
@@ -217,6 +301,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     public async cleanUpRunningWorkspace(workspaceName: string) {
         if (workspaceName === undefined || workspaceName.length === 0) {
           Logger.warn(`Could nod delete workspace because workspaceName is undefined or empty`);
@@ -237,6 +324,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         await this.removeWorkspaceById(workspaceID);
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     async createWsFromDevFile(customTemplate: che.workspace.devfile.Devfile) {
         Logger.debug('TestWorkspaceUtil.createWsFromDevFile');
 
@@ -248,6 +338,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     async getBaseDevfile(): Promise<che.workspace.devfile.Devfile> {
         Logger.debug('TestWorkspaceUtil.getBaseDevfile');
 
@@ -261,6 +354,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         return baseDevfile;
     }
 
+    /**
+     * @deprecated Method deprecated. Works with CHE server only
+     */
     async startWorkspace(workspaceId: string) {
         Logger.debug('TestWorkspaceUtil.startWorkspace');
 
