@@ -10,12 +10,13 @@
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { CLASSES } from '../../inversify.types';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class Dashboard {
@@ -25,7 +26,9 @@ export class Dashboard {
     private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
+        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+        ) { }
 
     async stopWorkspaceByUI(workspaceName: string) {
         Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
@@ -58,11 +61,38 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
+     async stopAndRemoveWorkspaceWithSelectingTab(workspaceName: string) {
+        Logger.debug(`Dashboard.stopAndRemoveWorkspaceWithSelectingTab "${workspaceName}"`);
+        await this.switchToDashboardTab()
+        await this.stopWorkspaceByUI(workspaceName);
+        await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
+        await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
+    }
+
     async openDashboard() {
         Logger.debug('Dashboard.openDashboard');
+        //sometimes we can have opened files. In this case we get Alert dialog. We should perform it.
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
-        await this.waitPage();
+        
+        try {
+            await this.waitPage();
+        } catch (err) {
+            if (err instanceof error.UnexpectedAlertOpenError) {
+                this.driverHelper.getDriver().switchTo().alert().accept();
+            } else {
+                throw err;
+            }
 
+        }
+        await this.waitPage();
+    }
+
+    // click on the Browser tab which has been registered in the WorkspaceHandlingTests class
+    async switchToDashboardTab() {
+        Logger.debug('Dashboard.openDashboardTab');
+       
+        await this.findAndClickDashboardTab();
+        await this.waitPage();
     }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
@@ -112,6 +142,31 @@ export class Dashboard {
         Logger.debug(`Dashboard.recentWorkspaceName`);
 
         return await this.driverHelper.waitAndGetText(By.css('[data-testid="recent-workspace-item"]'), timeout);
+    }
+
+    async findAndClickDashboardTab(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+        Logger.debug('Dashboard.findAndClickDashboardTab');
+
+        await this.driverHelper.waitUntilTrue(async () => {
+            const windowHandles: string[] = await this.browserTabsUtil.getAllWindowHandles();
+
+            return windowHandles.length > 1;
+        }, timeout);
+
+        const windowHandles: string[] = await this.browserTabsUtil.getAllWindowHandles();
+
+        windowHandles.forEach(async windowHandle => {
+            await this.browserTabsUtil.switchToWindow(windowHandle);
+            try {
+                this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH));
+                Logger.info('Dashboard tab has been selected')
+                return;
+            }
+            catch {
+                Logger.warn('The Dashboard Tab is not found in the window: ' + this.browserTabsUtil.getCurrentWindowHandle())
+            }
+        });
+        Logger.warn('The Dashboard Tab is not opened')
     }
 
 }
