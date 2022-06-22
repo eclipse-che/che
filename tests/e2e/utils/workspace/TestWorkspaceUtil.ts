@@ -8,38 +8,38 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+import 'reflect-metadata';
 import { che } from '@eclipse-che/api';
 import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
-import { ApiUrlResolver } from './ApiUrlResolver';
-import 'reflect-metadata';
 import { WorkspaceStatus } from './WorkspaceStatus';
 import { error } from 'selenium-webdriver';
 import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
 import { CLASSES } from '../../inversify.types';
 import { Logger } from '../Logger';
 import axios from 'axios';
+import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
+import { ApiUrlResolver } from './ApiUrlResolver';
 
 @injectable()
-export class TestWorkspaceUtil {
-
-    static readonly WORKSPACE_API_URL: string = 'dashboard/api/namespace';
+export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     readonly attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
     readonly polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
+
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler,
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver
     ) { }
 
-    public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
+    public async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
         let workspaceStatus: string = '';
         let expectedStatus: boolean = false;
         for (let i = 0; i < this.attempts; i++) {
-            const response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName));
+            const response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName));
 
             if (response.status !== 200) {
                 throw new Error(`Can not get status of a workspace. Code: ${response.status} Data: ${response.data}`);
@@ -61,10 +61,10 @@ export class TestWorkspaceUtil {
         }
     }
 
-    public async stopWorkspaceByName(namespace: string, workspaceName: string) {
+    public async stopWorkspaceByName(workspaceName: string) {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
 
-        const stopWorkspaceApiUrl: string = this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName);
+        const stopWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let stopWorkspaceResponse;
 
         try {
@@ -78,14 +78,14 @@ export class TestWorkspaceUtil {
             throw new Error(`Cannot stop workspace. Code: ${stopWorkspaceResponse.status} Data: ${stopWorkspaceResponse.data}`);
         }
 
-        await this.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STOPPED);
+        await this.waitWorkspaceStatus(workspaceName, WorkspaceStatus.STOPPED);
     }
 
     // delete a worksapce without stopping phase (similar with force deleting)
-    public async deleteWorkspaceByName(namespace: string, workspaceName: string) {
+    public async deleteWorkspaceByName(workspaceName: string) {
         Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName ${workspaceName}` );
 
-        const deleteWorkspaceApiUrl: string = this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName);
+        const deleteWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let deleteWorkspaceResponse;
         let deleteWorkspaceStatus: boolean = false;
         try {
@@ -121,31 +121,31 @@ export class TestWorkspaceUtil {
     }
 
     // stop workspace before deleting with checking stopping phase
-    public async stopAndDeleteWorkspaceByName(namespace: string, workspaceName: string) {
+    public async stopAndDeleteWorkspaceByName(workspaceName: string) {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteWorkspaceByName');
 
-        await this.stopWorkspaceByName(namespace, workspaceName);
-        await this.deleteWorkspaceByName(namespace, workspaceName);
+        await this.stopWorkspaceByName(workspaceName);
+        await this.deleteWorkspaceByName(workspaceName);
     }
 
     // stop all run workspaces in the namespace
     public async stopAllRunningWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
-        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         for (let i = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being stopped: ' +  response.data.items[i].metadata.name);
-            await this.stopWorkspaceByName(namespace, response.data.items[i].metadata.name);
+            await this.stopWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
 
     // stop all run workspaces, check statused and remove the workspaces
     public async stopAndDeleteAllRunningWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
-        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         await this.stopAllRunningWorkspaces(namespace);
         for (let i = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being deleted: ' +  response.data.items[i].metadata.name);
-            await this.deleteWorkspaceByName(namespace, response.data.items[i].metadata.name);
+            await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
 
@@ -153,11 +153,11 @@ export class TestWorkspaceUtil {
     // similar with 'force' deleting
     public async deleteAllWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
-        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
         for (let i = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being deleted .......: ' +  response.data.items[i].metadata.name);
-            await this.deleteWorkspaceByName(namespace, response.data.items[i].metadata.name);
+            await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
 
@@ -167,7 +167,7 @@ export class TestWorkspaceUtil {
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginName: string) {
         Logger.debug('TestWorkspaceUtil.waitPluginAdding');
 
-        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}:${workspaceName}`;
+        const workspaceStatusApiUrl: string = `${await this.apiUrlResolver.getWorkspacesApiUrl()}/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
@@ -200,7 +200,7 @@ export class TestWorkspaceUtil {
     public async getListOfWorkspaceId(): Promise<string[]> {
         Logger.debug('TestWorkspaceUtil.getListOfWorkspaceId');
 
-        const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
+        const getAllWorkspacesResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
         interface IMyObj {
             id: string;
@@ -224,7 +224,7 @@ export class TestWorkspaceUtil {
     public async getIdOfRunningWorkspace(wsName: string): Promise<string> {
         Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspace');
 
-        const getWorkspacesByNameResponse = await this.processRequestHandler.get(`${TestWorkspaceUtil.WORKSPACE_API_URL}/:${wsName}`);
+        const getWorkspacesByNameResponse = await this.processRequestHandler.get(`${await this.apiUrlResolver.getWorkspacesApiUrl()}/:${wsName}`);
         return getWorkspacesByNameResponse.data.id;
 
     }
@@ -236,7 +236,7 @@ export class TestWorkspaceUtil {
         Logger.debug('TestWorkspaceUtil.getIdOfRunningWorkspaces');
 
         try {
-            const getAllWorkspacesResponse = await this.processRequestHandler.get(TestWorkspaceUtil.WORKSPACE_API_URL);
+            const getAllWorkspacesResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
             interface IMyObj {
                 id: string;
@@ -254,7 +254,7 @@ export class TestWorkspaceUtil {
 
             return idOfRunningWorkspace;
         } catch (err) {
-            console.log(`Getting id of running workspaces failed. URL used: ${TestWorkspaceUtil.WORKSPACE_API_URL}`);
+            console.log(`Getting id of running workspaces failed. URL used: ${await this.apiUrlResolver.getWorkspacesApiUrl()}`);
             throw err;
         }
     }
@@ -265,7 +265,7 @@ export class TestWorkspaceUtil {
     public async removeWorkspaceById(id: string) {
         Logger.debug('TestWorkspaceUtil.removeWorkspaceById');
 
-        const workspaceIdUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
+        const workspaceIdUrl: string = `${await this.apiUrlResolver.getWorkspacesApiUrl()}/${id}`;
         try {
             const deleteWorkspaceResponse = await this.processRequestHandler.delete(workspaceIdUrl);
             if (deleteWorkspaceResponse.status !== 204) {
@@ -283,7 +283,7 @@ export class TestWorkspaceUtil {
     public async stopWorkspaceById(id: string) {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceById');
 
-        const stopWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${id}`;
+        const stopWorkspaceApiUrl: string = `${await this.apiUrlResolver.getWorkspacesApiUrl()}/${id}`;
         let stopWorkspaceResponse;
 
         try {
@@ -338,16 +338,16 @@ export class TestWorkspaceUtil {
      */
     public async cleanUpRunningWorkspace(workspaceName: string) {
         if (workspaceName === undefined || workspaceName.length === 0) {
-          Logger.warn(`Could nod delete workspace because workspaceName is undefined or empty`);
-          return;
+            Logger.warn(`Could nod delete workspace because workspaceName is undefined or empty`);
+            return;
         }
 
         Logger.debug(`TestWorkspaceUtil.cleanUpRunningWorkspace ${workspaceName}`);
         const workspaceID: string = await this.getIdOfRunningWorkspace(workspaceName);
 
         if (workspaceID === undefined || workspaceID.length === 0) {
-          Logger.error(`Could nod delete workspace with name ${workspaceName} because workspaceID is undefined or empty`);
-          return;
+            Logger.error(`Could nod delete workspace with name ${workspaceName} because workspaceID is undefined or empty`);
+            return;
         }
 
         Logger.trace(`TestWorkspaceUtil.cleanUpRunningWorkspace Stopping workspace:${workspaceName} with ID:${workspaceID}`);
@@ -363,7 +363,7 @@ export class TestWorkspaceUtil {
         Logger.debug('TestWorkspaceUtil.createWsFromDevFile');
 
         try {
-            await this.processRequestHandler.post(TestWorkspaceUtil.WORKSPACE_API_URL + '/devfile', customTemplate);
+            await this.processRequestHandler.post(await this.apiUrlResolver.getWorkspacesApiUrl() + '/devfile', customTemplate);
         } catch (error) {
             console.error(error);
             throw error;
@@ -393,7 +393,7 @@ export class TestWorkspaceUtil {
         Logger.debug('TestWorkspaceUtil.startWorkspace');
 
         try {
-            await this.processRequestHandler.post(`${TestWorkspaceUtil.WORKSPACE_API_URL}/${workspaceId}/runtime`);
+            await this.processRequestHandler.post(`${await this.apiUrlResolver.getWorkspacesApiUrl()}/${workspaceId}/runtime`);
         } catch (error) {
             console.error(error);
             throw error;
