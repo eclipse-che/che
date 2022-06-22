@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
- export enum WorkspaceStatus {
+export enum WorkspaceStatus {
     RUNNING = 'Running',
     STOPPED = 'Stopped',
     STARTING = 'Starting'

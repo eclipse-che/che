@@ -12,13 +12,26 @@ import { IAuthorizationHeaderHandler } from './IAuthorizationHeaderHandler';
 import { inject, injectable } from 'inversify';
 import { DriverHelper } from '../../DriverHelper';
 import { CLASSES } from '../../../inversify.types';
+import { Logger } from '../../Logger';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
+    static AUTHORIZATION_TOKEN: string;
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async get(): Promise<AxiosRequestConfig> {
-        let token = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
-        return { headers: { 'cookie': `_oauth_proxy=${token.value}` } };
+        try {
+            let token = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
+            if (CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN !== token.value) {
+                CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN = token.value;
+            }
+        } catch (err) {
+            if (CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN.length > 0) {
+                Logger.warn(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.`);
+            } else {
+                throw new Error(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. No stored token present!`);
+            }
+        }
+        return { headers: { 'cookie': `_oauth_proxy=${CheMultiuserAuthorizationHeaderHandler.AUTHORIZATION_TOKEN}` } };
     }
 }

@@ -15,7 +15,8 @@ import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
-import { Logger } from '..';
+import { Logger } from '../utils/Logger';
+import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 
 @injectable()
 export class WorkspaceHandlingTests {
@@ -30,11 +31,14 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+        @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver) {}
 
     public createAndOpenWorkspace(stack: string) {
         test(`Open 'New Workspace' page`, async () => {
             await this.dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             const parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
@@ -49,6 +53,8 @@ export class WorkspaceHandlingTests {
     public openExistingWorkspace(workspaceName: string) {
         test('Start workspace', async () => {
             await this.dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickWorkspacesButton();
             await this.workspaces.waitPage();
             await this.workspaces.clickOpenButton(workspaceName);
