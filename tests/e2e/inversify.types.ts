@@ -15,7 +15,8 @@ const TYPES = {
     OcpLogin: Symbol.for('OcpLogin'),
     WorkspaceUtil: Symbol.for('WorkspaceUtil'),
     IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
-    ITokenHandler: Symbol.for('ITokenHandler')
+    ITokenHandler: Symbol.for('ITokenHandler'),
+    IApiUrlResolver: Symbol.for('IApiUrlResolver')
 };
 
 const CLASSES = {
@@ -66,7 +67,8 @@ const CLASSES = {
     GitOauthAppsSettings: 'GitOauthAppsSettings',
     AnimationChecker: 'AnimationChecker',
     Sanitizer: 'Sanitizer',
-    NavigationBar: 'NavigationBar'
+    NavigationBar: 'NavigationBar',
+    ApiUrlResolver: 'ApiUrlResolver'
 };
 
 export { TYPES, CLASSES };

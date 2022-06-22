@@ -70,6 +70,9 @@ import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/NavigationBar';
+import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
+import { IApiUrlResolver } from './utils/workspace/IUrlResolver';
+
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -132,5 +135,5 @@ e2eContainer.bind<GitOauthAppsSettings>(CLASSES.GitOauthAppsSettings).to(GitOaut
 e2eContainer.bind<AnimationChecker>(CLASSES.AnimationChecker).to(AnimationChecker);
 e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 e2eContainer.bind<NavigationBar>(CLASSES.NavigationBar).to(NavigationBar);
-
+e2eContainer.bind<IApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 export { e2eContainer };
