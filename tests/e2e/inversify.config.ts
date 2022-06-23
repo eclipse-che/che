@@ -69,16 +69,14 @@ import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/NavigationBar';
-import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
+import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver'; 
 import { IApiUrlResolver } from './utils/workspace/IApiUrlResolver';
 
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
-e2eContainer.bind<TestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
-
 e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
 e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler);
 
@@ -135,4 +133,5 @@ e2eContainer.bind<AnimationChecker>(CLASSES.AnimationChecker).to(AnimationChecke
 e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 e2eContainer.bind<NavigationBar>(CLASSES.NavigationBar).to(NavigationBar);
 e2eContainer.bind<IApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
+e2eContainer.bind<TestWorkspaceUtil>(CLASSES.WorkspaceUtil).to(TestWorkspaceUtil);
 export { e2eContainer };

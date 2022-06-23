@@ -31,7 +31,7 @@ const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
-let testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+let testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.WorkspaceUtil);
 // let preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 class CheReporter extends mocha.reporters.Spec {

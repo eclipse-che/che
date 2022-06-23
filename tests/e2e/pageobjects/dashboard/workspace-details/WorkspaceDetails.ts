@@ -29,7 +29,7 @@ export class WorkspaceDetails {
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = 'workspace-details-overview md-progress-linear';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(CLASSES.WorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
 
     async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         Logger.debug('WorkspaceDetails.waitLoaderDisappearance');
