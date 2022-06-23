@@ -79,12 +79,12 @@ repositories:
     description: >-
       The default set of devfiles that would be made available on the Che dashboard stacks.
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-docs
+  - url: https://github.com/eclipse-che/che-docs
     name: docs
     description: >-
-      Eclipse Che documentation https://www.eclipse.org/che/docs/ source code.
-    devfile: https://github.com/eclipse/che-docs/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard
+      Eclipse Che documentation https://github.com/eclipse-che/che-docs source code.
+    devfile: https://github.com/eclipse-che/che-docs/blob/main/devfile.yaml
+    doc: https://github.com/eclipse-che/che-docs/blob/main/CONTRIBUTING.adoc
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-machine-exec
     name: machine-exec
@@ -99,23 +99,23 @@ repositories:
       Che operator to deploy, update and manage K8S/OpenShift resources of Che.
     devfile: https://github.com/eclipse-che/che-operator/blob/master/devfile.yaml
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-plugin-broker
+  - url: https://github.com/eclipse-che/che-plugin-broker
     name: plugin-broker
     description: >-
       The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile.
-    devfile: https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml
-    doc: https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/eclipse-che/che-plugin-broker/blob/master/devfile.yaml
+    doc: https://github.com/eclipse-che/che-plugin-broker/blob/master/CONTRIBUTING.md
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-plugin-registry
     name: plugin-registry
     description: >-
       The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces.
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse/che-website
+  - url: https://github.com/eclipse-che/che-website
     name: website
     description: >-
       https://eclipse.org/che website source code.
-    devfile: https://github.com/eclipse/che-website/blob/master/devfile.yaml
+    devfile: https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-workspace-client
     name: workspace-client
