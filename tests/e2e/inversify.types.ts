@@ -66,7 +66,8 @@ const CLASSES = {
     GitOauthAppsSettings: 'GitOauthAppsSettings',
     AnimationChecker: 'AnimationChecker',
     Sanitizer: 'Sanitizer',
-    NavigationBar: 'NavigationBar'
+    NavigationBar: 'NavigationBar',
+    ApiUrlResolver: 'ApiUrlResolver'
 };
 
 export { TYPES, CLASSES };

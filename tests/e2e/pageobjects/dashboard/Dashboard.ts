@@ -27,7 +27,7 @@ export class Dashboard {
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil
         ) { }
 
     async stopWorkspaceByUI(workspaceName: string) {
@@ -61,9 +61,9 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
-     async stopAndRemoveWorkspaceWithSelectingTab(workspaceName: string) {
+    async stopAndRemoveWorkspaceWithSelectingTab(workspaceName: string) {
         Logger.debug(`Dashboard.stopAndRemoveWorkspaceWithSelectingTab "${workspaceName}"`);
-        await this.switchToDashboardTab()
+        await this.switchToDashboardTab();
         await this.stopWorkspaceByUI(workspaceName);
         await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
@@ -71,9 +71,9 @@ export class Dashboard {
 
     async openDashboard() {
         Logger.debug('Dashboard.openDashboard');
-        //sometimes we can have opened files. In this case we get Alert dialog. We should perform it.
+        // sometimes we can have opened files. In this case we get Alert dialog. We should perform it.
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
-        
+
         try {
             await this.waitPage();
         } catch (err) {
@@ -90,7 +90,7 @@ export class Dashboard {
     // click on the Browser tab which has been registered in the WorkspaceHandlingTests class
     async switchToDashboardTab() {
         Logger.debug('Dashboard.openDashboardTab');
-       
+
         await this.findAndClickDashboardTab();
         await this.waitPage();
     }
@@ -159,14 +159,13 @@ export class Dashboard {
             await this.browserTabsUtil.switchToWindow(windowHandle);
             try {
                 this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH));
-                Logger.info('Dashboard tab has been selected')
+                Logger.info('Dashboard tab has been selected');
                 return;
-            }
-            catch {
-                Logger.warn('The Dashboard Tab is not found in the window: ' + this.browserTabsUtil.getCurrentWindowHandle())
+            } catch {
+                Logger.warn('The Dashboard Tab is not found in the window: ' + this.browserTabsUtil.getCurrentWindowHandle());
             }
         });
-        Logger.warn('The Dashboard Tab is not opened')
+        Logger.warn('The Dashboard Tab is not opened');
     }
 
 }
