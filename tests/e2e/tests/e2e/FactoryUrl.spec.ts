@@ -9,7 +9,7 @@
 //  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import CheReporter from '../../driver/CheReporter';
@@ -20,7 +20,7 @@ import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(CLASSES.WorkspaceUtil);
 
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 const workspaceSampleName: string = 'console-java-simple';

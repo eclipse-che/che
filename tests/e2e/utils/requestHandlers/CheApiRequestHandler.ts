@@ -35,6 +35,7 @@ export class CheApiRequestHandler {
                         return request;
                     }
                     request_censored.headers.Authorization = 'CENSORED';
+                    request_censored.headers.Cookie = 'CENSORED';
                     Logger.info(`RequestHandler request:\n` + request_censored);
                 } catch (err) {
                     Logger.error(`RequestHandler request: Failed to deep clone AxiosRequestConfig:` + err);
@@ -69,6 +70,7 @@ export class CheApiRequestHandler {
                         return response;
                     }
                     response_censored.config.headers.Authorization = 'CENSORED';
+                    response_censored.config.headers.Cookie = 'CENSORED';
                     if (response_censored.data.access_token != null) {
                         response_censored.data.access_token = 'CENSORED';
                     }
@@ -95,6 +97,10 @@ export class CheApiRequestHandler {
 
     async delete(relativeUrl: string): Promise<AxiosResponse> {
         return await axios.delete(this.assembleUrl(relativeUrl), await this.headerHandler.get());
+    }
+
+    async patch(relativeUrl: string, patchParams: object): Promise<AxiosResponse> {
+        return await axios.patch(this.assembleUrl(relativeUrl), patchParams, await this.headerHandler.get());
     }
 
     private assembleUrl(relativeUrl: string): string {
