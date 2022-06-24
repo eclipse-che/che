@@ -193,20 +193,10 @@ repositories:
       Eclispe Che blog content. Get published at https://che.eclipseprojects.io/
     useCheReleaseLifecycle: false
     devfile: https://github.com/eclipse-che/blog/blob/main/devfile.yaml
-  - url: https://github.com/eclipse-che/che-dev
-    name: Che Dev
-    description: >-
-      development resources and tools for Eclipse Che
-    useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-docs-vale-style
     name: CheDocs Vale style
     description: >-
       Vale style for Eclipse Che Documentation and related projects
-    useCheReleaseLifecycle: false
-  - url: https://github.com/eclipse-che/che-jwtproxy
-    name: JWT Proxy
-    description: >-
-      complementary service for authenticating, and possibly authorizing requests made between services. 
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-release
     name: Che release scripts and tools
