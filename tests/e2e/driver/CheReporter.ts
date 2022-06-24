@@ -17,7 +17,7 @@ import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
-import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
+import { TestWorkspaceUtil } from '../utils/workspace/TestWorkspaceUtil';
 // import { PreferencesHandler } from '../utils/PreferencesHandler';
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
@@ -32,7 +32,7 @@ const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
-let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+let testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.WorkspaceUtil);
 // let preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 class CheReporter extends mocha.reporters.Spec {
