@@ -187,6 +187,63 @@ repositories:
     description: >-
       ensures that all nodes in the cluster have those images cached
     useCheReleaseLifecycle: false
+  - url: https://github.com/eclipse-che/blog
+    name: Eclipse Che blog git repository
+    description: >-
+      Eclispe Che blog content. Get published at https://che.eclipseprojects.io/
+    useCheReleaseLifecycle: false
+    devfile: https://github.com/eclipse-che/blog/blob/main/devfile.yaml
+  - url: https://github.com/eclipse-che/che-dev
+    name: Che Dev
+    description: >-
+      development resources and tools for Eclipse Che
+    useCheReleaseLifecycle: false
+  - url: https://github.com/eclipse-che/che-docs-vale-style
+    name: CheDocs Vale style
+    description: >-
+      Vale style for Eclipse Che Documentation and related projects
+    useCheReleaseLifecycle: false
+  - url: https://github.com/eclipse-che/che-jwtproxy
+    name: JWT Proxy
+    description: >-
+      complementary service for authenticating, and possibly authorizing requests made between services. 
+    useCheReleaseLifecycle: false
+  - url: https://github.com/eclipse-che/che-release
+    name: Che release scripts and tools
+    description: >-
+      orchestration scripts for Eclipse Che artifacts and container images.
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/che-deploy-action
+    name: Che deploy action
+    description: >-
+      GitHub action deploying Eclipse Che using chectl
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/devfile-converter
+    name: devfile converter
+    description: >-
+      Allow to convert Devfile v1 to v2 or v2 to v1
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/happy-path-tests-action
+    name: Eclipse Che - Happy Path Tests Action
+    description: >-
+      Run Happy Path tests as part of a Github action
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/header-rewrite-traefik-plugin
+    name: Header rewrite Traefik plugin
+    description: >-
+      Traefik plugin that can modify http headers. 
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/jetbrains-editor-images
+    name: JetBrains Projector Editor Images
+    description: >-
+      Run JetBrains IDE remotely in Eclipse Che
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/kubernetes-image-puller-operator
+    name: Kubernetes Image Puller Operator
+    description: >-
+      Install, configure, and manage the kubernetes-image-puller
+    useCheReleaseLifecycle: false
+
 
 
 
