@@ -100,7 +100,7 @@ export class CheApiRequestHandler {
     }
 
     async patch(relativeUrl: string, patchParams: object): Promise<AxiosResponse> {
-       return await axios.patch(this.assembleUrl(relativeUrl), patchParams, await this.headerHandler.get());
+        return await axios.patch(this.assembleUrl(relativeUrl), patchParams, await this.headerHandler.get());
     }
 
     private assembleUrl(relativeUrl: string): string {
