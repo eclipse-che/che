@@ -10,7 +10,7 @@
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES, TYPES } from '../../../inversify.types';
+import { CLASSES } from '../../../inversify.types';
 import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
 import { TestWorkspaceUtil } from '../../../utils/workspace/TestWorkspaceUtil';

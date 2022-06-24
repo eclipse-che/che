@@ -9,7 +9,7 @@
  **********************************************************************/
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES, TYPES } from '../../../inversify.types';
+import { CLASSES } from '../../../inversify.types';
 import 'reflect-metadata';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';

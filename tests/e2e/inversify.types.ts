@@ -19,7 +19,7 @@ const TYPES = {
 };
 
 const CLASSES = {
-    WorkspaceUtil: Symbol.for('WorkspaceUtil'),
+    WorkspaceUtil: 'WorkspaceUtil',
     DriverHelper: 'DriverHelper',
     Dashboard: 'Dashboard',
     Workspaces: 'Workspaces',

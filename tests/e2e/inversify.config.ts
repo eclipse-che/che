@@ -69,7 +69,7 @@ import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/NavigationBar';
-import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver'; 
+import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
 import { IApiUrlResolver } from './utils/workspace/IApiUrlResolver';
 
 
