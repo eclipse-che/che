@@ -13,16 +13,16 @@ import { CLASSES, TYPES } from '../../inversify.types';
 import { Ide } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TestConstants, WorkspaceNameHandler } from '../..';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const cheLoginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const workspaceName: string = workspaceNameHandler.generateWorkspaceName('wksp-test-', 5);

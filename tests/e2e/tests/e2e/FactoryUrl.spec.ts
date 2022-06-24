@@ -15,12 +15,12 @@ import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
 
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 const workspaceSampleName: string = 'console-java-simple';

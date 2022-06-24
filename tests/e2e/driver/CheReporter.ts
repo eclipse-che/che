@@ -36,7 +36,7 @@ let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil
 
 class CheReporter extends mocha.reporters.Spec {
 
-  private static latestWorkspace: string;
+  private static latestWorkspace: string = '';
 
   public static registerRunningWorkspace(workspaceName: string) {
     Logger.debug(`CheReporter.registerRunningWorkspace {${workspaceName}}`);

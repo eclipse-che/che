@@ -22,12 +22,12 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { CheGitApi } from '../../utils/VCS/CheGitApi';
 import { GitHubUtil } from '../../utils/VCS/github/GitHubUtil';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../..';
 import CheReporter from '../../driver/CheReporter';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -39,7 +39,7 @@ const gitHubUtils: GitHubUtil = e2eContainer.get<GitHubUtil>(CLASSES.GitHubUtil)
 const cheGitAPI: CheGitApi = e2eContainer.get(CLASSES.CheGitApi);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
