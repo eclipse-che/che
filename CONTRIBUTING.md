@@ -26,12 +26,12 @@ Repository | Component | Description | Devfile | Documentation
 [che-code](https://github.com/che-incubator/che-code) | | Fork of "Code - OSS" to work with Eclipse Che | [devfile](https://github.com/che-incubator/che-code/blob/main/devfile.yaml) | [doc](https://github.com/che-incubator/che-code/blob/main/README.md)
 [dashboard](https://github.com/eclipse-che/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-dashboard/blob/main/README.md#eclipse-che-dashboard)
 [devfile-registry](https://github.com/eclipse-che/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 
-[docs](https://github.com/eclipse/che-docs) | | Eclipse Che documentation https://www.eclipse.org/che/docs/ source code. | [devfile](https://github.com/eclipse/che-docs/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md#dashboard)
+[docs](https://github.com/eclipse-che/che-docs) | | Eclipse Che documentation https://github.com/eclipse-che/che-docs source code. | [devfile](https://github.com/eclipse-che/che-docs/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-docs/blob/main/CONTRIBUTING.adoc)
 [machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md)
 [operator](https://github.com/eclipse-che/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | [devfile](https://github.com/eclipse-che/che-operator/blob/master/devfile.yaml) | 
-[plugin-broker](https://github.com/eclipse/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse/che-plugin-broker/blob/master/CONTRIBUTING.md)
+[plugin-broker](https://github.com/eclipse-che/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse-che/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-plugin-broker/blob/master/CONTRIBUTING.md)
 [plugin-registry](https://github.com/eclipse-che/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. |  | 
-[website](https://github.com/eclipse/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse/che-website/blob/master/devfile.yaml) | 
+[website](https://github.com/eclipse-che/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml) | 
 [workspace-client](https://github.com/eclipse-che/che-workspace-client) | | JS library to interact with a che-server. |  | 
 [che-container-tools](https://github.com/che-dockerfiles/che-container-tools) | | Base image used for sidecars that service container tooling plugins |  | 
 [che-custom-nodejs-deasync](https://github.com/che-dockerfiles/che-custom-nodejs-deasync) | | Provides a custom nodejs binary embedding deasync node-gyp module as builtin module |  | 
@@ -46,6 +46,19 @@ Repository | Component | Description | Devfile | Documentation
 [workspace-data-sync](https://github.com/che-incubator/workspace-data-sync) | | Provides the ability to increase I/O performance for a developer workspaces |  | 
 [che-workspace-telemetry-client](https://github.com/che-incubator/che-workspace-telemetry-client) | | abstract telemetry API and a Typescript implementation of the API. |  | 
 [kubernetes-image-puller](https://github.com/che-incubator/kubernetes-image-puller) | | ensures that all nodes in the cluster have those images cached |  | 
+[blog](https://github.com/eclipse-che/blog) | | Eclispe Che blog content. Get published at https://che.eclipseprojects.io/ | [devfile](https://github.com/eclipse-che/blog/blob/main/devfile.yaml) | 
+[che-docs-vale-style](https://github.com/eclipse-che/che-docs-vale-style) | | Vale style for Eclipse Che Documentation and related projects |  | 
+[che-release](https://github.com/eclipse-che/che-release) | | orchestration scripts for Eclipse Che artifacts and container images. |  | 
+[che-deploy-action](https://github.com/che-incubator/che-deploy-action) | | GitHub action deploying Eclipse Che using chectl |  | 
+[devfile-converter](https://github.com/che-incubator/devfile-converter) | | Allow to convert Devfile v1 to v2 or v2 to v1 |  | 
+[happy-path-tests-action](https://github.com/che-incubator/happy-path-tests-action) | | Run Happy Path tests as part of a Github action |  | 
+[header-rewrite-traefik-plugin](https://github.com/che-incubator/header-rewrite-traefik-plugin) | | Traefik plugin that can modify http headers.  |  | 
+[jetbrains-editor-images](https://github.com/che-incubator/jetbrains-editor-images) | | Run JetBrains IDE remotely in Eclipse Che |  | 
+[kubernetes-image-puller-operator](https://github.com/che-incubator/kubernetes-image-puller-operator) | | Install, configure, and manage the kubernetes-image-puller |  | 
+[devworkspace-operator](https://github.com/devfile/devworkspace-operator) | | Runs devfile based development environments on Kubernetes |  | 
+[registry](https://github.com/devfile/registry) | | Upstream devfile registry |  | 
+[developer-images](https://github.com/devfile/developer-images) | | Container images to code, build run applications on secured Kubernetes clusters |  | 
+[devworkspace-operator-docs](https://github.com/devfile/devworkspace-operator-docs) | | DevWorkspace operator documentation |  | 
 <!-- end repository list -->
 
 ## Devfile to contribute

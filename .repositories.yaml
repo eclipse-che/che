@@ -188,52 +188,68 @@ repositories:
       ensures that all nodes in the cluster have those images cached
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/blog
-    name: Eclipse Che blog git repository
+    name: blog
     description: >-
       Eclispe Che blog content. Get published at https://che.eclipseprojects.io/
     useCheReleaseLifecycle: false
     devfile: https://github.com/eclipse-che/blog/blob/main/devfile.yaml
   - url: https://github.com/eclipse-che/che-docs-vale-style
-    name: CheDocs Vale style
+    name: che-docs-vale-style
     description: >-
       Vale style for Eclipse Che Documentation and related projects
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-release
-    name: Che release scripts and tools
+    name: che-release
     description: >-
       orchestration scripts for Eclipse Che artifacts and container images.
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/che-deploy-action
-    name: Che deploy action
+    name: che-deploy-action
     description: >-
       GitHub action deploying Eclipse Che using chectl
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/devfile-converter
-    name: devfile converter
+    name: devfile-converter
     description: >-
       Allow to convert Devfile v1 to v2 or v2 to v1
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/happy-path-tests-action
-    name: Eclipse Che - Happy Path Tests Action
+    name: happy-path-tests-action
     description: >-
       Run Happy Path tests as part of a Github action
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/header-rewrite-traefik-plugin
-    name: Header rewrite Traefik plugin
+    name: header-rewrite-traefik-plugin
     description: >-
       Traefik plugin that can modify http headers. 
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/jetbrains-editor-images
-    name: JetBrains Projector Editor Images
+    name: jetbrains-editor-images
     description: >-
       Run JetBrains IDE remotely in Eclipse Che
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/kubernetes-image-puller-operator
-    name: Kubernetes Image Puller Operator
+    name: kubernetes-image-puller-operator
     description: >-
       Install, configure, and manage the kubernetes-image-puller
     useCheReleaseLifecycle: false
-
-
-
-
+  - url: https://github.com/devfile/devworkspace-operator
+    name: devworkspace-operator
+    description: >-
+      Runs devfile based development environments on Kubernetes
+    useCheReleaseLifecycle: false
+  - url: https://github.com/devfile/registry
+    name: registry
+    description: >-
+      Upstream devfile registry
+    useCheReleaseLifecycle: false
+  - url: https://github.com/devfile/developer-images
+    name: developer-images
+    description: >-
+      Container images to code, build run applications on secured Kubernetes clusters
+    useCheReleaseLifecycle: false
+  - url: https://github.com/devfile/devworkspace-operator-docs
+    name: devworkspace-operator-docs
+    description: >-
+      DevWorkspace operator documentation
+    useCheReleaseLifecycle: false

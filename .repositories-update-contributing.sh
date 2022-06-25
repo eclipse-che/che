@@ -118,7 +118,7 @@ fi
 if [ ${CHECK_MODE} = true ]; then
  if ! diff "${DIR}/target/contributing.original" "${DIR}/target/CONTRIBUTING.md"; then
     printf "%bError: %bCONTRIBUTING.md should be updated as repositories.yaml file has been updated\n" "${RED}" "${NC}"
-    printf "%s" "Run the command: ./.repositories-update-contributing.sh"
+    printf "%s\n" "Run the command: ./.repositories-update-contributing.sh"
     exit 1
  fi
 

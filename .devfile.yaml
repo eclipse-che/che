@@ -19,3 +19,12 @@ components:
     memoryRequest: 256Mi
     cpuLimit: 500m
     cpuRequest: 30m
+commands:
+- id: update-contributing
+  exec:
+    commandLine: '.repositories-update-contributing.sh IN_DOCKER'
+    component: devtools
+- id: check-contributing-is-updated
+  exec:
+    commandLine: '.repositories-update-contributing.sh IN_DOCKER'
+    component: devtools
