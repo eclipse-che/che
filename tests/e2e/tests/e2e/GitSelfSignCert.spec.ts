@@ -25,18 +25,18 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Editor } from '../../pageobjects/ide/Editor';
 
- const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
- const ide: Ide = e2eContainer.get(CLASSES.Ide);
- const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
- const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
- const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
- const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
- const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
- const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
- const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(CLASSES.WorkspaceUtil);
- const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
- const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
- const editor: Editor = e2eContainer.get(CLASSES.Editor);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const ide: Ide = e2eContainer.get(CLASSES.Ide);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
+const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
+const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
+const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
+const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
+const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const editor: Editor = e2eContainer.get(CLASSES.Editor);
 
 const workspaceName = 'gitSelfSignCert';
 

@@ -9,7 +9,7 @@
 //  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
@@ -18,7 +18,7 @@ import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTest
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(CLASSES.WorkspaceUtil);
+const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests);
 
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;

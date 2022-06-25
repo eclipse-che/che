@@ -36,7 +36,7 @@ export class CodeExecutionTests {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests
+        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests:WorkspaceHandlingTests
 
      ) {}
 

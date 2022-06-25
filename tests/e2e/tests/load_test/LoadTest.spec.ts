@@ -42,5 +42,3 @@ suite('Load test suite', async () => {
     });
 
 });
-
-
