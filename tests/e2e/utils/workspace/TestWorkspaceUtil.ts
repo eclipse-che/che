@@ -12,6 +12,7 @@ import { che } from '@eclipse-che/api';
 import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
+import { ApiUrlResolver } from './ApiUrlResolver';
 import 'reflect-metadata';
 import { WorkspaceStatus } from './WorkspaceStatus';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
@@ -29,17 +30,18 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     readonly polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler
+        @inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler,
+        @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver
     ) { }
 
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
-        const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
+        // const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
         let workspaceStatus: string = '';
         let expectedStatus: boolean = false;
         for (let i = 0; i < this.attempts; i++) {
-            const response = await this.processRequestHandler.get(workspaceStatusApiUrl);
+            const response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName));
 
             if (response.status !== 200) {
                 throw new Error(`Can not get status of a workspace. Code: ${response.status} Data: ${response.data}`);
@@ -64,7 +66,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     public async stopWorkspaceByName(namespace: string, workspaceName: string) {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
 
-        const stopWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
+        const stopWorkspaceApiUrl: string = this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName);
         let stopWorkspaceResponse;
 
         try {
@@ -83,9 +85,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // delete a worksapce without stopping phase (similar with force deleting)
     public async deleteWorkspaceByName(namespace: string, workspaceName: string) {
-        Logger.debug('TestWorkspaceUtil.deleteWorkspaceByName');
+        Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName ${workspaceName}` );
 
-        const deleteWorkspaceApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
+        const deleteWorkspaceApiUrl: string = this.apiUrlResolver.getWorkspaceApiUrl(namespace, workspaceName);
         let deleteWorkspaceResponse;
         let deleteWorkspaceStatus: boolean = false;
         try {
@@ -95,16 +97,15 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
                 Logger.error(`The workspace :${workspaceName} not found`);
                 throw error;
             }
-            Logger.error(`Stop workspace call failed. URL used: ${deleteWorkspaceStatus}`);
+            Logger.error(`Delete workspace call failed. URL used: ${deleteWorkspaceStatus}`);
             throw error;
         }
 
         if (deleteWorkspaceResponse.status !== 204) {
-            throw new Error(`Can not stop workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
+            throw new Error(`Can not delete workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
         }
 
         for (let i = 0; i < this.attempts; i++) {
-
             try {
                 deleteWorkspaceResponse = await this.processRequestHandler.get(deleteWorkspaceApiUrl);
             } catch (error) {
@@ -127,6 +128,39 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         await this.stopWorkspaceByName(namespace, workspaceName);
         await this.deleteWorkspaceByName(namespace, workspaceName);
+    }
+
+    // stop all run workspaces in the namespace
+    public async stopAllRunProjects(namespace: string) {
+        Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
+        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+        for (let i = 0; i < response.data.items.length; i++) {
+            Logger.info('The project is being stopped: ' +  response.data.items[i].metadata.name);
+            await this.stopWorkspaceByName(namespace, response.data.items[i].metadata.name);
+        }
+    }
+
+    // stop all run workspaces, check statused and remove the workspaces
+    public async stopAndDeleteAllRunProjects(namespace: string) {
+        Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
+        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+        await this.stopAllRunProjects(namespace);
+        for (let i = 0; i < response.data.items.length; i++) {
+            Logger.info('The project is being deleted: ' +  response.data.items[i].metadata.name);
+            await this.deleteWorkspaceByName(namespace, response.data.items[i].metadata.name);
+        }
+    }
+
+    // stop all run workspaces without stopping and waiting for of 'Stopped' phase
+    // similar with 'force' deleting
+    public async deleteAllRunProjects(namespace: string) {
+        Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
+        let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
+
+        for (let i = 0; i < response.data.items.length; i++) {
+            Logger.info('The project is being deleted .......: ' +  response.data.items[i].metadata.name);
+            await this.deleteWorkspaceByName(namespace, response.data.items[i].metadata.name);
+        }
     }
 
     /**
