@@ -37,7 +37,6 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
-        // const workspaceStatusApiUrl: string = `${TestWorkspaceUtil.WORKSPACE_API_URL}/${namespace}-che/devworkspaces/${workspaceName}`;
         let workspaceStatus: string = '';
         let expectedStatus: boolean = false;
         for (let i = 0; i < this.attempts; i++) {
@@ -131,7 +130,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop all run workspaces in the namespace
-    public async stopAllRunProjects(namespace: string) {
+    public async stopAllRunningWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
         let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
         for (let i = 0; i < response.data.items.length; i++) {
@@ -141,10 +140,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop all run workspaces, check statused and remove the workspaces
-    public async stopAndDeleteAllRunProjects(namespace: string) {
+    public async stopAndDeleteAllRunningWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
         let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
-        await this.stopAllRunProjects(namespace);
+        await this.stopAllRunningWorkspaces(namespace);
         for (let i = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being deleted: ' +  response.data.items[i].metadata.name);
             await this.deleteWorkspaceByName(namespace, response.data.items[i].metadata.name);
@@ -153,7 +152,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // stop all run workspaces without stopping and waiting for of 'Stopped' phase
     // similar with 'force' deleting
-    public async deleteAllRunProjects(namespace: string) {
+    public async deleteAllWorkspaces(namespace: string) {
         Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
         let response = await this.processRequestHandler.get(this.apiUrlResolver.getWorkspacesApiUrl(namespace));
 

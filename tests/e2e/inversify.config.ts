@@ -71,13 +71,13 @@ import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/NavigationBar';
 import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
-import { IApiUrlResolver } from './utils/workspace/IUrlResolver';
+import { IApiUrlResolver } from './utils/workspace/IApiUrlResolver';
 
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
-e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
+e2eContainer.bind<ITestWorkspaceUtil>(CLASSES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
 
 e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);

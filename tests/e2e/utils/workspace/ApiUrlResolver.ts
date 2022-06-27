@@ -1,4 +1,4 @@
-import { IApiUrlResolver } from './IUrlResolver';
+import { IApiUrlResolver } from './IApiUrlResolver';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.

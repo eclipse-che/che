@@ -13,13 +13,13 @@ const TYPES = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
     OcpLogin: Symbol.for('OcpLogin'),
-    WorkspaceUtil: Symbol.for('WorkspaceUtil'),
     IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
     ITokenHandler: Symbol.for('ITokenHandler'),
     IApiUrlResolver: Symbol.for('IApiUrlResolver')
 };
 
 const CLASSES = {
+    WorkspaceUtil: 'WorkspaceUtil',
     DriverHelper: 'DriverHelper',
     Dashboard: 'Dashboard',
     Workspaces: 'Workspaces',

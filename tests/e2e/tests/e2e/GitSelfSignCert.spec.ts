@@ -33,7 +33,7 @@
  const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
  const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
  const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
- const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+ const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(CLASSES.WorkspaceUtil);
  const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
  const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
  const editor: Editor = e2eContainer.get(CLASSES.Editor);

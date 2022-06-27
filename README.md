@@ -1,3 +1,6 @@
+[![Dev](https://img.shields.io/static/v1?label=Open%20in&message=Che%20dogfooding%20server%20(with%20VS%20Code)&logo=eclipseche&color=FDB940&labelColor=525C86)](https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com/#https://github.com/eclipse/che?che-editor=che-incubator/che-code/insiders)
+[![Dev](https://img.shields.io/static/v1?label=Open%20in&message=Che%20dogfooding%20server%20(with%20Theia)&logo=eclipseche&color=FDB940&labelColor=525C86)](https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com/#https://github.com/eclipse/che?che-editor=eclipse/che-theia/next)
+
 ### Eclipse Che Server has moved!
 
 If you're looking for the sources of the Eclipse Che Server, it has been relocated here:

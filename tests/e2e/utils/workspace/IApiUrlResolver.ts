@@ -10,4 +10,6 @@
 
 export interface IApiUrlResolver {
     getWorkspaceApiUrl(namespace: string, workspacename: string): string;
+    getWorkspacesApiUrl(namespace: string): string;
+
 }
