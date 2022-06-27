@@ -5,7 +5,7 @@
 dockerfiles/** @benoitf @nickboldt
 
 # e2e tests
-tests/e2e/** @musienko-maxim @Ohrimenko1988 @rhopp @nickboldt @Katka92 @ScrewTSW
+tests/e2e/** @musienko-maxim @rhopp @nickboldt @ScrewTSW @dmytro-ndp
 
 # devworkspace happy path test
 tests/devworkspace-happy-path/** @musienko-maxim
