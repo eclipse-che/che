@@ -29,6 +29,7 @@ import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -76,6 +77,7 @@ suite('Validation of workspace start', async () => {
 
     test('Register running workspace', async () => {
         WorkspaceHandlingTests.setWorkspaceName(workspaceName);
+        CheReporter.registerRunningWorkspace(workspaceName);
     });
 
     test('Wait for workspace readiness', async () => {

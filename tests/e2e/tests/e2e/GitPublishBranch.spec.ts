@@ -24,6 +24,7 @@ import { By } from 'selenium-webdriver';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
@@ -54,6 +55,7 @@ suite('Publish branch in git extension', async () => {
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameGitPublishBranch);
         await loginPage.login();
         WorkspaceHandlingTests.setWorkspaceName(wsNameGitPublishBranch);
+        CheReporter.registerRunningWorkspace(wsNameGitPublishBranch);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(15000);

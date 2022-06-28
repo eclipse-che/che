@@ -24,6 +24,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -49,6 +50,7 @@ suite('Checking git + self sign cert', async () => {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = workspaceName;
         WorkspaceHandlingTests.setWorkspaceName(workspaceName);
+        CheReporter.registerRunningWorkspace(workspaceName);
         await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
         await loginPage.login();
         await testWorkspaceUtils.createWsFromDevFile(wsConfig);

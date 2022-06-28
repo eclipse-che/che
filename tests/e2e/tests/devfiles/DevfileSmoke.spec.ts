@@ -15,6 +15,7 @@ import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { NavigationBar } from '../../pageobjects/ide/NavigationBar';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
@@ -30,6 +31,9 @@ suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        });
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
 
         test('Set application.confirmExit user preferences to "never"', async () => {

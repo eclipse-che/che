@@ -27,6 +27,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -78,6 +79,7 @@ suite('Openshift connector user story', async () => {
     await dashboard.openDashboard();
     await browserTabsUtil.navigateTo(workspacePrefixUrl + wsName);
     WorkspaceHandlingTests.setWorkspaceName(wsName);
+    CheReporter.registerRunningWorkspace(wsName);
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');

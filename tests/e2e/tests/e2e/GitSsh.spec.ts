@@ -28,6 +28,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../..';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -62,6 +63,7 @@ suite('Git with ssh workflow', async () => {
         await dashboard.openDashboard();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
         WorkspaceHandlingTests.setWorkspaceName(wsNameCheckGeneratingKeys);
+        CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
@@ -112,6 +114,7 @@ suite('Git with ssh workflow', async () => {
         await dashboard.openDashboard();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckPropagatingKeys);
         WorkspaceHandlingTests.setWorkspaceName(wsNameCheckPropagatingKeys);
+        CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
         await driverHelper.wait(TimeoutConstants.TS_PROJECT_TREE_TIMEOUT);
