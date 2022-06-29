@@ -17,9 +17,7 @@ import { KubernetesPlugin } from '../../pageobjects/ide/plugins/KubernetesPlugin
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { OpenDialogWidget, Buttons } from '../../pageobjects/ide/OpenDialogWidget';
@@ -29,7 +27,6 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const openDialogWidget: OpenDialogWidget = e2eContainer.get(CLASSES.OpenDialogWidget);
@@ -38,7 +35,6 @@ const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/t
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const sampleName: string = 'nodejs-web-app';
 const subRootFolder: string = 'app';
-let workspaceName: string;
 
 suite(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Create workspace', async () => {
@@ -46,11 +42,9 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        test('Wait until created workspace is started', async () => {
-            await ide.waitAndSwitchToIdeFrame();
-            workspaceName = await workspaceNameHandler.getNameFromUrl();
-            CheReporter.registerRunningWorkspace(workspaceName);
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
+        test('Wait until created workspace is started', async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
 
@@ -79,7 +73,7 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

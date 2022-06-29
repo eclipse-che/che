@@ -30,17 +30,14 @@ const fileName: string = `GreetingService.java`;
 const taskPackage: string = 'Package';
 const taskPackageNative: string = 'Package Native';
 const taskStartNative: string = 'Start Native';
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
     suite(`Create ${workspaceStack}`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
@@ -73,7 +70,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite('Stop and remove workspace', async() => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

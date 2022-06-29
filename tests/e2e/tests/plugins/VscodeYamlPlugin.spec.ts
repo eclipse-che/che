@@ -16,7 +16,6 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
 import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
@@ -36,19 +35,17 @@ const pathToFile: string = `${projectName}`;
 const yamlFileName: string = 'routes.yaml';
 const yamlSchema = { 'yaml-schema.json': '*.yaml' };
 
-let workspaceName: string = 'yaml-plugin';
-
 suite('The "VscodeYamlPlugin" userstory', async () => {
     suite('Create workspace', async () => {
         test('Create workspace using factory', async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
 
-        test('Wait until created workspace is started', async () => {
-            CheReporter.registerRunningWorkspace(workspaceName);
-
+        test('Set confirmExit preference to never', async () => {
             await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
         });
     });
@@ -97,7 +94,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
     suite('Delete workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

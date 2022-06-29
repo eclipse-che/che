@@ -27,18 +27,15 @@ const workspaceSampleName: string = 'python-hello-world';
 const taskRunName: string = 'run';
 const fileFolderPath: string = `${workspaceSampleName}`;
 const fileName: string = `hello-world.py`;
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
@@ -61,7 +58,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

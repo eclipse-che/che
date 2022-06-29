@@ -18,12 +18,13 @@ import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { WorkspaceNameHandler } from '../../utils/WorkspaceNameHandler';
 import { By } from 'selenium-webdriver';
-import CheReporter from '../../driver/CheReporter';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
@@ -34,7 +35,7 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const gitPlugin: GitPlugin = e2eContainer.get(CLASSES.GitPlugin);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const workspaceNameHandler: WorkspaceNameHandler = e2eContainer.get(CLASSES.WorkspaceNameHandler);
 
 const workspacePrefixUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${TestConstants.TS_SELENIUM_USERNAME}/`;
@@ -53,6 +54,7 @@ suite('Publish branch in git extension', async () => {
     test('Login into workspace', async () => {
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameGitPublishBranch);
         await loginPage.login();
+        WorkspaceHandlingTests.setWorkspaceName(wsNameGitPublishBranch);
         CheReporter.registerRunningWorkspace(wsNameGitPublishBranch);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();

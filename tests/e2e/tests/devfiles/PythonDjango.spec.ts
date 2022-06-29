@@ -29,18 +29,15 @@ const taskRunServer: string = 'run server';
 const taskRunServerInDebugMode: string = 'run server in debug mode';
 const taskExpectedDialogText: string = 'Process django is now listening on port 7000. Open it ?';
 const taskExpectedDialogTextInDebugMode: string = 'A new process is now listening on port 5678 but this port is not a current endpoint.          Would you want to add a redirect for this port so it becomes available ?';
-let workspaceName: string;
 
 suite(`${workspaceStack} test`, async () => {
 
     suite(`Create ${workspaceStack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(workspaceStack);
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
@@ -64,7 +61,7 @@ suite(`${workspaceStack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

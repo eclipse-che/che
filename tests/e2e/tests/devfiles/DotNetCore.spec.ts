@@ -32,17 +32,14 @@ const updateDependenciesTaskName: string = 'update dependencies';
 const buildTaskName: string = 'build';
 const runTaskName: string = 'run';
 const runTaskNameExpectedString: string = 'Process 5000-tcp is now listening on port 5000. Open it ?';
-let workspaceName: string;
 
 suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
@@ -75,7 +72,7 @@ suite(`Test ${stack}`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

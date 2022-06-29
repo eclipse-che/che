@@ -12,7 +12,6 @@ import { Container } from 'inversify';
 import { IDriver } from './driver/IDriver';
 import { ChromeDriver } from './driver/ChromeDriver';
 import { TYPES, CLASSES } from './inversify.types';
-import { ITestWorkspaceUtil } from './utils/workspace/ITestWorkspaceUtil';
 import { TestWorkspaceUtil } from './utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from './pageobjects/login/IOcpLoginPage';
 import { OcpUserLoginPage } from './pageobjects/login/OcpUserLoginPage';
@@ -70,13 +69,15 @@ import { AnimationChecker } from './utils/AnimationChecker';
 import { WorkspaceNameHandler } from './utils/WorkspaceNameHandler';
 import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/NavigationBar';
+import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
+import { ITestWorkspaceUtil } from './utils/workspace/ITestWorkspaceUtil';
+
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
-
 e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
 e2eContainer.bind<ITokenHandler>(TYPES.ITokenHandler).to(CheMultiuserTokenHandler);
 
@@ -132,5 +133,6 @@ e2eContainer.bind<GitOauthAppsSettings>(CLASSES.GitOauthAppsSettings).to(GitOaut
 e2eContainer.bind<AnimationChecker>(CLASSES.AnimationChecker).to(AnimationChecker);
 e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 e2eContainer.bind<NavigationBar>(CLASSES.NavigationBar).to(NavigationBar);
+e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 
 export { e2eContainer };

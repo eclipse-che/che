@@ -20,6 +20,7 @@ export * from './utils/Sanitizer';
 export * from './utils/ScreenCatcher';
 export * from './utils/VCS/CheGitApi';
 export * from './utils/VCS/github/GitHubUtil';
+export * from './utils/workspace/ApiUrlResolver';
 export * from './utils/workspace/ITestWorkspaceUtil';
 export * from './utils/WorkspaceNameHandler';
 export * from './utils/workspace/TestWorkspaceUtil';

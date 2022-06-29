@@ -36,7 +36,7 @@ let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil
 
 class CheReporter extends mocha.reporters.Spec {
 
-  private static latestWorkspace: string;
+  private static latestWorkspace: string = '';
 
   public static registerRunningWorkspace(workspaceName: string) {
     Logger.debug(`CheReporter.registerRunningWorkspace {${workspaceName}}`);
@@ -192,7 +192,7 @@ class CheReporter extends mocha.reporters.Spec {
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
         Logger.warn('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
-        await testWorkspaceUtil.cleanUpRunningWorkspace(CheReporter.latestWorkspace);
+        await testWorkspaceUtil.stopAndDeleteWorkspaceByName(CheReporter.latestWorkspace);
       }
 
     });

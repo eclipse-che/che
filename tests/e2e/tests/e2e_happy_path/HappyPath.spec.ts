@@ -28,6 +28,7 @@ import { TimeoutConstants } from '../../TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { RightToolBar } from '../../pageobjects/ide/RightToolBar';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -75,11 +76,12 @@ suite('Validation of workspace start', async () => {
     });
 
     test('Register running workspace', async () => {
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         CheReporter.registerRunningWorkspace(workspaceName);
     });
 
     test('Wait for workspace readiness', async () => {
-        await ide.waitAndSwitchToIdeFrame();
+        // await ide.waitAndSwitchToIdeFrame(); test is outdated, should be deprecated.
         await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         await projectTree.openProjectTreeContainer();
         await ide.waitNotificationAndClickOnButton('Do you trust the authors of', 'Yes, I trust', 60_000);
@@ -126,7 +128,7 @@ suite('Language server validation', async () => {
         } catch (err) {
             Logger.debug('Workaround for the https://github.com/eclipse/che/issues/18974.');
             await browserTabsUtil.refreshPage();
-            await ide.waitAndSwitchToIdeFrame();
+            // await ide.waitAndSwitchToIdeFrame(); test is outdated, should be deprecated.
             await ide.waitIde();
             await editor.waitErrorInLine(30, javaFileName, TimeoutConstants.TS_ERROR_HIGHLIGHTING_TIMEOUT * 2);
         }
@@ -240,10 +242,11 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Check content of the launched application', async () => {
-        await previewWidget.waitAndSwitchToWidgetFrame();
+        await previewWidget.waitAndSwitchToWidgetFrame(); // test is outdated, should be deprecated.
         await previewWidget.waitAndClick(SpringAppLocators.springHomeButtonLocator);
         await driverHelper.getDriver().switchTo().defaultContent();
-        await ide.waitAndSwitchToIdeFrame();
+        // await ide.waitAndSwitchToIdeFrame(); test is outdated, should be deprecated.
+        await ide.waitIde();
     });
 
     test('Open debug view', async () => {
@@ -280,7 +283,7 @@ suite('Validation of debug functionality', async () => {
 });
 
 async function checkErrorMessageInApplicationController() {
-    await previewWidget.waitAndSwitchToWidgetFrame();
+    await previewWidget.waitAndSwitchToWidgetFrame(); // test is outdated, should be deprecated.
     await previewWidget.waitAndClick(SpringAppLocators.springMenuButtonLocator);
     await previewWidget.waitAndClick(SpringAppLocators.springErrorButtonLocator);
 
@@ -289,15 +292,17 @@ async function checkErrorMessageInApplicationController() {
     } catch (err) {
 
         await driverHelper.getDriver().switchTo().defaultContent();
-        await ide.waitAndSwitchToIdeFrame();
+        // await ide.waitAndSwitchToIdeFrame(); test is outdated, should be deprecated.
+        await ide.waitIde();
 
-        await previewWidget.waitAndSwitchToWidgetFrame();
+        await previewWidget.waitAndSwitchToWidgetFrame(); // test is outdated, should be deprecated.
         await previewWidget.waitVisibility(SpringAppLocators.springErrorMessageLocator, 15_000);
     }
 
 
     await driverHelper.getDriver().switchTo().defaultContent();
-    await ide.waitAndSwitchToIdeFrame();
+    // await ide.waitAndSwitchToIdeFrame(); test is outdated, should be deprecated.
+    await ide.waitIde();
 }
 
 async function checkJavaPathCompletion() {

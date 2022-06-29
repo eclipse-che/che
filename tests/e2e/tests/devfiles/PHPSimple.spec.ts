@@ -30,17 +30,14 @@ const tabTitle: string = 'index.php';
 const depTaskName: string = 'Configure Apache Web Server DocumentRoot';
 const buildTaskName: string = 'Start Apache Web Server';
 const stack: string = 'PHP Simple';
-let workspaceName: string;
 
 suite(`${stack} test`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
-
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            workspaceName = WorkspaceHandlingTests.getWorkspaceName();
-            CheReporter.registerRunningWorkspace(workspaceName);
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
@@ -67,7 +64,7 @@ suite(`${stack} test`, async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 
