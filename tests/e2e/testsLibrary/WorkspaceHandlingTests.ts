@@ -16,9 +16,10 @@ import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { Logger } from '../utils/Logger';
-import { TimeoutConstants } from '../TimeoutConstants';
+import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { Ide } from '../pageobjects/ide/Ide';
+import { TimeoutConstants } from '../TimeoutConstants';
 import { By, error } from 'selenium-webdriver';
 
 @injectable()
@@ -50,11 +51,14 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.Ide) private readonly ide: Ide) {}
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver) {}
 
     public createAndOpenWorkspace(stack: string) {
         test(`Create and open new workspace, stack:${stack}`, async () => {
             await this.dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
@@ -66,6 +70,8 @@ export class WorkspaceHandlingTests {
     public openExistingWorkspace(workspaceName: string) {
         test('Open and start existing workspace', async () => {
             await this.dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickWorkspacesButton();
             await this.workspaces.waitPage();
             await this.workspaces.clickOpenButton(workspaceName);
@@ -77,7 +83,7 @@ export class WorkspaceHandlingTests {
             try {
                 await this.driverHelper.waitVisibility(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
                 // it takes a while to update the element with the workspace name
-                await this.driverHelper.wait(10_000);
+                await this.driverHelper.wait(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
                 let startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
                 // cutting away leading text
                 WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
@@ -97,7 +103,7 @@ export class WorkspaceHandlingTests {
                 await this.browserTabsUtil.switchToWindow(tabs[i]);
                 try {
                     await this.ide.waitIde(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-                    Logger.info(`WorkspaceHandlingTests.switchBackToIdeTab located and switched to IDE tab`);
+                    Logger.debug(`WorkspaceHandlingTests.switchBackToIdeTab located and switched to IDE tab`);
                     return;
                 } catch (err) {
                     if (err instanceof error.TimeoutError) {

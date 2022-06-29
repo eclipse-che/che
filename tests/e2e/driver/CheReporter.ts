@@ -23,7 +23,6 @@ import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHand
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
 import { Sanitizer } from '../utils/Sanitizer';
-import { WorkspaceHandlingTests } from '../testsLibrary/WorkspaceHandlingTests';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -36,6 +35,13 @@ let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil
 // let preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
 class CheReporter extends mocha.reporters.Spec {
+
+  private static latestWorkspace: string = '';
+
+  public static registerRunningWorkspace(workspaceName: string) {
+    Logger.debug(`CheReporter.registerRunningWorkspace {${workspaceName}}`);
+    CheReporter.latestWorkspace = workspaceName;
+  }
 
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
@@ -186,7 +192,7 @@ class CheReporter extends mocha.reporters.Spec {
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
         Logger.warn('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
-        await testWorkspaceUtil.cleanUpRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        await testWorkspaceUtil.stopAndDeleteWorkspaceByName(CheReporter.latestWorkspace);
       }
 
     });

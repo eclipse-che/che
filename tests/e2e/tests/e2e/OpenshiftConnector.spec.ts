@@ -23,15 +23,16 @@ import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../../TestConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { PreferencesHandler, TerminalRendererType } from '../../utils/PreferencesHandler';
-import { TestWorkspaceUtil } from '../../utils/workspace/TestWorkspaceUtil';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import CheReporter from '../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
-const testWorkspaceUtils: TestWorkspaceUtil = e2eContainer.get<TestWorkspaceUtil>(TYPES.WorkspaceUtil);
+const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
 const openshiftPlugin: OpenshiftPlugin = e2eContainer.get(CLASSES.OpenshiftPlugin);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
@@ -78,6 +79,7 @@ suite('Openshift connector user story', async () => {
     await dashboard.openDashboard();
     await browserTabsUtil.navigateTo(workspacePrefixUrl + wsName);
     WorkspaceHandlingTests.setWorkspaceName(wsName);
+    CheReporter.registerRunningWorkspace(wsName);
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();
     await projectTree.waitProjectImported(projectName, 'index.js');

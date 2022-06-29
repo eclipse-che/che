@@ -15,6 +15,7 @@ import { LanguageServerTests } from '../../testsLibrary/LanguageServerTests';
 import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
+import CheReporter from '../../driver/CheReporter';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -36,6 +37,9 @@ suite(`Test ${stack}`, async () => {
     suite (`Create ${stack} workspace`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+        test('Register running workspace', async () => {
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        });
         projectAndFileTests.waitWorkspaceReadinessNoSubfolder(workspaceSampleName, false);
     });
 
