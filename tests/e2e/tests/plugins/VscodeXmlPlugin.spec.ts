@@ -14,11 +14,8 @@ import { CLASSES } from '../../inversify.types';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
-import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
-
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -26,15 +23,12 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
-
-const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/xml-plugin';
+const devfileUrl: string = TestConstants.TS_TEST_WORKSPACE_DEVFILE_REPO || 'https://github.com/che-samples/web-nodejs-sample/tree/xml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'web-nodejs-sample';
 const pathToFile: string = `${projectName}`;
 const xmlFileName: string = 'hello.xml';
 const subRootFolder: string = 'app';
-let workspaceName: string = 'xml-plugin';
 
 suite('The "VscodeXmlPlugin" userstory', async () => {
     suite('Create workspace', async () => {
@@ -45,10 +39,6 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
-
-        test('Set confirmExit preference to never', async () => {
-            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
-        });
     });
 
     suite('Check the "vscode-xml" plugin', async () => {
@@ -98,14 +88,10 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
+    suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(workspaceName);
-                return;
-            }
-
-            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
+
 });

@@ -6,6 +6,7 @@
     "require": "source-map-support/register",
     "spec": [
         "dist/tests/login/Login.spec.js",
-        "dist/tests/plugins/*.spec.js"
+        "dist/tests/plugins/VscodeXmlPlugin.spec.js",
+        "dist/tests/plugins/VscodeYamlPlugin.spec.js"
     ]
 }
