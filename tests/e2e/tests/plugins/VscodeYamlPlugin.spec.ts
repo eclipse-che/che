@@ -14,7 +14,6 @@ import { CLASSES } from '../../inversify.types';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
-import { Logger } from '../../utils/Logger';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PreferencesHandler } from '../../utils/PreferencesHandler';
@@ -27,7 +26,7 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 
-const devfileUrl: string = 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
+const devfileUrl: string = TestConstants.TS_GITHUB_TEST_REPO || 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'web-nodejs-sample';
 const subRootFolder: string = 'app';
@@ -44,10 +43,6 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
-
-        test('Set confirmExit preference to never', async () => {
-            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
-        });
     });
 
     suite('Check the "vscode-yaml" plugin', async () => {
@@ -91,14 +86,10 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
     });
 
-    suite('Delete workspace', async () => {
+    suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-                return;
-            }
-
-            Logger.info(`As far as the "TS_DELETE_PLUGINS_TEST_WORKSPACE" value is "false the workspace deletion is skipped"`);
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
+
 });
