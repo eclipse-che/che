@@ -259,5 +259,10 @@ export const TestConstants = {
     /**
      * URL of Gogs self-hosted Git server.
      */
-    TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080'
+     TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080',
+
+     /**
+      * URL of workspace devfile test repository.
+      */
+      TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || ''
 };
