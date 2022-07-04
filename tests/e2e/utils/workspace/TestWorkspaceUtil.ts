@@ -57,7 +57,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         if (!expectedStatus) {
             let waitTime = this.attempts * this.polling;
-            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${workspaceStatus}`);
+            Logger.error(`TestWorkspaceUtil.waitWorkspaceStatus is out of attempts. Expected status ${expectedStatus} not reached. Current status: ${workspaceStatus}`);
+            throw new Error(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${workspaceStatus}`);
         }
     }
 
@@ -116,7 +117,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         if (!deleteWorkspaceStatus) {
             let waitTime = this.attempts * this.polling;
-            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms.`);
+            Logger.error(`TestWorkspaceUtil.deleteWorkspaceByName is out of attempts. Workspace was not yet deleted.`);
+            throw new Error(`The workspace was not stopped in ${waitTime} ms.`);
         }
     }
 
