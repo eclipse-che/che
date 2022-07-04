@@ -10,7 +10,7 @@
 import { IDriver } from '../driver/IDriver';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../inversify.types';
-import { error, ActionSequence } from 'selenium-webdriver';
+import { error, Actions } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { ThenableWebDriver, By, until, WebElement } from 'selenium-webdriver';
 import { TestConstants } from '../TestConstants';
@@ -26,7 +26,7 @@ export class DriverHelper {
         this.driver = driver.get();
     }
 
-    public getAction(): ActionSequence {
+    public getAction(): Actions {
         Logger.trace('DriverHelper.getAction');
 
         return this.driver.actions();
@@ -698,9 +698,10 @@ export class DriverHelper {
         Logger.trace(`DriverHelper.scrollTo ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            let element: WebElement;
+            // let element: WebElement;
             try {
-                element = await this.waitPresence(elementLocator, polling);
+                // element = await this.waitPresence(elementLocator, polling);
+                await this.waitPresence(elementLocator, polling);
             } catch (err) {
                 if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
@@ -717,7 +718,7 @@ export class DriverHelper {
             }
 
             try {
-                await this.getAction().mouseMove(element).perform();
+                // await this.getAction().mouseMove(element).perform();
                 return;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {

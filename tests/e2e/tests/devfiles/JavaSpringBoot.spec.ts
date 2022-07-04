@@ -15,14 +15,24 @@ import { CodeExecutionTests } from '../../testsLibrary/CodeExecutionTests';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../driver/CheReporter';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+import { Logger } from '../../utils/Logger';
+import { ApiUrlResolver } from '../../utils/workspace/ApiUrlResolver';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { TimeoutConstants } from '../../TimeoutConstants';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const commonLanguageServerTests: LanguageServerTests = e2eContainer.get(CLASSES.LanguageServerTests);
 const codeExecutionTests: CodeExecutionTests = e2eContainer.get(CLASSES.CodeExecutionTests);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+const apiUrlResolver: ApiUrlResolver = e2eContainer.get(CLASSES.ApiUrlResolver);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 const stack: string = 'Java Spring Boot';
-const workspaceSampleName: string = 'java-web-spring';
+const workspaceSampleName: string = 'java-spring-petclinic';
 const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/springframework/samples/petclinic`;
 const tabTitle: string = 'PetClinicApplication.java';
@@ -33,7 +43,17 @@ const runTaskExpectedDialogue: string = 'Process 8080-tcp is now listening on po
 
 suite(`${stack} test`, async () => {
     suite(`Create ${stack} workspace`, async () => {
-        workspaceHandlingTests.createAndOpenWorkspace(stack);
+        // workspaceHandlingTests.createAndOpenWorkspace(stack);
+        test('Start Maven workspace using factory URL and vscode editor', async() => {
+            await dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await apiUrlResolver.getWorkspacesApiUrl();
+            await dashboard.clickCreateWorkspaceButton();
+            await createWorkspace.waitPage();
+            workspaceHandlingTests.setWindowHandle(await browserTabsUtil.getCurrentWindowHandle());
+            await createWorkspace.startWorkspaceUsingFactory(`https://github.com/che-samples/java-spring-petclinic/tree/devfilev2?che-editor=che-incubator/che-code/insiders&storageType=persistent`);
+            await browserTabsUtil.waitAndSwitchToAnotherWindow(workspaceHandlingTests.getWindowHandle(), TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
+        });
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
             CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
@@ -41,22 +61,22 @@ suite(`${stack} test`, async () => {
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
-    suite('Test opening file', async () => {
+    suite.skip('Test opening file', async () => {
         // opening file that soon should give time for LS to initialize
         projectAndFileTests.openFile(fileFolderPath, tabTitle);
     });
 
-    suite('Validation of workspace build', async () => {
+    suite.skip('Validation of workspace build', async () => {
         codeExecutionTests.runTask(buildTaskName, 720_000);
         codeExecutionTests.closeTerminal(buildTaskName);
     });
 
-    suite('Validation of workspace execution', async () => {
+    suite.skip('Validation of workspace execution', async () => {
         codeExecutionTests.runTaskWithNotification(runTaskName, runTaskExpectedDialogue, 120_000);
         codeExecutionTests.closeTerminal(runTaskName);
     });
 
-    suite('Language server validation', async () => {
+    suite.skip('Language server validation', async () => {
         commonLanguageServerTests.autocomplete(tabTitle, 32, 56, 'args : String[]');
         commonLanguageServerTests.errorHighlighting(tabTitle, 'error_text', 30);
         commonLanguageServerTests.goToImplementations(tabTitle, 32, 23, codeNavigationClassName);
