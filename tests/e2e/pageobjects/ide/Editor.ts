@@ -13,7 +13,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error, ActionSequence, Button } from 'selenium-webdriver';
+import { By, Key, error } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
@@ -429,34 +429,33 @@ export class Editor {
         const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
         const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
 
-        new ActionSequence(this.driverHelper.getDriver()).
-            mouseMove({ x: xPosition, y: yPosition }).
-            click().
-            perform();
+        this.driverHelper.getAction().move({ x: xPosition, y: yPosition }).click().perform();
     }
 
     async goToDefinitionWithMouseClicking(line: number, char: number, fileName: string) {
         Logger.debug(`Editor.goToDefinitionWithMouseClicking line: "${line}" char: "${char}"`);
 
         const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
 
-        new ActionSequence(this.driverHelper.getDriver()).
-            keyDown(Key.CONTROL).
-            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
-            click().
-            keyDown(Key.CONTROL).
-            perform();
+        this.driverHelper.getAction()
+            .keyDown(Key.CONTROL)
+            .move({ x: xPosition, y: yPosition})
+            .click()
+            .keyDown(Key.CONTROL)
+            .perform();
     }
 
     async mouseRightButtonClick(line: number, char: number, fileName: string) {
         Logger.debug(`Editor.mouseRightButtonClick line: "${line}" char: "${char}"`);
 
         const yPosition: number = await this.getLineYCoordinates(line, fileName) + Editor.ADDITIONAL_SHIFTING_TO_Y;
+        const xPosition: number = char + Editor.ADDITIONAL_SHIFTING_TO_X;
 
-        new ActionSequence(this.driverHelper.getDriver()).
-            mouseMove({ x: char + Editor.ADDITIONAL_SHIFTING_TO_X, y: yPosition }).
-            click(Button.RIGHT).
-            perform();
+        this.driverHelper.getAction()
+            .move({ x: xPosition, y: yPosition})
+            .contextClick()
+            .perform();
     }
 
     private async scrollAndSearchSuggestion(editorTabTitle: string, suggestionLocator: By, timeout: number = 10000) {
