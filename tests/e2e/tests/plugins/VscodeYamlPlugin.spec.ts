@@ -46,6 +46,10 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
     });
 
     suite('Check the "vscode-yaml" plugin', async () => {
+        test('Set confirmExit preference to never', async () => {
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
+        });
+
         test('Set the yaml schema path', async () => {
             await preferencesHandler.setPreferenceUsingUI('yaml.schemas', yamlSchema);
         });
