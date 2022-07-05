@@ -108,8 +108,8 @@ export class CodeExecutionTests {
         test(`Run command '${taskName}' expecting notification`, async () => {
             await this.runTaskUsingQuickOpenContainer(taskName);
             await this.ide.waitNotification(notificationText, timeout);
-            // Need delay because a test application is not accessible immediately - it needs time.  
-            // Later can be improved (we can get and request the app. URL with axios until it is available)
+            // need delay because a test application is not accessible immediately - it needs time.
+            // later can be improved (we can get and request the app. URL with axios until it is available)
             // 7 sec is approximate value for most cases
             await this.driverHelper.wait(7_000);
             this.workspaceHandlingTests.setWindowHandle(await this.browserTabsUtil.getCurrentWindowHandle());
