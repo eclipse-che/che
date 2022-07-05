@@ -16,6 +16,7 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { TestConstants } from '../../TestConstants';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -23,6 +24,8 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
+
 const devfileUrl: string = TestConstants.TS_TEST_WORKSPACE_DEVFILE_REPO || 'https://github.com/che-samples/web-nodejs-sample/tree/xml-plugin';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
 const projectName: string = 'web-nodejs-sample';
@@ -42,6 +45,10 @@ suite('The "VscodeXmlPlugin" userstory', async () => {
     });
 
     suite('Check the "vscode-xml" plugin', async () => {
+        test('Set confirmExit preference to never', async () => {
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
+        });
+
         test('Check autocomplete', async () => {
             await projectTree.expandPathAndOpenFile(pathToFile, xmlFileName);
             await editor.waitSuggestion(xmlFileName, 'rollback', 60000, 16, 4);
