@@ -130,7 +130,7 @@ body:
         Please copy and paste any relevant log output.
         
         This will be automatically formatted into code, so no need for backticks
-      description: "How to collect logs: https://www.eclipse.org/che/docs/che-7/collecting-logs-using-chectl"
+      description: "How to collect logs: https://www.eclipse.org/che/docs/next/administration-guide/collecting-logs-using-chectl/"
       render: shell
 
   - type: textarea
