@@ -220,7 +220,7 @@ if [ ! -z $USER_COUNT ]; then
     oc_token=$(oc whoami -t)
     sed -i "s/REPLACE_TOKEN/$oc_token/g" final.yaml
     oc config use-context $executor_context
-    cat template.yaml
+    cat final.yaml
     oc create -f final.yaml
   done
 fi
@@ -233,7 +233,7 @@ if [ ! -z $CRED_FILE ]; then
     sed -i "s/REPLACE_NAME/load-test-$users_assigned/g" final.yaml
     sed -i "s/REPLACE_USERNAME/$cred_file_username/g" final.yaml
     sed -i "s/REPLACE_PASSWORD/$cred_file_pass/g" final.yaml
-    cat template.yaml
+    cat final.yaml
     oc create -f final.yaml
   done < $CRED_FILE
   IFS=$oldifs
