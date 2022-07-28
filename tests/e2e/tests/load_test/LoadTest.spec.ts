@@ -14,7 +14,9 @@ import { TestConstants } from '../../TestConstants';
 import { WorkspaceHandlingTests } from '../../testsLibrary/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { ProjectAndFileTests } from '../../testsLibrary/ProjectAndFileTests';
+import { PreferencesHandler } from '../../utils/PreferencesHandler';
 
+const preferencesHandler: PreferencesHandler = e2eContainer.get(CLASSES.PreferencesHandler);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -32,6 +34,10 @@ suite('Load test suite', async () => {
         });
 
         projectAndFileTests.waitWorkspaceReadiness(projectName, subRootFolder);
+
+        test('Set confirmExit preference to never', async () => {
+            await preferencesHandler.setPreferenceUsingUI('application.confirmExit', 'never');
+        });
     });
 
     suite ('Stopping and deleting the workspace', async () => {
