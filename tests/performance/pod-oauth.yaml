@@ -36,7 +36,7 @@ spec:
         - name: TS_SELENIUM_LOG_LEVEL
           value: "REPLACE_LOG_LEVEL"
         - name: TS_IDE_LOAD_TIMEOUT
-          value: "180000"
+          value: "5_000"
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: "0"
         - name: TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
@@ -66,13 +66,15 @@ spec:
         - name: TS_SELENIUM_DEFAULT_TIMEOUT
           value: "1000000"
         - name: TS_SELENIUM_WORKSPACE_STATUS_POLLING
-          value: "500000"
+          value: "100_000"
         - name: TS_LOAD_TESTS
           value: "true"
         - name: DELETE_WORKSPACE_ON_FAILED_TEST
           value: "true"
         - name: TS_IMPORT_PROJECT_DEFAULT_POLLING
-          value: "300000"
+          value: "100_000"
+        - name: TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS
+          value: "30"
         - name: TS_SELENIUM_SINGLE_HOST
           value: REPLACE_SINGLE_HOST
         image: REPLACE_IMAGE 
