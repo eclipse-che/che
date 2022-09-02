@@ -71,10 +71,10 @@ export class CheApiRequestHandler {
                     }
                     response_censored.config.headers.Authorization = 'CENSORED';
                     response_censored.config.headers.Cookie = 'CENSORED';
-                    if (response_censored.data.access_token != null) {
+                    if (response_censored.data.access_token !== null) {
                         response_censored.data.access_token = 'CENSORED';
                     }
-                    if (response_censored.data.refresh_token != null) {
+                    if (response_censored.data.refresh_token !== null) {
                         response_censored.data.refresh_token = 'CENSORED';
                     }
                     Logger.info(`RequestHandler response:\n` + response_censored);
