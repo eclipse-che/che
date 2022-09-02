@@ -22,31 +22,31 @@
  import { Ide } from '../pageobjects/ide/Ide';
  import { By, error } from 'selenium-webdriver';
  import { TestConstants } from '../TestConstants';
- 
+
  @injectable()
  export class WorkspaceHandlingTests {
- 
+
      private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
      private static READY_TO_READ_WORKSPACE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1[contains(.,'Starting workspace ')]`);
      private static workspaceName: string = 'undefined';
      private static parentGUID: string;
- 
+
      public static getWorkspaceName(): string {
          return WorkspaceHandlingTests.workspaceName;
      }
- 
+
      public static setWorkspaceName(workspaceName: string) {
          WorkspaceHandlingTests.workspaceName = workspaceName;
      }
- 
+
      public setWindowHandle(guid: string) {
          WorkspaceHandlingTests.parentGUID = guid;
      }
- 
+
      public getWindowHandle(): string {
          return WorkspaceHandlingTests.parentGUID;
      }
- 
+
      constructor(
          @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
          @inject(CLASSES.CreateWorkspace) private readonly createWorkspace: CreateWorkspace,
@@ -55,7 +55,7 @@
          @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver,
          @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
          @inject(CLASSES.Ide) private readonly ide: Ide) {}
- 
+
      public createAndOpenWorkspace(stack: string) {
          test(`Create and open new workspace, stack:${stack}`, async () => {
              await this.dashboard.waitPage();
@@ -68,7 +68,7 @@
              await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
          });
      }
- 
+
      public openExistingWorkspace(workspaceName: string) {
          test('Open and start existing workspace', async () => {
              await this.dashboard.waitPage();
@@ -79,28 +79,28 @@
              await this.workspaces.clickOpenButton(workspaceName);
          });
      }
- 
+
      public obtainWorkspaceNameFromStartingPage() {
          test('Obtain workspace name from workspace loader page', async() => {
              try {
                  Logger.info("Waiting for workspace name on workspace loader page");
                  await this.driverHelper.waitVisibility(WorkspaceHandlingTests.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
- 
+
                  const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
                  const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
                  const attempts: number = Math.ceil(timeout / polling);
                  let startingWorkspaceLineContent: string;
- 
+
                  for (let i = 0; i < attempts; i++) {
                      startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
- 
+
                      // cutting away leading text
                      WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
-                     if (WorkspaceHandlingTests.workspaceName != '') {
+                     if (WorkspaceHandlingTests.workspaceName !== '') {
                          Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
                          break;
                      }
- 
+
                      this.driverHelper.sleep(polling);
                  }
              } catch (err) {
@@ -109,7 +109,7 @@
              }
          });
      }
- 
+
      public switchBackToFirstOpenIdeTabFromLeftToRight() {
          test('WorkspaceHandlingTests.switchBackToIdeTab', async () => {
              let tabs = await this.driverHelper.getDriver().getAllWindowHandles();
@@ -132,17 +132,17 @@
              Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Failed to locate IDE tab, out of window handles.`);
          });
      }
- 
+
      public async stopWorkspace(workspaceName: string) {
          await this.dashboard.openDashboard();
          await this.dashboard.stopWorkspaceByUI(workspaceName);
      }
- 
+
      public async removeWorkspace(workspaceName: string) {
          await this.dashboard.openDashboard();
          await this.dashboard.deleteStoppedWorkspaceByUI(workspaceName);
      }
- 
+
      public async stopAndRemoveWorkspace(workspaceName: string) {
          await this.dashboard.openDashboard();
          await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
