@@ -9,7 +9,8 @@ launchAllUserstories(){
     echo "Launching all userstories";
     echo ""
 
-    npm run lint && npm run tsc && mocha --config mocha-all-devfiles.json ;
+    # TODO: Handle editor switching
+    npm run lint && npm run tsc && mocha --config mocha-all-devfiles-theia.json ;
 }
 
 launchSingleUserstory(){
@@ -17,7 +18,8 @@ launchSingleUserstory(){
     echo "Launching the \"${USERSTORY}\" userstory";
     echo ""
 
-    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/${USERSTORY}.spec.js ;
+    # TODO: Handle editor switching
+    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/theia/${USERSTORY}.spec.js ;
 }
 
 checkUserstoryName(){
