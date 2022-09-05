@@ -698,10 +698,9 @@ export class DriverHelper {
         Logger.trace(`DriverHelper.scrollTo ${elementLocator}`);
 
         for (let i = 0; i < attempts; i++) {
-            // let element: WebElement;
+            let element: WebElement;
             try {
-                // element = await this.waitPresence(elementLocator, polling);
-                await this.waitPresence(elementLocator, polling);
+                element = await this.waitPresence(elementLocator, polling);
             } catch (err) {
                 if (i >= attempts - 1) {
                     Logger.error(`DriverHelper.scrollTo - failed with exception, out of attempts - ${err}`);
@@ -718,7 +717,7 @@ export class DriverHelper {
             }
 
             try {
-                // await this.getAction().mouseMove(element).perform();
+                await this.getAction().move({origin: element}).perform();
                 return;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {

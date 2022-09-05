@@ -22,15 +22,17 @@ export class ChromeDriver implements IDriver {
     constructor() {
         const options: Options = this.getDriverOptions();
         this.driver = this.getDriverBuilder(options).build();
-
-        this.driver
-            .manage()
-            .window()
-            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
     }
 
     get(): ThenableWebDriver {
         return this.driver;
+    }
+
+    async setWindowSize() {
+        await this.driver
+            .manage()
+            .window()
+            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
     }
 
     private getDriverOptions(): Options {

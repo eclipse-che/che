@@ -23,6 +23,8 @@ import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHand
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
 import { Sanitizer } from '../utils/Sanitizer';
+import * as monacoPageObjects from 'monaco-page-objects';
+import * as vscodeExtensionTesterLocators from 'vscode-extension-tester-locators';
 
 const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
@@ -88,6 +90,8 @@ class CheReporter extends mocha.reporters.Spec {
       }
       // await preferencesHandler.setConfirmExit(AskForConfirmationType.never);
       // await preferencesHandler.setTerminalType(TerminalRendererType.dom);
+
+      monacoPageObjects.initPageObjects('1.71.0', '1.37.0', vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
     });
 
     runner.on('test', async function (test: mocha.Test) {
