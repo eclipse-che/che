@@ -1,0 +1,9 @@
+{
+    "timeout": "1200000",
+    "reporter": "dist/driver/CheReporter.js",
+    "ui": "tdd",
+    "bail": true,
+    "full-trace": true,
+    "support": "source-map-support/register",
+    "spec": ["dist/tests/login/Login.spec.js", "dist/tests/devfiles/theia/JavaVertx.spec.js"]
+}

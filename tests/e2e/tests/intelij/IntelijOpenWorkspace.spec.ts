@@ -11,7 +11,7 @@
 import { By } from 'selenium-webdriver';
 import { e2eContainer } from '../../inversify.config';
 import { CLASSES } from '../../inversify.types';
-import { Ide } from '../../pageobjects/ide/Ide';
+import { Ide } from '../../pageobjects/ide/theia/Ide';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';

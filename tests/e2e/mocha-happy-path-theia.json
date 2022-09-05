@@ -1,0 +1,12 @@
+{
+    "timeout": "2200000",
+    "reporter": "dist/driver/CheReporter.js",
+    "ui": "tdd",
+    "bail": true,
+    "full-trace": true,
+    "require": "source-map-support/register",
+    "spec": [
+        "dist/tests/login/Login.spec.js",
+        "dist/tests/e2e_happy_path/theia/HappyPath.spec.js"
+    ]
+}
