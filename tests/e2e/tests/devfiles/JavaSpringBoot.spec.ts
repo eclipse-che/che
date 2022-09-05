@@ -21,6 +21,9 @@ import { ApiUrlResolver } from '../../utils/workspace/ApiUrlResolver';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { By, until } from 'selenium-webdriver';
+import { Workbench } from 'monaco-page-objects';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -30,6 +33,7 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 const apiUrlResolver: ApiUrlResolver = e2eContainer.get(CLASSES.ApiUrlResolver);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 const stack: string = 'Java Spring Boot';
 const workspaceSampleName: string = 'java-spring-petclinic';
@@ -58,7 +62,27 @@ suite(`${stack} test`, async () => {
         test('Register running workspace', async () => {
             CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-        projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
+        test('Wait workspace readiness', async() => {
+            try {
+                await driverHelper.getDriver().wait(until.elementLocated(By.className('monaco-workbench')));
+            } catch (err) {
+                if ((err as Error).name === 'WebDriverError') {
+                    await new Promise(res => setTimeout(res, 3000));
+                } else {
+                    throw err;
+                }
+            }
+            let workbench = new Workbench();
+            let activityBar = workbench.getActivityBar();
+            let activityBarControls = await activityBar.getViewControls();
+            // let sidebarContent = activityBar.getViewControl();
+            // let sidebarViewSections = await sidebarContent.getSections();
+            Logger.debug(`Editor sections:`);
+            activityBarControls.forEach(async control => {
+                Logger.debug(`${await control.getTitle()}`);
+            });
+        });
+        // projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
     suite.skip('Test opening file', async () => {
