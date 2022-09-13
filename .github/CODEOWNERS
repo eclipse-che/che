@@ -2,7 +2,7 @@
 * @nickboldt
 
 # dockerfiles
-dockerfiles/** @benoitf @nickboldt
+dockerfiles/** @nickboldt
 
 # e2e tests
 tests/e2e/** @musienko-maxim @nickboldt @ScrewTSW @dmytro-ndp
