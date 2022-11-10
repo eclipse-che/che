@@ -49,7 +49,7 @@
     "typescript": "3.9.9"
   },
   "dependencies": {
-    "@eclipse-che/api": "latest",
+    "@eclipse-che/api": "7.56.0",
     "inversify": "5.0.1",
     "reflect-metadata": "0.1.13"
   },
