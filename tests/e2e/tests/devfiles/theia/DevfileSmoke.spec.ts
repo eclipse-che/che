@@ -12,12 +12,12 @@ import { CLASSES } from '../../../inversify.types';
 import { e2eContainer } from '../../../inversify.config';
 import { PreferencesHandlerTheia } from '../../../utils/theia/PreferencesHandlerTheia';
 import { ProjectAndFileTestsTheia } from '../../../testsLibrary/theia/ProjectAndFileTestsTheia';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { NavigationBar } from '../../../pageobjects/ide/theia/NavigationBar';
 import { Dashboard } from '../../../pageobjects/dashboard/Dashboard';
 import CheReporter from '../../../driver/CheReporter';
 
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
 const projectAndFileTests: ProjectAndFileTestsTheia = e2eContainer.get(CLASSES.ProjectAndFileTestsTheia);
 const navigationBar: NavigationBar = e2eContainer.get(CLASSES.NavigationBar);
@@ -32,7 +32,7 @@ suite(`${stack} test`, async () => {
         workspaceHandlingTests.createAndOpenWorkspace(stack);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
-            CheReporter.registerRunningWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+            CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
         projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
 
@@ -44,7 +44,7 @@ suite(`${stack} test`, async () => {
     suite ('Stopping and deleting the workspace', async () => {
         test(`Stop and remowe workspace`, async () => {
             await navigationBar.openNavigationBar();
-            await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTestsTheia.getWorkspaceName());
+            await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 });

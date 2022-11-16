@@ -59,7 +59,7 @@ const CLASSES = {
     LanguageServerTestsTheia: 'LanguageServerTestsTheia',
     CodeExecutionTestsTheia: 'CodeExecutionTestsTheia',
     ProjectAndFileTestsTheia: 'ProjectAndFileTestsTheia',
-    WorkspaceHandlingTestsTheia: 'WorkspaceHandlingTestsTheia',
+    WorkspaceHandlingTests: 'WorkspaceHandlingTests',
     WorkspaceNameHandler: 'WorkspaceNameHandler',
     GitHubPullRequestPlugin: 'GitHubPullRequestPlugin',
     GitLoginPage: 'GitLoginPage',

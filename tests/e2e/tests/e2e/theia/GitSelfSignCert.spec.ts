@@ -21,12 +21,12 @@ import { TopMenu } from '../../../pageobjects/ide/theia/TopMenu';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { Dashboard } from '../../../pageobjects/dashboard/Dashboard';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Editor } from '../../../pageobjects/ide/theia/Editor';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
 import CheReporter from '../../../driver/CheReporter';
 
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
@@ -49,7 +49,7 @@ suite('Checking git + self sign cert', async () => {
     suiteSetup(async function () {
         const wsConfig = await testWorkspaceUtils.getBaseDevfile();
         wsConfig.metadata!.name = workspaceName;
-        WorkspaceHandlingTestsTheia.setWorkspaceName(workspaceName);
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         CheReporter.registerRunningWorkspace(workspaceName);
         await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
         await loginPage.login();

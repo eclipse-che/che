@@ -27,7 +27,7 @@ import { TimeoutConstants } from '../../../TimeoutConstants';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { Dashboard } from '../../../pageobjects/dashboard/Dashboard';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -62,7 +62,7 @@ suite('Git with ssh workflow', async () => {
     test('Login into workspace and open tree container', async () => {
         await dashboard.openDashboard();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckGeneratingKeys);
-        WorkspaceHandlingTestsTheia.setWorkspaceName(wsNameCheckGeneratingKeys);
+        WorkspaceHandlingTests.setWorkspaceName(wsNameCheckGeneratingKeys);
         CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
@@ -113,7 +113,7 @@ suite('Git with ssh workflow', async () => {
         await testWorkspaceUtils.createWsFromDevFile(data);
         await dashboard.openDashboard();
         await browserTabsUtil.navigateTo(workspacePrefixUrl + wsNameCheckPropagatingKeys);
-        WorkspaceHandlingTestsTheia.setWorkspaceName(wsNameCheckPropagatingKeys);
+        WorkspaceHandlingTests.setWorkspaceName(wsNameCheckPropagatingKeys);
         CheReporter.registerRunningWorkspace(wsNameCheckGeneratingKeys);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();

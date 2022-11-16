@@ -17,7 +17,7 @@ import { TestConstants } from '../../../TestConstants';
 import { WorkspaceNameHandler } from '../../../utils/WorkspaceNameHandler';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -45,7 +45,7 @@ suite('Load test suite', async () => {
     });
 
     test('Wait loading workspace and get time', async () => {
-        WorkspaceHandlingTestsTheia.setWorkspaceName(workspaceName);
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         await ide.waitWorkspaceAndIde();
         await projectTree.openProjectTreeContainer();
     });

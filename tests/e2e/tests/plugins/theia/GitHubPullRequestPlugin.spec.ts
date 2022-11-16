@@ -14,7 +14,7 @@ import { Ide } from '../../../pageobjects/ide/theia/Ide';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { TestConstants } from '../../../TestConstants';
 import { ProjectTree } from '../../../pageobjects/ide/theia/ProjectTree';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../../utils/Logger';
 import { GitHubPullRequestPlugin } from '../../../pageobjects/ide/theia/plugins/GitHubPullRequestPlugin';
 import { GitLoginPage } from '../../../pageobjects/third-parties/GitLoginPage';
@@ -29,7 +29,7 @@ import { Key } from 'selenium-webdriver';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
-const workspaceHandling: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const gitHubPullRequestPlugin: GitHubPullRequestPlugin = e2eContainer.get(CLASSES.GitHubPullRequestPlugin);
 const githubLoginPage: GitLoginPage = e2eContainer.get(CLASSES.GitLoginPage);
@@ -75,7 +75,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        workspaceHandling.obtainWorkspaceNameFromStartingPage();
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
         test('Wait until created workspace is started', async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
@@ -136,7 +136,7 @@ suite(`The 'GitHubPullRequestPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandling.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

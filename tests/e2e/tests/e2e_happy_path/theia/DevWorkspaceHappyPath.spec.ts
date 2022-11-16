@@ -24,7 +24,7 @@ import { TimeoutConstants } from '../../../TimeoutConstants';
 import { TopMenu } from '../../../pageobjects/ide/theia/TopMenu';
 import * as fs from 'fs';
 import axios from 'axios';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../../driver/CheReporter';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -66,7 +66,7 @@ suite('Workspace creation via factory url', async () => {
         });
 
         test('Register running workspace', async () => {
-            WorkspaceHandlingTestsTheia.setWorkspaceName(projectName);
+            WorkspaceHandlingTests.setWorkspaceName(projectName);
             CheReporter.registerRunningWorkspace(projectName);
         });
 
@@ -272,7 +272,7 @@ async function sendRequestToDebugApp(urlToApp: string) {
     const httpClient = axios.create();
     httpClient.defaults.timeout = 1000;
     try {
-      await httpClient.get(urlToApp);
+        await httpClient.get(urlToApp);
     } catch (error) {
         if (error instanceof Error) {
             if (error.message === 'timeout of 1000ms exceeded') {

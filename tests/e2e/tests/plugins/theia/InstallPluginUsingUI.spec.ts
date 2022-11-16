@@ -16,7 +16,7 @@ import { TestConstants } from '../../../TestConstants';
 import { ProjectTree } from '../../../pageobjects/ide/theia/ProjectTree';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { PluginsView } from '../../../pageobjects/ide/theia/plugins/PluginsView';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../../utils/Logger';
 
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -24,7 +24,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const pluginsView: PluginsView = e2eContainer.get(CLASSES.PluginsView);
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceHandling: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/InstallPluginUsingUI.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -37,7 +37,7 @@ suite(`The 'InstallPluginUsingUI' test`, async () => {
             await browserTabsUtil.navigateTo(factoryUrl);
         });
 
-        workspaceHandling.obtainWorkspaceNameFromStartingPage();
+        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
         test('Wait until created workspace is started', async () => {
             await ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
@@ -66,7 +66,7 @@ suite(`The 'InstallPluginUsingUI' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test(`Stop and remove workspace`, async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandling.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

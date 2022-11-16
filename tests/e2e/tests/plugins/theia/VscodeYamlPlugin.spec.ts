@@ -13,7 +13,7 @@ import { CLASSES } from '../../../inversify.types';
 import { ProjectTree } from '../../../pageobjects/ide/theia/ProjectTree';
 import { Editor } from '../../../pageobjects/ide/theia/Editor';
 import { TestConstants } from '../../../TestConstants';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { PreferencesHandlerTheia } from '../../../utils/theia/PreferencesHandlerTheia';
 import { ProjectAndFileTestsTheia } from '../../../testsLibrary/theia/ProjectAndFileTestsTheia';
@@ -23,7 +23,7 @@ const projectAndFileTests: ProjectAndFileTestsTheia = e2eContainer.get(CLASSES.P
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
 
 const devfileUrl: string = TestConstants.TS_TEST_WORKSPACE_DEVFILE_REPO || 'https://github.com/che-samples/web-nodejs-sample/tree/yaml-plugin';
@@ -92,7 +92,7 @@ suite('The "VscodeYamlPlugin" userstory', async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 
