@@ -19,10 +19,10 @@ import { Editor } from '../../../pageobjects/ide/theia/Editor';
 import { TopMenu } from '../../../pageobjects/ide/theia/TopMenu';
 import { DebugView } from '../../../pageobjects/ide/theia/DebugView';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../../utils/Logger';
 
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
@@ -105,7 +105,7 @@ suite(`The 'PhpPlugin' tests`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

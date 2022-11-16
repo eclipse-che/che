@@ -65,4 +65,4 @@ export * from './pageobjects/third-parties/GitOauthAppsSettings';
 export * from './testsLibrary/theia/CodeExecutionTestsTheia';
 export * from './testsLibrary/theia/LanguageServerTestsTheia';
 export * from './testsLibrary/theia/ProjectAndFileTestsTheia';
-export * from './testsLibrary/theia/WorkspaceHandlingTestsTheia';
+export * from './testsLibrary/WorkspaceHandlingTests';

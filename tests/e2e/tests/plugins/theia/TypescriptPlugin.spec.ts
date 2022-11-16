@@ -21,13 +21,13 @@ import { TopMenu } from '../../../pageobjects/ide/theia/TopMenu';
 import { DebugView } from '../../../pageobjects/ide/theia/DebugView';
 import { Terminal } from '../../../pageobjects/ide/theia/Terminal';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../../utils/Logger';
 import { PreferencesHandlerTheia } from '../../../utils/theia/PreferencesHandlerTheia';
 import { ProjectAndFileTestsTheia } from '../../../testsLibrary/theia/ProjectAndFileTestsTheia';
 
 const projectAndFileTests: ProjectAndFileTestsTheia = e2eContainer.get(CLASSES.ProjectAndFileTestsTheia);
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
@@ -158,7 +158,7 @@ suite(`The 'TypescriptPlugin and Node-debug' tests`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

@@ -13,11 +13,11 @@ import { CLASSES } from '../../../../inversify.types';
 import { TestConstants } from '../../../../TestConstants';
 import { ProjectAndFileTestsTheia } from '../../../../testsLibrary/theia/ProjectAndFileTestsTheia';
 import { BrowserTabsUtil } from '../../../../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../../testsLibrary/WorkspaceHandlingTests';
 import { PreferencesHandlerTheia } from '../../../../utils/theia/PreferencesHandlerTheia';
 
 const preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTestsTheia = e2eContainer.get(CLASSES.ProjectAndFileTestsTheia);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
@@ -50,7 +50,7 @@ suite('Workspace creation via factory url', async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 

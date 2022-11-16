@@ -9,8 +9,11 @@ launchAllUserstories(){
     echo "Launching all userstories";
     echo ""
 
-    # TODO: Handle editor switching
-    npm run lint && npm run tsc && mocha --config mocha-all-devfiles-theia.json ;
+    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
+        npm run lint && npm run tsc && mocha --config mocha-all-devfiles-theia.json ;
+    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
+        npm run lint && npm run tsc && mocha --config mocha-all-devfiles-code.json ;
+    fi
 }
 
 launchSingleUserstory(){
@@ -18,12 +21,21 @@ launchSingleUserstory(){
     echo "Launching the \"${USERSTORY}\" userstory";
     echo ""
 
-    # TODO: Handle editor switching
-    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/theia/${USERSTORY}.spec.js ;
+    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
+        tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/theia/${USERSTORY}.spec.js ;
+    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
+        tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/code/${USERSTORY}.spec.js ;
+    fi
+
 }
 
 checkUserstoryName(){
-    local checkedName="$(ls tests/devfiles | grep ${USERSTORY}.spec.ts)";
+    local checkedName;
+    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
+        checkedName="$(ls tests/devfiles/theia | grep ${USERSTORY}.spec.ts)";
+    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
+        checkedName="$(ls tests/devfiles/code | grep ${USERSTORY}.spec.ts)";
+    fi
 
     if [ -z "$checkedName" ]; then
         echo ""

@@ -17,7 +17,7 @@ import { TestConstants } from '../../../TestConstants';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 import { Terminal } from '../../../pageobjects/ide/theia/Terminal';
 import { Logger } from '../../../utils/Logger';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { Key } from 'selenium-webdriver';
 
@@ -26,7 +26,7 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 const devfileUrl: string = 'https://raw.githubusercontent.com/eclipse/che/main/tests/e2e/files/devfiles/plugins/VscodeValePlugin.yaml';
 const factoryUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=${devfileUrl}`;
@@ -75,7 +75,7 @@ suite('The "VscodeValePlugin" userstory', async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

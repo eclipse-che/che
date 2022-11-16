@@ -10,7 +10,7 @@
 
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Ide } from '../../pageobjects/ide/theia/Ide';
 import { ProjectTree } from '../../pageobjects/ide/theia/ProjectTree';
 import { OpenEditors } from '../../pageobjects/ide/theia/OpenEditors';
@@ -18,6 +18,8 @@ import { Editor } from '../../pageobjects/ide/theia/Editor';
 import { TimeoutConstants } from '../../TimeoutConstants';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
+import { Logger } from '../../utils/Logger';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class ProjectAndFileTestsTheia {
@@ -27,7 +29,31 @@ export class ProjectAndFileTestsTheia {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.ProjectTree) private readonly projectTree: ProjectTree,
         @inject(CLASSES.OpenEditors) private readonly openEditors: OpenEditors,
-        @inject(CLASSES.Editor) private readonly editor: Editor) {}
+        @inject(CLASSES.Editor) private readonly editor: Editor,
+        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {}
+
+        public switchBackToFirstOpenIdeTabFromLeftToRight() {
+            test('WorkspaceHandlingTests.switchBackToIdeTab', async () => {
+                let tabs = await this.driverHelper.getDriver().getAllWindowHandles();
+                Logger.trace(`WorkspaceHandlingTests.switchBackToIdeTab Found ${tabs.length} window handles, iterating...`);
+                for (let i = 0; i < tabs.length; i++) {
+                    await this.browserTabsUtil.switchToWindow(tabs[i]);
+                    try {
+                        await this.ide.waitIde(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
+                        Logger.debug(`WorkspaceHandlingTests.switchBackToIdeTab located and switched to IDE tab`);
+                        return;
+                    } catch (err) {
+                        if (err instanceof error.TimeoutError) {
+                            Logger.warn(`WorkspaceHandlingTests.switchBackToIdeTab Locator timed out, trying with another window handle.`);
+                            continue;
+                        }
+                        Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Received unexpected exception while trying to locate IDE tab:${err}`);
+                        throw err;
+                    }
+                }
+                Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Failed to locate IDE tab, out of window handles.`);
+            });
+        }
 
     public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
         test('Wait for workspace readiness', async () => {

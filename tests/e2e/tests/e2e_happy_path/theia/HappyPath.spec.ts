@@ -28,7 +28,7 @@ import { TimeoutConstants } from '../../../TimeoutConstants';
 import { Logger } from '../../../utils/Logger';
 import { RightToolBar } from '../../../pageobjects/ide/theia/RightToolBar';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../../driver/CheReporter';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -77,7 +77,7 @@ suite('Validation of workspace start', async () => {
     });
 
     test('Register running workspace', async () => {
-        WorkspaceHandlingTestsTheia.setWorkspaceName(workspaceName);
+        WorkspaceHandlingTests.setWorkspaceName(workspaceName);
         CheReporter.registerRunningWorkspace(workspaceName);
     });
 

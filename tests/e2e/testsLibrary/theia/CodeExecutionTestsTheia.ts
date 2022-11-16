@@ -20,7 +20,7 @@ import { DialogWindow } from '../../pageobjects/ide/theia/DialogWindow';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
 import { QuickOpenContainer } from '../../pageobjects/ide/theia/QuickOpenContainer';
-import { WorkspaceHandlingTestsTheia } from './WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
@@ -36,7 +36,7 @@ export class CodeExecutionTestsTheia {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.QuickOpenContainer) private readonly quickOpenContainer: QuickOpenContainer,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(CLASSES.WorkspaceHandlingTestsTheia) private readonly workspaceHandlingTests: WorkspaceHandlingTestsTheia) {}
+        @inject(CLASSES.WorkspaceHandlingTests) private readonly workspaceHandlingTests: WorkspaceHandlingTests) {}
 
     public runTask(taskName: string, timeout: number) {
         test(`Run command '${taskName}'`, async () => {

@@ -55,6 +55,12 @@ export const TestConstants = {
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
 
     /**
+     * Editor the tests are running against, "code" by default.
+     * Possible values: "code", "theia"
+     */
+    TS_SELENIUM_EDITOR: process.env.TS_SELENIUM_EDITOR || 'code',
+
+    /**
      * Default ammount of tries, "5" by default.
      */
     TS_SELENIUM_DEFAULT_ATTEMPTS: Number(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS) || 5,

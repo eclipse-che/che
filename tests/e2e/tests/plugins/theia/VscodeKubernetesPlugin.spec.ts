@@ -15,14 +15,14 @@ import { TimeoutConstants } from '../../../TimeoutConstants';
 import { TestConstants } from '../../../TestConstants';
 import { KubernetesPlugin } from '../../../pageobjects/ide/theia/plugins/KubernetesPlugin';
 import { ProjectTree } from '../../../pageobjects/ide/theia/ProjectTree';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import { Logger } from '../../../utils/Logger';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { TopMenu } from '../../../pageobjects/ide/theia/TopMenu';
 import { QuickOpenContainer } from '../../../pageobjects/ide/theia/QuickOpenContainer';
 import { OpenDialogWidget, Buttons } from '../../../pageobjects/ide/theia/OpenDialogWidget';
 
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
 const kubernetesPlugin: KubernetesPlugin = e2eContainer.get(CLASSES.KubernetesPlugin);
@@ -73,7 +73,7 @@ suite(`The 'VscodeKubernetesPlugin' test`, async () => {
     suite('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
             if (TestConstants.TS_DELETE_PLUGINS_TEST_WORKSPACE === 'true') {
-                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+                await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
                 return;
             }
 

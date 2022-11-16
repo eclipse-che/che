@@ -25,7 +25,7 @@ import { DriverHelper } from '../../../utils/DriverHelper';
 import { PreferencesHandlerTheia, TerminalRendererTypeTheia } from '../../../utils/theia/PreferencesHandlerTheia';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../../driver/CheReporter';
 import { Key } from 'selenium-webdriver';
 
@@ -78,7 +78,7 @@ suite('Openshift connector user story', async () => {
   test('Login into workspace and open plugin', async () => {
     await dashboard.openDashboard();
     await browserTabsUtil.navigateTo(workspacePrefixUrl + wsName);
-    WorkspaceHandlingTestsTheia.setWorkspaceName(wsName);
+    WorkspaceHandlingTests.setWorkspaceName(wsName);
     CheReporter.registerRunningWorkspace(wsName);
     await ide.waitWorkspaceAndIde();
     await projectTree.openProjectTreeContainer();

@@ -14,12 +14,12 @@ import { TestConstants } from '../../../TestConstants';
 import { ProjectAndFileTestsTheia } from '../../../testsLibrary/theia/ProjectAndFileTestsTheia';
 import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
-import { WorkspaceHandlingTestsTheia } from '../../../testsLibrary/theia/WorkspaceHandlingTestsTheia';
+import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 
 const projectAndFileTests: ProjectAndFileTestsTheia = e2eContainer.get(CLASSES.ProjectAndFileTestsTheia);
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const testWorkspaceUtils: ITestWorkspaceUtil = e2eContainer.get<ITestWorkspaceUtil>(TYPES.WorkspaceUtil);
-const workspaceHandlingTests: WorkspaceHandlingTestsTheia = e2eContainer.get<WorkspaceHandlingTestsTheia>(CLASSES.WorkspaceHandlingTestsTheia);
+const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 
 const factoryUrl : string = `${TestConstants.TS_SELENIUM_BASE_URL}/f?url=https://raw.githubusercontent.com/eclipse/che-devfile-registry/master/devfiles/java-maven/devfile.yaml`;
 const workspaceSampleName: string = 'console-java-simple';
@@ -40,7 +40,7 @@ suite('Workspace creation via factory url', async () => {
 
     suite ('Stopping and deleting the workspace', async () => {
         test('Stop and remove workspace', async () => {
-            await testWorkspaceUtils.cleanUpRunningWorkspace(WorkspaceHandlingTestsTheia.getWorkspaceName());
+            await testWorkspaceUtils.cleanUpRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });
 

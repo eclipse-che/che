@@ -10,21 +10,20 @@
 
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
-import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { Logger } from '../../utils/Logger';
-import { ApiUrlResolver } from '../../utils/workspace/ApiUrlResolver';
-import { TimeoutConstants } from '../../TimeoutConstants';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { Ide } from '../../pageobjects/ide/theia/Ide';
-import { By, error } from 'selenium-webdriver';
-import { TestConstants } from '../../TestConstants';
+import { CLASSES } from '../inversify.types';
+import { Dashboard } from '../pageobjects/dashboard/Dashboard';
+import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
+import { Workspaces } from '../pageobjects/dashboard/Workspaces';
+import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
+import { Logger } from '../utils/Logger';
+import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
+import { TimeoutConstants } from '../TimeoutConstants';
+import { DriverHelper } from '../utils/DriverHelper';
+import { By } from 'selenium-webdriver';
+import { TestConstants } from '../TestConstants';
 
 @injectable()
-export class WorkspaceHandlingTestsTheia {
+export class WorkspaceHandlingTests {
 
     private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
     private static READY_TO_READ_WORKSPACE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1[contains(.,'Starting workspace ')]`);
@@ -32,19 +31,19 @@ export class WorkspaceHandlingTestsTheia {
     private static parentGUID: string;
 
     public static getWorkspaceName(): string {
-        return WorkspaceHandlingTestsTheia.workspaceName;
+        return WorkspaceHandlingTests.workspaceName;
     }
 
     public static setWorkspaceName(workspaceName: string) {
-        WorkspaceHandlingTestsTheia.workspaceName = workspaceName;
+        WorkspaceHandlingTests.workspaceName = workspaceName;
     }
 
     public setWindowHandle(guid: string) {
-        WorkspaceHandlingTestsTheia.parentGUID = guid;
+        WorkspaceHandlingTests.parentGUID = guid;
     }
 
     public getWindowHandle(): string {
-        return WorkspaceHandlingTestsTheia.parentGUID;
+        return WorkspaceHandlingTests.parentGUID;
     }
 
     constructor(
@@ -53,8 +52,7 @@ export class WorkspaceHandlingTestsTheia {
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) {}
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
 
     public createAndOpenWorkspace(stack: string) {
         test(`Create and open new workspace, stack:${stack}`, async () => {
@@ -63,9 +61,9 @@ export class WorkspaceHandlingTestsTheia {
             await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
-            WorkspaceHandlingTestsTheia.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
+            WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
             await this.createWorkspace.clickOnSample(stack);
-            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTestsTheia.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
+            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
         });
     }
 
@@ -84,7 +82,7 @@ export class WorkspaceHandlingTestsTheia {
         test('Obtain workspace name from workspace loader page', async() => {
             try {
                 Logger.info('Waiting for workspace name on workspace loader page');
-                await this.driverHelper.waitVisibility(WorkspaceHandlingTestsTheia.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+                await this.driverHelper.waitVisibility(WorkspaceHandlingTests.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
 
                 const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
                 const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
@@ -92,12 +90,12 @@ export class WorkspaceHandlingTestsTheia {
                 let startingWorkspaceLineContent: string;
 
                 for (let i = 0; i < attempts; i++) {
-                    startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTestsTheia.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
+                    startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
 
                     // cutting away leading text
-                    WorkspaceHandlingTestsTheia.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
-                    if (WorkspaceHandlingTestsTheia.workspaceName !== '') {
-                        Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTestsTheia.workspaceName}`);
+                    WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
+                    if (WorkspaceHandlingTests.workspaceName !== '') {
+                        Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
                         break;
                     }
 
@@ -107,29 +105,6 @@ export class WorkspaceHandlingTestsTheia {
                 Logger.error(`Failed to obtain workspace name from workspace loader page: ${err}`);
                 throw err;
             }
-        });
-    }
-
-    public switchBackToFirstOpenIdeTabFromLeftToRight() {
-        test('WorkspaceHandlingTests.switchBackToIdeTab', async () => {
-            let tabs = await this.driverHelper.getDriver().getAllWindowHandles();
-            Logger.trace(`WorkspaceHandlingTests.switchBackToIdeTab Found ${tabs.length} window handles, iterating...`);
-            for (let i = 0; i < tabs.length; i++) {
-                await this.browserTabsUtil.switchToWindow(tabs[i]);
-                try {
-                    await this.ide.waitIde(TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-                    Logger.debug(`WorkspaceHandlingTests.switchBackToIdeTab located and switched to IDE tab`);
-                    return;
-                } catch (err) {
-                    if (err instanceof error.TimeoutError) {
-                        Logger.warn(`WorkspaceHandlingTests.switchBackToIdeTab Locator timed out, trying with another window handle.`);
-                        continue;
-                    }
-                    Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Received unexpected exception while trying to locate IDE tab:${err}`);
-                    throw err;
-                }
-            }
-            Logger.error(`WorkspaceHandlingTests.switchBackToIdeTab Failed to locate IDE tab, out of window handles.`);
         });
     }
 
