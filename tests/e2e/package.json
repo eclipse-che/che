@@ -18,7 +18,7 @@
     "load-test-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-load-theia.json",
     "test-happy-path-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-happy-path-theia.json",
     "test-devworkspace-happy-path-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-devworkspace-happy-path-theia.json",
-    "test-wkspc-creation-and-ls-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-wkspc-creation-and-ls-theia.json",
+    "test-ws-creation-and-ls-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-ws-creation-and-ls-theia.json",
     "test-java-vertx-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-java-vertx-theia.json",
     "test-java-springboot-theia": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-java-springboot-theia.json",
     "test-git-ssh-theia": "./generateIndex.sh &&  npm run lint && npm run tsc && mocha --config mocha-git-ssh-theia.json",

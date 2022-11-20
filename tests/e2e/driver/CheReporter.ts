@@ -13,7 +13,7 @@ import { inversifyConfig } from '..';
 import { TYPES, CLASSES } from '..';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
-import { TestConstants } from '../TestConstants';
+import { EditorType, TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
@@ -57,6 +57,8 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_USERNAME: ${TestConstants.TS_SELENIUM_USERNAME}
       TS_SELENIUM_PASSWORD: ${TestConstants.TS_SELENIUM_PASSWORD}
 
+      TS_SELENIUM_EDITOR:   ${TestConstants.TS_SELENIUM_EDITOR}
+
       TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
       TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
       TS_SELENIUM_REPORT_FOLDER: ${TestConstants.TS_SELENIUM_REPORT_FOLDER}
@@ -88,12 +90,13 @@ class CheReporter extends mocha.reporters.Spec {
         CheApiRequestHandler.enableResponseInterceptor();
       }
 
-      if (TestConstants.TS_SELENIUM_EDITOR === 'theia') {
+      if (TestConstants.TS_SELENIUM_EDITOR === EditorType.THEIA) {
         let preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
         await preferencesHandler.setConfirmExit(AskForConfirmationTypeTheia.never);
         await preferencesHandler.setTerminalType(TerminalRendererTypeTheia.dom);
-      } else if (TestConstants.TS_SELENIUM_EDITOR === 'code') {
-        monacoPageObjects.initPageObjects('1.71.0', '1.37.0', vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
+      } else if (TestConstants.TS_SELENIUM_EDITOR === EditorType.CHE_CODE) {
+        // init vscode-extension-tester monaco-page-objects
+        monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
       }
 
     });

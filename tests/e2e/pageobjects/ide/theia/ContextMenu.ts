@@ -12,7 +12,7 @@ import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { CLASSES } from '../../../inversify.types';
-import { By, Key } from 'selenium-webdriver';
+import { By, Key, WebElement } from 'selenium-webdriver';
 import { Logger } from '../../../utils/Logger';
 import { TimeoutConstants } from '../../../TimeoutConstants';
 
@@ -26,8 +26,8 @@ export class ContextMenu {
      async invokeContextMenuOnTheElementWithMouse(elementLocator: By) {
           Logger.debug(`ContextMenu.invokeContextMenuOnTheElementWithMouse ${elementLocator}`);
 
-          // const webElement: WebElement = await this.driverHelper.waitVisibility(elementLocator, TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT);
-          // await this.driverHelper.getAction().click(webElement, Button.RIGHT).perform();
+          const webElement: WebElement = await this.driverHelper.waitVisibility(elementLocator, TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT);
+          await this.driverHelper.getAction().contextClick(webElement).perform();
           this.waitContextMenu();
      }
 

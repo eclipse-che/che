@@ -21,21 +21,11 @@ launchSingleUserstory(){
     echo "Launching the \"${USERSTORY}\" userstory";
     echo ""
 
-    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
-        tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/theia/${USERSTORY}.spec.js ;
-    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
-        tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/code/${USERSTORY}.spec.js ;
-    fi
-
+    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/${TS_SELENIUM_EDITOR}/${USERSTORY}.spec.js ;
 }
 
 checkUserstoryName(){
-    local checkedName;
-    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
-        checkedName="$(ls tests/devfiles/theia | grep ${USERSTORY}.spec.ts)";
-    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
-        checkedName="$(ls tests/devfiles/code | grep ${USERSTORY}.spec.ts)";
-    fi
+    local checkedName="$(ls tests/devfiles/${TS_SELENIUM_EDITOR} | grep ${USERSTORY}.spec.ts)";
 
     if [ -z "$checkedName" ]; then
         echo ""

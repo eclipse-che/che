@@ -57,8 +57,6 @@ const SpringAppLocators = {
 suite('Workspace creation via factory url', async () => {
     let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
 
-    // const workspaceRootFolderName: string = 'src';
-
     suite('Open factory URL', async () => {
         // this is DevWorkspace test specific - we create the test ws. using factory instead of chectl
         test(`Navigating to factory URL`, async () => {
