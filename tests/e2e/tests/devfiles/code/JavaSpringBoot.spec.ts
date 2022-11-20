@@ -41,7 +41,7 @@ suite(`${stack} test`, async () => {
             await dashboard.clickCreateWorkspaceButton();
             await createWorkspace.waitPage();
             workspaceHandlingTests.setWindowHandle(await browserTabsUtil.getCurrentWindowHandle());
-            await createWorkspace.startWorkspaceUsingFactory(`https://github.com/devspaces-samples/rest-http-example/tree/devspaces-3-rhel-8?che-editor=che-incubator/che-code/insiders&storageType=persistent`);
+            await createWorkspace.startWorkspaceUsingFactory(`https://github.com/che-samples/web-java-spring-boot/tree/master?che-editor=che-incubator/che-code/insiders&storageType=persistent`);
             await browserTabsUtil.waitAndSwitchToAnotherWindow(workspaceHandlingTests.getWindowHandle(), TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
         });
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -61,8 +61,6 @@ suite(`${stack} test`, async () => {
             let workbench = new Workbench();
             let activityBar = workbench.getActivityBar();
             let activityBarControls = await activityBar.getViewControls();
-            // let sidebarContent = activityBar.getViewControl();
-            // let sidebarViewSections = await sidebarContent.getSections();
             Logger.debug(`Editor sections:`);
             activityBarControls.forEach(async control => {
                 Logger.debug(`${await control.getTitle()}`);
