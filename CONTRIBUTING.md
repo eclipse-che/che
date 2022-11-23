@@ -59,6 +59,7 @@ Repository | Component | Description | Devfile | Documentation
 [registry](https://github.com/devfile/registry) | | Upstream devfile registry |  | 
 [developer-images](https://github.com/devfile/developer-images) | | Container images to code, build run applications on secured Kubernetes clusters |  | 
 [devworkspace-operator-docs](https://github.com/devfile/devworkspace-operator-docs) | | DevWorkspace operator documentation |  | 
+[git-srv](https://github.com/che-incubator/git-srv) | | Scripts to deploy oAuth supported self-hosted git providers |  |
 <!-- end repository list -->
 
 ## Devfile to contribute
