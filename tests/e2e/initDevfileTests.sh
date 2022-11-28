@@ -9,11 +9,7 @@ launchAllUserstories(){
     echo "Launching all userstories";
     echo ""
 
-    if [ "${TS_SELENIUM_EDITOR}" == "theia" ]; then
-        npm run lint && npm run tsc && mocha --config mocha-all-devfiles-theia.json ;
-    elif [ "${TS_SELENIUM_EDITOR}" == "code" ]; then
-        npm run lint && npm run tsc && mocha --config mocha-all-devfiles-code.json ;
-    fi
+    npm run lint && npm run tsc && mocha --config mocha-all-devfiles-${TS_SELENIUM_EDITOR}.json ;
 }
 
 launchSingleUserstory(){
