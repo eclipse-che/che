@@ -17,6 +17,11 @@ function getBaseUrl(): string {
     return baseUrl.replace(/\/$/, '');
 }
 
+export enum EditorType {
+    THEIA = 'theia',
+    CHE_CODE = 'che-code'
+}
+
 export const TestConstants = {
     /**
      * Base URL of the application which should be checked
@@ -53,6 +58,24 @@ export const TestConstants = {
      * Browser height resolution, "1080" by default.
      */
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
+
+    /**
+     * Editor the tests are running against, "code" by default.
+     * Possible values: "che-code", "theia"
+     */
+    TS_SELENIUM_EDITOR: process.env.TS_SELENIUM_EDITOR || EditorType.CHE_CODE,
+
+    /**
+     * Base version of VSCode editor for monaco-page-objects, "1.37.0" by default.
+     */
+    TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION: process.env.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION || '1.37.0',
+
+    /**
+     * Latest compatible version to be used, based on versions available in
+     * https://github.com/redhat-developer/vscode-extension-tester/tree/master/locators/lib ,
+     * "1.73.0" by default.
+     */
+    TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION: process.env.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION || '1.73.0',
 
     /**
      * Default ammount of tries, "5" by default.

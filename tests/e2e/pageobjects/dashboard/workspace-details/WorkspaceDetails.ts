@@ -13,7 +13,7 @@ import { CLASSES, TYPES } from '../../../inversify.types';
 import 'reflect-metadata';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
-import { Ide } from '../../ide/Ide';
+import { Ide } from '../../ide/theia/Ide';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 import { Logger } from '../../../utils/Logger';
 import { TimeoutConstants } from '../../../TimeoutConstants';
