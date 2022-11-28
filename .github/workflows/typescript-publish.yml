@@ -21,11 +21,11 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/setup-node@v1
       with:
-        node-version: '12'
+        node-version: '16'
         registry-url: 'https://registry.npmjs.org'
         scope: '@eclipse-che'
     - name: Clone source code
