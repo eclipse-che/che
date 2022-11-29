@@ -26,7 +26,7 @@
     "forin": true,
     "indent": [
       true,
-      2
+     "spaces"
     ],
     "interface-name": true,
     "jsdoc-format": true,
@@ -37,9 +37,9 @@
     ],
     "member-ordering": [
       true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
+      {
+        "order": "statics-first"
+      }
     ],
     "no-arg": true,
     "no-bitwise": true,
@@ -92,26 +92,21 @@
     ],
     "typedef": [
       true,
-      "callSignature",
-      "indexSignature",
+      "call-signature",
+      "member-variable-declaration",
       "parameter",
-      "propertySignature",
-      "variableDeclarator"
+      "property-declaration",
+      "variable-declaration"
     ],
     "typedef-whitespace": [
       true,
-      [
-        "callSignature",
-        "noSpace"
-      ],
-      [
-        "catchClause",
-        "noSpace"
-      ],
-      [
-        "indexSignature",
-        "space"
-      ]
+      {
+        "call-signature": "nospace",
+        "index-signature": "onespace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      }
     ],
     "use-strict": false,
     "variable-name": false,
@@ -121,7 +116,8 @@
       "check-decl",
       "check-operator",
       "check-separator",
-      "check-type"
+      "check-type",
+      "check-module"
     ]
   }
 }
