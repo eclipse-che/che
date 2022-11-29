@@ -12,38 +12,19 @@ import { CLASSES } from '../../../inversify.types';
 import { e2eContainer } from '../../../inversify.config';
 import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
 import CheReporter from '../../../driver/CheReporter';
-import { CreateWorkspace } from '../../../pageobjects/dashboard/CreateWorkspace';
 import { Logger } from '../../../utils/Logger';
-import { ApiUrlResolver } from '../../../utils/workspace/ApiUrlResolver';
-import { BrowserTabsUtil } from '../../../utils/BrowserTabsUtil';
-import { TimeoutConstants } from '../../../TimeoutConstants';
-import { Dashboard } from '../../../pageobjects/dashboard/Dashboard';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { By, until } from 'selenium-webdriver';
 import { Workbench } from 'monaco-page-objects';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
-const apiUrlResolver: ApiUrlResolver = e2eContainer.get(CLASSES.ApiUrlResolver);
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
-const stack: string = 'Java Spring Boot';
+const stackName: string = 'Empty Workspace';
 
-suite(`${stack} test`, async () => {
-    suite(`Create ${stack} workspace`, async () => {
-        // workspaceHandlingTests.createAndOpenWorkspace(stack);
-        test('Start Maven workspace using factory URL and vscode editor', async() => {
-            await dashboard.waitPage();
-            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
-            await apiUrlResolver.getWorkspacesApiUrl();
-            await dashboard.clickCreateWorkspaceButton();
-            await createWorkspace.waitPage();
-            workspaceHandlingTests.setWindowHandle(await browserTabsUtil.getCurrentWindowHandle());
-            await createWorkspace.startWorkspaceUsingFactory(`https://github.com/che-samples/web-java-spring-boot/tree/master?che-editor=che-incubator/che-code/insiders&storageType=persistent`);
-            await browserTabsUtil.waitAndSwitchToAnotherWindow(workspaceHandlingTests.getWindowHandle(), TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-        });
+suite(`${stackName} test`, async () => {
+    suite(`Create ${stackName} workspace`, async () => {
+        workspaceHandlingTests.createAndOpenWorkspace(stackName);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
             CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
