@@ -26,7 +26,7 @@ const workspaceRootFolderName: string = 'src';
 const fileFolderPath: string = `${workspaceSampleName}/${workspaceRootFolderName}/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 const codeNavigationClassName: string = 'String.class';
-const stack : string = 'Java Maven';
+const stack: string = 'Java Maven';
 const taskName: string = 'maven build';
 
 suite(`${stack} test`, async () => {
