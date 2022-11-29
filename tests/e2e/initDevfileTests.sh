@@ -9,7 +9,7 @@ launchAllUserstories(){
     echo "Launching all userstories";
     echo ""
 
-    npm run lint && npm run tsc && mocha --config mocha-all-devfiles.json ;
+    npm run lint && npm run tsc && mocha --config mocha-all-devfiles-${TS_SELENIUM_EDITOR}.json ;
 }
 
 launchSingleUserstory(){
@@ -17,11 +17,11 @@ launchSingleUserstory(){
     echo "Launching the \"${USERSTORY}\" userstory";
     echo ""
 
-    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/${USERSTORY}.spec.js ;
+    tsc && mocha --config mocha-single-devfile.json --spec dist/tests/login/Login.spec.js --spec dist/tests/devfiles/${TS_SELENIUM_EDITOR}/${USERSTORY}.spec.js ;
 }
 
 checkUserstoryName(){
-    local checkedName="$(ls tests/devfiles | grep ${USERSTORY}.spec.ts)";
+    local checkedName="$(ls tests/devfiles/${TS_SELENIUM_EDITOR} | grep ${USERSTORY}.spec.ts)";
 
     if [ -z "$checkedName" ]; then
         echo ""
