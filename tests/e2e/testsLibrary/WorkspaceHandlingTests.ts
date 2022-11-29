@@ -25,26 +25,18 @@ import { TestConstants } from '../TestConstants';
 @injectable()
 export class WorkspaceHandlingTests {
 
-    private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
-    private static READY_TO_READ_WORKSPACE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1[contains(.,'Starting workspace ')]`);
-    private static workspaceName: string = 'undefined';
-    private static parentGUID: string;
-
     public static getWorkspaceName(): string {
         return WorkspaceHandlingTests.workspaceName;
     }
 
-    public static setWorkspaceName(workspaceName: string) {
+    public static setWorkspaceName(workspaceName: string): void {
         WorkspaceHandlingTests.workspaceName = workspaceName;
     }
 
-    public setWindowHandle(guid: string) {
-        WorkspaceHandlingTests.parentGUID = guid;
-    }
-
-    public getWindowHandle(): string {
-        return WorkspaceHandlingTests.parentGUID;
-    }
+    private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
+    private static READY_TO_READ_WORKSPACE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1[contains(.,'Starting workspace ')]`);
+    private static workspaceName: string = 'undefined';
+    private static parentGUID: string;
 
     constructor(
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
@@ -54,7 +46,15 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
 
-    public createAndOpenWorkspace(stack: string) {
+    public setWindowHandle(guid: string): void {
+        WorkspaceHandlingTests.parentGUID = guid;
+    }
+
+    public getWindowHandle(): string {
+        return WorkspaceHandlingTests.parentGUID;
+    }
+
+    public createAndOpenWorkspace(stack: string): void {
         test(`Create and open new workspace, stack:${stack}`, async () => {
             await this.dashboard.waitPage();
             Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
@@ -62,12 +62,12 @@ export class WorkspaceHandlingTests {
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
-            await this.createWorkspace.clickOnSample(stack);
+            await this.createWorkspace.clickOnSampleForSpecificEditor(stack);
             await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
         });
     }
 
-    public openExistingWorkspace(workspaceName: string) {
+    public openExistingWorkspace(workspaceName: string): void {
         test('Open and start existing workspace', async () => {
             await this.dashboard.waitPage();
             Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
@@ -78,7 +78,7 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public obtainWorkspaceNameFromStartingPage() {
+    public obtainWorkspaceNameFromStartingPage(): void {
         test('Obtain workspace name from workspace loader page', async() => {
             try {
                 Logger.info('Waiting for workspace name on workspace loader page');
@@ -89,7 +89,7 @@ export class WorkspaceHandlingTests {
                 const attempts: number = Math.ceil(timeout / polling);
                 let startingWorkspaceLineContent: string;
 
-                for (let i = 0; i < attempts; i++) {
+                for (let i: number = 0; i < attempts; i++) {
                     startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
 
                     // cutting away leading text
@@ -108,17 +108,17 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public async stopWorkspace(workspaceName: string) {
+    public async stopWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.stopWorkspaceByUI(workspaceName);
     }
 
-    public async removeWorkspace(workspaceName: string) {
+    public async removeWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.deleteStoppedWorkspaceByUI(workspaceName);
     }
 
-    public async stopAndRemoveWorkspace(workspaceName: string) {
+    public async stopAndRemoveWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
     }
