@@ -287,5 +287,5 @@ export const TestConstants = {
     /**
      * URL of workspace devfile test repository.
      */
-    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || '',
+    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || ''
 };

@@ -44,7 +44,7 @@ export class CreateWorkspace {
         await this.driverHelper.waitVisibility(sampleLocator, timeout);
     }
 
-    async clickOnSample(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+    async clickOnSampleNoEditorSelection(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
         Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
@@ -91,7 +91,7 @@ export class CreateWorkspace {
                 throw new Error(`Unsupported editor ${TestConstants.TS_SELENIUM_EDITOR}`);
         }
 
-        Logger.debug(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}, editor "${editor}"`);
+        Logger.trace(`CreateWorkspace.getSampleLocatorWithSpecificEditor sampleName: ${sampleName}, editor "${editor}"`);
 
         return By.xpath(`//div[text()='${sampleName}']//parent::article//span[text()[
                 contains(
@@ -101,7 +101,7 @@ export class CreateWorkspace {
     }
 
     private getSampleLocator(sampleName: string): By {
-        Logger.debug(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}, used default editor`);
+        Logger.trace(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}, used default editor`);
 
         return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
     }
