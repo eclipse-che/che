@@ -42,7 +42,7 @@ export const TestConstants = {
      * Run browser in "Fullscreen" (kiosk) mode.
      * Default to true if undefined
      */
-    TS_SELENIUM_LAUNCH_FULLSCREEN: (process.env.TS_SELENIUM_LAUNCH_FULLSCREEN === 'false') ? false : true,
+    TS_SELENIUM_LAUNCH_FULLSCREEN: (process.env.TS_SELENIUM_LAUNCH_FULLSCREEN !== 'false'),
 
     /**
      * Run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
@@ -206,7 +206,7 @@ export const TestConstants = {
     /**
      * Enable Axios response interceptor, false by default
      */
-     TS_SELENIUM_RESPONSE_INTERCEPTOR: process.env.TS_SELENIUM_RESPONSE_INTERCEPTOR === 'true',
+    TS_SELENIUM_RESPONSE_INTERCEPTOR: process.env.TS_SELENIUM_RESPONSE_INTERCEPTOR === 'true',
 
     /**
      * Running test suite - possible variants can be found in package.json scripts part.
@@ -282,10 +282,10 @@ export const TestConstants = {
     /**
      * URL of Gogs self-hosted Git server.
      */
-     TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080',
+    TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080',
 
-     /**
-      * URL of workspace devfile test repository.
-      */
-      TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || ''
+    /**
+     * URL of workspace devfile test repository.
+     */
+    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || ''
 };
