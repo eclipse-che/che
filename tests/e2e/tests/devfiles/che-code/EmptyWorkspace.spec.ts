@@ -8,20 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { e2eContainer } from '../../../inversify.config';
-
 import { ActivityBar, ViewControl, Workbench } from 'monaco-page-objects';
-import { CLASSES, TYPES } from '../../../inversify.types';
+import { CLASSES } from '../../../inversify.types';
 import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
-import { DriverHelper } from '../../../utils/DriverHelper';
 import { Logger } from '../../../utils/Logger';
-
-import { IDriver } from '../../../driver/IDriver';
 import CheReporter from '../../../driver/CheReporter';
+import { ProjectAndFileTestsCheCode } from '../../../testsLibrary/che-code/ProjectAndFileTestsCheCode';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const driver: IDriver = e2eContainer.get(TYPES.Driver);
-
+const projectAndFileTests: ProjectAndFileTestsCheCode = e2eContainer.get(CLASSES.ProjectAndFileTestsCheCode);
 const stackName: string = 'Empty Workspace';
 
 suite(`${stackName} test`, async () => {
@@ -32,7 +27,7 @@ suite(`${stackName} test`, async () => {
             CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
         test('Wait workspace readiness', async() => {
-            await workspaceHandlingTests.waitWorkspaceReadinessForCheCodeEditor();
+            await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 
             const workbench: Workbench = new Workbench();
             const activityBar: ActivityBar = workbench.getActivityBar();
