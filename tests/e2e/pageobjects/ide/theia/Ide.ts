@@ -52,7 +52,7 @@ export class Ide {
         } catch (err) {
             if (err instanceof error.StaleElementReferenceError) {
                 Logger.warn('StaleElementException occurred during waiting for IDE. Sleeping for 2 secs and retrying.');
-                this.driverHelper.wait(2000);
+                await this.driverHelper.wait(2000);
                 try {
                     await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
                 } catch (err) {
