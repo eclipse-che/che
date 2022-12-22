@@ -9,24 +9,19 @@
  **********************************************************************/
 import * as mocha from 'mocha';
 import { IDriver } from './IDriver';
-import { inversifyConfig } from '..';
 import { TYPES, CLASSES } from '..';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
-import { EditorType, TestConstants } from '../TestConstants';
+import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
-import { AskForConfirmationTypeTheia, PreferencesHandlerTheia, TerminalRendererTypeTheia } from '../utils/theia/PreferencesHandlerTheia';
-import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
 import { Sanitizer } from '../utils/Sanitizer';
-import * as monacoPageObjects from 'monaco-page-objects';
-import * as vscodeExtensionTesterLocators from 'vscode-extension-tester-locators';
+import { e2eContainer } from '../inversify.config';
 
-const e2eContainer = inversifyConfig.e2eContainer;
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
@@ -37,12 +32,12 @@ let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil
 
 class CheReporter extends mocha.reporters.Spec {
 
-  private static latestWorkspace: string = '';
-
   public static registerRunningWorkspace(workspaceName: string) {
     Logger.debug(`CheReporter.registerRunningWorkspace {${workspaceName}}`);
     CheReporter.latestWorkspace = workspaceName;
   }
+
+  private static latestWorkspace: string = '';
 
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
@@ -83,22 +78,6 @@ class CheReporter extends mocha.reporters.Spec {
       console.log(launchInformation);
 
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
-      if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
-        CheApiRequestHandler.enableRequestInteceptor();
-      }
-      if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
-        CheApiRequestHandler.enableResponseInterceptor();
-      }
-
-      if (TestConstants.TS_SELENIUM_EDITOR === EditorType.THEIA) {
-        let preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
-        await preferencesHandler.setConfirmExit(AskForConfirmationTypeTheia.never);
-        await preferencesHandler.setTerminalType(TerminalRendererTypeTheia.dom);
-      } else if (TestConstants.TS_SELENIUM_EDITOR === EditorType.CHE_CODE) {
-        // init vscode-extension-tester monaco-page-objects
-        monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
-      }
-
     });
 
     runner.on('test', async function (test: mocha.Test) {

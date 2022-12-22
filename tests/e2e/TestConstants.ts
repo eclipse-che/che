@@ -287,5 +287,10 @@ export const TestConstants = {
     /**
      * URL of workspace devfile test repository.
      */
-    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || ''
+    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || '',
+
+    /**
+     * Constant, which prolong timeout constants for local debug.
+     */
+    TS_DEBUG_MODE: process.env.TS_DEBUG_MODE || false
 };
