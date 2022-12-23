@@ -7,7 +7,6 @@
   "full-trace": true,
   "support": "source-map-support/register",
   "spec": [
-    "dist/tests/login/Login.spec.js",
-    "dist/tests/devfiles/Scala.spec.js"
+    "dist/tests/login/Login.spec.js"
   ]
 }

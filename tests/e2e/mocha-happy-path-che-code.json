@@ -9,8 +9,6 @@
     "./dist/tests/MochaHooks.js"
   ],
   "spec": [
-    "dist/tests/login/Login.spec.js",
-    "dist/tests/e2e/theia/factories/DirectUrlFactoryWithRootFolderTest.spec.js",
-    "dist/tests/e2e/theia/factories/DirectUrlFactoryWithSpecificBranchTest.spec.js"
+    "dist/tests/login/Login.spec.js"
   ]
 }
