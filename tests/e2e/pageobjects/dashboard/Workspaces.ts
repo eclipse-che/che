@@ -86,12 +86,11 @@ export class Workspaces {
         Logger.debug(`Workspaces.waitActionsPopup of the '${workspaceName}' list item`);
 
         await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
-        await this.driverHelper.wait(5000);
+        await this.driverHelper.wait(2000);
     }
 
     async openActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
         Logger.debug(`Workspaces.openActionsPopup for the '${workspaceName}' list item`);
-
         await this.clickActionsButton(workspaceName);
         await this.waitActionsPopup(workspaceName, timeout);
     }
@@ -104,8 +103,15 @@ export class Workspaces {
 
     async clickActionsStopWorkspaceButton(workspaceName: string) {
         Logger.debug(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item`);
+        // workaround because of issue CRW-3649
+        try {
+            await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+        } catch (e) {
+            Logger.warn(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item - popup was missed, try to click one more time (issue CRW-3649).`);
 
-        await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+            await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
+            await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+        }
     }
 
     async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) {

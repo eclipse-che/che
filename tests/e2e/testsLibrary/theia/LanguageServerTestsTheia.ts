@@ -97,7 +97,7 @@ export class LanguageServerTestsTheia {
         });
     }
 
-    public goToDefinition(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
+    public goToDefinition(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         test('Go to Definition', async () => {
             try {
                 await this.editor.moveCursorToLineAndChar(openedFile, line, char);
@@ -123,7 +123,7 @@ export class LanguageServerTestsTheia {
         });
     }
 
-    public goToImplementations(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout : number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
+    public goToImplementations(openedFile: string, line: number, char: number, codeNavigationClassName: string, timeout: number = TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT) {
         test('Go to Implementations', async () => {
             try {
                 await this.editor.moveCursorToLineAndChar(openedFile, line, char);

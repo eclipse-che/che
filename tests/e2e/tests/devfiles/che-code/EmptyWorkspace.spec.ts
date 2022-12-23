@@ -7,19 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import 'reflect-metadata';
-import { CLASSES } from '../../../inversify.types';
 import { e2eContainer } from '../../../inversify.config';
+import { ActivityBar, ViewControl, Workbench } from 'monaco-page-objects';
+import { CLASSES } from '../../../inversify.types';
 import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
-import CheReporter from '../../../driver/CheReporter';
 import { Logger } from '../../../utils/Logger';
-import { DriverHelper } from '../../../utils/DriverHelper';
-import { By, until } from 'selenium-webdriver';
-import { Workbench } from 'monaco-page-objects';
+import CheReporter from '../../../driver/CheReporter';
+import { ProjectAndFileTestsCheCode } from '../../../testsLibrary/che-code/ProjectAndFileTestsCheCode';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-
+const projectAndFileTests: ProjectAndFileTestsCheCode = e2eContainer.get(CLASSES.ProjectAndFileTestsCheCode);
 const stackName: string = 'Empty Workspace';
 
 suite(`${stackName} test`, async () => {
@@ -30,28 +27,21 @@ suite(`${stackName} test`, async () => {
             CheReporter.registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
         test('Wait workspace readiness', async() => {
-            try {
-                await driverHelper.getDriver().wait(until.elementLocated(By.className('monaco-workbench')));
-            } catch (err) {
-                if ((err as Error).name === 'WebDriverError') {
-                    await new Promise(res => setTimeout(res, 3000));
-                } else {
-                    throw err;
-                }
-            }
-            let workbench = new Workbench();
-            let activityBar = workbench.getActivityBar();
-            let activityBarControls = await activityBar.getViewControls();
+            await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+
+            const workbench: Workbench = new Workbench();
+            const activityBar: ActivityBar = workbench.getActivityBar();
+            const activityBarControls: ViewControl[] = await activityBar.getViewControls();
+
             Logger.debug(`Editor sections:`);
-            activityBarControls.forEach(async control => {
+            for (const control of activityBarControls) {
                 Logger.debug(`${await control.getTitle()}`);
-            });
+            }
         });
-        // projectAndFileTests.waitWorkspaceReadiness(workspaceSampleName, workspaceRootFolderName, false);
     });
 
     suite('Stopping and deleting the workspace', async () => {
-        test(`Stop and remowe workspace`, async () => {
+        test(`Stop and remove workspace`, async () => {
             await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });

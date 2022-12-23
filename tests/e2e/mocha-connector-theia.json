@@ -1,9 +1,12 @@
 {
-    "timeout": "2200000",
-    "reporter": "dist/driver/CheReporter.js",
-    "ui": "tdd",
-    "bail": true,
-    "full-trace": true,
-    "require": "source-map-support/register",
-    "spec": "dist/tests/e2e/theia/OpenshiftConnector.spec.js"
+  "timeout": "2200000",
+  "reporter": "dist/driver/CheReporter.js",
+  "ui": "tdd",
+  "bail": true,
+  "full-trace": true,
+  "require": [
+    "source-map-support/register",
+    "./dist/tests/MochaHooks.js"
+  ],
+  "spec": "dist/tests/e2e/theia/OpenshiftConnector.spec.js"
 }

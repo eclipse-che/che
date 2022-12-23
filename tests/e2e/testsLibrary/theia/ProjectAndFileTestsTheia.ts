@@ -55,7 +55,7 @@ export class ProjectAndFileTestsTheia {
             });
         }
 
-    public waitWorkspaceReadiness(sampleName : string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
+    public waitWorkspaceReadiness(sampleName: string, folder: string, checkNotification: boolean = true, restartWorkspaceDialogIsExpected: boolean = false) {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 
@@ -72,7 +72,7 @@ export class ProjectAndFileTestsTheia {
         });
     }
 
-    public waitWorkspaceReadinessNoSubfolder(sampleName : string, checkNotification: boolean = true) {
+    public waitWorkspaceReadinessNoSubfolder(sampleName: string, checkNotification: boolean = true) {
         test('Wait for workspace readiness', async () => {
             await this.ide.waitIde(TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
             if (checkNotification) {

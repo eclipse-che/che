@@ -34,7 +34,7 @@ export class ApiUrlResolver {
         return ApiUrlResolver.KUBERNETES_API_URL;
     }
 
-    private async obtainUserNamespace() : Promise<string> {
+    private async obtainUserNamespace(): Promise<string> {
         Logger.debug(`ApiUrlResolver.obtainUserNamespace ${this.userNamespace}`);
         if (this.userNamespace.length === 0) {
             Logger.trace(`ApiUrlResolver.obtainUserNamespace USER_NAMESPACE.length = 0, calling kubernetes API`);
