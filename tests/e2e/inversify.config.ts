@@ -71,6 +71,7 @@ import { Sanitizer } from './utils/Sanitizer';
 import { NavigationBar } from './pageobjects/ide/theia/NavigationBar';
 import { ApiUrlResolver } from './utils/workspace/ApiUrlResolver';
 import { ITestWorkspaceUtil } from './utils/workspace/ITestWorkspaceUtil';
+import { ProjectAndFileTestsCheCode } from './testsLibrary/che-code/ProjectAndFileTestsCheCode';
 
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
@@ -125,6 +126,7 @@ e2eContainer.bind<PluginsView>(CLASSES.PluginsView).to(PluginsView);
 e2eContainer.bind<LanguageServerTestsTheia>(CLASSES.LanguageServerTestsTheia).to(LanguageServerTestsTheia);
 e2eContainer.bind<CodeExecutionTestsTheia>(CLASSES.CodeExecutionTestsTheia).to(CodeExecutionTestsTheia);
 e2eContainer.bind<ProjectAndFileTestsTheia>(CLASSES.ProjectAndFileTestsTheia).to(ProjectAndFileTestsTheia);
+e2eContainer.bind<ProjectAndFileTestsCheCode>(CLASSES.ProjectAndFileTestsCheCode).to(ProjectAndFileTestsCheCode);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<WorkspaceNameHandler>(CLASSES.WorkspaceNameHandler).to(WorkspaceNameHandler);
 e2eContainer.bind<GitHubPullRequestPlugin>(CLASSES.GitHubPullRequestPlugin).to(GitHubPullRequestPlugin);

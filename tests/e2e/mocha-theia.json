@@ -1,8 +1,12 @@
 {
-    "timeout": "1200000",
-    "reporter": "dist/driver/CheReporter.js",
-    "ui": "tdd",
-    "bail": true,
-    "full-trace": true,
-    "spec": ["dist/tests/login/Login.spec.js", "dist/tests/e2e/theia/*.spec.js"]
+  "timeout": "1200000",
+  "reporter": "dist/driver/CheReporter.js",
+  "ui": "tdd",
+  "bail": true,
+  "full-trace": true,
+  "require": "./dist/tests/MochaHooks.js",
+  "spec": [
+    "dist/tests/login/Login.spec.js",
+    "dist/tests/e2e/theia/*.spec.js"
+  ]
 }

@@ -26,7 +26,7 @@
     "forin": true,
     "indent": [
       true,
-     "spaces"
+      "spaces"
     ],
     "interface-name": true,
     "jsdoc-format": true,
@@ -59,15 +59,18 @@
     "no-eval": true,
     "no-string-literal": true,
     "no-switch-case-fall-through": true,
-    "trailing-comma": [true, {
-      "singleline": "never",
-      "multiline": {
-        "objects": "ignore",
-        "arrays": "always",
-        "functions": "never",
-        "typeLiterals": "ignore"
+    "trailing-comma": [
+      true,
+      {
+        "singleline": "never",
+        "multiline": {
+          "objects": "ignore",
+          "arrays": "always",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        }
       }
-    }],
+    ],
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
@@ -92,7 +95,7 @@
     ],
     "typedef": [
       true,
-      "call-signature",
+      // "call-signature",
       "member-variable-declaration",
       "parameter",
       "property-declaration",

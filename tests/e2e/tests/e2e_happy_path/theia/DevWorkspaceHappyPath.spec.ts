@@ -55,7 +55,7 @@ const SpringAppLocators = {
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
-    let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
+    let factoryUrl: string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
 
     suite('Open factory URL', async () => {
         // this is DevWorkspace test specific - we create the test ws. using factory instead of chectl
