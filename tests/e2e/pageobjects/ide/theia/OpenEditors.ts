@@ -56,7 +56,7 @@ export class OpenEditors {
         Logger.trace('OpenEditors.waitAndClickExpansionToggle expansion toggle clicked.');
     }
 
-    async isExpansionToggleCollapsed(timeout: number = TimeoutConstants.TS_OPEN_EDITORS_CLICK_ON_ITEM_TIMEOUT) : Promise<boolean> {
+    async isExpansionToggleCollapsed(timeout: number = TimeoutConstants.TS_OPEN_EDITORS_CLICK_ON_ITEM_TIMEOUT): Promise<boolean> {
         Logger.debug('OpenEditors.isExpansionToggleCollapsed');
         return await this.driverHelper.waitVisibilityBoolean(OpenEditors.OPEN_EDITORS_EXPANSION_TOGGLE_COLLAPSED_LOCATOR, 1, timeout);
     }
