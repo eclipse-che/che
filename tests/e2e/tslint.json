@@ -96,10 +96,10 @@
     "typedef": [
       true,
       // "call-signature",
-      "member-variable-declaration",
+      // "member-variable-declaration",
       "parameter",
       "property-declaration",
-      "variable-declaration"
+      // "variable-declaration"
     ],
     "typedef-whitespace": [
       true,

@@ -6,10 +6,11 @@ USER root
 
 RUN apt-get update && apt-get install && \
     apt-get install -y ftp && \
+    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && \
     apt-get install -y nodejs && \
-    apt-get install -y npm && \
     npm install -g typescript && \
-    apt-get install x11vnc ffmpeg -y
+    apt-get install x11vnc ffmpeg -y && \
+    node -v
 
 COPY --chown=0:0 build/dockerfiles/entrypoint.sh /tmp/
 
