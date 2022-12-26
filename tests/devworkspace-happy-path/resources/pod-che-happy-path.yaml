@@ -16,7 +16,7 @@ spec:
       imagePullPolicy: Always
       env:
         - name: TEST_SUITE
-          value: test-devworkspace-happy-path
+          value: test-devworkspace-happy-path-code
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: '0'
         - name: TS_SELENIUM_BASE_URL
