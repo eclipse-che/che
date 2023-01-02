@@ -98,7 +98,7 @@
       // "call-signature",
       // "member-variable-declaration",
       "parameter",
-      "property-declaration",
+      "property-declaration"
       // "variable-declaration"
     ],
     "typedef-whitespace": [
