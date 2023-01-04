@@ -31,7 +31,7 @@ on:
 jobs:
   build:
     name: Create Che E2E Tests Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/setup-node@v3
         with:
