@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021 Red Hat, Inc.
+# Copyright (c) 2021-2023 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -32,7 +32,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
-        java-version: '11.0.11+9'
+        java-version: '11'
     - name: Login to docker.io
       uses: docker/login-action@v2
       with:
