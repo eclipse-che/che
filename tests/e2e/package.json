@@ -32,6 +32,7 @@
     "test-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-che-code.json",
     "test-happy-path-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-happy-path-che-code.json",
     "test-devworkspace-happy-path-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-devworkspace-happy-path-che-code.json",
+    "test-empty-workspace-devworkspace-happy-path-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-empty-workspace-devworkspace-happy-path-che-code.json",
     "test-java-vertx-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-java-vertx-che-code.json",
     "test-java-springboot-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-java-springboot-che-code.json",
     "test-factory-code": "./generateIndex.sh && npm run lint && npm run tsc && mocha --config mocha-factory-che-code.json",
