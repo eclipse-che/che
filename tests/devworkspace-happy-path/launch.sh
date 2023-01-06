@@ -25,6 +25,7 @@ export CHE_NAMESPACE="${CHE_NAMESPACE:-eclipse-che}"
 export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-quay.io/eclipse/che-e2e:next}"
 export HAPPY_PATH_POD_NAME=happy-path-che
 export HAPPY_PATH_TEST_PROJECT='https://github.com/che-samples/java-spring-petclinic/tree/devfilev2'
+export HAPPY_PATH_SUITE="${HAPPY_PATH_SUITE:-test-devworkspace-happy-path-code}"
 
 rm -rf ${WORKDIR}
 mkdir -p ${WORKDIR}
@@ -98,6 +99,7 @@ startHappyPathTest() {
   TS_SELENIUM_DEVWORKSPACE_URL="${ECLIPSE_CHE_URL}/#${HAPPY_PATH_TEST_PROJECT}"
   HAPPY_PATH_POD_FILE=${SCRIPT_DIR}/resources/pod-che-happy-path.yaml
   cp $HAPPY_PATH_POD_FILE ${WORKDIR}/e2e-pod.yaml
+  sed -i "s@HAPPY_PATH_SUITE@${HAPPY_PATH_SUITE}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@CHE_URL@${ECLIPSE_CHE_URL}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@WORKSPACE_ROUTE@${TS_SELENIUM_DEVWORKSPACE_URL}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@CHE-NAMESPACE@${CHE_NAMESPACE}@g" ${WORKDIR}/e2e-pod.yaml
