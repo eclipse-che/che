@@ -19,7 +19,7 @@ import { Logger } from '../utils/Logger';
 import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { DriverHelper } from '../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { TestConstants } from '../TestConstants';
 
 @injectable()
@@ -80,30 +80,36 @@ export class WorkspaceHandlingTests {
 
     public obtainWorkspaceNameFromStartingPage(): void {
         test('Obtain workspace name from workspace loader page', async() => {
-            try {
-                Logger.info('Waiting for workspace name on workspace loader page');
-                await this.driverHelper.waitVisibility(WorkspaceHandlingTests.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+            Logger.info('Waiting for workspace name on workspace loader page');
+            await this.driverHelper.waitVisibility(WorkspaceHandlingTests.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
 
-                const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
-                const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
-                const attempts: number = Math.ceil(timeout / polling);
-                let startingWorkspaceLineContent: string;
+            const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
+            const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+            const attempts: number = Math.ceil(timeout / polling);
+            let startingWorkspaceLineContent: string = '';
 
-                for (let i: number = 0; i < attempts; i++) {
+            for (let i: number = 0; i < attempts; i++) {
+                try {
                     startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
-
-                    // cutting away leading text
-                    WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
-                    if (WorkspaceHandlingTests.workspaceName !== '') {
-                        Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
-                        break;
+                } catch (err) {
+                    if (err instanceof error.StaleElementReferenceError) {
+                        Logger.warn(`Failed to obtain name from workspace start page, element possibly not yet visible. Retrying.`);
+                        this.driverHelper.sleep(polling);
+                        continue;
                     }
 
-                    this.driverHelper.sleep(polling);
+                    Logger.error(`Obtaining workspace name failed with an unexpected error:${err}`);
+                    throw err;
                 }
-            } catch (err) {
-                Logger.error(`Failed to obtain workspace name from workspace loader page: ${err}`);
-                throw err;
+
+                // cutting away leading text
+                WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
+                if (WorkspaceHandlingTests.workspaceName !== '') {
+                    Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
+                    break;
+                }
+
+                this.driverHelper.sleep(polling);
             }
         });
     }
