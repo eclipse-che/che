@@ -33,8 +33,7 @@ export class WorkspaceHandlingTests {
         WorkspaceHandlingTests.workspaceName = workspaceName;
     }
 
-    private static START_WORKSPACE_PAGE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1`);
-    private static READY_TO_READ_WORKSPACE_NAME_LOCATOR: By = By.xpath(`//div[@class="ui-container"]/div[@class="pf-c-page"]//div[@class="pf-c-content"]/h1[contains(.,'Starting workspace ')]`);
+    private static WORKSPACE_NAME_LOCATOR: By = By.xpath(`//h1[contains(.,'Starting workspace ')]`);
     private static workspaceName: string = 'undefined';
     private static parentGUID: string;
 
@@ -80,37 +79,39 @@ export class WorkspaceHandlingTests {
 
     public obtainWorkspaceNameFromStartingPage(): void {
         test('Obtain workspace name from workspace loader page', async() => {
-            Logger.info('Waiting for workspace name on workspace loader page');
-            await this.driverHelper.waitVisibility(WorkspaceHandlingTests.READY_TO_READ_WORKSPACE_NAME_LOCATOR, TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
-
             const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
             const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
             const attempts: number = Math.ceil(timeout / polling);
-            let startingWorkspaceLineContent: string = '';
 
             for (let i: number = 0; i < attempts; i++) {
                 try {
-                    startingWorkspaceLineContent = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.START_WORKSPACE_PAGE_NAME_LOCATOR).getAttribute('innerHTML');
+                    let startingWorkspaceLineContent: string = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_NAME_LOCATOR).getText();
+                    Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage obtained starting workspace getText():${startingWorkspaceLineContent}`);
+                    // cutting away leading text
+                    WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
+                    Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage trimmed workspace name from getText():${WorkspaceHandlingTests.workspaceName}`);
+                    break;
                 } catch (err) {
                     if (err instanceof error.StaleElementReferenceError) {
-                        Logger.warn(`Failed to obtain name from workspace start page, element possibly not yet visible. Retrying.`);
+                        Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
                         this.driverHelper.sleep(polling);
                         continue;
                     }
-
-                    Logger.error(`Obtaining workspace name failed with an unexpected error:${err}`);
+                    if (err instanceof error.NoSuchElementError) {
+                        Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element not visible yet. Retrying.`);
+                        this.driverHelper.sleep(polling);
+                        continue;
+                    }
+                    Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Obtaining workspace name failed with an unexpected error:${err}`);
                     throw err;
                 }
-
-                // cutting away leading text
-                WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
-                if (WorkspaceHandlingTests.workspaceName !== '') {
-                    Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
-                    break;
-                }
-
-                this.driverHelper.sleep(polling);
             }
+            if (WorkspaceHandlingTests.workspaceName !== '' && WorkspaceHandlingTests.workspaceName !== undefined) {
+                Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
+                return;
+            }
+            Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromSartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
+            throw new error.InvalidArgumentError(`WorkspaceHandlingTests.obtainWorkspaceNameFromSartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
         });
     }
 
