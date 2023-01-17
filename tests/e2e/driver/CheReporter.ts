@@ -8,9 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import * as mocha from 'mocha';
-import { IDriver } from './IDriver';
-import { inversifyConfig } from '..';
-import { TYPES, CLASSES } from '..';
+import { e2eContainer } from '../inversify.config';
+import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
 import { EditorType, TestConstants } from '../TestConstants';
@@ -26,8 +25,6 @@ import { Sanitizer } from '../utils/Sanitizer';
 import * as monacoPageObjects from 'monaco-page-objects';
 import * as vscodeExtensionTesterLocators from 'vscode-extension-tester-locators';
 
-const e2eContainer = inversifyConfig.e2eContainer;
-const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
@@ -96,7 +93,7 @@ class CheReporter extends mocha.reporters.Spec {
         await preferencesHandler.setTerminalType(TerminalRendererTypeTheia.dom);
       } else if (TestConstants.TS_SELENIUM_EDITOR === EditorType.CHE_CODE) {
         // init vscode-extension-tester monaco-page-objects
-        monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
+        monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
       }
 
     });
@@ -133,10 +130,10 @@ class CheReporter extends mocha.reporters.Spec {
 
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
-      await driver.get().sleep(5000);
+      await driverHelper.wait(5000);
 
       // close driver
-      await driver.get().quit();
+      await driverHelper.getDriver().quit();
 
       // delete screencast folder if conditions matched
       if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
@@ -177,13 +174,13 @@ class CheReporter extends mocha.reporters.Spec {
       }
 
       // take screenshot and write to file
-      const screenshot: string = await driver.get().takeScreenshot();
+      const screenshot: string = await driverHelper.getDriver().takeScreenshot();
       const screenshotStream = fs.createWriteStream(screenshotFileName);
       screenshotStream.write(Buffer.from(screenshot, 'base64'));
       screenshotStream.end();
 
       // take pagesource and write to file
-      const pageSource: string = await driver.get().getPageSource();
+      const pageSource: string = await driverHelper.getDriver().getPageSource();
       const pageSourceStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(Buffer.from(pageSource));
       pageSourceStream.end();
