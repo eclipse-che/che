@@ -94,12 +94,12 @@ export class WorkspaceHandlingTests {
                 } catch (err) {
                     if (err instanceof error.StaleElementReferenceError) {
                         Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
-                        this.driverHelper.sleep(polling);
+                        await this.driverHelper.wait(polling);
                         continue;
                     }
                     if (err instanceof error.NoSuchElementError) {
                         Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element not visible yet. Retrying.`);
-                        this.driverHelper.sleep(polling);
+                        await this.driverHelper.wait(polling);
                         continue;
                     }
                     Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Obtaining workspace name failed with an unexpected error:${err}`);
