@@ -8,8 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import * as mocha from 'mocha';
-import { IDriver } from './IDriver';
-import { TYPES, CLASSES } from '..';
+import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
 import { TestConstants } from '../TestConstants';
@@ -22,7 +21,6 @@ import { Logger } from '../utils/Logger';
 import { Sanitizer } from '../utils/Sanitizer';
 import { e2eContainer } from '../inversify.config';
 
-const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
@@ -112,10 +110,10 @@ class CheReporter extends mocha.reporters.Spec {
 
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
-      await driver.get().sleep(5000);
+      await driverHelper.wait(5000);
 
       // close driver
-      await driver.get().quit();
+      await driverHelper.getDriver().quit();
 
       // delete screencast folder if conditions matched
       if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
@@ -156,13 +154,13 @@ class CheReporter extends mocha.reporters.Spec {
       }
 
       // take screenshot and write to file
-      const screenshot: string = await driver.get().takeScreenshot();
+      const screenshot: string = await driverHelper.getDriver().takeScreenshot();
       const screenshotStream = fs.createWriteStream(screenshotFileName);
       screenshotStream.write(Buffer.from(screenshot, 'base64'));
       screenshotStream.end();
 
       // take pagesource and write to file
-      const pageSource: string = await driver.get().getPageSource();
+      const pageSource: string = await driverHelper.getDriver().getPageSource();
       const pageSourceStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(Buffer.from(pageSource));
       pageSourceStream.end();
