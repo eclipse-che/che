@@ -55,7 +55,7 @@ const SpringAppLocators = {
 
 // this test checks only workspace created from "web-nodejs-sample" https://github.com/devfile/devworkspace-operator/blob/main/samples/flattened_theia-next.yaml.
 suite('Workspace creation via factory url', async () => {
-    let factoryUrl : string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
+    let factoryUrl: string = `${TestConstants.TS_SELENIUM_DEVWORKSPACE_URL}`;
 
     suite('Open factory URL', async () => {
         // this is DevWorkspace test specific - we create the test ws. using factory instead of chectl
@@ -106,7 +106,7 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
-        await driverHelper.getDriver().sleep(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
+        await driverHelper.wait(TimeoutConstants.TS_SUGGESTION_TIMEOUT);   // workaround https://github.com/eclipse/che/issues/19004
 
         const textForErrorDisplaying: string = '$';
         await editor.type(javaFileName, textForErrorDisplaying, 30);
@@ -242,7 +242,7 @@ async function switchAppWindowAndCheck(contentLocator: By) {
             break;
         } else {
             console.log(`----------- The Spring app is not available. Attempt # ${index}. Waiting ${TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT}s`);
-            await driverHelper.getDriver().sleep(TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
+            await driverHelper.wait(TimeoutConstants.TS_SELENIUM_DIALOG_WIDGET_TIMEOUT);
             await driverHelper.getDriver().navigate().refresh();
         }
     }
