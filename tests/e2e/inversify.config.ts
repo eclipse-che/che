@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+import 'reflect-metadata';
 import { Container } from 'inversify';
 import { IDriver } from './driver/IDriver';
 import { ChromeDriver } from './driver/ChromeDriver';
