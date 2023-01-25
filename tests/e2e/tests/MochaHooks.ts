@@ -1,6 +1,15 @@
+/*********************************************************************
+ * Copyright (c) 2023 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
 
-import { IDriver } from '..';
-import { TYPES, CLASSES } from '..';
+import 'reflect-metadata';
+import { CLASSES } from '../inversify.types';
 import { EditorType, TestConstants } from '../TestConstants';
 import { AskForConfirmationTypeTheia, PreferencesHandlerTheia, TerminalRendererTypeTheia } from '../utils/theia/PreferencesHandlerTheia';
 import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
@@ -8,8 +17,9 @@ import { TimeoutConstants } from '../TimeoutConstants';
 import * as monacoPageObjects from 'monaco-page-objects';
 import * as vscodeExtensionTesterLocators from 'vscode-extension-tester-locators';
 import { e2eContainer } from '../inversify.config';
+import { DriverHelper } from '../utils/DriverHelper';
 
-const driver: IDriver = e2eContainer.get(TYPES.Driver);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
 
 exports.mochaHooks = {
@@ -33,7 +43,7 @@ exports.mochaHooks = {
         async function initMonacoPageObjects() {
             if (TestConstants.TS_SELENIUM_EDITOR === EditorType.CHE_CODE) {
                 // init vscode-extension-tester monaco-page-objects
-                monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driver.get(), 'google-chrome');
+                monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
             }
         },
         async function prolongTimeoutConstantsInDebugMode() {
