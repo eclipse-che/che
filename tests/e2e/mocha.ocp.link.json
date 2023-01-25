@@ -1,8 +1,11 @@
 {
-    "timeout": "1200000",
-    "reporter": "dist/driver/CheReporter.js",
-    "ui": "tdd",
-    "bail": true,
-    "full-trace": true,
-    "spec": ["./dist/tests/login/LinkCheAndOcpUsers.spec.js"]
+  "timeout": "1200000",
+  "reporter": "dist/driver/CheReporter.js",
+  "require": "./dist/tests/MochaHooks.js",
+  "ui": "tdd",
+  "bail": true,
+  "full-trace": true,
+  "spec": [
+    "./dist/tests/login/LinkCheAndOcpUsers.spec.js"
+  ]
 }

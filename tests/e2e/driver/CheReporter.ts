@@ -12,18 +12,14 @@ import { e2eContainer } from '../inversify.config';
 import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
-import { EditorType, TestConstants } from '../TestConstants';
+import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
-import { AskForConfirmationTypeTheia, PreferencesHandlerTheia, TerminalRendererTypeTheia } from '../utils/theia/PreferencesHandlerTheia';
-import { CheApiRequestHandler } from '../utils/requestHandlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../TimeoutConstants';
 import { Logger } from '../utils/Logger';
 import { Sanitizer } from '../utils/Sanitizer';
-import * as monacoPageObjects from 'monaco-page-objects';
-import * as vscodeExtensionTesterLocators from 'vscode-extension-tester-locators';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
@@ -80,22 +76,6 @@ class CheReporter extends mocha.reporters.Spec {
       console.log(launchInformation);
 
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
-      if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
-        CheApiRequestHandler.enableRequestInteceptor();
-      }
-      if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
-        CheApiRequestHandler.enableResponseInterceptor();
-      }
-
-      if (TestConstants.TS_SELENIUM_EDITOR === EditorType.THEIA) {
-        let preferencesHandler: PreferencesHandlerTheia = e2eContainer.get(CLASSES.PreferencesHandlerTheia);
-        await preferencesHandler.setConfirmExit(AskForConfirmationTypeTheia.never);
-        await preferencesHandler.setTerminalType(TerminalRendererTypeTheia.dom);
-      } else if (TestConstants.TS_SELENIUM_EDITOR === EditorType.CHE_CODE) {
-        // init vscode-extension-tester monaco-page-objects
-        monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
-      }
-
     });
 
     runner.on('test', async function (test: mocha.Test) {

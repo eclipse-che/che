@@ -82,7 +82,7 @@ export class GitHubUtil {
       const arrayOfPublicKeys = JSON.parse(stringified);
       for (let entry of arrayOfPublicKeys) {
         if (entry.title === keyName) {
-          this.removePublicSshKey(authToken, entry.id);
+          await this.removePublicSshKey(authToken, entry.id);
           break;
         }
       }
@@ -97,7 +97,7 @@ export class GitHubUtil {
     try {
       const idList: string[] = await this.getPublicSshKeys(authToken);
       for (let id of idList) {
-        this.removePublicSshKey(authToken, id);
+        await this.removePublicSshKey(authToken, id);
       }
 
     } catch (error) {
