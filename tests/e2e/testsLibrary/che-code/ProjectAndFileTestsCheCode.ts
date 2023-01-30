@@ -13,6 +13,8 @@ import { inject, injectable } from 'inversify';
 import { By, until } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
+import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../TimeoutConstants';
 
 @injectable()
 export class ProjectAndFileTestsCheCode {
@@ -22,13 +24,10 @@ export class ProjectAndFileTestsCheCode {
 
     public async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
         try {
-            await this.driverHelper.getDriver().wait(until.elementLocated(By.className('monaco-workbench')));
+            await this.driverHelper.getDriver().wait(until.elementLocated(By.className('monaco-workbench')), TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
         } catch (err) {
-            if ((err as Error).name === 'WebDriverError') {
-                await new Promise(res => setTimeout(res, 3000));
-            } else {
-                throw err;
-            }
+            Logger.error(`ProjectAndFileTestsCheCode.waitWorkspaceReadinessForCheCodeEditor - waiting for workspace readiness failed: ${err}`);
+            throw err;
         }
     }
 }
