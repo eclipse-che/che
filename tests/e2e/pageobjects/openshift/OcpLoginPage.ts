@@ -78,7 +78,7 @@ export class OcpLoginPage {
     }
 
     async enterPasswordOpenShift(passw: string) {
-        Logger.debug(`OcpLoginPage.enterPasswordOpenShift "${passw}"`);
+        Logger.debug(`OcpLoginPage.enterPasswordOpenShift"`);
 
         await this.driverHelper.enterValue(By.id('inputPassword'), passw);
     }

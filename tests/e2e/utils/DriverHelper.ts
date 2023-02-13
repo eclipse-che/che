@@ -408,7 +408,11 @@ export class DriverHelper {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
-        Logger.trace(`DriverHelper.type ${elementLocator} text: ${text}`);
+        if (elementLocator.toString().toLocaleLowerCase().includes('password')) {
+            Logger.trace(`DriverHelper.type ${elementLocator} text: ***`);
+        } else {
+            Logger.trace(`DriverHelper.type ${elementLocator} text: ${text}`);
+        }
 
         for (let i = 0; i < attempts; i++) {
             let element: WebElement;
@@ -573,7 +577,11 @@ export class DriverHelper {
     }
 
     public async enterValue(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
-        Logger.trace(`DriverHelper.enterValue ${elementLocator} text: ${text}`);
+        if (elementLocator.toString().toLocaleLowerCase().includes('password')) {
+            Logger.trace(`DriverHelper.enterValue ${elementLocator} text: ***`);
+        } else {
+            Logger.trace(`DriverHelper.enterValue ${elementLocator} text: ${text}`);
+        }
 
         await this.waitVisibility(elementLocator, timeout);
         await this.clear(elementLocator);
