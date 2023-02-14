@@ -8,10 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { e2eContainer } from '../../../inversify.config';
-import { ActivityBar, ViewControl, Workbench } from 'monaco-page-objects';
 import { CLASSES } from '../../../inversify.types';
 import { WorkspaceHandlingTests } from '../../../testsLibrary/WorkspaceHandlingTests';
-import { Logger } from '../../../utils/Logger';
 import CheReporter from '../../../driver/CheReporter';
 import { ProjectAndFileTestsCheCode } from '../../../testsLibrary/che-code/ProjectAndFileTestsCheCode';
 

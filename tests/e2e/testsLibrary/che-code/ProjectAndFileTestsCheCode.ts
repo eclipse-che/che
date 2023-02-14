@@ -10,7 +10,7 @@
 
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { By, until } from 'selenium-webdriver';
+import { By, error, until, WebElement } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { Logger } from '../../utils/Logger';
@@ -22,6 +22,8 @@ import { TestConstants } from '../../TestConstants';
 export class ProjectAndFileTestsCheCode {
 
     private static readonly ENDPOINTS_TITLE_TEXT: string = 'endpoints';
+    private static readonly TRUST_AUTHORS_DIALOG_BOX_TEXT: string = 'Do you trust the authors of the files in this folder?';
+    private static readonly TRUST_AUTHORS_DIALOG_BUTTON_TEXT: string = 'Yes, I trust the authors';
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
@@ -48,6 +50,34 @@ export class ProjectAndFileTestsCheCode {
         } catch (err) {
             Logger.error(`ProjectAndFileTestsCheCode.waitWorkspaceReadinessForCheCodeEditor - waiting for workspace readiness failed: ${err}`);
             throw err;
+        }
+    }
+
+    public async waitAndConfirmTrustAuthorsDialogBox(): Promise<void> {
+        Logger.debug('ProjectAndFileTestsCheCode.waitAndConfirmTrustAuthorsDialogBox');
+        try {
+            Logger.trace('ProjectAndFileTestsCheCode.waitAndConfirmTrustAuthorsDialogBox - waiting for trust authors dialog box overlay');
+            const dialog: WebElement = await this.driverHelper.waitPresence(By.id('monaco-dialog-message-text'));
+            const dialogText: string = await dialog.getText();
+            if (dialogText === ProjectAndFileTestsCheCode.TRUST_AUTHORS_DIALOG_BOX_TEXT) {
+                const trustAuthorsDialogCheckbox: WebElement = await this.driverHelper.waitPresence(By.css('body > div > div.monaco-dialog-modal-block.dimmed > div > div > div.dialog-message-row > div.dialog-message-container > div.dialog-checkbox-row > div.monaco-custom-toggle.codicon.codicon-check.monaco-checkbox'));
+                let isChecked: boolean = await trustAuthorsDialogCheckbox.getAttribute('aria-checked') === 'true';
+                if (!isChecked) {
+                    trustAuthorsDialogCheckbox.click();
+                    isChecked = await trustAuthorsDialogCheckbox.getAttribute('aria-checked') === 'true';
+                    Logger.trace(`Clicked thrust authors dialog checkbox. Is checked: ${isChecked}`);
+                }
+                const trustAuthorsDialogButton: WebElement = await this.driverHelper.waitPresence(By.css('body > div > div.monaco-dialog-modal-block.dimmed > div > div > div.dialog-buttons-row > div > div:nth-child(2) > a'));
+                const trustAuthorsDialogButtonText: string = await trustAuthorsDialogButton.getText();
+                if (trustAuthorsDialogButtonText === ProjectAndFileTestsCheCode.TRUST_AUTHORS_DIALOG_BUTTON_TEXT) {
+                    trustAuthorsDialogButton.click();
+                    Logger.trace(`Clicked trust authors dialog button.`);
+                }
+            }
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                Logger.warn(`ProjectAndFileTestsCheCode.waitAndConfirmTrustAuthorsDialogBox - "Do you trust the authors" dialog not shown. Continuing...`);
+            }
         }
     }
 

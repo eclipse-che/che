@@ -18,6 +18,7 @@ import { ProjectAndFileTestsCheCode } from '../../../testsLibrary/che-code/Proje
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTestsCheCode = e2eContainer.get(CLASSES.ProjectAndFileTestsCheCode);
+
 const stackName: string = 'Quarkus REST API';
 const sectionTitle: string = 'quarkus-quickstarts';
 const projectName: string = 'getting-started';
@@ -31,6 +32,8 @@ suite(`Happy Path test`, async () => {
         });
         test('Wait workspace readiness', async() => {
             const workbench: Workbench = await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+
+            await projectAndFileTests.waitAndConfirmTrustAuthorsDialogBox();
 
             const rootProjectViewItem: ViewItem = await projectAndFileTests.waitForRootProjectPresence(workbench, sectionTitle, projectName);
             Logger.debug('Found root project.');
