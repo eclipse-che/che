@@ -28,15 +28,6 @@ suite(`${stackName} test`, async () => {
         });
         test('Wait workspace readiness', async() => {
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-
-            const workbench: Workbench = new Workbench();
-            const activityBar: ActivityBar = workbench.getActivityBar();
-            const activityBarControls: ViewControl[] = await activityBar.getViewControls();
-
-            Logger.debug(`Editor sections:`);
-            for (const control of activityBarControls) {
-                Logger.debug(`${await control.getTitle()}`);
-            }
         });
     });
 
