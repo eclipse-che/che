@@ -21,11 +21,12 @@ import { Logger } from '../../utils/Logger';
 export class Dashboard {
     private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`;
     private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
-    private static readonly LOADER_PAGE_CSS: string = '.main-page-loader';
+    private static readonly LOADER_PAGE_STEP_TITLES_XPATH: string = '//*[@data-testid="step-title"]';
     private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
+    private static readonly LOADER_ALERT_XPATH = '//*[@data-testid="loader-alert"]';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
+                @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
 
     async stopWorkspaceByUI(workspaceName: string) {
         Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
@@ -84,16 +85,22 @@ export class Dashboard {
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
+    async getLoaderAlert(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
+        Logger.debug('Dashboard.getLoaderAlert');
+
+        return await this.driverHelper.waitAndGetText(By.xpath(Dashboard.LOADER_ALERT_XPATH), timeout);
+    }
+
     async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
         Logger.debug('Dashboard.waitLoader');
 
-        await this.driverHelper.waitVisibility(By.css(Dashboard.LOADER_PAGE_CSS), timeout);
+        await this.driverHelper.waitAllPresence(By.xpath(Dashboard.LOADER_PAGE_STEP_TITLES_XPATH), timeout);
     }
 
     async waitLoaderDisappearance(timeout: number = TimeoutConstants.TS_WAIT_LOADER_ABSENCE_TIMEOUT) {
         Logger.debug('Dashboard.waitLoaderDisappearance');
 
-        await this.driverHelper.waitDisappearance(By.css(Dashboard.LOADER_PAGE_CSS), timeout);
+        await this.driverHelper.waitDisappearance(By.xpath(Dashboard.LOADER_PAGE_STEP_TITLES_XPATH), timeout);
     }
 
     async waitDisappearanceNavigationMenu(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
