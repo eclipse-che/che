@@ -23,9 +23,13 @@ launchSingleUserstory(){
 checkUserstoryName(){
     local checkedName="$(ls tests/devfiles/${TS_SELENIUM_EDITOR} | grep ${USERSTORY}.spec.ts)";
 
-    if [ -z "$TS_SELENIUM_EDITOR"]; then
+    if [ -z "$TS_SELENIUM_EDITOR" ]; then
         echo ""
         echo "Variable TS_SELENIUM_EDITOR is unset."
+        echo ""
+        echo "Available values are:"
+        echo ""
+        ls tests/devfiles/ | xargs -n1 echo
         echo ""
         echo "Please assign the variable to a correct editor value."
         echo ""
