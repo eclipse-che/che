@@ -11,7 +11,7 @@
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
-import { By } from 'selenium-webdriver';
+import { By, WebElement } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../TimeoutConstants';
 
@@ -23,8 +23,10 @@ export enum WorkspaceStatusUI {
 @injectable()
 export class Workspaces {
     private static readonly ADD_WORKSPACE_BUTTON_XPATH: string = `//button[text()='Add Workspace']`;
+    private static readonly WORKSPACE_ITEM_TABLE_NAME_SECTION_XPATH: string = `//td[@data-label="Name"]/span/a`;
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
+    }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         Logger.debug('Workspaces.waitPage');
@@ -168,6 +170,25 @@ export class Workspaces {
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
     }
 
+    async getAllCreatedWorkspacesNames(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+        Logger.debug('Workspaces.getAllCreatedWorkspacesNames');
+
+        const workspaceNames: string[] = [];
+        try {
+            const workspaceItems: WebElement[] = await this.driverHelper.waitAllPresence(By.xpath(Workspaces.WORKSPACE_ITEM_TABLE_NAME_SECTION_XPATH), timeout);
+            for (let item of workspaceItems) {
+                Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - try to get ${workspaceItems.indexOf(item)} items name`);
+                workspaceNames.push(await item.getText());
+                Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - workspace name is "${workspaceNames[workspaceNames.length - 1]}"`);
+            }
+        } catch (e) {
+            Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - ${e}`);
+        }
+
+        Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - ${workspaceNames.length} workspaces have been created in DevSpaces`);
+        return workspaceNames;
+    }
+
     private getWorkspaceListItemLocator(workspaceName: string): string {
         return `//tr[td/span/a[text()='${workspaceName}']]`;
     }
@@ -191,5 +212,4 @@ export class Workspaces {
     private getOpenButtonLocator(workspaceName: string) {
         return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-key=5]//a[text()='Open']`);
     }
-
 }
