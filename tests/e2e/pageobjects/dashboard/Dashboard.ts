@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,11 +9,11 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../TestConstants';
-import { TimeoutConstants } from '../../TimeoutConstants';
+import { TestConstants } from '../../constants/TestConstants';
+import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
 

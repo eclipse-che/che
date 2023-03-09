@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,10 @@
 
 import { injectable, inject } from 'inversify';
 import { By, error } from 'selenium-webdriver';
-import { CLASSES } from '../inversify.types';
+import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
-import { TimeoutConstants } from '../TimeoutConstants';
+import { TimeoutConstants } from '../constants/TimeoutConstants';
 
 @injectable()
 export class BrowserTabsUtil {

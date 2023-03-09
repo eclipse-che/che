@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,16 +9,15 @@
  **********************************************************************/
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES, TYPES } from '../../../inversify.types';
+import { CLASSES, TYPES } from '../../../configs/inversify.types';
 import 'reflect-metadata';
-import { TestConstants } from '../../../TestConstants';
+import { TestConstants } from '../../../constants/TestConstants';
 import { By } from 'selenium-webdriver';
-import { Ide } from '../../ide/theia/Ide';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 import { Logger } from '../../../utils/Logger';
-import { TimeoutConstants } from '../../../TimeoutConstants';
+import { TimeoutConstants } from '../../../constants/TimeoutConstants';
 import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
-
+import { ProjectAndFileTests } from '../../../tests-library/ProjectAndFileTests';
 
 @injectable()
 export class WorkspaceDetails {
@@ -29,7 +28,8 @@ export class WorkspaceDetails {
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = 'workspace-details-overview md-progress-linear';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-                @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
+                @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil,
+                @inject(CLASSES.ProjectAndFileTests) private readonly testProjectAndFileCheCode: ProjectAndFileTests) { }
 
     async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         Logger.debug('WorkspaceDetails.waitLoaderDisappearance');
@@ -85,7 +85,7 @@ export class WorkspaceDetails {
         Logger.debug(`WorkspaceDetails.openWorkspace "${namespace}/${workspaceName}"`);
 
         await this.clickOnOpenButton(timeout);
-        await this.driverHelper.waitVisibility(By.css(Ide.THEIA_EDITOR_CSS), TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
+        await this.testProjectAndFileCheCode.waitWorkspaceReadinessForCheCodeEditor();
         await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
