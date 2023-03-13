@@ -2,7 +2,7 @@
 
 Load tests should test the behaviour of server when users will start workspace at once. 
 
-## Prereqiusites
+## Prerequisites
 Test itself is just creating a load so there are some steps that need to be done before running load tests.
 What do you need to run those tests
 - `oc` client, `jq` and `tar` installed
@@ -10,8 +10,8 @@ What do you need to run those tests
 - cluster where load tests pods will be executed (can be the same cluster where Che/CRW is deployed)
 - users created on a Che/CRW (see 'How to create users' below)
 
-### How to crate users
-Users can be craeted manually, but there is a script `create_users.sh` to create users automatically.
+### How to create users
+Users can be created manually, but there is a script `create_users.sh` to create users automatically.
 #### Creating users via script
 Log in via oc to the server and namespace, where the Che/CRW is running.
 Type `create_users.s -h` to see how to run the script. The script will generate users based on `base part of username` and will add an increment to that.
@@ -29,7 +29,7 @@ The Che is running without any users created yet. 5 users can be created here by
 ```
 
 There are 5 users created `user1`, `user2`, `user3`, `user4`, `user5`. All users have common password `pass123`. 
-Now 5 usres exist and can be used for load tests. Let's add anoter 10!
+Now 5 usres exist and can be used for load tests. Let's add another 10!
 ```
 ./create_users.sh -n user -p pass123 -c 10 -e Che -s 6
 ```
@@ -53,7 +53,7 @@ Let's consider Che with 15 users created in format `user1`, `user2`, etc. and wi
 
 **Additional parameters**
 There is non mandatory parameter that can be used:
-`-t` defines how many workspaces will user create in a row. Default value is one. That basicly means that whole test flow will be run again - so only one workspace will run at one time.
+`-t` defines how many workspaces will user create in a row. Default value is one. That basically means that whole test flow will be run again - so only one workspace will run at one time.
 
 ### Other parameters
 `-i` sets the image that include test. This image is used as a base image for a pods where test runs.
