@@ -29,7 +29,7 @@ The Che is running without any users created yet. 5 users can be created here by
 ```
 
 There are 5 users created `user1`, `user2`, `user3`, `user4`, `user5`. All users have common password `pass123`. 
-Now 5 usres exist and can be used for load tests. Let's add another 10!
+Now 5 users exist and can be used for load tests. Let's add another 10!
 ```
 ./create_users.sh -n user -p pass123 -c 10 -e Che -s 6
 ```
