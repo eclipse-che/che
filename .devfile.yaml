@@ -28,3 +28,19 @@ commands:
   exec:
     commandLine: '.repositories-update-contributing.sh IN_DOCKER'
     component: devtools
+- id: tests-update-dependencies
+  exec:
+    commandLine: >-
+      cd tests/e2e &&
+      echo "Updating npm" &&
+      npm install -g npm &&
+      echo "Updating nodejs" &&
+      nvm install Gallium &&
+      echo "Installing typescript" &&
+      npm install -g typescript &&
+      echo "Installing test dependencies" &&
+      rm -rf package-lock.json &&
+      npm install &&
+      npm uninstall chromedriver && npm install chromedriver --save-dev &&
+      cd ../../
+    component: devtools
