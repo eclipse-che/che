@@ -9,8 +9,19 @@
 schemaVersion: 2.1.0
 metadata:
   name: che
+  language: typescript
 attributes:
-  controller.devfile.io/storage-type: ephemeral
+  controller.devfile.io/scc: container-build
+  controller.devfile.io/storage-type: per-workspace
+projects:
+  - name: che
+    git:
+      remotes:
+        origin: 'https://github.com/ScrewTSW/che.git'
+        upstream: 'https://github.com/eclipse/che.git'
+      checkoutFrom:
+        remote: origin
+        revision: devtools-week-che-dogfooding-test-development
 components:
 - name: devtools
   container:
@@ -19,6 +30,8 @@ components:
     memoryRequest: 256Mi
     cpuLimit: 500m
     cpuRequest: 30m
+    mountSources: true
+    sourceMapping: /projects
 commands:
 - id: update-contributing
   exec:
