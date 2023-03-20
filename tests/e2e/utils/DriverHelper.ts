@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,13 +9,13 @@
  **********************************************************************/
 import { IDriver } from '../driver/IDriver';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../inversify.types';
+import { TYPES } from '../configs/inversify.types';
 import { error, Actions } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { ThenableWebDriver, By, until, WebElement } from 'selenium-webdriver';
-import { TestConstants } from '../TestConstants';
+import { TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
-import { TimeoutConstants } from '../TimeoutConstants';
+import { TimeoutConstants } from '../constants/TimeoutConstants';
 
 
 @injectable()

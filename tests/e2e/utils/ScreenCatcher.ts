@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2021 Red Hat, Inc.
+ * Copyright (c) 2021-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,11 +9,11 @@
  **********************************************************************/
 import * as fs from 'fs';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../inversify.types';
+import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
-import { TestConstants } from '..';
 import { Sanitizer } from './Sanitizer';
 import { error } from 'selenium-webdriver';
+import { TestConstants } from '../constants/TestConstants';
 
 @injectable()
 export class ScreenCatcher {

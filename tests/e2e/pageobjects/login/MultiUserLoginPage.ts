@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,8 +11,8 @@ import 'reflect-metadata';
 import { ICheLoginPage } from './ICheLoginPage';
 import { CheLoginPage } from '../openshift/CheLoginPage';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { TestConstants } from '../../TestConstants';
+import { CLASSES } from '../../configs/inversify.types';
+import { TestConstants } from '../../constants/TestConstants';
 import { Logger } from '../../utils/Logger';
 
 @injectable()

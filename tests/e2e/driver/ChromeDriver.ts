@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@ import { injectable } from 'inversify';
 import { ThenableWebDriver, Builder } from 'selenium-webdriver';
 import { IDriver } from './IDriver';
 import { Options } from 'selenium-webdriver/chrome';
-import { TestConstants } from '../TestConstants';
+import { TestConstants } from '../constants/TestConstants';
 
 @injectable()
 export class ChromeDriver implements IDriver {

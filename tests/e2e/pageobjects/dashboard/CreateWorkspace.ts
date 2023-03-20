@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,12 +9,12 @@
  **********************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
-import { TimeoutConstants } from '../../TimeoutConstants';
-import { EditorType, TestConstants } from '../../TestConstants';
+import { TimeoutConstants } from '../../constants/TimeoutConstants';
+import { EditorType, TestConstants } from '../../constants/TestConstants';
 
 @injectable()
 export class CreateWorkspace {

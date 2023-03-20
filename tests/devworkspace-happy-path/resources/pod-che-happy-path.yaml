@@ -17,6 +17,8 @@ spec:
       env:
         - name: TEST_SUITE
           value: HAPPY_PATH_SUITE
+        - name: USERSTORY
+          value: HAPPY_PATH_USERSTORY
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: '0'
         - name: TS_SELENIUM_BASE_URL

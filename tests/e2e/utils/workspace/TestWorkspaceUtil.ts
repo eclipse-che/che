@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+ * Copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,13 @@
 
 import 'reflect-metadata';
 import { che } from '@eclipse-che/api';
-import { TestConstants } from '../../TestConstants';
+import { TestConstants } from '../../constants/TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { WorkspaceStatus } from './WorkspaceStatus';
 import { error } from 'selenium-webdriver';
-import { CheApiRequestHandler } from '../requestHandlers/CheApiRequestHandler';
-import { CLASSES } from '../../inversify.types';
+import { CheApiRequestHandler } from '../request-handlers/CheApiRequestHandler';
+import { CLASSES } from '../../configs/inversify.types';
 import { Logger } from '../Logger';
 import axios from 'axios';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
