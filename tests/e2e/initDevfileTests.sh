@@ -23,9 +23,13 @@ launchSingleUserstory(){
 checkUserstoryName(){
     local checkedName="$(ls tests/devfiles/${TS_SELENIUM_EDITOR} | grep ${USERSTORY}.spec.ts)";
 
-    if [ -z "$TS_SELENIUM_EDITOR" ]; then
+    if [ -z "$TS_SELENIUM_EDITOR" ] || [ ! -d "tests/devfiles/${TS_SELENIUM_EDITOR}" ]; then
         echo ""
-        echo "Variable TS_SELENIUM_EDITOR is unset."
+        if [ -z "$TS_SELENIUM_EDITOR" ]; then
+          echo "Variable TS_SELENIUM_EDITOR is unset."
+        elif [ ! -d "tests/devfiles/${TS_SELENIUM_EDITOR}" ]; then
+          echo "Variable \"${TS_SELENIUM_EDITOR}\" is not a valid directory."
+        fi
         echo ""
         echo "Available values are:"
         echo ""
@@ -39,9 +43,9 @@ checkUserstoryName(){
 
     if [ -z "$checkedName" ]; then
         echo ""
-        echo "Current value USERSTORY=\"${USERSTORY}\" doesn't match to any existed test:"
+        echo "Current value USERSTORY=\"${USERSTORY}\" doesn't match to any of existing tests:"
         echo ""
-        echo "$(ls tests/devfiles | sed -e 's/.spec.ts/ /g')"
+        echo "$(ls "tests/devfiles/${TS_SELENIUM_EDITOR}" | sed -e 's/.spec.ts//g')"
         echo ""
         echo "Please choose one of the tests above, or unset the \"USERSTORY\" variable for launching all of them."
         echo ""
