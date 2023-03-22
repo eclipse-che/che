@@ -20,7 +20,6 @@ checkUserstoryName(){
         export TS_SELENIUM_EDITOR=${TS_SELENIUM_EDITOR:-"che-code"}
         echo "TS_SELENIUM_EDITOR = ${TS_SELENIUM_EDITOR}"
         echo ""
-        exit 1
     fi
 
     if [ -z "$checkedName" ]; then
