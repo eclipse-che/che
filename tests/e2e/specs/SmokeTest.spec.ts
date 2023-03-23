@@ -8,13 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { SideBarView, ViewSection } from 'monaco-page-objects';
-import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
-import { CLASSES } from '../../configs/inversify.types';
-import { e2eContainer } from '../../configs/inversify.config';
-import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
-import { registerRunningWorkspace } from '../MochaHooks';
-import { Logger } from '../../utils/Logger';
-import { LoginTests } from '../../tests-library/LoginTests';
+import { ProjectAndFileTests } from '../tests-library/ProjectAndFileTests';
+import { CLASSES } from '../configs/inversify.types';
+import { e2eContainer } from '../configs/inversify.config';
+import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
+import { registerRunningWorkspace } from './MochaHooks';
+import { Logger } from '../utils/Logger';
+import { LoginTests } from '../tests-library/LoginTests';
 
 const factoryUrl: string = 'https://github.com/che-incubator/quarkus-api-example.git';
 const projectName: string = 'quarkus-api-example';
@@ -22,11 +22,11 @@ const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.Projec
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 
-suite(`The ${factoryUrl} userstory`, async function () {
+suite(`The SmokeTest userstory`, async function () {
     let projectSection: ViewSection;
     suite(`Create workspace from factory:${factoryUrl}`, async function () {
         loginTests.loginIntoChe();
-        workspaceHandlingTests.createAndOpenWorkspaceFromFactory(factoryUrl);
+        workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());

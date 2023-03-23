@@ -44,12 +44,6 @@ export class CreateWorkspace {
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
     }
 
-    async startWorkspaceUsingFactory(factoryUrl: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug(`CreateWorkspace.startWorkspaceUsingFactory factoryUrl: "${factoryUrl}"`);
-        await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL_LOCATOR, timeout);
-        await this.driverHelper.type(CreateWorkspace.FACTORY_URL_LOCATOR, Key.chord(factoryUrl, Key.ENTER), timeout);
-    }
-
     async clickOnSampleForSpecificEditor(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
         await this.clickOnEditorsDropdownListButton(sampleName, timeout);
 
@@ -57,6 +51,12 @@ export class CreateWorkspace {
 
         const sampleLocator: By = this.getSampleLocatorWithSpecificEditor(sampleName);
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
+    }
+
+    async importFromGitUsingUI(factoryUrl: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+        Logger.debug(`CreateWorkspace.importFromGitUsingUI factoryUrl: "${factoryUrl}"`);
+        await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL_LOCATOR, timeout);
+        await this.driverHelper.type(CreateWorkspace.FACTORY_URL_LOCATOR, Key.chord(factoryUrl, Key.ENTER), timeout);
     }
 
     private async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
