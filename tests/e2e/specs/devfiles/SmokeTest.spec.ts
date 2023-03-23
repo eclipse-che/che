@@ -16,17 +16,17 @@ import { registerRunningWorkspace } from '../MochaHooks';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 
-const stackName: string = 'Quarkus REST API';
-const projectName: string = 'quarkus-quickstarts';
+const factoryUrl: string = 'https://github.com/che-incubator/quarkus-api-example.git';
+const projectName: string = 'quarkus-api-example';
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 
-suite(`The ${stackName} userstory`, async function () {
+suite(`The ${factoryUrl} userstory`, async function () {
     let projectSection: ViewSection;
-    suite(`Create workspace from ${stackName} sample`, async function () {
+    suite(`Create workspace from factory:${factoryUrl}`, async function () {
         loginTests.loginIntoChe();
-        workspaceHandlingTests.createAndOpenWorkspace(stackName);
+        workspaceHandlingTests.createAndOpenWorkspaceFromFactory(factoryUrl);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
