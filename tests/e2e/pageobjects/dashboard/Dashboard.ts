@@ -24,6 +24,8 @@ export class Dashboard {
     private static readonly LOADER_PAGE_STEP_TITLES_XPATH: string = '//*[@data-testid="step-title"]';
     private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
     private static readonly LOADER_ALERT_XPATH = '//*[@data-testid="loader-alert"]';
+    private static readonly USER_DROPDOWN_MENU_BUTTON_XPATH = `//*[text()="${TestConstants.TS_SELENIUM_OCP_USERNAME}"]//parent::button`;
+    private static readonly LOGOUT_BUTTON_XPATH = '//button[text()="Logout"]';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
                 @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
@@ -116,9 +118,17 @@ export class Dashboard {
     }
 
     async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
-        Logger.debug(`Dashboard.recentWorkspaceName`);
+        Logger.debug(`Dashboard.getRecentWorkspaceName`);
 
         return await this.driverHelper.waitAndGetText(By.css('[data-testid="recent-workspace-item"]'), timeout);
     }
 
+    async logout(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+        Logger.debug(`Dashboard.logout`);
+
+        await this.openDashboard();
+        await this.driverHelper.waitAndClick(By.xpath(Dashboard.USER_DROPDOWN_MENU_BUTTON_XPATH), timeout);
+        await this.driverHelper.waitAndClick(By.xpath(Dashboard.LOGOUT_BUTTON_XPATH), timeout);
+        await this.driverHelper.waitDisappearance(By.xpath(Dashboard.USER_DROPDOWN_MENU_BUTTON_XPATH), timeout);
+    }
 }

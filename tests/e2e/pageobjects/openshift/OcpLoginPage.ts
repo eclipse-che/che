@@ -24,12 +24,6 @@ export class OcpLoginPage {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async openLoginPageOpenShift(url: string) {
-        Logger.debug('OcpLoginPage.openLoginPageOpenShift');
-
-        await this.driverHelper.navigateToUrl(url);
-    }
-
     async waitOpenShiftLoginWelcomePage() {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
@@ -95,19 +89,4 @@ export class OcpLoginPage {
 
         await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
-
-    async isLinkAccountPageVisible(): Promise<boolean> {
-        Logger.debug('OcpLoginPage.isLinkAccountPageVisible');
-
-        const linkAccountLocator: By = By.id(`linkAccount`);
-        return await this.driverHelper.waitVisibilityBoolean(linkAccountLocator, 3, 5000);
-    }
-
-    async clickOnLinkAccountButton() {
-        Logger.debug('OcpLoginPage.clickOnLinkAccountButton');
-
-        const linkAccountLocator: By = By.id(`linkAccount`);
-        this.driverHelper.waitAndClick(linkAccountLocator);
-    }
-
 }

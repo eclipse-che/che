@@ -34,7 +34,7 @@ exports.mochaHooks = {
     beforeAll: [
         async function enableRequestInterceptor() {
             if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
-                CheApiRequestHandler.enableRequestInteceptor();
+                CheApiRequestHandler.enableRequestInterceptor();
             }
         },
         async function enableResponseInterceptor() {
@@ -47,7 +47,7 @@ exports.mochaHooks = {
             monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
         },
         async function prolongTimeoutConstantsInDebugMode() {
-            if (TestConstants.TS_DEBUG_MODE === 'true') {
+            if (TestConstants.TS_DEBUG_MODE) {
                 for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
                     Object.defineProperty(TimeoutConstants, timeout, {value: seconds * 100});
                 }

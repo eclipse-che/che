@@ -10,9 +10,8 @@
 import { IDriver } from '../driver/IDriver';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../configs/inversify.types';
-import { error, Actions } from 'selenium-webdriver';
+import { Actions, By, error, ThenableWebDriver, until, WebElement } from 'selenium-webdriver';
 import 'reflect-metadata';
-import { ThenableWebDriver, By, until, WebElement } from 'selenium-webdriver';
 import { TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
@@ -32,23 +31,12 @@ export class DriverHelper {
         return this.driver.actions();
     }
 
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.maximize()
-     */
-    public async maximize() {
-        Logger.trace(`DriverHelper.maximize`);
-
-        await this.driver.manage().window().maximize();
-    }
-
     public async isVisible(locator: By): Promise<boolean> {
         Logger.trace(`DriverHelper.isVisible ${locator}`);
 
         try {
             const element: WebElement = await this.driver.findElement(locator);
-            const isVisible: boolean = await element.isDisplayed();
-            return isVisible;
+            return await element.isDisplayed();
         } catch {
             return false;
         }
@@ -164,8 +152,7 @@ export class DriverHelper {
 
         for (let i = 0; i < attempts; i++) {
             try {
-                const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), polling);
-                return webElement;
+                return await this.driver.wait(until.elementLocated(elementLocator), polling);
             } catch (err) {
                 if (err instanceof error.TimeoutError) {
                     Logger.trace(`DriverHelper.waitPresence - Polling timed out attempt #${(i + 1)}, retrying with ${polling}ms timeout`);
@@ -182,7 +169,7 @@ export class DriverHelper {
             }
         }
 
-        throw new error.TimeoutError(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum presence checking attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
     public async waitAllPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<Array<WebElement>> {
@@ -193,8 +180,7 @@ export class DriverHelper {
 
         for (let i = 0; i < attempts; i++) {
             try {
-                const webElements: Array<WebElement> = await this.driver.wait(until.elementsLocated(elementLocator), polling);
-                return webElements;
+                return await this.driver.wait(until.elementsLocated(elementLocator), polling);
             } catch (err) {
                 if (err instanceof error.TimeoutError) {
                     Logger.trace(`DriverHelper.waitAllPresence - Polling timed out attempt #${(i + 1)}, retrying with ${polling}ms timeout`);
@@ -299,7 +285,6 @@ export class DriverHelper {
         }
 
         throw new error.TimeoutError(`Exceeded maximum clicking attempts, the '${elementLocator}' element is not clickable`);
-
     }
 
     public async waitAndGetElementAttribute(elementLocator: By, attribute: string,
@@ -329,8 +314,7 @@ export class DriverHelper {
             }
 
             try {
-                const attributeValue = await element.getAttribute(attribute);
-                return attributeValue;
+                return await element.getAttribute(attribute);
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling);
@@ -372,8 +356,7 @@ export class DriverHelper {
             }
 
             try {
-                const cssAttributeValue = await element.getCssValue(cssAttribute);
-                return cssAttributeValue;
+                return await element.getCssValue(cssAttribute);
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling);
@@ -622,8 +605,7 @@ export class DriverHelper {
             }
 
             try {
-                const innerText: string = await element.getText();
-                return innerText;
+                return await element.getText();
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling);
@@ -641,62 +623,13 @@ export class DriverHelper {
     public async waitAndGetValue(elementLocator: By, timeout: number): Promise<string> {
         Logger.trace(`DriverHelper.waitAndGetValue ${elementLocator}`);
 
-        const elementValue: string = await this.waitAndGetElementAttribute(elementLocator, 'value', timeout);
-        return elementValue;
+        return await this.waitAndGetElementAttribute(elementLocator, 'value', timeout);
     }
 
     public async waitUntilTrue(callback: any, timeout: number) {
         Logger.trace('DriverHelper.waitUntilTrue');
 
         await this.driver.wait(callback, timeout);
-    }
-
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.refreshPage()
-     */
-    public async reloadPage() {
-        Logger.debug('DriverHelper.reloadPage');
-
-        await this.driver.navigate().refresh();
-    }
-
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.navigateAndWaitToUrl()
-     */
-    public async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL) {
-        Logger.trace(`DriverHelper.navigateAndWaitToUrl ${url}`);
-
-        await this.navigateToUrl(url);
-        await this.waitURL(url, timeout);
-    }
-
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.navigateTo()
-     */
-    public async navigateToUrl(url: string) {
-        Logger.debug(`DriverHelper.navigateToUrl ${url}`);
-
-        await this.driver.navigate().to(url);
-    }
-
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.waitURL()
-     */
-    public async waitURL(expectedUrl: string, timeout: number) {
-        Logger.trace(`DriverHelper.waitURL ${expectedUrl}`);
-
-        await this.getDriver().wait(async () => {
-            const currentUrl: string = await this.getDriver().getCurrentUrl();
-            const urlEquals: boolean = currentUrl === expectedUrl;
-
-            if (urlEquals) {
-                return true;
-            }
-        }, timeout);
     }
 
     public async scrollTo(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) {
@@ -739,14 +672,6 @@ export class DriverHelper {
         }
 
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
-    }
-
-    /**
-     * @deprecated Method deprecated. Use the next method instead.
-     * @see BrowserTabsUtil.getCurrentUrl()
-     */
-    public async getCurrentUrl(): Promise<string> {
-        return await this.driver.getCurrentUrl();
     }
 
     getDriver(): ThenableWebDriver {

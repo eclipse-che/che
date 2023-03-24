@@ -14,12 +14,14 @@ import { TestConstants } from '../constants/TestConstants';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { Logger } from '../utils/Logger';
 import { inject, injectable } from 'inversify';
+import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 
 @injectable()
 export class LoginTests {
     constructor(
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(TYPES.CheLogin) private readonly loginPage: ICheLoginPage) {
+        @inject(TYPES.CheLogin) private readonly loginPage: ICheLoginPage,
+        @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) {
     }
 
     public loginIntoChe(): void {
@@ -30,6 +32,12 @@ export class LoginTests {
                 Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
                 await this.browserTabsUtil.maximize();
             }
+        });
+    }
+
+    public logoutFromChe(): void {
+        test('Logout', async () => {
+            await this.dashboard.logout();
         });
     }
 }

@@ -88,7 +88,6 @@ export class Workspaces {
         Logger.debug(`Workspaces.waitActionsPopup of the '${workspaceName}' list item`);
 
         await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
-        await this.driverHelper.wait(2000);
     }
 
     async openActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT) {
@@ -105,7 +104,7 @@ export class Workspaces {
 
     async clickActionsStopWorkspaceButton(workspaceName: string) {
         Logger.debug(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item`);
-        // workaround because of issue CRW-3649
+        // todo: workaround because of issue CRW-3649
         try {
             await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
         } catch (e) {
@@ -122,7 +121,6 @@ export class Workspaces {
         const confirmationWindowLocator: By = By.xpath(`//div[@aria-label='Delete workspaces confirmation window']`);
 
         await this.driverHelper.waitVisibility(confirmationWindowLocator, timeout);
-        await this.driverHelper.wait(5000);
     }
 
 

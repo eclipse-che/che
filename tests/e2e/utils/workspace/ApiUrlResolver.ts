@@ -30,10 +30,6 @@ export class ApiUrlResolver {
         return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
     }
 
-    public getKubernetesApiUrl(): string {
-        return ApiUrlResolver.KUBERNETES_API_URL;
-    }
-
     private async obtainUserNamespace(): Promise<string> {
         Logger.debug(`ApiUrlResolver.obtainUserNamespace ${this.userNamespace}`);
         if (this.userNamespace.length === 0) {

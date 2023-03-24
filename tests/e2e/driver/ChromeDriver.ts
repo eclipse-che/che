@@ -54,7 +54,7 @@ export class ChromeDriver implements IDriver {
             .forBrowser('chrome')
             .setChromeOptions(options);
 
-        // if 'false' w3c protocl is disabled
+        // if 'false' w3c protocol is disabled
         if (! TestConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
             builder.withCapabilities(disableW3copts)
             .forBrowser('chrome')
