@@ -17,19 +17,21 @@ import { TestConstants } from '../constants/TestConstants';
 
 @injectable()
 export class ChromeDriver implements IDriver {
-    private readonly driver: ThenableWebDriver;
+    private readonly driver: ThenableWebDriver | undefined;
 
     constructor() {
         const options: Options = this.getDriverOptions();
-        this.driver = this.getDriverBuilder(options).build();
+        if (TestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+            this.driver = this.getDriverBuilder(options).build();
+        }
     }
 
     get(): ThenableWebDriver {
-        return this.driver;
+        return this.driver as ThenableWebDriver;
     }
 
     async setWindowSize(): Promise<void> {
-        await this.driver
+        await (this.driver as ThenableWebDriver)
             .manage()
             .window()
             .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);

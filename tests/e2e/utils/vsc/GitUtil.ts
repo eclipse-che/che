@@ -19,7 +19,7 @@ export class GitUtil {
      * @param url git https url (which using for "git clone")
      * @return project name
      */
-    getProjectNameFromGitUrl(url: string): string {
+    static getProjectNameFromGitUrl(url: string): string {
         return url.split(/[\/.]/).filter((e: string) => e !== '' && e !== 'git').reverse()[0];
     }
 }

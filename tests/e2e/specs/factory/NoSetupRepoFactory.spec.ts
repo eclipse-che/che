@@ -58,7 +58,6 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     let scmProvider: SingleScmProvider;
     let rest: SingleScmProvider[];
     let scmContextMenu: ContextMenu;
-    const gitUtilCheCode: GitUtil = new GitUtil();
 
     // test specific data
     let numberOfCreatedWorkspaces: number = 0;
@@ -69,7 +68,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     const commitChangesButtonLabel: string = `Commit Changes on "${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
     const refreshButtonLabel: string = 'Refresh';
     const label: string = TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
-    const testRepoProjectName: string = gitUtilCheCode.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+    const testRepoProjectName: string = GitUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
     const isPrivateRepo: string = TestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
     loginTests.loginIntoChe();

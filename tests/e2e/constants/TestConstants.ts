@@ -30,9 +30,14 @@ export const TestConstants: any = {
     TS_SELENIUM_BASE_URL: getBaseUrl(),
 
     /**
-     * Run browser in "Headless" (hiden) mode, "false" by default.
+     * Run browser in "Headless" (hidden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
+
+    /**
+     * Create instance of chromedriver, "true" by default. Should be "false" to run only API tests.
+     */
+    TS_USE_WEB_DRIVER_FOR_TEST: process.env.TS_USE_WEB_DRIVER_FOR_TEST !== 'false',
 
     /**
      * Run browser in "Fullscreen" (kiosk) mode.
@@ -203,7 +208,7 @@ export const TestConstants: any = {
 
     TS_SELENIUM_FACTORY_GIT_REPO_URL: process.env.TS_SELENIUM_FACTORY_GIT_REPO_URL || '',
 
-    TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: true,
+    TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: process.env.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO === 'true',
 
     TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: process.env.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'master',
 
@@ -215,10 +220,13 @@ export const TestConstants: any = {
 
     TS_SELENIUM_GIT_PROVIDER_PASSWORD: process.env.TS_SELENIUM_GIT_PROVIDER_PASSWORD || '',
 
-    TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN: process.env.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN || false,
+    TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN: process.env.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN === 'true',
 
-    TS_SELENIUM_GIT_PROVIDER_OAUTH: process.env.TS_SELENIUM_GIT_PROVIDER_OAUTH || false,
+    TS_SELENIUM_GIT_PROVIDER_OAUTH: process.env.TS_SELENIUM_GIT_PROVIDER_OAUTH === 'true',
 
     TS_SELENIUM_PROJECT_ROOT_FILE_NAME: process.env.TS_SELENIUM_PROJECT_ROOT_FILE_NAME || 'devfile.yaml',
 
+    TS_API_TEST_UDI_IMAGE: process.env.TS_API_TEST_UDI_IMAGE || 'quay.io/devfile/universal-developer-image:latest',
+
+    TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`
 };

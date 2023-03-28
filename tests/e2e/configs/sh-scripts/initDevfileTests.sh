@@ -5,7 +5,7 @@
 ########################################
 
 launchUserstories(){
-    export MOCHA_DIRECTORY=${MOCHA_DIRECTORY:-"devfiles"}
+    export MOCHA_DIRECTORY=${MOCHA_DIRECTORY:-"dashboard-samples"}
     echo "MOCHA_DIRECTORY = ${MOCHA_DIRECTORY}"
     npm run lint && npm run tsc && mocha --config dist/configs/mocharc.js
 }

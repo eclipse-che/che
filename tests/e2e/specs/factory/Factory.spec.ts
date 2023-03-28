@@ -54,7 +54,6 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     let scmProvider: SingleScmProvider;
     let rest: SingleScmProvider[];
     let scmContextMenu: ContextMenu;
-    const gitUtilCheCode: GitUtil = new GitUtil();
 
     // test specific data
     const timeToRefresh: number = 1500;
@@ -63,7 +62,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     const commitChangesButtonLabel: string = `Commit Changes on "${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
     const refreshButtonLabel: string = 'Refresh';
     const pushItemLabel: string = 'Push';
-    const testRepoProjectName: string = gitUtilCheCode.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+    const testRepoProjectName: string = GitUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
 
     loginTests.loginIntoChe();
     test(`Navigate to the factory URL`, async function (): Promise<void> {

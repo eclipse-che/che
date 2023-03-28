@@ -63,7 +63,7 @@ exports.mochaHooks = {
             }
         },
         async function stopTheDriver(): Promise<void> {
-            if (!TestConstants.TS_DEBUG_MODE) {
+            if (!TestConstants.TS_DEBUG_MODE && TestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
                 await driverHelper.getDriver().quit();
                 Logger.info('Chrome driver session stopped.');
             }
