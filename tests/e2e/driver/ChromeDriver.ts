@@ -28,7 +28,7 @@ export class ChromeDriver implements IDriver {
         return this.driver;
     }
 
-    async setWindowSize() {
+    async setWindowSize(): Promise<void> {
         await this.driver
             .manage()
             .window()
@@ -49,7 +49,7 @@ export class ChromeDriver implements IDriver {
     }
 
     private getDriverBuilder(options: Options): Builder {
-        const disableW3copts = { 'goog:chromeOptions' : { 'w3c' : false }};
+        const disableW3copts: object = { 'goog:chromeOptions' : { 'w3c' : false }};
         let builder: Builder = new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options);

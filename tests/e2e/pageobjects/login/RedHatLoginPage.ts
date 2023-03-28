@@ -27,34 +27,34 @@ export class RedHatLoginPage {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitRedHatLoginWelcomePage() {
+    async waitRedHatLoginWelcomePage(): Promise<void> {
         Logger.debug('RedHatLoginPage.waitRedHatLoginWelcomePage');
         await this.driverHelper.waitVisibility(By.id(USERNAME_INPUT_ID));
     }
 
-    async enterPasswordRedHat() {
+    async enterPasswordRedHat(): Promise<void> {
         Logger.debug('RedHatLoginPage.enterPasswordRedHat');
         const passwordFieldLocator: By = By.id(PASSWORD_INPUT_ID);
         await this.driverHelper.waitVisibility(passwordFieldLocator, 3000);
         await this.driverHelper.enterValue(passwordFieldLocator, TestConstants.TS_SELENIUM_PASSWORD, timeout );
     }
-    async clickOnLoginButton() {
+    async clickOnLoginButton(): Promise<void> {
         Logger.debug('RedHatLoginPage.clickOnLoginButton');
         const loginButtonLocator: By = By.id(LOGIN_BUTTON_ID);
         await this.driverHelper.waitAndClick(loginButtonLocator, timeout);
     }
-    async waitDisappearanceRedHatLoginWelcomePage() {
+    async waitDisappearanceRedHatLoginWelcomePage(): Promise<void> {
         Logger.debug('RedHatLoginPage.waitDisappearanceRedHatLoginWelcomePage');
         await this.driverHelper.waitDisappearance(By.id(LOGIN_BUTTON_ID));
     }
-    async enterUserNameRedHat() {
+    async enterUserNameRedHat(): Promise<void> {
         Logger.debug('RedHatLoginPage.enterUserNameRedHat');
         const usernameFieldLocator: By = By.id(USERNAME_INPUT_ID);
         await this.driverHelper.waitVisibility(usernameFieldLocator, 20000);
         await this.driverHelper.enterValue(usernameFieldLocator, TestConstants.TS_SELENIUM_USERNAME, timeout );
     }
 
-    async clickNextButton() {
+    async clickNextButton(): Promise<void> {
         Logger.debug('RedHatLoginPage.clickNextButton');
         const nextButtonLocator: By = By.id(NEXT_BUTTON_ID);
         await this.driverHelper.waitAndClick(nextButtonLocator, timeout);

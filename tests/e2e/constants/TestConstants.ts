@@ -23,7 +23,7 @@ export enum GitProviderType {
     BITBUCKET = 'bitbucket'
 }
 
-export const TestConstants = {
+export const TestConstants: any = {
     /**
      * Base URL of the application which should be checked
      */
@@ -217,7 +217,7 @@ export const TestConstants = {
 
     TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: process.env.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'master',
 
-    TS_SELENIUM_FACTORY_URL() {
+    TS_SELENIUM_FACTORY_URL(): string {
         return process.env.TS_SELENIUM_FACTORY_URL || TestConstants.TS_SELENIUM_BASE_URL + '/dashboard/#/' + this.TS_SELENIUM_FACTORY_GIT_REPO_URL;
     },
 

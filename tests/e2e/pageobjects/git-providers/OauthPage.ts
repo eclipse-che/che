@@ -55,7 +55,7 @@ export class OauthPage {
         }
     }
 
-    async waitLoginPage() {
+    async waitLoginPage(): Promise<void> {
         Logger.debug('OauthPage.waitLoginPage');
 
         // for gitlab server https://gitlab.cee.redhat.com
@@ -70,55 +70,55 @@ export class OauthPage {
         await this.driverHelper.waitVisibility(this.loginForm, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM * 3);
     }
 
-    async enterUserName(userName: string) {
+    async enterUserName(userName: string): Promise<void> {
         Logger.debug(`this.enterUserName "${userName}"`);
 
         await this.driverHelper.enterValue(this.loginForm, userName);
     }
 
-    async enterPassword(password: string) {
+    async enterPassword(password: string): Promise<void> {
         Logger.debug(`OauthPage.enterPassword`);
 
         await this.driverHelper.enterValue(this.passwordForm, password);
     }
 
-    async clickOnLoginButton() {
+    async clickOnLoginButton(): Promise<void> {
         Logger.debug('OauthPage.clickOnLoginButton');
 
         await this.driverHelper.waitAndClick(this.submitButton);
     }
 
-    async waitClosingLoginPage() {
+    async waitClosingLoginPage(): Promise<void> {
         Logger.debug('OauthPage.waitClosingLoginPage');
 
         await this.driverHelper.waitDisappearance(this.loginForm);
     }
 
-    async waitOauthPage() {
+    async waitOauthPage(): Promise<void> {
         Logger.debug('OauthPage.waitOauthPage');
 
         await this.driverHelper.waitVisibility(this.approveButton);
     }
 
-    async clickOnApproveButton() {
+    async clickOnApproveButton(): Promise<void> {
         Logger.debug('OauthPage.clickOnApproveButton');
 
         await this.driverHelper.waitAndClick(this.approveButton);
     }
 
-    async clickOnDenyAccessButton() {
+    async clickOnDenyAccessButton(): Promise<void> {
         Logger.debug('OauthPage.clickOnDenyAccessButton');
 
         await this.driverHelper.waitAndClick(this.denyAccessButton);
     }
 
-    async waitDisappearanceOauthPage() {
+    async waitDisappearanceOauthPage(): Promise<void> {
         Logger.debug('OauthPage.waitDisappearanceOauthPage');
 
         await this.driverHelper.waitDisappearance(this.approveButton);
     }
 
-    async login() {
+    async login(): Promise<void> {
         Logger.debug('OauthPage.login');
 
         await this.waitLoginPage();
@@ -128,7 +128,7 @@ export class OauthPage {
         await this.waitClosingLoginPage();
     }
 
-    async confirmAccess() {
+    async confirmAccess(): Promise<void> {
         Logger.debug('OauthPage.confirmAccess');
 
         try {
@@ -147,7 +147,7 @@ export class OauthPage {
         }
     }
 
-    async denyAccess() {
+    async denyAccess(): Promise<void> {
         Logger.debug('OauthPage.denyAccess');
 
         await this.clickOnDenyAccessButton();

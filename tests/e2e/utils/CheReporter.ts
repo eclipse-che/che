@@ -20,6 +20,7 @@ import { TimeoutConstants } from '../constants/TimeoutConstants';
 import { Logger } from './Logger';
 import { Sanitizer } from './Sanitizer';
 import { e2eContainer } from '../configs/inversify.config';
+import { WriteStream } from 'fs';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
@@ -35,7 +36,7 @@ class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
-    runner.on('start', async (test: mocha.Test) => {
+    runner.on('start', async () => {
       let launchInformation: string =
         `################## Launch Information ##################
 
@@ -76,7 +77,7 @@ class CheReporter extends mocha.reporters.Spec {
       rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
     });
 
-    runner.on('test', async function (test: mocha.Test) {
+    runner.on('test', async function (test: mocha.Test): Promise<void> {
       if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
         return;
       }
@@ -97,7 +98,7 @@ class CheReporter extends mocha.reporters.Spec {
       if (TestConstants.TS_LOAD_TESTS) {
         const loadTestReportFolder: string = TestConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
         const loadTestFilePath: string = loadTestReportFolder + '/load-test-results.txt';
-        const report = test.title + ': ' + test.duration + '\r';
+        const report: string = test.title + ': ' + test.duration + '\r';
         if (!fs.existsSync(loadTestReportFolder)) {
           fs.mkdirSync(loadTestReportFolder);
         }
@@ -106,7 +107,7 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
 
-    runner.on('end', async function (test: mocha.Test) {
+    runner.on('end', async function (): Promise<void> {
       // ensure that fired events done
       await driverHelper.wait(5000);
 
@@ -119,7 +120,7 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
-    runner.on('fail', async function (test: mocha.Test) {
+    runner.on('fail', async function (test: mocha.Test): Promise<void> {
       Logger.error(`CheReporter runner.on.fail: ${test.fullTitle()} failed after ${test.duration}ms`);
       // raise flag for keeping the screencast
       deleteScreencast = false;
@@ -153,13 +154,13 @@ class CheReporter extends mocha.reporters.Spec {
 
       // take screenshot and write to file
       const screenshot: string = await driverHelper.getDriver().takeScreenshot();
-      const screenshotStream = fs.createWriteStream(screenshotFileName);
+      const screenshotStream: WriteStream = fs.createWriteStream(screenshotFileName);
       screenshotStream.write(Buffer.from(screenshot, 'base64'));
       screenshotStream.end();
 
       // take pagesource and write to file
       const pageSource: string = await driverHelper.getDriver().getPageSource();
-      const pageSourceStream = fs.createWriteStream(pageSourceFileName);
+      const pageSourceStream: WriteStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(Buffer.from(pageSource));
       pageSourceStream.end();
 
@@ -171,7 +172,7 @@ class CheReporter extends mocha.reporters.Spec {
         browserLogs += `\"${log.level}\" \"${log.type}\" \"${log.message}\"\n`;
       });
 
-      const browserLogsStream = fs.createWriteStream(browserLogsFileName);
+      const browserLogsStream: WriteStream = fs.createWriteStream(browserLogsFileName);
       browserLogsStream.write(Buffer.from(browserLogs));
       browserLogsStream.end();
 

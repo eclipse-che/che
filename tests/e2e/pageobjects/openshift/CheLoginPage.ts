@@ -22,19 +22,19 @@ export class CheLoginPage {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
     }
 
-    async waitEclipseCheLoginFormPage() {
+    async waitEclipseCheLoginFormPage(): Promise<void> {
         Logger.debug('CheLoginPage.waitEclipseCheLoginFormPage');
 
         await this.driverHelper.waitVisibility(By.id('login'), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
-    async inputUserNameEclipseCheLoginPage(userName: string) {
+    async inputUserNameEclipseCheLoginPage(userName: string): Promise<void> {
         Logger.debug(`CheLoginPage.inputUserNameEclipseCheLoginPage username: "${userName}"`);
 
         await this.driverHelper.enterValue(By.id('login'), userName);
     }
 
-    async clickEclipseCheLoginButton() {
+    async clickEclipseCheLoginButton(): Promise<void> {
         Logger.debug('CheLoginPage.clickEclipseCheLoginButton');
 
         await this.driverHelper.waitAndClick(By.id('submit-login'));

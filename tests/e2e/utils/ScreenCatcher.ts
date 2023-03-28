@@ -14,15 +14,16 @@ import { DriverHelper } from './DriverHelper';
 import { Sanitizer } from './Sanitizer';
 import { error } from 'selenium-webdriver';
 import { TestConstants } from '../constants/TestConstants';
+import { WriteStream } from 'fs';
 
 @injectable()
 export class ScreenCatcher {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
                 @inject(CLASSES.Sanitizer) private readonly sanitizer: Sanitizer) { }
 
-    async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number) {
-        const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
-        const executionScreenCastErrorsDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencastErrors`;
+    async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number): Promise<void> {
+        const executionScreenCastDir: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
+        const executionScreenCastErrorsDir: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencastErrors`;
         const formattedMethodIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(methodIndex);
         const formattedScreenshotIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 5 }).format(screenshotIndex).replace(/,/g, '');
 
@@ -54,18 +55,18 @@ export class ScreenCatcher {
         }
     }
 
-    async catchScreen(screenshotPath: string) {
+    async catchScreen(screenshotPath: string): Promise<void> {
         const screenshot: string = await this.driverHelper.getDriver().takeScreenshot();
-        const screenshotStream = fs.createWriteStream(screenshotPath);
+        const screenshotStream: WriteStream = fs.createWriteStream(screenshotPath);
         screenshotStream.write(Buffer.from(screenshot, 'base64'));
         screenshotStream.end();
     }
 
-    async writeErrorLog(errorLogPath: string, err: error.IError) {
+    async writeErrorLog(errorLogPath: string, err: error.IError): Promise<void> {
         console.log(`Failed to save screenshot, additional information in the ${errorLogPath}`);
 
         if (err.stack) {
-            const screenshotStream = fs.createWriteStream(errorLogPath);
+            const screenshotStream: WriteStream = fs.createWriteStream(errorLogPath);
             screenshotStream.write(Buffer.from(err.stack, 'utf8'));
             screenshotStream.end();
         }

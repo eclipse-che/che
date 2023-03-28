@@ -9,7 +9,7 @@
  **********************************************************************/
 
 
-const TYPES = {
+const TYPES: any = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
     OcpLogin: Symbol.for('OcpLogin'),
@@ -18,7 +18,7 @@ const TYPES = {
     ITokenHandler: Symbol.for('ITokenHandler')
 };
 
-const CLASSES = {
+const CLASSES: any = {
     DriverHelper: 'DriverHelper',
     Dashboard: 'Dashboard',
     Workspaces: 'Workspaces',

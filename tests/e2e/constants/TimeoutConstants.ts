@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-export const TimeoutConstants = {
+export const TimeoutConstants: any = {
     // -------------------------------------------- INSTALLING AND STARTUP --------------------------------------------
 
     /**

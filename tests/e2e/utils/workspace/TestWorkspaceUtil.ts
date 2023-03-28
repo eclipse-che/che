@@ -17,7 +17,7 @@ import { error } from 'selenium-webdriver';
 import { CheApiRequestHandler } from '../request-handlers/CheApiRequestHandler';
 import { CLASSES } from '../../configs/inversify.types';
 import { Logger } from '../Logger';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import { ApiUrlResolver } from './ApiUrlResolver';
 
@@ -32,13 +32,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver
     ) { }
 
-    public async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
+    public async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void> {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
         let workspaceStatus: string = '';
         let expectedStatus: boolean = false;
-        for (let i = 0; i < this.attempts; i++) {
-            const response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName));
+        for (let i: number = 0; i < this.attempts; i++) {
+            const response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName));
 
             if (response.status !== 200) {
                 throw new Error(`Can not get status of a workspace. Code: ${response.status} Data: ${response.data}`);
@@ -55,16 +55,16 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
 
         if (!expectedStatus) {
-            let waitTime = this.attempts * this.polling;
-            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Currnet status is: ${workspaceStatus}`);
+            let waitTime: number = this.attempts * this.polling;
+            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms. Current status is: ${workspaceStatus}`);
         }
     }
 
-    public async stopWorkspaceByName(workspaceName: string) {
+    public async stopWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
 
         const stopWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
-        let stopWorkspaceResponse;
+        let stopWorkspaceResponse: AxiosResponse;
 
         try {
             stopWorkspaceResponse = await this.processRequestHandler.patch(stopWorkspaceApiUrl, [{'op': 'replace', 'path': '/spec/started', 'value': false}]);
@@ -81,11 +81,11 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // delete a workspace without stopping phase (similar with force deleting)
-    public async deleteWorkspaceByName(workspaceName: string) {
+    public async deleteWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName ${workspaceName}` );
 
         const deleteWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
-        let deleteWorkspaceResponse;
+        let deleteWorkspaceResponse: AxiosResponse;
         let deleteWorkspaceStatus: boolean = false;
         try {
             deleteWorkspaceResponse = await this.processRequestHandler.delete(deleteWorkspaceApiUrl);
@@ -102,7 +102,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             throw new Error(`Can not delete workspace. Code: ${deleteWorkspaceResponse.status} Data: ${deleteWorkspaceResponse.data}`);
         }
 
-        for (let i = 0; i < this.attempts; i++) {
+        for (let i: number = 0; i < this.attempts; i++) {
             try {
                 deleteWorkspaceResponse = await this.processRequestHandler.get(deleteWorkspaceApiUrl);
             } catch (error) {
@@ -114,13 +114,13 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
 
         if (!deleteWorkspaceStatus) {
-            let waitTime = this.attempts * this.polling;
+            let waitTime: number = this.attempts * this.polling;
             throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms.`);
         }
     }
 
     // stop workspace before deleting with checking stopping phase
-    public async stopAndDeleteWorkspaceByName(workspaceName: string) {
+    public async stopAndDeleteWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteWorkspaceByName');
 
         await this.stopWorkspaceByName(workspaceName);
@@ -128,21 +128,21 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop all run workspaces in the namespace
-    public async stopAllRunningWorkspaces(namespace: string) {
+    public async stopAllRunningWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
-        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
-        for (let i = 0; i < response.data.items.length; i++) {
+        let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
+        for (let i: number = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being stopped: ' +  response.data.items[i].metadata.name);
             await this.stopWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
 
     // stop all run workspaces, check statuses and remove the workspaces
-    public async stopAndDeleteAllRunningWorkspaces(namespace: string) {
+    public async stopAndDeleteAllRunningWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
-        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
+        let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         await this.stopAllRunningWorkspaces(namespace);
-        for (let i = 0; i < response.data.items.length; i++) {
+        for (let i: number = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being deleted: ' +  response.data.items[i].metadata.name);
             await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }
@@ -150,11 +150,11 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // stop all run workspaces without stopping and waiting for of 'Stopped' phase
     // similar with 'force' deleting
-    public async deleteAllWorkspaces(namespace: string) {
+    public async deleteAllWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
-        let response = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
+        let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
-        for (let i = 0; i < response.data.items.length; i++) {
+        for (let i: number = 0; i < response.data.items.length; i++) {
             Logger.info('The project is being deleted .......: ' +  response.data.items[i].metadata.name);
             await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }

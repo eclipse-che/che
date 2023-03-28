@@ -18,7 +18,7 @@ import { TimeoutConstants } from '../constants/TimeoutConstants';
 export class BrowserTabsUtil {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async switchToWindow(windowHandle: string) {
+    async switchToWindow(windowHandle: string): Promise<void> {
         Logger.debug('BrowserTabsUtil.switchToWindow');
         await this.driverHelper.getDriver().switchTo().window(windowHandle);
     }
@@ -35,20 +35,20 @@ export class BrowserTabsUtil {
         return await this.driverHelper.getDriver().getWindowHandle();
     }
 
-    async navigateTo(url: string) {
+    async navigateTo(url: string): Promise<void> {
         Logger.debug(`BrowserTabsUtil.navigateTo ${url}`);
 
         await this.driverHelper.getDriver().navigate().to(url);
     }
 
-    async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL) {
+    async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL): Promise<void> {
         Logger.trace(`BrowserTabsUtil.navigateAndWaitToUrl ${url}`);
 
         await this.navigateTo(url);
         await this.waitURL(url, timeout);
     }
 
-    async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number) {
+    async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number): Promise<void> {
         Logger.debug('BrowserTabsUtil.waitAndSwitchToAnotherWindow');
 
         await this.driverHelper.waitUntilTrue(async () => {
@@ -66,7 +66,7 @@ export class BrowserTabsUtil {
         }
     }
 
-    async refreshPage() {
+    async refreshPage(): Promise<void> {
         Logger.debug('BrowserTabsUtil.refreshPage');
 
         await (await this.driverHelper.getDriver()).navigate().refresh();
@@ -76,7 +76,7 @@ export class BrowserTabsUtil {
         return await this.driverHelper.getDriver().getCurrentUrl();
     }
 
-    async waitURL(expectedUrl: string, timeout: number) {
+    async waitURL(expectedUrl: string, timeout: number): Promise<void> {
         Logger.trace(`BrowserTabsUtil.waitURL ${expectedUrl}`);
 
         await this.driverHelper.getDriver().wait(async () => {
@@ -89,7 +89,7 @@ export class BrowserTabsUtil {
         }, timeout);
     }
 
-    public async maximize() {
+    public async maximize(): Promise<void> {
         Logger.trace(`BrowserTabsUtil.maximize`);
 
         await this.driverHelper.getDriver().manage().window().maximize();

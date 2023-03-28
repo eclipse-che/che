@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../configs/inversify.types';
 import { Logger } from '../Logger';
 import { CheApiRequestHandler } from '../request-handlers/CheApiRequestHandler';
+import { AxiosResponse } from 'axios';
 
 @injectable()
 export class ApiUrlResolver {
@@ -26,7 +27,7 @@ export class ApiUrlResolver {
     }
 
     public async getWorkspacesApiUrl(): Promise<string> {
-        const namespace = await this.obtainUserNamespace();
+        const namespace: string = await this.obtainUserNamespace();
         return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
     }
 
@@ -34,7 +35,7 @@ export class ApiUrlResolver {
         Logger.debug(`ApiUrlResolver.obtainUserNamespace ${this.userNamespace}`);
         if (this.userNamespace.length === 0) {
             Logger.trace(`ApiUrlResolver.obtainUserNamespace USER_NAMESPACE.length = 0, calling kubernetes API`);
-            const kubernetesResponse = await this.processRequestHandler.get(ApiUrlResolver.KUBERNETES_API_URL);
+            const kubernetesResponse: AxiosResponse = await this.processRequestHandler.get(ApiUrlResolver.KUBERNETES_API_URL);
             if (kubernetesResponse.status !== 200) {
                 throw new Error(`Cannot get user namespace from kubernetes API. Code: ${kubernetesResponse.status} Data: ${kubernetesResponse.data}`);
             }

@@ -1,10 +1,10 @@
 import { e2eContainer } from '../../configs/inversify.config';
 import { assert } from 'chai';
-import { registerRunningWorkspace } from '../MochaHooks';
 import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
+import { registerRunningWorkspace } from '../MochaHooks';
 
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 const util: any = require('node:util');
@@ -19,7 +19,7 @@ async function runShellScript(shellCommandToExecution: string): Promise<string> 
     return stdout;
 }
 
-suite(`Create predefined workspace and check it `, async function () {
+suite(`Create predefined workspace and check it `, async function (): Promise<void> {
     let workspaceName: string = '';
 
     const setEditRightsForUser: string = `oc adm policy add-role-to-user edit user -n ${predefinedNamespaceName}`;
@@ -37,7 +37,7 @@ suite(`Create predefined workspace and check it `, async function () {
         '    che.eclipse.org/username: user\n' +
         'EOF';
     // create a predefined namespace for user using shell script and login into user dashboard
-    suiteSetup(async function () {
+    suiteSetup(async function (): Promise<void> {
         Logger.info('Test prerequisites:');
         Logger.info(' (1) there is OCP user with username and user password that have been set in the TS_SELENIUM_USERNAME and TS_SELENIUM_PASSWORD variables');
         Logger.info(' (2) \'oc\' client installed and logged into test OCP cluster with admin rights.');
@@ -46,7 +46,7 @@ suite(`Create predefined workspace and check it `, async function () {
         await runShellScript(setEditRightsForUser);
     });
 
-    suiteTeardown(async () => {
+    suiteTeardown(async (): Promise<void> => {
         const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
         try {
             await runShellScript(deletePredefinedNamespace);
@@ -61,7 +61,7 @@ suite(`Create predefined workspace and check it `, async function () {
     workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
     // verify that just created workspace with unique name is present in the predefined namespace
-    test('Validate the created workspace is present in predefined namespace', async function () {
+    test('Validate the created workspace is present in predefined namespace', async function (): Promise<void> {
         workspaceName = WorkspaceHandlingTests.getWorkspaceName();
         registerRunningWorkspace(workspaceName);
         const ocDevWorkspaceOutput: string = await runShellScript(getDevWorkspaceFromPredefinedNameSpace);

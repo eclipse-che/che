@@ -17,7 +17,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static error(text: string, indentLevel: number = 1) {
+    public static error(text: string, indentLevel: number = 1): void {
         this.logText(indentLevel, `[ERROR] ${text}`);
     }
 
@@ -26,7 +26,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static warn(text: string, indentLevel: number = 1) {
+    public static warn(text: string, indentLevel: number = 1): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
             return;
         }
@@ -38,7 +38,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static info(text: string, indentLevel: number = 3) {
+    public static info(text: string, indentLevel: number = 3): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN') {
             return;
@@ -51,7 +51,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static debug(text: string, indentLevel: number = 5) {
+    public static debug(text: string, indentLevel: number = 5): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
@@ -66,7 +66,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static trace(text: string, indentLevel: number = 6) {
+    public static trace(text: string, indentLevel: number = 6): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO' ||
@@ -76,16 +76,16 @@ export abstract class Logger {
         this.logText(indentLevel, `‣ ${text}`);
     }
 
-    private static logText(messageIndentationLevel: number, text: string) {
+    private static logText(messageIndentationLevel: number, text: string): void {
         // start group for every level
-        for (let i = 0; i < messageIndentationLevel; i++) {
+        for (let i: number = 0; i < messageIndentationLevel; i++) {
             console.group();
         }
         // print the trimmed text
         // if multiline, the message should be properly padded
         console.log(text);
         // end group for every level
-        for (let i = 0; i < messageIndentationLevel; i++) {
+        for (let i: number = 0; i < messageIndentationLevel; i++) {
             console.groupEnd();
         }
     }

@@ -52,7 +52,7 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 
-suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`, async function () {
+suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`, async function (): Promise<void> {
 
     let projectSection: ViewSection;
     let scmProvider: SingleScmProvider;
@@ -74,26 +74,26 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
 
     loginTests.loginIntoChe();
 
-    test('Get number of previously created workspaces', async function () {
+    test('Get number of previously created workspaces', async function (): Promise<void> {
         await dashboard.clickWorkspacesButton();
         await workspaces.waitPage();
         numberOfCreatedWorkspaces = (await workspaces.getAllCreatedWorkspacesNames()).length;
     });
 
-    test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function () {
+    test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
         await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_FACTORY_URL());
     });
 
     if (TestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
 
-        test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function () {
+        test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
             await dashboard.waitLoader();
             const loaderAlert: string = await dashboard.getLoaderAlert();
             expect(loaderAlert).contains('Failed to create the workspace')
                 .and.contains('Cause: Unsupported OAuth provider ');
         });
 
-        test(`Check that workspace was not created`, async function () {
+        test(`Check that workspace was not created`, async function (): Promise<void> {
             await dashboard.openDashboard();
             await dashboard.clickWorkspacesButton();
             await workspaces.waitPage();
@@ -106,20 +106,20 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     } else {
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 
-        test('Registering the running workspace', async function () {
+        test('Registering the running workspace', async function (): Promise<void> {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
 
-        test('Wait the workspace readiness', async function () {
+        test('Wait the workspace readiness', async function (): Promise<void> {
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
 
-        test('Check if a project folder has been created', async function () {
+        test('Check if a project folder has been created', async function (): Promise<void> {
             Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
             projectSection = await new SideBarView().getContent().getSection(testRepoProjectName as unknown as string);
         });
 
-        test('Accept the project as a trusted one', async function () {
+        test('Accept the project as a trusted one', async function (): Promise<void> {
             // click somewhere to trigger "Welcome Content" dialog
             try {
                 await driverHelper.waitAndClick(webCheCodeLocators.Workbench.notificationItem);
@@ -142,14 +142,14 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             }
         });
 
-        test('Check if the project files were imported', async function () {
+        test('Check if the project files were imported', async function (): Promise<void> {
             Logger.debug(`projectSection.findItem: find ${label}`);
             const isFileImported: ViewItem | undefined = await projectSection.findItem(label);
             // projectSection.findItem(label) can return undefined but test will goes on
             expect(isFileImported).not.eqls(undefined);
         });
 
-        test('Make changes to the file', async function () {
+        test('Make changes to the file', async function (): Promise<void> {
             Logger.debug(`projectSection.openItem: "${fileToChange}"`);
             await projectSection.openItem(fileToChange);
             const editor: TextEditor = await new EditorView().openEditor(fileToChange) as TextEditor;
@@ -160,7 +160,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             await editor.typeTextAt(1, 1, changesToCommit);
         });
 
-        test('Open a source control manager', async function () {
+        test('Open a source control manager', async function (): Promise<void> {
             const viewSourceControl: string = `Source Control`;
             const sourceControl: ViewControl = await new ActivityBar().getViewControl(viewSourceControl) as ViewControl;
             Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
@@ -171,7 +171,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             Logger.debug(`scmView.getProviders: "${scmProvider}, ${scmProvider}"`);
         });
 
-        test('Check if the changes is displayed in the source control manager', async function () {
+        test('Check if the changes is displayed in the source control manager', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
             await driverHelper.wait(timeToRefresh);
             Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
@@ -183,7 +183,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             expect(changes).eql(1);
         });
 
-        test('Stage the changes', async function () {
+        test('Stage the changes', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
             Logger.debug(`scmProvider.openMoreActions`);
             scmContextMenu = await scmProvider.openMoreActions();
@@ -192,7 +192,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             await scmContextMenu.select('Changes', 'Stage All Changes');
         });
 
-        test('Commit the changes', async function () {
+        test('Commit the changes', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel));
             Logger.debug(`scmProvider.commitChanges: commit name "Commit ${changesToCommit}"`);
             await scmProvider.commitChanges('Commit ' + changesToCommit);
@@ -207,7 +207,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             expect(changes).eql(0);
         });
 
-        test('Push the changes', async function () {
+        test('Push the changes', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(`Push 1 commits to origin/${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`));
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
             Logger.debug(`scmProvider.openMoreActions`);
@@ -218,14 +218,14 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
         });
 
         if (TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITHUB) {
-            test('Decline GitHub Extension', async function () {
+            test('Decline GitHub Extension', async function (): Promise<void> {
                 await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
                 const gitHaExtensionDialog: ModalDialog = new ModalDialog();
                 await gitHaExtensionDialog.pushButton('Cancel');
             });
         }
 
-        test('Insert git credentials which were asked after push', async function () {
+        test('Insert git credentials which were asked after push', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 
             try {
@@ -244,7 +244,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             await driverHelper.wait(timeToRefresh);
         });
 
-        test('Check if the changes were pushed', async function () {
+        test('Check if the changes were pushed', async function (): Promise<void> {
             try {
                 Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
                 await scmProvider.takeAction(refreshButtonLabel);
@@ -257,14 +257,14 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             expect(isCommitButtonDisabled).eql('true');
         });
 
-        test(`Stop and remove the workspace`, async function () {
+        test(`Stop and remove the workspace`, async function (): Promise<void> {
             await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
 
         loginTests.logoutFromChe();
     }
 
-    suiteTeardown('Close the browser', async function () {
+    suiteTeardown('Close the browser', async function (): Promise<void> {
         if (!TestConstants.TS_DEBUG_MODE) {
             await driverHelper.getDriver().close();
         }

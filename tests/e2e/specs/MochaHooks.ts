@@ -25,31 +25,31 @@ const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUt
 
 let latestWorkspace: string = '';
 
-export function registerRunningWorkspace(workspaceName: string) {
+export function registerRunningWorkspace(workspaceName: string): void {
     Logger.debug(`MochaHooks.registerRunningWorkspace with workspaceName:${workspaceName}`);
     latestWorkspace = workspaceName;
 }
 
 exports.mochaHooks = {
     beforeAll: [
-        async function enableRequestInterceptor() {
+        async function enableRequestInterceptor(): Promise<void> {
             if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
                 CheApiRequestHandler.enableRequestInterceptor();
             }
         },
-        async function enableResponseInterceptor() {
+        async function enableResponseInterceptor(): Promise<void> {
             if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
                 CheApiRequestHandler.enableResponseInterceptor();
             }
         },
-        async function initMonacoPageObjects() {
+        async function initMonacoPageObjects(): Promise<void> {
             // init vscode-extension-tester monaco-page-objects
             monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
         },
-        async function prolongTimeoutConstantsInDebugMode() {
+        async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
             if (TestConstants.TS_DEBUG_MODE) {
                 for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
-                    Object.defineProperty(TimeoutConstants, timeout, {value: seconds * 100});
+                    Object.defineProperty(TimeoutConstants, timeout, {value: seconds as number * 100});
                 }
             }
         },
@@ -62,7 +62,7 @@ exports.mochaHooks = {
                 testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
             }
         },
-        async function stopTheDriver() {
+        async function stopTheDriver(): Promise<void> {
             if (!TestConstants.TS_DEBUG_MODE) {
                 await driverHelper.getDriver().quit();
                 Logger.info('Chrome driver session stopped.');
