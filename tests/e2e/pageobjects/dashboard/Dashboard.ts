@@ -9,13 +9,17 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../constants/TestConstants';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
+import { ICheLoginPage } from '../login/ICheLoginPage';
+import { RegularUserOcpCheLoginPage } from '../login/RegularUserOcpCheLoginPage';
+import { OcpRedHatLoginPage } from '../login/OcpRedHatLoginPage';
+import { e2eContainer } from '../../configs/inversify.config';
 
 @injectable()
 export class Dashboard {
@@ -23,12 +27,23 @@ export class Dashboard {
     private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_STEP_TITLES_XPATH: string = '//*[@data-testid="step-title"]';
     private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
-    private static readonly LOADER_ALERT_XPATH = '//*[@data-testid="loader-alert"]';
-    private static readonly USER_DROPDOWN_MENU_BUTTON_XPATH = `//*[text()="${TestConstants.TS_SELENIUM_OCP_USERNAME}"]//parent::button`;
-    private static readonly LOGOUT_BUTTON_XPATH = '//button[text()="Logout"]';
+    private static readonly LOADER_ALERT_XPATH: string = '//*[@data-testid="loader-alert"]';
+    private static readonly LOGOUT_BUTTON_XPATH: string = '//button[text()="Logout"]';
+
+    private static getUserDropdownMenuButtonLocator(): By {
+        Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: get current user.`);
+
+        const currentUser: string = TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
+            TestConstants.TS_SELENIUM_OCP_USERNAME : TestConstants.TS_SELENIUM_USERNAME;
+        Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: ${currentUser}.`);
+
+        return By.xpath(`//*[text()="${currentUser}"]//parent::button`);
+
+    }
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-                @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
+                @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) {
+    }
 
     async stopWorkspaceByUI(workspaceName: string) {
         Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
@@ -127,8 +142,8 @@ export class Dashboard {
         Logger.debug(`Dashboard.logout`);
 
         await this.openDashboard();
-        await this.driverHelper.waitAndClick(By.xpath(Dashboard.USER_DROPDOWN_MENU_BUTTON_XPATH), timeout);
+        await this.driverHelper.waitAndClick(Dashboard.getUserDropdownMenuButtonLocator(), timeout);
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.LOGOUT_BUTTON_XPATH), timeout);
-        await this.driverHelper.waitDisappearance(By.xpath(Dashboard.USER_DROPDOWN_MENU_BUTTON_XPATH), timeout);
+        await this.driverHelper.waitDisappearance(Dashboard.getUserDropdownMenuButtonLocator(), timeout);
     }
 }
