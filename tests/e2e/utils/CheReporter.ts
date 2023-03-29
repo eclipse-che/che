@@ -56,6 +56,9 @@ class CheReporter extends mocha.reporters.Spec {
       DELETE_WORKSPACE_ON_FAILED_TEST: ${TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST}
       TS_SELENIUM_LOG_LEVEL: ${TestConstants.TS_SELENIUM_LOG_LEVEL}
       TS_SELENIUM_LAUNCH_FULLSCREEN: ${TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN}
+
+      ${process.env.MOCHA_DIRECTORY ? 'MOCHA_DIRECTORY: ' + process.env.MOCHA_DIRECTORY : 'MOCHA_DRIRECTORY is not set'}
+      ${process.env.USERSTORY ? 'USERSTORY: ' + process.env.USERSTORY : 'USERSTORY is not set'}
 `;
 
       if (TestConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES) {

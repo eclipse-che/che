@@ -21,7 +21,7 @@ module.exports = {
                 `dist/specs/${process.env.MOCHA_DIRECTORY}/${process.env.USERSTORY}.spec.js`
                 : `dist/specs/${process.env.MOCHA_DIRECTORY}/**.spec.js`
             : process.env.USERSTORY ?
-                `dist/specs/**/${process.env.USERSTORY}.spec.js`
-                : `dist/specs/**/**.spec.js`,
+                [`dist/specs/**/${process.env.USERSTORY}.spec.js`, `dist/specs/${process.env.USERSTORY}.spec.js`]
+                : [`dist/specs/**/**.spec.js`, `dist/specs/**.spec.js`],
     retries: TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
 };

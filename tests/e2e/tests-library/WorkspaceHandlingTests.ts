@@ -62,6 +62,19 @@ export class WorkspaceHandlingTests {
         });
     }
 
+    public createAndOpenWorkspaceFromGitRepository(factoryUrl: string): void {
+        test(`Create and open new workspace from factory:${factoryUrl}`, async () => {
+            await this.dashboard.waitPage();
+            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            await this.apiUrlResolver.getWorkspacesApiUrl();
+            await this.dashboard.clickCreateWorkspaceButton();
+            await this.createWorkspace.waitPage();
+            WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
+            await this.createWorkspace.importFromGitUsingUI(factoryUrl);
+            await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
+        });
+    }
+
     public openExistingWorkspace(workspaceName: string): void {
         test('Open and start existing workspace', async () => {
             await this.dashboard.waitPage();

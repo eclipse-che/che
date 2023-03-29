@@ -12,9 +12,6 @@ import { injectable } from 'inversify';
 
 @injectable()
 export class GitUtil {
-
-    constructor() { }
-
     /**
      * Method extracts a test repo name from git clone https url;
      * it splits the url into string[] by "/" or ".", deletes empty elements and elements that contains just "git" word, than returns the last one;

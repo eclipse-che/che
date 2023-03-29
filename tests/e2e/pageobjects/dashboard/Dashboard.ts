@@ -9,17 +9,13 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES, TYPES } from '../../configs/inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../constants/TestConstants';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
-import { ICheLoginPage } from '../login/ICheLoginPage';
-import { RegularUserOcpCheLoginPage } from '../login/RegularUserOcpCheLoginPage';
-import { OcpRedHatLoginPage } from '../login/OcpRedHatLoginPage';
-import { e2eContainer } from '../../configs/inversify.config';
 
 @injectable()
 export class Dashboard {
