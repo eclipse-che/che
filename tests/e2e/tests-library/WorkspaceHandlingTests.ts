@@ -29,10 +29,6 @@ export class WorkspaceHandlingTests {
         return WorkspaceHandlingTests.workspaceName;
     }
 
-    public static setWorkspaceName(workspaceName: string): void {
-        WorkspaceHandlingTests.workspaceName = workspaceName;
-    }
-
     private static WORKSPACE_NAME_LOCATOR: By = By.xpath(`//h1[contains(.,'Starting workspace ')]`);
     private static workspaceName: string = 'undefined';
     private static parentGUID: string;
@@ -61,7 +57,7 @@ export class WorkspaceHandlingTests {
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
-            await this.createWorkspace.clickOnSampleForSpecificEditor(stack);
+            await this.createWorkspace.clickOnSampleNoEditorSelection(stack);
             await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
         });
     }
@@ -110,8 +106,8 @@ export class WorkspaceHandlingTests {
                 Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
                 return;
             }
-            Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromSartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
-            throw new error.InvalidArgumentError(`WorkspaceHandlingTests.obtainWorkspaceNameFromSartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
+            Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
+            throw new error.InvalidArgumentError(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
         });
     }
 

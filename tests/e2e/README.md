@@ -3,8 +3,8 @@
 
 ## Requirements
 
-- node 8.x
-- "Chrome" browser 69.x or later
+- node 16.x
+- "Chrome" browser 111.x or later
 - deployed Che 7 with accessible URL
 
 ## Before launch
@@ -18,16 +18,16 @@ Note: If there is any modifications in package.json, manually execute the `npm i
 
 ## Default launch
 
-- Provide connection credentials to Che:
-  - ```export TS_SELENIUM_USERNAME=<username>```
-  - ```export TS_SELENIUM_PASSWORD=<password>```
-- ```npm test```
+- Provide connection credentials:
+  - ```export TS_SELENIUM_OCP_USERNAME=<username>```
+  - ```export TS_SELENIUM_OCP_PASSWORD=<password>```
+  - ```npm run test```
 
 ## Custom launch
 
 - Use environment variables which described in the **```'TestConstants.ts'```** file
 - Use environment variables for setting timeouts if needed. You can see the list in **```'TimeoutConstants.ts'```**. You can see the list of those variables and their value if you set the ```'TS_SELENIUM_PRINT_TIMEOUT_VARIABLES = true'```
-- Check for available scripts in package.json which are prefixed by `test-`. Then, perform command ```npm run test-<suffixNameOfScript>```
+- To test one specification export file name as ```export USERSTORY=<spec-file-name-without-extension> && npm run test``` (example: ```-e USERSTORY=Quarkus```)
 
 ## Docker launch
 
@@ -58,35 +58,8 @@ For running tests without docker, please perform next steps:**
   - link to devfile ( **```For successfull test passing, exactly provided devfile should be used```** )
     <https://gist.githubusercontent.com/Ohrimenko1988/93f5426f4ebc1705c55feb8ff0396a49/raw/cbea89ad145ba33ed34a151a12c50f045f9f3b78/yaml-ls-bug.yaml>
 - Provide the **```'TS_SELENIUM_BASE_URL'```** environment variable as described above
-- perform command **```'npm run test-happy-path'```**
-
-## Plugins tests launching for the Che without oauth authentication
-
-**Setup next environment variables:**
-
-- export TS_SELENIUM_BASE_URL=\<Che-URL\>
-- export USERSTORY=\<Test you want to run \>
-- (skip if login is "admin") export TS_SELENIUM_USERNAME=\<Login\>
-- (skip if password is "admin") export TS_SELENIUM_PASSWORD=\<Password\>
-
-**Run command:**
-
-- npm run test-plugin
-
-## Plugins tests launching for the Che with oauth authentication
-
-**Setup next environment variables:**
-
-- export TS_SELENIUM_BASE_URL=\<Che-URL\>
-- export USERSTORY=\<test-you-want-to-run\>
-- export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH="true"
-- export TS_SELENIUM_OCP_USERNAME=\<cluster-username\>
-- export TS_SELENIUM_OCP_PASSWORD=\<cluster-password\>
-
-**Run command:**
-
-- npm run test-plugin
-
+- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see TestConstants.ts)
+- perform command **```export USERSTORY=$TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME && npm run test-all-devfiles```**
 
 ## Launching the DevWorkspaceHappyPath spec file using Che with oauth authentication
 
@@ -98,6 +71,7 @@ For running tests without docker, please perform next steps:**
 - export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH="true"
 - export TS_OCP_LOGIN_PAGE_PROVIDER_TITLE=\<login-provide-title\>
 - export TS_SELENIUM_DEVWORKSPACE_URL=\<devworkspace-url\>
+- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see TestConstants.ts)
 
 **Execute the npm command:**
-- npm run test-devworkspace-happy-path
+- perform command ```export USERSTORY=$TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME && npm run test-all-devfiles```

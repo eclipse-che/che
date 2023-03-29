@@ -20,7 +20,7 @@ fi
 
 # Set testing suite
 if [ -z "$TEST_SUITE" ]; then
-    TEST_SUITE=test-happy-path
+    TEST_SUITE=test
 fi
 
 # Launch display mode and VNC server

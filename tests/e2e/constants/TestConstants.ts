@@ -17,9 +17,10 @@ function getBaseUrl(): string {
     return baseUrl.replace(/\/$/, '');
 }
 
-export enum EditorType {
-    THEIA = 'theia',
-    CHE_CODE = 'che-code'
+export enum GitProviderType {
+    GITHUB = 'github',
+    GITLAB = 'gitlab',
+    BITBUCKET = 'bitbucket'
 }
 
 export const TestConstants = {
@@ -27,11 +28,6 @@ export const TestConstants = {
      * Base URL of the application which should be checked
      */
     TS_SELENIUM_BASE_URL: getBaseUrl(),
-
-    /**
-     * Base URl of web console OpenShift which uses to test OperatorHub.
-     */
-    TS_SELENIUM_WEB_CONSOLE_OCP_URL: process.env.TS_SELENIUM_WEB_CONSOLE_OCP_URL || 'https://console-openshift-console.apps.',
 
     /**
      * Run browser in "Headless" (hiden) mode, "false" by default.
@@ -61,9 +57,9 @@ export const TestConstants = {
 
     /**
      * Editor the tests are running against, "code" by default.
-     * Possible values: "che-code", "theia"
+     * Possible values: "che-code"
      */
-    TS_SELENIUM_EDITOR: process.env.TS_SELENIUM_EDITOR || EditorType.CHE_CODE,
+    TS_SELENIUM_EDITOR: process.env.TS_SELENIUM_EDITOR || 'che-code',
 
     /**
      * Base version of VSCode editor for monaco-page-objects, "1.37.0" by default.
@@ -78,7 +74,7 @@ export const TestConstants = {
     TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION: process.env.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION || '1.73.0',
 
     /**
-     * Default ammount of tries, "5" by default.
+     * Default amount of tries, "5" by default.
      */
     TS_SELENIUM_DEFAULT_ATTEMPTS: Number(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS) || 5,
 
@@ -98,25 +94,15 @@ export const TestConstants = {
     TS_SELENIUM_WORKSPACE_STATUS_POLLING: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING) || 10000,
 
     /**
-     * Amount of tries for checking plugin precence.
-     */
-    TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS) || 20,
-
-    /**
      * Name of workspace created for 'Happy Path' scenario validation.
      */
-    TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
-
-    /**
-     * Using 'single-host' strategy, "false" by default.
-     */
-    TS_SELENIUM_SINGLE_HOST: process.env.TS_SELENIUM_SINGLE_HOST === 'true',
+    TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'EmptyWorkspace',
 
     /**
      * Value of OpenShift oAuth property determines how to login in installed application,
      * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
-    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH === 'true',
 
     /**
      * Username used to log in MultiUser Che.
@@ -147,21 +133,6 @@ export const TestConstants = {
      * Password regular user used to login in OCP.
      */
     TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
-
-    /**
-     * Email of regular user OpenShift to login CHE.
-     */
-    TS_SELENIUM_EMAIL_USER: process.env.TS_SELENIUM_EMAIL_USER || 'test@test.com',
-
-    /**
-     * First name of regular user OpenShift to login CHE.
-     */
-    TS_SELENIUM_FIRST_NAME: process.env.TS_SELENIUM_FIRST_NAME || 'qa',
-
-    /**
-     * Last name of regular user Openshift to login CHE.
-     */
-    TS_SELENIUM_LAST_NAME: process.env.TS_SELENIUM_LAST_NAME || 'test',
 
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.
@@ -211,56 +182,10 @@ export const TestConstants = {
     /**
      * Running test suite - possible variants can be found in package.json scripts part.
      */
-    TEST_SUITE: process.env.TEST_SUITE || 'test-happy-path',
+    TEST_SUITE: process.env.TEST_SUITE || 'userstory',
 
     /**
-     * The repo (with README.md in root) and access token are needed for to run test-git-ssh
-     */
-    TS_GITHUB_TEST_REPO: process.env.TS_GITHUB_TEST_REPO || '',
-
-    /**
-     * Token for a github repository with permissions which allow add the ssh keys
-     */
-    TS_GITHUB_TEST_REPO_ACCESS_TOKEN: process.env.TS_GITHUB_TEST_REPO_ACCESS_TOKEN || '',
-
-    /**
-     * Username of the github account
-     */
-    TS_GITHUB_USERNAME: process.env.TS_GITHUB_USERNAME || '',
-
-    /**
-     * Password of the github account
-     */
-    TS_GITHUB_PASSWORD: process.env.TS_GITHUB_PASSWORD || '',
-
-    /**
-     * Login for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
-     */
-    TS_TEST_OPENSHIFT_PLUGIN_USERNAME: process.env.TS_TEST_OPENSHIFT_PLUGIN_USERNAME || '',
-
-    /**
-     * Password for a user whom has been created in the test Openshift cluster. Need for Openshift connector test
-     */
-    TS_TEST_OPENSHIFT_PLUGIN_PASSWORD: process.env.TS_TEST_OPENSHIFT_PLUGIN_PASSWORD || '',
-
-    /**
-     * The name of project in the Openshift plugin tree
-     */
-    TS_TEST_OPENSHIFT_PLUGIN_PROJECT: process.env.TS_TEST_OPENSHIFT_PLUGIN_PROJECT || '',
-
-    /**
-     * The name of the Openshift connector plugin component type
-     */
-    TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE: process.env.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_TYPE || 'nodejs (s2i)',
-
-
-    /**
-     * The name of the Openshift connector plugin component version
-     */
-    TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION: process.env.TS_TEST_OPENSHIFT_PLUGIN_COMPONENT_VERSION || 'latest',
-
-    /**
-     * Print all timeout variables when tests launch, defaulte to false
+     * Print all timeout variables when tests launch, default to false
      */
     TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: process.env.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES || false,
 
@@ -275,22 +200,35 @@ export const TestConstants = {
     TS_LOAD_TESTS: process.env.TS_LOAD_TESTS || 'false',
 
     /**
-     * This variable determines whether to delete the workspace after the test or leave the workspace running.
-     */
-    TS_DELETE_PLUGINS_TEST_WORKSPACE: process.env.TS_DELETE_PLUGINS_TEST_WORKSPACE || 'true',
-
-    /**
-     * URL of Gogs self-hosted Git server.
-     */
-    TS_SELF_HOSTED_GIT_SERVER_URL: process.env.TS_SELF_HOSTED_GIT_SERVER_URL || '10.0.104.86:10080',
-
-    /**
-     * URL of workspace devfile test repository.
-     */
-    TS_TEST_WORKSPACE_DEVFILE_REPO: process.env.TS_TEST_WORKSPACE_DEVFILE_REPO || '',
-
-    /**
      * Constant, which prolong timeout constants for local debug.
      */
-    TS_DEBUG_MODE: process.env.TS_DEBUG_MODE || false
+    TS_DEBUG_MODE: process.env.TS_DEBUG_MODE === 'true',
+
+    E2E_OCP_CLUSTER_VERSION: process.env.E2E_OCP_CLUSTER_VERSION || '4.x',
+
+    /* -------------------------------------------
+    |  The factory tests related constants
+    ----------------------------------------------*/
+    TS_SELENIUM_FACTORY_GIT_PROVIDER: process.env.TS_SELENIUM_FACTORY_GIT_PROVIDER || GitProviderType.GITHUB,
+
+    TS_SELENIUM_FACTORY_GIT_REPO_URL: process.env.TS_SELENIUM_FACTORY_GIT_REPO_URL || '',
+
+    TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: true,
+
+    TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: process.env.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'master',
+
+    TS_SELENIUM_FACTORY_URL() {
+        return process.env.TS_SELENIUM_FACTORY_URL || TestConstants.TS_SELENIUM_BASE_URL + '/dashboard/#/' + this.TS_SELENIUM_FACTORY_GIT_REPO_URL;
+    },
+
+    TS_SELENIUM_GIT_PROVIDER_USERNAME: process.env.TS_SELENIUM_GIT_PROVIDER_USERNAME || '',
+
+    TS_SELENIUM_GIT_PROVIDER_PASSWORD: process.env.TS_SELENIUM_GIT_PROVIDER_PASSWORD || '',
+
+    TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN: process.env.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN || false,
+
+    TS_SELENIUM_GIT_PROVIDER_OAUTH: process.env.TS_SELENIUM_GIT_PROVIDER_OAUTH || false,
+
+    TS_SELENIUM_PROJECT_ROOT_FILE_NAME: process.env.TS_SELENIUM_PROJECT_ROOT_FILE_NAME || 'devfile.yaml',
+
 };

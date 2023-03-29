@@ -9,7 +9,6 @@
  **********************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { By, error } from 'selenium-webdriver';
 import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
@@ -60,38 +59,17 @@ export class BrowserTabsUtil {
 
         const windowHandles: string[] = await this.getAllWindowHandles();
 
-        windowHandles.forEach(async windowHandle => {
+        for (const windowHandle of windowHandles) {
             if (windowHandle !== currentWindowHandle) {
                 await this.switchToWindow(windowHandle);
-                return;
             }
-        });
-    }
-
-    async waitContentAvailableInTheNewTab(contentLocator: By, timeout: number) {
-        Logger.debug('BrowserTabsUtil.waitContentAvailableInTheNewTab');
-
-        await this.driverHelper.waitVisibility(contentLocator, timeout);
+        }
     }
 
     async refreshPage() {
         Logger.debug('BrowserTabsUtil.refreshPage');
 
         await (await this.driverHelper.getDriver()).navigate().refresh();
-    }
-
-    async refreshForDebug() {
-        Logger.debug('BrowserTabsUtil.refreshForDebug');
-
-        // if refresh triggers debug breakpoint test stucks of the refreshing
-        // and fail with a timeout error.
-        try {
-            await (await this.driverHelper.getDriver()).navigate().refresh();
-        } catch (err) {
-            if (!(err instanceof error.TimeoutError)) {
-                throw err;
-            }
-        }
     }
 
     async getCurrentUrl(): Promise<string> {

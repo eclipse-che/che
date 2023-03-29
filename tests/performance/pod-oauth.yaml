@@ -51,12 +51,8 @@ spec:
           value: REPLACE_PASSWORD
         - name: TS_SELENIUM_PASSWORD
           value: REPLACE_PASSWORD
-        - name: E2E_OPENSHIFT_TOKEN
-          value: REPLACE_TOKEN
         - name: E2E_OCP_CLUSTER_VERSION
           value: "4.x"
-        - name: TS_SELENIUM_VALUE_TLS_SUPPORT
-          value: "true"
         - name: TS_SELENIUM_W3C_CHROME_OPTION
           value: "true"
         - name: VIDEO_RECORDING
@@ -73,8 +69,6 @@ spec:
           value: "true"
         - name: TS_IMPORT_PROJECT_DEFAULT_POLLING
           value: "300000"
-        - name: TS_SELENIUM_SINGLE_HOST
-          value: REPLACE_SINGLE_HOST
         image: REPLACE_IMAGE 
         imagePullPolicy: Always
         name: load-testing-container

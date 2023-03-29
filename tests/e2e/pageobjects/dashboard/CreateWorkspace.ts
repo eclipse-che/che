@@ -14,7 +14,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { EditorType, TestConstants } from '../../constants/TestConstants';
+import { TestConstants } from '../../constants/TestConstants';
 
 @injectable()
 export class CreateWorkspace {
@@ -34,14 +34,6 @@ export class CreateWorkspace {
         Logger.debug('CreateWorkspace.waitPage');
 
         await this.waitTitleContains('Create Workspace', timeout);
-    }
-
-    async waitSample(sampleName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`CreateWorkspace.waitSample sampleName: "${sampleName}"`);
-
-        const sampleLocator: By = this.getSampleLocator(sampleName);
-
-        await this.driverHelper.waitVisibility(sampleLocator, timeout);
     }
 
     async clickOnSampleNoEditorSelection(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
@@ -80,15 +72,12 @@ export class CreateWorkspace {
 
     private getSampleLocatorWithSpecificEditor(sampleName: string): By {
         let editor: string = '';
-        switch (TestConstants.TS_SELENIUM_EDITOR) {
-            case EditorType.CHE_CODE:
+        switch (process.env.TS_SELENIUM_EDITOR) {
+            case 'che-code':
                 editor = 'code';
                 break;
-            case EditorType.THEIA:
-                editor = 'theia';
-                break;
             default:
-                throw new Error(`Unsupported editor ${TestConstants.TS_SELENIUM_EDITOR}`);
+                throw new Error(`Unsupported editor ${process.env.TS_SELENIUM_EDITOR}`);
         }
 
         Logger.trace(`CreateWorkspace.getSampleLocatorWithSpecificEditor sampleName: ${sampleName}, editor "${editor}"`);

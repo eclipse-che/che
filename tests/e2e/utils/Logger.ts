@@ -15,6 +15,7 @@ export abstract class Logger {
     /**
      * Uses for logging of fatal errors.
      * @param text log text
+     * @param indentLevel log level
      */
     public static error(text: string, indentLevel: number = 1) {
         this.logText(indentLevel, `[ERROR] ${text}`);
@@ -23,6 +24,7 @@ export abstract class Logger {
     /**
      * Uses for logging of recoverable errors and general warnings.
      * @param text log text
+     * @param indentLevel log level
      */
     public static warn(text: string, indentLevel: number = 1) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
@@ -34,6 +36,7 @@ export abstract class Logger {
     /**
      * Uses for logging of the public methods of the pageobjects.
      * @param text log text
+     * @param indentLevel log level
      */
     public static info(text: string, indentLevel: number = 3) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
@@ -46,6 +49,7 @@ export abstract class Logger {
     /**
      * Uses for logging of the public methods of the pageobjects.
      * @param text log text
+     * @param indentLevel log level
      */
     public static debug(text: string, indentLevel: number = 5) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
@@ -60,6 +64,7 @@ export abstract class Logger {
      * Uses for logging of the public methods of the {@link DriverHelper} or
      * private methods inside of pageobjects.
      * @param text log text
+     * @param indentLevel log level
      */
     public static trace(text: string, indentLevel: number = 6) {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||

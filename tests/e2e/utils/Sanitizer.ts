@@ -16,5 +16,4 @@ export class Sanitizer {
     public sanitize(arg: string): string {
         return arg.replace(/[\/]/g, '+').replace(/[\,]/g, '.').replace(/[\:]/g, '-').replace(/[\'\"]/g, '').replace(/[^a-z0-9\+\-\.\(\)\[\]\_]/gi, '_');
     }
-
 }
