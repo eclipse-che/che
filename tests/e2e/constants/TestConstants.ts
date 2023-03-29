@@ -102,7 +102,7 @@ export const TestConstants = {
      * Value of OpenShift oAuth property determines how to login in installed application,
      * if 'false' as an user of application, if 'true' as a regular user of OCP.
      */
-    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH || 'false',
+    TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH === 'true',
 
     /**
      * Username used to log in MultiUser Che.

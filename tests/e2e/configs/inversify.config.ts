@@ -40,17 +40,12 @@ import { LoginTests } from '../tests-library/LoginTests';
 import { RedHatLoginPage } from '../pageobjects/login/RedHatLoginPage';
 import { OcpRedHatLoginPage } from '../pageobjects/login/OcpRedHatLoginPage';
 
-const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
+const e2eContainer: Container = new Container({defaultScope: 'Transient'});
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
 e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
-
-if (JSON.parse(TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH)) {
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage);
-}
-
 e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard);
@@ -67,9 +62,12 @@ e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 
+TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
+
 if (TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE === 'DevSandbox') {
     e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
-    e2eContainer.rebind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
 }
 
 export { e2eContainer };
