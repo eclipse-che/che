@@ -22,28 +22,28 @@ const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.Projec
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 
-suite(`The SmokeTest userstory`, async function () {
+suite(`The SmokeTest userstory`, async function (): Promise<void> {
     let projectSection: ViewSection;
-    suite(`Create workspace from factory:${factoryUrl}`, async function () {
+    suite(`Create workspace from factory:${factoryUrl}`, async function (): Promise<void> {
         loginTests.loginIntoChe();
         workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
         workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
         test('Register running workspace', async () => {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
-        test('Wait workspace readiness', async function () {
+        test('Wait workspace readiness', async function (): Promise<void> {
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
-        test('Check a project folder has been created', async function () {
+        test('Check a project folder has been created', async function (): Promise<void> {
             projectSection = await new SideBarView().getContent().getSection(projectName);
             Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
         });
-        test('Check the project files was imported', async function () {
+        test('Check the project files was imported', async function (): Promise<void> {
             const label: string = 'devfile.yaml';
             await projectSection.findItem(label);
             Logger.debug(`projectSection.findItem: find ${label}`);
         });
-        test('Stopping and deleting the workspace', async function () {
+        test('Stopping and deleting the workspace', async function (): Promise<void> {
             await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     });

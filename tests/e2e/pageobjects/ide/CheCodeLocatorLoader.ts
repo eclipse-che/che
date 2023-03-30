@@ -39,7 +39,7 @@ export class CheCodeLocatorLoader extends LocatorLoader {
         };
     }
 
-    private merge(target: any, obj: any) {
+    private merge(target: any, obj: any): object {
         for (const key in obj) {
             if (!Object.prototype.hasOwnProperty.call(obj, key)) {
                 continue;

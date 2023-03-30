@@ -95,11 +95,11 @@
     ],
     "typedef": [
       true,
-      // "call-signature",
-      // "member-variable-declaration",
+      "call-signature",
+      "member-variable-declaration",
       "parameter",
-      "property-declaration"
-      // "variable-declaration"
+      "property-declaration",
+      "variable-declaration"
     ],
     "typedef-whitespace": [
       true,

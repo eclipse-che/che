@@ -24,13 +24,13 @@ export class OcpLoginPage {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async waitOpenShiftLoginWelcomePage() {
+    async waitOpenShiftLoginWelcomePage(): Promise<void> {
         Logger.debug('OcpLoginPage.waitOpenShiftLoginWelcomePage');
 
         await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
-    async clickOnLoginProviderTitle() {
+    async clickOnLoginProviderTitle(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
         const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
@@ -51,40 +51,40 @@ export class OcpLoginPage {
         return await this.driverHelper.isVisible(authorizeOpenshiftIdentityProviderPageLocator);
     }
 
-    async waitAuthorizeOpenShiftIdentityProviderPage() {
+    async waitAuthorizeOpenShiftIdentityProviderPage(): Promise<void> {
         Logger.debug('OcpLoginPage.waitAuthorizeOpenShiftIdentityProviderPage');
 
         const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
         await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
-    async clickOnApproveAuthorizeAccessButton() {
+    async clickOnApproveAuthorizeAccessButton(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnApproveAuthorizeAccessOpenshift');
 
         const approveAuthorizeAccessOcpLocator: By = By.css('input[name=\'approve\']');
         await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator);
     }
 
-    async enterUserNameOpenShift(userName: string) {
+    async enterUserNameOpenShift(userName: string): Promise<void> {
         Logger.debug(`OcpLoginPage.enterUserNameOpenShift "${userName}"`);
 
         await this.driverHelper.enterValue(By.id('inputUsername'), userName);
     }
 
-    async enterPasswordOpenShift(passw: string) {
+    async enterPasswordOpenShift(passw: string): Promise<void> {
         Logger.debug(`OcpLoginPage.enterPasswordOpenShift"`);
 
         await this.driverHelper.enterValue(By.id('inputPassword'), passw);
     }
 
-    async clickOnLoginButton() {
+    async clickOnLoginButton(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnLoginButton');
 
         const loginButtonlocator: By = By.css('button[type=submit]');
         await this.driverHelper.waitAndClick(loginButtonlocator);
     }
 
-    async waitDisappearanceOpenShiftLoginWelcomePage() {
+    async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {
         Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
         await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));

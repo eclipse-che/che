@@ -41,7 +41,7 @@ export class Dashboard {
                 @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) {
     }
 
-    async stopWorkspaceByUI(workspaceName: string) {
+    async stopWorkspaceByUI(workspaceName: string): Promise<void> {
         Logger.debug(`Dashboard.stopWorkspaceByUI "${workspaceName}"`);
 
         await this.clickWorkspacesButton();
@@ -53,7 +53,7 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
     }
 
-    async deleteStoppedWorkspaceByUI(workspaceName: string) {
+    async deleteStoppedWorkspaceByUI(workspaceName: string): Promise<void> {
         Logger.debug(`Dashboard.deleteStoppedWorkspaceByUI "${workspaceName}"`);
 
         await this.clickWorkspacesButton();
@@ -64,7 +64,7 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
-    async stopAndRemoveWorkspaceByUI(workspaceName: string) {
+    async stopAndRemoveWorkspaceByUI(workspaceName: string): Promise<void> {
         Logger.debug(`Dashboard.stopAndRemoveWorkspaceByUI "${workspaceName}"`);
 
         await this.stopWorkspaceByUI(workspaceName);
@@ -72,69 +72,69 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
-    async openDashboard() {
+    async openDashboard(): Promise<void> {
         Logger.debug('Dashboard.openDashboard');
         await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
         await this.waitPage();
 
     }
 
-    async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.waitPage');
 
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.WORKSPACES_BUTTON_XPATH), timeout);
         await this.driverHelper.waitVisibility(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
-    async clickWorkspacesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
+    async clickWorkspacesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.clickWorkspacesButton');
 
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.WORKSPACES_BUTTON_XPATH), timeout);
     }
 
-    async clickCreateWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) {
+    async clickCreateWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.clickCreateWorkspaceButton');
 
         await this.driverHelper.waitAndClick(By.xpath(Dashboard.CREATE_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
-    async getLoaderAlert(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
+    async getLoaderAlert(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<string> {
         Logger.debug('Dashboard.getLoaderAlert');
 
         return await this.driverHelper.waitAndGetText(By.xpath(Dashboard.LOADER_ALERT_XPATH), timeout);
     }
 
-    async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT) {
+    async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.waitLoader');
 
         await this.driverHelper.waitAllPresence(By.xpath(Dashboard.LOADER_PAGE_STEP_TITLES_XPATH), timeout);
     }
 
-    async waitLoaderDisappearance(timeout: number = TimeoutConstants.TS_WAIT_LOADER_ABSENCE_TIMEOUT) {
+    async waitLoaderDisappearance(timeout: number = TimeoutConstants.TS_WAIT_LOADER_ABSENCE_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.waitLoaderDisappearance');
 
         await this.driverHelper.waitDisappearance(By.xpath(Dashboard.LOADER_PAGE_STEP_TITLES_XPATH), timeout);
     }
 
-    async waitDisappearanceNavigationMenu(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+    async waitDisappearanceNavigationMenu(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
         Logger.debug('Dashboard.waitDisappearanceNavigationMenu');
 
         await this.driverHelper.waitDisappearance(By.id('chenavmenu'), timeout);
     }
 
-    async waitWorkspaceStartingPage(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+    async waitWorkspaceStartingPage(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
         Logger.debug(`Dashboard.waitWorkspaceStartingPage`);
 
         await this.driverHelper.waitPresence(By.css(Dashboard.WORKSPACE_STARTING_PAGE_CSS), timeout);
     }
 
-    async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+    async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string> {
         Logger.debug(`Dashboard.getRecentWorkspaceName`);
 
         return await this.driverHelper.waitAndGetText(By.css('[data-testid="recent-workspace-item"]'), timeout);
     }
 
-    async logout(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) {
+    async logout(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
         Logger.debug(`Dashboard.logout`);
 
         await this.openDashboard();

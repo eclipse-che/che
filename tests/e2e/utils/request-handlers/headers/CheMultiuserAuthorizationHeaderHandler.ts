@@ -13,6 +13,7 @@ import { inject, injectable } from 'inversify';
 import { DriverHelper } from '../../DriverHelper';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../Logger';
+import { IWebDriverCookie } from 'selenium-webdriver';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
@@ -22,7 +23,7 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
 
     async get(): Promise<AxiosRequestConfig> {
         try {
-            let token = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
+            let token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
             if (this.authorizationToken !== token.value) {
                 this.authorizationToken = token.value;
             }

@@ -28,7 +28,7 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async login() {
+    async login(): Promise<void> {
         Logger.debug('RegularUserOcpCheLoginPage.login');
 
         Logger.debug('RegularUserOcpCheLoginPage.login wait for LogInWithOpenShift page and click button');
