@@ -115,7 +115,7 @@ export class WorkspaceHandlingTests {
                     throw err;
                 }
             }
-            if (WorkspaceHandlingTests.workspaceName !== '' && WorkspaceHandlingTests.workspaceName !== undefined) {
+            if (WorkspaceHandlingTests.workspaceName !== '' && WorkspaceHandlingTests.workspaceName !== 'undefined') {
                 Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
                 return;
             }
