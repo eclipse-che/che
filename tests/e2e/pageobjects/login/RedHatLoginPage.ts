@@ -36,7 +36,7 @@ export class RedHatLoginPage {
         Logger.debug('RedHatLoginPage.enterPasswordRedHat');
         const passwordFieldLocator: By = By.id(PASSWORD_INPUT_ID);
         await this.driverHelper.waitVisibility(passwordFieldLocator, 3000);
-        await this.driverHelper.enterValue(passwordFieldLocator, TestConstants.TS_SELENIUM_PASSWORD, timeout );
+        await this.driverHelper.enterValue(passwordFieldLocator, TestConstants.TS_SELENIUM_OCP_PASSWORD, timeout );
     }
     async clickOnLoginButton(): Promise<void> {
         Logger.debug('RedHatLoginPage.clickOnLoginButton');
@@ -51,7 +51,7 @@ export class RedHatLoginPage {
         Logger.debug('RedHatLoginPage.enterUserNameRedHat');
         const usernameFieldLocator: By = By.id(USERNAME_INPUT_ID);
         await this.driverHelper.waitVisibility(usernameFieldLocator, 20000);
-        await this.driverHelper.enterValue(usernameFieldLocator, TestConstants.TS_SELENIUM_USERNAME, timeout );
+        await this.driverHelper.enterValue(usernameFieldLocator, TestConstants.TS_SELENIUM_OCP_USERNAME, timeout );
     }
 
     async clickNextButton(): Promise<void> {
