@@ -39,7 +39,7 @@ suite(`Create predefined workspace and check it `, async function (): Promise<vo
     // create a predefined namespace for user using shell script and login into user dashboard
     suiteSetup(async function (): Promise<void> {
         Logger.info('Test prerequisites:');
-        Logger.info(' (1) there is OCP user with username and user password that have been set in the TS_SELENIUM_USERNAME and TS_SELENIUM_PASSWORD variables');
+        Logger.info(' (1) there is OCP user with username and user password that have been set in the TS_SELENIUM_OCP_USERNAME and TS_SELENIUM_OCP_PASSWORD variables');
         Logger.info(' (2) \'oc\' client installed and logged into test OCP cluster with admin rights.');
 
         await runShellScript(createPredefinedProjectCommand);

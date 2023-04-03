@@ -29,8 +29,7 @@ export class Dashboard {
     private static getUserDropdownMenuButtonLocator(): By {
         Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: get current user.`);
 
-        const currentUser: string = TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
-            TestConstants.TS_SELENIUM_OCP_USERNAME : TestConstants.TS_SELENIUM_USERNAME;
+        const currentUser: string = TestConstants.TS_SELENIUM_OCP_USERNAME;
         Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: ${currentUser}.`);
 
         return By.xpath(`//*[text()="${currentUser}"]//parent::button`);

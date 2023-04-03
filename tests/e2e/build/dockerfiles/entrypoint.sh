@@ -73,7 +73,7 @@ fi
 # Launch tests
 if [ $TS_LOAD_TESTS ]; then
   timestamp=$(date +%s)
-  user_folder="$TS_SELENIUM_USERNAME-$timestamp"
+  user_folder="$TS_SELENIUM_OCP_USERNAME-$timestamp"
   export TS_SELENIUM_REPORT_FOLDER="./$user_folder/report"
   export TS_SELENIUM_LOAD_TEST_REPORT_FOLDER="./$user_folder/load-test-folder"
   CONSOLE_LOGS="./$user_folder/console-log.txt"
@@ -103,7 +103,7 @@ else
     trap kill_ffmpeg 2 15
   fi
 
-  echo "Running TEST_SUITE: $TEST_SUITE with user: $TS_SELENIUM_USERNAME"
+  echo "Running TEST_SUITE: $TEST_SUITE with user: $TS_SELENIUM_OCP_USERNAME"
   npm run $TEST_SUITE
   EXIT_CODE=$?
   if [ "${SCREEN_RECORDING}" == "true" ]; then

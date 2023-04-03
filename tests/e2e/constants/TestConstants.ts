@@ -105,16 +105,6 @@ export const TestConstants: any = {
     TS_SELENIUM_VALUE_OPENSHIFT_OAUTH: process.env.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH === 'true',
 
     /**
-     * Username used to log in MultiUser Che.
-     */
-    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'che',
-
-    /**
-     * Password used to log in MultiUser Che.
-     */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
-
-    /**
      * Log into OCP by using appropriate provider title.
      */
     TS_OCP_LOGIN_PAGE_PROVIDER_TITLE: process.env.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE || '',
