@@ -40,7 +40,7 @@ wsStartMax=${sorted_array[${#sorted_array[@]}-1]}
 wsStartAvr=$(average "${sorted_array[@]}")
 
 # Fill out load testing report
-echo "Load testing for $USER_COUNT users x $COMPLETITIONS_COUNT workspaces took $1 seconds" >> $results
+echo "$TEST_SUITE load testing for $USER_COUNT users x $COMPLETITIONS_COUNT workspaces took $1 seconds" >> $results
 echo "$passed tests passed" >> $results
 echo "$failed tests failed" >> $results
 
