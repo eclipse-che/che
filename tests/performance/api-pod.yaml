@@ -13,10 +13,6 @@ spec:
       labels:
         group: load-tests
     spec:
-      volumes:
-        - name: dshm
-          emptyDir:
-            medium: Memory
       containers:
         - name: mycontainer
           env:                                 
@@ -36,18 +32,5 @@ spec:
               value: /tmp/.kube/config
           image: quay.io/openshift/origin-cli
           command: ["/bin/bash"]
-          args: ["-c", "curl -sSL https://gist.githubusercontent.com/SkorikSergey/5fa2d7a6875b3dfad031aa8d658babbc/raw/58cb69a42c5027b05c00ff05517f9ee2616dd1fe/start.sh | bash"]
-          # args:
-          #   - /bin/sleep
-          #   - "infinity"
-          volumeMounts:
-            - name: dshm
-              mountPath: /dev/shm
-          resources:
-            requests:
-              cpu: "500m"
-              memory: "900Mi"
-            limits:
-              cpu: "1"
-              memory: "1300Mi"
+          args: ["-c", "curl -sSL REPLACE_API_TEST | bash"]
       restartPolicy: Never
