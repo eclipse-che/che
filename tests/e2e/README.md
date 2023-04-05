@@ -28,6 +28,7 @@ Note: If there is any modifications in package.json, manually execute the `npm i
 - Use environment variables which described in the **```'TestConstants.ts'```** file
 - Use environment variables for setting timeouts if needed. You can see the list in **```'TimeoutConstants.ts'```**. You can see the list of those variables and their value if you set the ```'TS_SELENIUM_PRINT_TIMEOUT_VARIABLES = true'```
 - To test one specification export file name as ```export USERSTORY=<spec-file-name-without-extension> && npm run test``` (example: ```-e USERSTORY=Quarkus```)
+- To run test without Selenium WebDriver (API tests etc.) use ```export USERSTORY=<spec-file-name-without-extension> && npm run driver-less-test``` (example: ```-e USERSTORY=CloneGitRepoAPI```)
 
 ## Docker launch
 
