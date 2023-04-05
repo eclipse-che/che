@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-wget -O /tmp/api-utils.sh https://raw.githubusercontent.com/eclipse/che/apiLoadTests/tests/performance/api-tests/api-utils.sh
+wget -O /tmp/api-utils.sh https://raw.githubusercontent.com/eclipse/che/main/tests/performance/api-tests/api-utils.sh
 source /tmp/api-utils.sh
 
 export TEST_DEVFILE_PATH="devfile-registry/devfiles/java11-maven-quarkus__quarkus-quickstarts/devworkspace-che-code-latest.yaml"

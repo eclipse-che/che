@@ -54,7 +54,7 @@ for ((i=1; i<=$USER_COUNT; i++)); do
 done
 
 # Set common variables to template.yaml
-apiTest="https://raw.githubusercontent.com/eclipse/che/apiLoadTests/tests/performance/api-tests/api-test-$TEST_SUITE.sh"
+apiTest="https://raw.githubusercontent.com/eclipse/che/main/tests/performance/api-tests/api-test-$TEST_SUITE.sh"
 rm template.yaml || true
 cp api-pod.yaml template.yaml
 sed -i "s/REPLACE_COMPLETITIONS/$COMPLETITIONS_COUNT/g" template.yaml
