@@ -36,7 +36,7 @@ class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
-    runner.on('start', async () => {
+    runner.on('start', async (): Promise<void> => {
       let launchInformation: string =
         `################## Launch Information ##################
 
@@ -155,7 +155,7 @@ class CheReporter extends mocha.reporters.Spec {
       screenshotStream.write(Buffer.from(screenshot, 'base64'));
       screenshotStream.end();
 
-      // take pagesource and write to file
+      // take page source and write to file
       const pageSource: string = await driverHelper.getDriver().getPageSource();
       const pageSourceStream: WriteStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(Buffer.from(pageSource));

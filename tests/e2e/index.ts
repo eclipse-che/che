@@ -8,6 +8,7 @@ export * from './driver/IDriver';
 export * from './utils/BrowserTabsUtil';
 export * from './utils/DriverHelper';
 export * from './utils/Logger';
+export * from './utils/OpenshiftClientExecutor';
 export * from './utils/request-handlers/CheApiRequestHandler';
 export * from './utils/request-handlers/headers/CheMultiuserAuthorizationHeaderHandler';
 export * from './utils/request-handlers/headers/IAuthorizationHeaderHandler';

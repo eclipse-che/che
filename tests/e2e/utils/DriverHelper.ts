@@ -22,7 +22,7 @@ export class DriverHelper {
     private readonly driver: ThenableWebDriver;
 
     constructor(@inject(TYPES.Driver) driver: IDriver) {
-        this.driver = driver.get();
+        this.driver = driver.get() as ThenableWebDriver;
     }
 
     public getAction(): Actions {
