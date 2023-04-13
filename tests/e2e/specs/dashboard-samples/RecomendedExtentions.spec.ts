@@ -41,7 +41,7 @@ const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
-const samples: any = ['Node.js MongoDB', 'Node.js Express'];
+const samples: any = TestConstants.TS_SAMPLE_LIST.split(',');
 
 suite(`Check if recommended extensions installed for ${samples}`, async function (): Promise<void> {
     let projectSection: ViewSection;
