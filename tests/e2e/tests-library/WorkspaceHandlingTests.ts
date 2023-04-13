@@ -51,6 +51,7 @@ export class WorkspaceHandlingTests {
 
     public createAndOpenWorkspace(stack: string): void {
         test(`Create and open new workspace, stack:${stack}`, async () => {
+            await this.dashboard.clickWorkspacesButton();
             await this.dashboard.waitPage();
             Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
             await this.apiUrlResolver.getWorkspacesApiUrl();
