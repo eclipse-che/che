@@ -5,11 +5,10 @@ ENV DISPLAY=':20'
 USER root
 
 RUN apt-get update && apt-get install && \
-    apt-get install -y ftp && \
+    apt-get install -y ftp x11vnc ffmpeg libvpx6 && \
     curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && \
     apt-get install -y nodejs && \
     npm install -g typescript && \
-    apt-get install x11vnc ffmpeg -y && \
     node -v
 
 COPY --chown=0:0 build/dockerfiles/entrypoint.sh /tmp/
