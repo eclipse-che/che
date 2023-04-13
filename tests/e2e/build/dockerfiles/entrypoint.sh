@@ -98,7 +98,7 @@ else
   if [ "${SCREEN_RECORDING}" == "true" ]; then
     echo "Starting ffmpeg recording..."
     mkdir -p /tmp/ffmpeg_report
-    nohup ffmpeg -y -video_size 1920x1080 -framerate 24 -f x11grab -i :20.0 /tmp/ffmpeg_report/output.mp4 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt & 
+    nohup ffmpeg -y -video_size 1920x1080 -framerate 30 -f x11grab -i :20.0 -c:a libvpx /tmp/ffmpeg_report/output.webm 2> /tmp/ffmpeg_report/ffmpeg_err.txt > /tmp/ffmpeg_report/ffmpeg_std.txt &
     ffmpeg_pid=$!
     trap kill_ffmpeg 2 15
   fi
