@@ -201,6 +201,8 @@ export const TestConstants: any = {
 
     E2E_OCP_CLUSTER_VERSION: process.env.E2E_OCP_CLUSTER_VERSION || '4.x',
 
+    TS_SAMPLE_LIST: process.env.TS_SAMPLE_LIST || 'Node.js MongoDB,Node.js Express',
+
     /* -------------------------------------------
     |  The factory tests related constants
     ----------------------------------------------*/
