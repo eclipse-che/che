@@ -1,8 +1,9 @@
-import { OpenshiftClientExecutor } from '../../utils/OpenshiftClientExecutor';
+import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
 import { GitUtil } from '../../utils/vsc/GitUtil';
 import { TestConstants } from '../../constants/TestConstants';
+
 
 const gitRepository: string = 'https://github.com/crw-qe/web-nodejs-sample';
 
@@ -13,8 +14,8 @@ suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async fun
     const clonedProjectName: string = GitUtil.getProjectNameFromGitUrl(gitRepository);
     let containerWorkDir: string = '';
 
-    const openshiftClientExecutor: OpenshiftClientExecutor = new OpenshiftClientExecutor(workspaceName, namespace);
-    const containerTerminal: OpenshiftClientExecutor.ContainerTerminal = new OpenshiftClientExecutor.ContainerTerminal(openshiftClientExecutor);
+    const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(workspaceName, namespace);
+    const containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal = new KubernetesCommandLineToolsExecutor.ContainerTerminal(kubernetesCommandLineToolsExecutor);
 
     const emptyYaml: string =
         'apiVersion: workspace.devfile.io/v1alpha2\n' +
@@ -39,12 +40,12 @@ suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async fun
         '                value: 0.0.0.0';
 
     suiteSetup('Create empty workspace with OC client', function (): void {
-        openshiftClientExecutor.loginToOcp();
-        openshiftClientExecutor.applyAndWaitDevWorkspace(emptyYaml);
+        kubernetesCommandLineToolsExecutor.loginToOcp();
+        kubernetesCommandLineToolsExecutor.applyAndWaitDevWorkspace(emptyYaml);
     });
 
     suiteTeardown('Delete workspace', function (): void {
-        openshiftClientExecutor.deleteDevWorkspace();
+        kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
     });
 
     suite('Clone public repo without previous setup', function (): void {
