@@ -50,7 +50,7 @@ jobs:
       run: |
         set -xe
         SHORT_SHA1=$(git rev-parse --short HEAD)
-        echo ::set-output name=short_sha1::${SHORT_SHA1}
+        echo "short_sha1=${SHORT_SHA1}" >> $GITHUB_OUTPUT
         
         cd tests/e2e
         docker build -t quay.io/eclipse/che-e2e:next -f build/dockerfiles/Dockerfile .
