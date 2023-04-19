@@ -241,5 +241,7 @@ export const TestConstants: any = {
 
     TS_API_TEST_UDI_IMAGE: process.env.TS_API_TEST_UDI_IMAGE || 'quay.io/devfile/universal-developer-image:latest',
 
-    TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`
+    TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`,
+
+    TS_API_TEST_NAMESPACE: process.env.TS_API_TEST_NAMESPACE || undefined
 };

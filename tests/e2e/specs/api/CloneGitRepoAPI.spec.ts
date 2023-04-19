@@ -9,7 +9,7 @@ const gitRepository: string = 'https://github.com/crw-qe/web-nodejs-sample';
 
 suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async function (): Promise<void> {
     // works only for root user
-    const namespace: string = 'admin-devspaces';
+    const namespace: string = TestConstants.TS_API_TEST_NAMESPACE ? TestConstants.TS_API_TEST_NAMESPACE : undefined;
     const workspaceName: string = 'empty-' + Math.floor(Math.random() * 1000);
     const clonedProjectName: string = GitUtil.getProjectNameFromGitUrl(gitRepository);
     let containerWorkDir: string = '';

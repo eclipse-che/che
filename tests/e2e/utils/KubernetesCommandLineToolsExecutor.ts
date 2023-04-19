@@ -94,7 +94,11 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     }
 
     private setNamespace(_namespace: string | undefined): string {
-        return _namespace !== undefined ? _namespace : TestConstants.TS_SELENIUM_OCP_USERNAME + '-devspaces';
+        _namespace = _namespace !== undefined ? _namespace
+            : TestConstants.TS_SELENIUM_BASE_URL.includes('devspaces') ? TestConstants.TS_SELENIUM_OCP_USERNAME + '-devspaces'
+                : TestConstants.TS_SELENIUM_BASE_URL.includes('che') ? TestConstants.TS_SELENIUM_OCP_USERNAME + '-che'
+                    : 'default';
+        return _namespace;
     }
 
     private getServerUrl(): string {
