@@ -23,6 +23,11 @@ export enum GitProviderType {
     BITBUCKET = 'bitbucket'
 }
 
+export enum KubernetesCommandLineTool {
+    OC = 'oc',
+    KUBECTL = 'kubectl',
+}
+
 export const TestConstants: any = {
     /**
      * Base URL of the application which should be checked
@@ -228,7 +233,15 @@ export const TestConstants: any = {
 
     TS_SELENIUM_PROJECT_ROOT_FILE_NAME: process.env.TS_SELENIUM_PROJECT_ROOT_FILE_NAME || 'devfile.yaml',
 
+    /* -------------------------------------------
+   |  The api tests related constants
+   ----------------------------------------------*/
+
+    TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL: process.env.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL || KubernetesCommandLineTool.OC,
+
     TS_API_TEST_UDI_IMAGE: process.env.TS_API_TEST_UDI_IMAGE || 'quay.io/devfile/universal-developer-image:latest',
 
-    TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`
+    TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`,
+
+    TS_API_TEST_NAMESPACE: process.env.TS_API_TEST_NAMESPACE || undefined
 };
