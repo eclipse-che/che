@@ -135,7 +135,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
                     extensionMenuItemLabels += (await item.getLabel()) + ' ';
                 }
                 Logger.debug(`extensionMenuItemLabels: ${extensionMenuItemLabels}.`);
-                expect(extensionMenuItemLabels).contains('Disable').and.not.contains('Enable');
+                expect(extensionMenuItemLabels).contains('Uninstall').and.not.contains('Enable');
             }
         });
 
