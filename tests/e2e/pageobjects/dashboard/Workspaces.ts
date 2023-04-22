@@ -166,7 +166,7 @@ export class Workspaces {
 
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
-        
+
         const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitDisappearance(workspaceListItemLocator, attempts, polling);
