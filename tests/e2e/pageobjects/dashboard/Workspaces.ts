@@ -14,6 +14,7 @@ import { CLASSES } from '../../configs/inversify.types';
 import { By, WebElement } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
+import { TestConstants } from '../../constants/TestConstants';
 
 export enum WorkspaceStatusUI {
     Running = 'green',
