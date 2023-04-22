@@ -163,9 +163,12 @@ export class Workspaces {
     async waitWorkspaceListItemAbcence(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbcence "${workspaceName}"`);
 
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
+        
         const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
-        await this.driverHelper.waitDisappearance(workspaceListItemLocator, timeout);
+        await this.driverHelper.waitDisappearance(workspaceListItemLocator, attempts, polling);
     }
 
     async getAllCreatedWorkspacesNames(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string[]> {
