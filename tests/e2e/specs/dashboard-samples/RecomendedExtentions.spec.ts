@@ -99,7 +99,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
             Logger.debug(`recommendedExtensions.recommendations: Get recommendations clear names using map().`);
             // recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
-            recommendedExtensions.recommendations = ["javascript"];
+            recommendedExtensions.recommendations = ['javascript'];
         });
 
         test(`Open "Extensions" view section`, async function (): Promise<void> {
@@ -112,6 +112,8 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
         test(`Wait until extensions starts installation`, async function (): Promise<void> {
             Logger.info(`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT}`);
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
+            browserTabsUtil.refreshPage();
+            await driverHelper.wait(TimeoutConstants.TS_OPEN_EDITOR_TIMEOUT);
         });
 
         test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
@@ -144,15 +146,8 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
                     extensionMenuItemLabels += (await item.getLabel()) + ' ';
                 }
 
-                try {
-                    Logger.debug(`extensionMenuItemLabels: ${extensionMenuItemLabels}.`);
-                    expect(extensionMenuItemLabels).contains('Disable').and.not.contains('Enable');
-                } catch (e) {
-                    Logger.debug(`Extension "${extension}" is not enabled. Trying to reload editor page.`);
-                    browserTabsUtil.refreshPage();
-
-                    expect(extensionMenuItemLabels).contains('Disable').and.not.contains('Enable');
-                }
+                Logger.debug(`extensionMenuItemLabels: ${extensionMenuItemLabels}.`);
+                expect(extensionMenuItemLabels).contains('Disable').and.not.contains('Enable');
             }
         });
 
