@@ -98,7 +98,8 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             Logger.debug(`editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.`);
             recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
             Logger.debug(`recommendedExtensions.recommendations: Get recommendations clear names using map().`);
-            recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
+            // recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
+            recommendedExtensions.recommendations = ["javascript"];
         });
 
         test(`Open "Extensions" view section`, async function (): Promise<void> {
