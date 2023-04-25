@@ -98,8 +98,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             Logger.debug(`editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.`);
             recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
             Logger.debug(`recommendedExtensions.recommendations: Get recommendations clear names using map().`);
-            // recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
-            recommendedExtensions.recommendations = ['javascript'];
+            recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
         });
 
         test(`Open "Extensions" view section`, async function (): Promise<void> {
@@ -117,7 +116,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
         test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
             Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
             extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
-            
+
             Logger.debug(`extensionsView?.getContent().getSections(): get current section.`);
             [extensionSection] = await extensionsView?.getContent().getSections() as ExtensionsViewSection[];
 
