@@ -36,6 +36,9 @@ const CLASSES: any = {
     WorkspaceHandlingTests: 'WorkspaceHandlingTests',
     RedHatLoginPage: 'RedHatLoginPage',
     OcpRedHatLoginPage: 'OcpRedHatLoginPage',
+    OcpApplicationPage: 'OcpApplicationPage',
+    OcpMainPage: 'OcpMainPage',
+    OcpImportFromGitPage: 'OcpImportFromGitPage'
 };
 
 export { TYPES, CLASSES };

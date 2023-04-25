@@ -48,6 +48,12 @@ export class DriverHelper {
         await this.driver.sleep(milliseconds);
     }
 
+    public async refreshPage(): Promise<void> {
+        Logger.trace(`DriverHelper.refreshPage`);
+
+        await this.driver.navigate().refresh();
+    }
+
     public async waitVisibilityBoolean(locator: By,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<boolean> {
@@ -273,10 +279,21 @@ export class DriverHelper {
                 await element.click();
                 return;
             } catch (err) {
-                if (err instanceof error.StaleElementReferenceError) {
-                    Logger.debug(`DriverHelper.waitAndClik - ${elementLocator} - StaleElementReferenceError - ${err}`);
+                if (err instanceof error.StaleElementReferenceError || (err instanceof error.ElementClickInterceptedError && i !== attempts - 1)) {
+                    Logger.debug(`DriverHelper.waitAndClick - ${elementLocator} - ${err}`);
                     await this.wait(polling);
                     continue;
+                }
+
+                if (err instanceof error.ElementClickInterceptedError && i === attempts - 1) {
+                    Logger.debug(`DriverHelper.waitAndClick - Element is not clickable, try to perform pointer click`);
+                    await this.getAction()
+                        .move({
+                            origin: await this.waitPresence(elementLocator)
+                        })
+                        .click()
+                        .perform();
+                    return;
                 }
 
                 Logger.error(`DriverHelper.waitAndClick - failed with an unexpected exception - ${err}`);
@@ -658,7 +675,8 @@ export class DriverHelper {
             }
 
             try {
-                await this.getAction().move({origin: element}).perform();
+                await this.getDriver()
+                    .executeScript('arguments[0].scrollIntoView(true);', element);
                 return;
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
@@ -674,7 +692,17 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
     }
 
-    getDriver(): ThenableWebDriver {
+    public async scrollToAndClick(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+        await this.scrollTo(elementLocator, timeout);
+        await this.waitAndClick(elementLocator, timeout);
+    }
+
+    public async scrollToAndEnterValue(elementLocator: By, value: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+        await this.scrollTo(elementLocator, timeout);
+        await this.enterValue(elementLocator, value, timeout);
+    }
+
+        getDriver(): ThenableWebDriver {
         Logger.trace('DriverHelper.getDriver');
 
         return this.driver;

@@ -2,6 +2,7 @@ import { echo, exec, ShellString } from 'shelljs';
 import { KubernetesCommandLineTool, TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
+import { TimeoutConstants } from '../constants/TimeoutConstants';
 
 export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     private static container: string;
@@ -89,6 +90,27 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} create namespace ${this.namespace}`);
     }
 
+    createProject(projectName: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT * 2): void {
+        Logger.debug(`${this.getLoggingName(this.createProject.name)}: Create new project "${projectName}".`);
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const attempts: number = Math.ceil(timeout / polling);
+        let response: ShellString;
+        for (let i: number = 0; i < attempts; i++) {
+            response = this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
+            if ((response.stderr + response.stdout).includes('already exist')) {
+                Logger.trace(`${this.getLoggingName(this.createProject.name)} - Project already exist #${(i + 1)}, retrying with ${polling}ms timeout`);
+                exec(`sleep ${polling / 1000}s`);
+            } else {
+                break;
+            }
+        }
+    }
+
+    deleteProject(projectName: string): void {
+        Logger.debug(`${this.getLoggingName(this.deleteProject.name)}: Delete "${projectName}".`);
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace} && sleep 5s`);
+    }
+
     private getLoggingName(methodName: string): string {
         return `${this.constructor.name}.${methodName} - ${(this.KUBERNETES_COMMAND_LINE_TOOL)}`;
     }
@@ -110,7 +132,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 export namespace KubernetesCommandLineToolsExecutor {
     export class ContainerTerminal extends KubernetesCommandLineToolsExecutor {
         constructor(cluster: KubernetesCommandLineToolsExecutor) {
-                super(cluster.getWorkspaceName, cluster.getNamespace);
+            super(cluster.getWorkspaceName, cluster.getNamespace);
         }
 
         ls(path: string = ''): ShellString {

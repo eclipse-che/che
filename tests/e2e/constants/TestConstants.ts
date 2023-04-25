@@ -34,6 +34,10 @@ export const TestConstants: any = {
      */
     TS_SELENIUM_BASE_URL: getBaseUrl(),
 
+    TS_SELENIUM_OPENSHIFT_CONSOLE_URL(): string {
+        return process.env.TS_SELENIUM_OPENSHIFT_CONSOLE_URL || TestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
+    },
+
     /**
      * Run browser in "Headless" (hidden) mode, "false" by default.
      */

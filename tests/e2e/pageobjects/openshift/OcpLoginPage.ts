@@ -80,13 +80,13 @@ export class OcpLoginPage {
     async clickOnLoginButton(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnLoginButton');
 
-        const loginButtonlocator: By = By.css('button[type=submit]');
-        await this.driverHelper.waitAndClick(loginButtonlocator);
+        const loginButtonLocator: By = By.css('button[type=submit]');
+        await this.driverHelper.waitAndClick(loginButtonLocator);
     }
 
     async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {
         Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS * 10);
     }
 }
