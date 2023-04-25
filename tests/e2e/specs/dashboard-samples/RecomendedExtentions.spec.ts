@@ -102,6 +102,11 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             recommendedExtensions.recommendations = ['javascript'];
         });
 
+        test(`Open "Extensions" view section`, async function (): Promise<void> {
+            Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
+            extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+        });
+
         test(`Wait until extensions starts installation`, async function (): Promise<void> {
             Logger.info(`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT}`);
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
@@ -109,14 +114,10 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             await driverHelper.wait(TimeoutConstants.TS_OPEN_EDITOR_TIMEOUT);
         });
 
-        test(`Open "Extensions" view section`, async function (): Promise<void> {
-            Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
-            extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+        test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
             Logger.debug(`extensionsView?.getContent().getSections(): get current section.`);
             [extensionSection] = await extensionsView?.getContent().getSections() as ExtensionsViewSection[];
-        });
 
-        test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
             Logger.info(`Check if recommendedExtensions.recommendations are installed: ${recommendedExtensions.recommendations}.`);
             for (const extension of recommendedExtensions.recommendations) {
                 Logger.debug(`extensionSection.findItem(${extension}).`);
