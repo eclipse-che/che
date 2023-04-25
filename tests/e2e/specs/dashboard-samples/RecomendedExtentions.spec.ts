@@ -106,11 +106,11 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
         });
 
-        test(`Wait until extensions starts installation`, async function (): Promise<void> {
+        test(`Let extensions complete installation`, async function (): Promise<void> {
             Logger.info(`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT}`);
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
             browserTabsUtil.refreshPage();
-            await driverHelper.wait(TimeoutConstants.TS_OPEN_EDITOR_TIMEOUT);
+            await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
 
         test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
