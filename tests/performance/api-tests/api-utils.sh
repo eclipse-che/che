@@ -59,3 +59,12 @@ function testCommand() {
     exit 1
   fi
 }
+
+# This function deletes created workspace(dw and dwt objects).
+#
+# Arguments:
+#   $1: workspace name
+function deleteWorkspace() {
+  oc delete dw $1 || true
+  oc delete dwt che-code-$1 || true
+}
