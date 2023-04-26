@@ -31,7 +31,7 @@ export class LoginTests {
             if (TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
                 Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
                 await this.browserTabsUtil.maximize();
-                await this.dashboard.waitPage();
+                await this.dashboard.waitStartingPageLoaderDisappearance();
             }
         });
     }
