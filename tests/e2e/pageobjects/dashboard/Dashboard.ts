@@ -22,7 +22,7 @@ export class Dashboard {
     private static readonly WORKSPACES_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`;
     private static readonly CREATE_WORKSPACE_BUTTON_XPATH: string = `//div[@id='page-sidebar']//a[text()='Create Workspace']`;
     private static readonly LOADER_PAGE_STEP_TITLES_XPATH: string = '//*[@data-testid="step-title"]';
-    private static readonly WORKSPACE_STARTING_PAGE_CSS: string = '.ide-loader-page';
+    private static readonly STARTING_PAGE_LOADER_CSS: string = '.main-page-loader';
     private static readonly LOADER_ALERT_XPATH: string = '//*[@data-testid="loader-alert"]';
     private static readonly LOGOUT_BUTTON_XPATH: string = '//button[text()="Logout"]';
 
@@ -121,10 +121,11 @@ export class Dashboard {
         await this.driverHelper.waitDisappearance(By.id('chenavmenu'), timeout);
     }
 
-    async waitWorkspaceStartingPage(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`Dashboard.waitWorkspaceStartingPage`);
+    async waitStartingPageLoaderDisappearance(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+        Logger.debug(`Dashboard.waitStartingPageLoaderDisappearance`);
 
-        await this.driverHelper.waitPresence(By.css(Dashboard.WORKSPACE_STARTING_PAGE_CSS), timeout);
+        await this.driverHelper.waitDisappearance(By.css(Dashboard.STARTING_PAGE_LOADER_CSS), timeout);
+        await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
     }
 
     async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string> {
