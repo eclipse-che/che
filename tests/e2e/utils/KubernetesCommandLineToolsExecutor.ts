@@ -28,11 +28,15 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     // login to Openshift cluster with username and password
     loginToOcp(): void {
         if (this.KUBERNETES_COMMAND_LINE_TOOL === KubernetesCommandLineTool.OC) {
-            Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login to the "OC" client`);
+            Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login to the "OC" client.`);
             const url: string = this.getServerUrl();
-            Logger.debug(url, TestConstants.TS_SELENIUM_OCP_USERNAME);
-            exec(`sleep 5
-            oc login --server=${url} -u=${TestConstants.TS_SELENIUM_OCP_USERNAME} -p=${TestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+            const isUserLoggedIn: ShellString = this.execWithLog('oc whoami && oc whoami --show-server=true');
+            if (isUserLoggedIn.stdout.includes(TestConstants.TS_SELENIUM_OCP_USERNAME) && isUserLoggedIn.stdout.includes(url)) {
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: User already logged`);
+            } else {
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${TestConstants.TS_SELENIUM_OCP_USERNAME}`);
+                exec(`oc login --server=${url} -u=${TestConstants.TS_SELENIUM_OCP_USERNAME} -p=${TestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+            }
         } else {
             Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: doesn't support login command`);
         }
