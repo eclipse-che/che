@@ -20,4 +20,4 @@ testProjectImported ${WORKSPACE_NAME} ${containerName} ${projectName}
 
 testCommand ${WORKSPACE_NAME} ${containerName} "${commandToTest}" "${expectedCommandOutput}"
 
-oc delete dw $WORKSPACE_NAME || true
+deleteWorkspace ${WORKSPACE_NAME}
