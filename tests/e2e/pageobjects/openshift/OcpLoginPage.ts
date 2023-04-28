@@ -87,6 +87,6 @@ export class OcpLoginPage {
     async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {
         Logger.debug('OcpLoginPage.waitDisappearanceOpenShiftLoginWelcomePage');
 
-        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS * 10);
+        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
     }
 }

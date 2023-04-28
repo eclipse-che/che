@@ -98,7 +98,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
 
     test('Check if a project folder has been created', async function (): Promise<void> {
         Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
-        projectSection = await new SideBarView().getContent().getSection(testRepoProjectName as unknown as string);
+        projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
     });
 
     test('Accept the project as a trusted one', async function (): Promise<void> {

@@ -109,7 +109,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
         test(`Let extensions complete installation`, async function (): Promise<void> {
             Logger.info(`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT}`);
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
-            browserTabsUtil.refreshPage();
+            await browserTabsUtil.refreshPage();
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
 

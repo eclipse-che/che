@@ -15,7 +15,6 @@ import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { OcpImportFromGitPage } from './OcpImportFromGitPage';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { e2eContainer } from '../../configs/inversify.config';
 
 @injectable()

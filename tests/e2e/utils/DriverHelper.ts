@@ -279,13 +279,17 @@ export class DriverHelper {
                 await element.click();
                 return;
             } catch (err) {
-                if (err instanceof error.StaleElementReferenceError || (err instanceof error.ElementClickInterceptedError && i !== attempts - 1)) {
+                function isElementClickInterceptedOnLastAttempt(err: Error, i: number): boolean {
+                    return err instanceof error.ElementClickInterceptedError && i === attempts - 1;
+                }
+
+                if (err instanceof error.StaleElementReferenceError || err instanceof error.ElementClickInterceptedError) {
                     Logger.debug(`DriverHelper.waitAndClick - ${elementLocator} - ${err}`);
                     await this.wait(polling);
                     continue;
                 }
 
-                if (err instanceof error.ElementClickInterceptedError && i === attempts - 1) {
+                if (isElementClickInterceptedOnLastAttempt(err, i)) {
                     Logger.debug(`DriverHelper.waitAndClick - Element is not clickable, try to perform pointer click`);
                     await this.getAction()
                         .move({

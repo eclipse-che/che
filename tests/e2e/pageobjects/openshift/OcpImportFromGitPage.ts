@@ -14,15 +14,13 @@ import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { OcpApplicationPage } from './OcpApplicationPage';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { e2eContainer } from '../../configs/inversify.config';
 
 @injectable()
 export class OcpImportFromGitPage {
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil) {
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
     }
 
     async enterGitRepoUrl(gitRepoUrl: string): Promise<void> {
