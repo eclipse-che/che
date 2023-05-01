@@ -14,7 +14,7 @@ export commandToTest="cd /projects/$projectName; pwd && ls -la && python -m venv
 oc login -u $OCP_USERNAME -p $OCP_PASSWORD --server=$OCP_SERVER_URL --insecure-skip-tls-verify
 cd /tmp
 
-startWorkspace ${BASE_URL}/${TEST_DEVFILE_PATH} ${WORKSPACE_NAME}
+startWorkspace ${BASE_URL} ${TEST_DEVFILE_PATH} ${WORKSPACE_NAME}
 
 testProjectImported ${WORKSPACE_NAME} ${containerName} ${projectName}
 

@@ -8,13 +8,30 @@ set -e
 #   $2: path to devfile in devfile-registry
 #   $3: workspace name
 function startWorkspace() {
-  curl --insecure $1 -o devfile.yaml
-  echo "  routingClass: che" >> devfile.yaml
+  curl --insecure $1/$2 -o devfile.yaml
   cat devfile.yaml
-  oc apply -f devfile.yaml
+
+  csplit devfile.yaml /---/
+  mv xx00 dwt.yaml
+  mv xx01 dw.yaml
+
+  echo "--- Patch devfile ---"
+  export patch="[{\"name\": \"CHE_DASHBOARD_URL\", \"value\": \"$1\"},{\"name\": \"CHE_PLUGIN_REGISTRY_URL\", \"value\": \"$1/plugin-registry/v3\"},{\"name\": \"CHE_PLUGIN_REGISTRY_INTERNAL_URL\", \"value\": \"http://plugin-registry.openshift-devspaces.svc:8080/v3\"}]";
+  echo $patch
+
+  yq -y ".spec.components[0].container.env += $patch" dwt.yaml -i
+  cat dwt.yaml
+
+  yq -y ".spec.template.components[0].container.env += $patch" dw.yaml -i
+  yq -y '.spec += {"routingClass": "che"}' dw.yaml -i
+  cat dw.yaml
+
+  echo "--- Create and start workspace by 'oc' command ---"
+  oc apply -f dwt.yaml
+  oc apply -f dw.yaml
 
   start=$(date +%s)
-  oc wait --for=condition=Ready dw $2 --timeout=360s
+  oc wait --for=condition=Ready dw $3 --timeout=360s
   end=$(date +%s)
   echo "Workspace started in $(($end - $start)) seconds"
 }
