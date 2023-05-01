@@ -30,7 +30,7 @@ spec:
               value: REPLACE_PASSWORD
             - name: KUBECONFIG
               value: /tmp/.kube/config
-          image: quay.io/sskoryk/performance
+          image: quay.io/crw_pr/performance
           command: ["/bin/bash"]
           args: ["-c", "curl -sSL REPLACE_API_TEST | bash"]
       restartPolicy: Never
