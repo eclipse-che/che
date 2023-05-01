@@ -76,3 +76,25 @@ If tests fail, there is also another folder called report. There are screenshots
 ## Pod conole log files
 For each running pod there are logs gathered in a file `pod-<number_of_pod>-console-logs.txt`. Please note that if you set `-t` larger then 1, this pod console log contains logs only from the last run. 
 
+
+
+# API performance tests
+
+API performance tests use test scripts from crw-jenkins(https://gitlab.cee.redhat.com/codeready-workspaces/crw-jenkins/-/tree/master/vars) repo. 
+
+## Running API load tests
+To start API tests  use `./api-load-tests.sh` script with next parameters:
+- `-n` - number of users
+- `-c` - number of workspaces per user      
+- `-o` - OCP URL
+- `-b` - Che URL
+- `-u` - username
+- `-p` - password
+- `-s` - test suite to run
+
+Example:
+This script will run API test for 10 users with 10 workspaces and cpp test suite:
+ `./api-load-tests.sh -u user -p load-user -b https://devspaces.apps.ocp410-sskoryk.crw-qe.com -o https://api.ocp410-sskoryk.crw-qe.com:6443 -n 10 -c 1 -s cpp` .
+
+## Dockerfile
+Dockerfile is used to build image with all required dependencies to run API tests. It is used in `api-pod.yaml` script. It based on `openshift/origin-cli:latest` image and adds `jq` and `yq` packages.
