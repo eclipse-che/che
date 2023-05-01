@@ -8,7 +8,9 @@ set -e
 #   $2: path to devfile in devfile-registry
 #   $3: workspace name
 function startWorkspace() {
-  curl --insecure $1/$2 -o devfile.yaml
+  echo $1
+  echo $2
+  curl --insecure "$1/$2" -o devfile.yaml
   cat devfile.yaml
 
   csplit devfile.yaml /---/
