@@ -94,7 +94,7 @@ To start API tests  use `./api-load-tests.sh` script with next parameters:
 
 Example:
 This script will run API test for 10 users with 10 workspaces and cpp test suite:
- `./api-load-tests.sh -u user -p load-user -b https://devspaces.apps.ocp410-sskoryk.crw-qe.com -o https://api.ocp410-sskoryk.crw-qe.com:6443 -n 10 -c 1 -s cpp` .
+ `./api-load-tests.sh -u user -p password -b https://devspaces.apps.ocp410.com -o https://api.ocp410.com:6443 -n 10 -c 10 -s cpp` .
 
 ## Dockerfile
 Dockerfile is used to build image with all required dependencies to run API tests. It is used in `api-pod.yaml` script. It based on `openshift/origin-cli:latest` image and adds `jq` and `yq` packages.
