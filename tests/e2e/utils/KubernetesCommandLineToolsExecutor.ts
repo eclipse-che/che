@@ -96,23 +96,12 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     createProject(projectName: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT * 2): void {
         Logger.debug(`${this.getLoggingName(this.createProject.name)}: Create new project "${projectName}".`);
-        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
-        const attempts: number = Math.ceil(timeout / polling);
-        let response: ShellString;
-        for (let i: number = 0; i < attempts; i++) {
-            response = this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
-            if ((response.stderr + response.stdout).includes('already exist')) {
-                Logger.trace(`${this.getLoggingName(this.createProject.name)} - Project already exist #${(i + 1)}, retrying with ${polling}ms timeout`);
-                exec(`sleep ${polling / 1000}s`);
-            } else {
-                break;
-            }
-        }
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
     }
 
     deleteProject(projectName: string): void {
         Logger.debug(`${this.getLoggingName(this.deleteProject.name)}: Delete "${projectName}".`);
-        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace} && sleep 5s`);
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace}`);
     }
 
     private isUserLoggedIn(): boolean {

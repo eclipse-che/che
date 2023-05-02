@@ -38,14 +38,13 @@ const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = n
 // works only with no-admin user
 suite(`DevConsole Integration`, async function (): Promise<void> {
     // test specific data
-    const gitImportRepo: string = 'https://github.com/musienko-maxim/summit-lab-spring-music';
+    const gitImportRepo: string = 'https://github.com/crw-qe/summit-lab-spring-music.git';
     const gitImportReference: string = 'pipeline';
     const projectLabel: string = 'app.openshift.io/runtime=spring';
     const projectName: string = 'devconsole-integration-test';
 
     suiteSetup('Create new empty project using ocp', async function (): Promise<void> {
         kubernetesCommandLineToolsExecutor.loginToOcp();
-        kubernetesCommandLineToolsExecutor.deleteProject(projectName);
         kubernetesCommandLineToolsExecutor.createProject(projectName);
     });
 

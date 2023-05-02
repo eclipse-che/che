@@ -27,6 +27,14 @@ export class OcpMainPage {
     private static readonly SELECT_PROJECT_DROPDOWN_LOCATOR: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
     private static readonly PROJECT_FILTER_INPUT_LOCATOR: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
 
+    private static getRoleLocator(role: string): By {
+        return By.xpath(`//a//*[text()="${role}"]`);
+    }
+
+    private static getProjectDropdownItemLocator(projectName: string): By {
+        return By.xpath(`//button//*[text()="${projectName}"]`);
+    }
+
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
@@ -51,7 +59,7 @@ export class OcpMainPage {
     async selectDeveloperRole(): Promise<void> {
         Logger.debug(`${this.constructor.name}.${this.selectDeveloperRole.name}`);
 
-        await this.driverHelper.waitAndClick(this.getRoleLocator('Developer'));
+        await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator('Developer'));
     }
 
     async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
@@ -74,14 +82,6 @@ export class OcpMainPage {
 
         await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN_LOCATOR);
         await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT_LOCATOR, projectName);
-        await this.driverHelper.waitAndClick(this.getProjectDropdownItemLocator(projectName));
-    }
-
-    private getRoleLocator(role: string): By {
-        return By.xpath(`//a//*[text()="${role}"]`);
-    }
-
-    private getProjectDropdownItemLocator(projectName: string): By {
-        return By.xpath(`//button//*[text()="${projectName}"]`);
+        await this.driverHelper.waitAndClick(OcpMainPage.getProjectDropdownItemLocator(projectName));
     }
 }
