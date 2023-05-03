@@ -34,7 +34,7 @@ export class OcpLoginPage {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
         const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
-        await this.driverHelper.waitAndClick(loginProviderTitleLocator);
+        await this.driverHelper.waitAndClick(loginProviderTitleLocator, TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL);
     }
 
     async isIdentityProviderLinkVisible(): Promise<boolean> {
@@ -80,8 +80,8 @@ export class OcpLoginPage {
     async clickOnLoginButton(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnLoginButton');
 
-        const loginButtonlocator: By = By.css('button[type=submit]');
-        await this.driverHelper.waitAndClick(loginButtonlocator);
+        const loginButtonLocator: By = By.css('button[type=submit]');
+        await this.driverHelper.waitAndClick(loginButtonLocator);
     }
 
     async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {

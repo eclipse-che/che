@@ -13,6 +13,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
+import { TestConstants } from '../constants/TestConstants';
 
 @injectable()
 export class BrowserTabsUtil {
@@ -91,8 +92,9 @@ export class BrowserTabsUtil {
 
     public async maximize(): Promise<void> {
         Logger.trace(`BrowserTabsUtil.maximize`);
-
-        await this.driverHelper.getDriver().manage().window().maximize();
+        if (TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
+            Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
+            await this.driverHelper.getDriver().manage().window().maximize();
+        }
     }
-
 }

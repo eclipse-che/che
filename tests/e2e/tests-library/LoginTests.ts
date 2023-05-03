@@ -12,27 +12,36 @@ import { CLASSES, TYPES } from '../configs/inversify.types';
 import { ICheLoginPage } from '../pageobjects/login/ICheLoginPage';
 import { TestConstants } from '../constants/TestConstants';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
-import { Logger } from '../utils/Logger';
 import { inject, injectable } from 'inversify';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
+import { IOcpLoginPage } from '../pageobjects/login/IOcpLoginPage';
 
 @injectable()
 export class LoginTests {
     constructor(
         @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(TYPES.CheLogin) private readonly loginPage: ICheLoginPage,
+        @inject(TYPES.CheLogin) private readonly productLoginPage: ICheLoginPage,
+        @inject(TYPES.OcpLogin) private readonly ocpLoginPage: IOcpLoginPage,
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) {
     }
 
     public loginIntoChe(): void {
         test('Login', async () => {
-            await this.browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
-            await this.loginPage.login();
-            if (TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
-                Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
-                await this.browserTabsUtil.maximize();
-                await this.dashboard.waitStartingPageLoaderDisappearance();
+            if (!(await this.browserTabsUtil.getCurrentUrl()).includes(TestConstants.TS_SELENIUM_BASE_URL)) {
+                await this.browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
             }
+            await this.productLoginPage.login();
+            await this.browserTabsUtil.maximize();
+            await this.dashboard.waitStartingPageLoaderDisappearance();
+        });
+    }
+
+    public loginIntoOcpConsole(): void {
+        test('Login into ocp console', async () => {
+            const openshiftConsoleUrl: string =  TestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
+            await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
+            await this.ocpLoginPage.login();
+            await this.browserTabsUtil.maximize();
         });
     }
 

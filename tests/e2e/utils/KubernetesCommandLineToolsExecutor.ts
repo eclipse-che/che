@@ -2,6 +2,7 @@ import { echo, exec, ShellString } from 'shelljs';
 import { KubernetesCommandLineTool, TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
+import { TimeoutConstants } from '../constants/TimeoutConstants';
 
 export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     private static container: string;
@@ -27,11 +28,14 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     // login to Openshift cluster with username and password
     loginToOcp(): void {
         if (this.KUBERNETES_COMMAND_LINE_TOOL === KubernetesCommandLineTool.OC) {
-            Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login to the "OC" client`);
+            Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login to the "OC" client.`);
             const url: string = this.getServerUrl();
-            Logger.debug(url, TestConstants.TS_SELENIUM_OCP_USERNAME);
-            exec(`sleep 5
-            oc login --server=${url} -u=${TestConstants.TS_SELENIUM_OCP_USERNAME} -p=${TestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+            if (this.isUserLoggedIn()) {
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: User already logged`);
+            } else {
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${TestConstants.TS_SELENIUM_OCP_USERNAME}`);
+                exec(`oc login --server=${url} -u=${TestConstants.TS_SELENIUM_OCP_USERNAME} -p=${TestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+            }
         } else {
             Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: doesn't support login command`);
         }
@@ -54,6 +58,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         Logger.debug(`${this.getLoggingName(this.deleteDevWorkspace.name)}: Delete '${this.workspaceName}' workspace`);
         this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`);
         this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
+        this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${TestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
     }
 
     applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {
@@ -89,6 +94,22 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} create namespace ${this.namespace}`);
     }
 
+    createProject(projectName: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT * 2): void {
+        Logger.debug(`${this.getLoggingName(this.createProject.name)}: Create new project "${projectName}".`);
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
+    }
+
+    deleteProject(projectName: string): void {
+        Logger.debug(`${this.getLoggingName(this.deleteProject.name)}: Delete "${projectName}".`);
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace}`);
+    }
+
+    private isUserLoggedIn(): boolean {
+        const whoamiCommandOutput: ShellString = this.execWithLog('oc whoami && oc whoami --show-server=true');
+
+        return whoamiCommandOutput.stdout.includes(TestConstants.TS_SELENIUM_OCP_USERNAME) && whoamiCommandOutput.stdout.includes(this.getServerUrl());
+    }
+
     private getLoggingName(methodName: string): string {
         return `${this.constructor.name}.${methodName} - ${(this.KUBERNETES_COMMAND_LINE_TOOL)}`;
     }
@@ -110,7 +131,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 export namespace KubernetesCommandLineToolsExecutor {
     export class ContainerTerminal extends KubernetesCommandLineToolsExecutor {
         constructor(cluster: KubernetesCommandLineToolsExecutor) {
-                super(cluster.getWorkspaceName, cluster.getNamespace);
+            super(cluster.getWorkspaceName, cluster.getNamespace);
         }
 
         ls(path: string = ''): ShellString {
