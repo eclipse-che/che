@@ -1,0 +1,37 @@
+kind: DevWorkspace
+apiVersion: workspace.devfile.io/v1alpha2
+metadata:
+  name: code-latest-pod-overrides
+spec:
+  started: true
+  template:
+    attributes:
+      pod-overrides:
+        metadata:
+          annotations:
+            io.openshift.userns: "true"
+            io.kubernetes.cri-o.userns-mode: "auto:size=65536;map-to-root=true"  # <-- user namespace
+            openshift.io/scc: container-build
+        spec:
+          runtimeClassName: kata
+          schedulerName: stork
+    projects:
+      - name: web-nodejs-sample
+        git:
+          remotes:
+            origin: "https://github.com/che-samples/web-nodejs-sample.git"
+    commands:
+      - id: say-hello
+        exec:
+          component: che-code-runtime-description
+          commandLine: echo "Hello from $(pwd)"
+          workingDir: ${PROJECT_SOURCE}/app
+  contributions:
+    - name: che-code
+      uri: https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml
+      components:
+        - name: che-code-runtime-description
+          container:
+            env:
+              - name: CODE_HOST
+                value: 0.0.0.0
