@@ -2,7 +2,7 @@ import { echo, exec, ShellString } from 'shelljs';
 import { KubernetesCommandLineTool, TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
-import { TimeoutConstants } from '../constants/TimeoutConstants';
+import * as path from 'path';
 
 export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     private static container: string;
@@ -84,6 +84,16 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
             'EOF');
     }
 
+    applyYamlConfigurationAsFile(pathToFile: string): void {
+        Logger.debug(`${this.getLoggingName(this.applyYamlConfigurationAsFile.name)}:`);
+        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f "${path.resolve(pathToFile)}"`);
+    }
+
+    getDevWorkspaceYamlConfiguration(): ShellString {
+        Logger.debug(`${this.getLoggingName(this.getDevWorkspaceYamlConfiguration.name)}:`);
+        return this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} get dw ${this.workspaceName} -n ${this.namespace} -o yaml`);
+    }
+
     waitDevWorkspace(timeout: number = 360): ShellString {
         Logger.debug(`${this.getLoggingName(this.waitDevWorkspace.name)}: Wait till workspace ready.`);
         return this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} wait -n ${this.namespace} --for=condition=Ready dw ${this.workspaceName} --timeout=${timeout}s`);
@@ -94,7 +104,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} create namespace ${this.namespace}`);
     }
 
-    createProject(projectName: string, timeout: number = TimeoutConstants.TS_SELENIUM_TERMINAL_DEFAULT_TIMEOUT * 2): void {
+    createProject(projectName: string): void {
         Logger.debug(`${this.getLoggingName(this.createProject.name)}: Create new project "${projectName}".`);
         this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
     }

@@ -1,0 +1,28 @@
+kind: DevWorkspace
+apiVersion: workspace.devfile.io/v1alpha2
+metadata:
+  name: web-terminal-container-overrides
+spec:
+  started: true
+  template:
+    attributes:
+      controller.devfile.io/storage-type: ephemeral
+    projects:
+      - name: web-nodejs-sample
+        git:
+          remotes:
+            origin: "https://github.com/che-samples/web-nodejs-sample.git"
+    components:
+      - name: web-terminal
+        attributes:
+          container-overrides: {"resources":{"limits":{"nvidia.com/gpu":"1"}}}
+        container:
+          image: quay.io/wto/web-terminal-tooling:next
+          args:
+            - tail
+            - '-f'
+            - /dev/null
+          cpuLimit: 400m
+          cpuRequest: 100m
+          memoryLimit: 256Mi
+          memoryRequest: 128Mi
