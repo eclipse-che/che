@@ -23,7 +23,7 @@ suite(`Test defining pod overrides via attribute.`, async function (): Promise<v
     });
 
     test('Check that fields are overridden in the Deployment for DewWorkspace', function (): void {
-       const devWorkspaceFullYamlOutput: Object = YAML.parse(kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration());
+       const devWorkspaceFullYamlOutput: any = YAML.parse(kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration());
        expect(devWorkspaceFullYamlOutput.spec.template.attributes['pod-overrides']).eqls({
            metadata: {
                annotations: {
