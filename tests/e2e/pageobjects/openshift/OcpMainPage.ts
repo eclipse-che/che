@@ -26,6 +26,7 @@ export class OcpMainPage {
     private static readonly IMPORT_FROM_GIT_ITEM_LOCATOR: By = By.xpath('//*[@data-test="item import-from-git"]');
     private static readonly SELECT_PROJECT_DROPDOWN_LOCATOR: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
     private static readonly PROJECT_FILTER_INPUT_LOCATOR: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
+    private static readonly SKIP_TOUR_BUTTON_LOCATOR: By = By.xpath('//*[text()="Skip tour"]');
 
     private static getRoleLocator(role: string): By {
         return By.xpath(`//a//*[text()="${role}"]`);
@@ -59,7 +60,11 @@ export class OcpMainPage {
     async selectDeveloperRole(): Promise<void> {
         Logger.debug(`${this.constructor.name}.${this.selectDeveloperRole.name}`);
 
-        await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator('Developer'));
+        await this.waitOpenMainPage();
+        await this.tryToSkipWebTour();
+        await this.clickOnSelectRoleButton();
+        await this.selectRole('Developer');
+        await this.tryToSkipWebTour();
     }
 
     async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
@@ -70,9 +75,8 @@ export class OcpMainPage {
     }
 
     async openImportFromGitPage(): Promise<OcpImportFromGitPage> {
-        await this.waitOpenMainPage();
-        await this.clickOnSelectRoleButton();
-        await this.selectDeveloperRole();
+        Logger.debug(`${this.constructor.name}.${this.openImportFromGitPage.name}`);
+
         await this.clickAddToProjectButton();
         return await this.selectImportFromGitMethod();
     }
@@ -83,5 +87,23 @@ export class OcpMainPage {
         await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN_LOCATOR);
         await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT_LOCATOR, projectName);
         await this.driverHelper.waitAndClick(OcpMainPage.getProjectDropdownItemLocator(projectName));
+    }
+
+    private async selectRole(role: string): Promise<void> {
+        Logger.debug(`${this.constructor.name}.${this.selectRole.name} - ${role}`);
+
+        await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator(role));
+    }
+
+    private async tryToSkipWebTour(): Promise<void> {
+        Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name}`);
+
+        if (await this.driverHelper.isVisible(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR)) {
+            await this.driverHelper.waitAndClick(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR);
+
+            Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name} - Welcome tour modal dialog was located and skipped`);
+        } else {
+            Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name} - Welcome tour modal dialog was not located`);
+        }
     }
 }
