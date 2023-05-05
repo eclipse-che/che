@@ -50,11 +50,12 @@ suite(`DevConsole Integration`, async function (): Promise<void> {
 
     loginTests.loginIntoOcpConsole();
 
-    test('Select test project on DevConsole', async function (): Promise<void> {
+    test('Select test project and Developer role on DevConsole', async function (): Promise<void> {
+        await ocpMainPage.selectDeveloperRole();
         await ocpMainPage.selectProject(projectName);
     });
 
-    test('Open import from git project page as Developer', async function (): Promise<void> {
+    test('Open import from git project page', async function (): Promise<void> {
         ocpImportPage = await ocpMainPage.openImportFromGitPage();
     });
 
