@@ -90,7 +90,7 @@ export class OcpMainPage {
     }
 
     private async selectRole(role: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.selectRole.name} - selecting role ${role}`);
+        Logger.debug(`${this.constructor.name}.${this.selectRole.name} - ${role}`);
 
         await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator(role));
     }
