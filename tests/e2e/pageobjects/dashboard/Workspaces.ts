@@ -141,7 +141,6 @@ export class Workspaces {
         await this.driverHelper.waitAndClick(enabledConfirmationWindowDeleteButton, timeout);
     }
 
-
     async deleteWorkspaceByActionsButton(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
         Logger.debug('Workspaces.deleteWorkspaceByActionsButton');
 

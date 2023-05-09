@@ -23,6 +23,7 @@ export class ProjectAndFileTests {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
 
     public async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
+        Logger.debug(`${this.constructor.name}.${this.waitWorkspaceReadinessForCheCodeEditor.name} - Waiting for editor.`);
         try {
             const start: number = new Date().getTime();
             await this.driverHelper.getDriver().wait(until.elementLocated(By.className('monaco-workbench')), TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
