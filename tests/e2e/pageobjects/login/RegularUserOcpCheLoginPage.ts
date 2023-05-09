@@ -10,6 +10,7 @@
 import 'reflect-metadata';
 import { ICheLoginPage } from './ICheLoginPage';
 import { OcpLoginPage } from '../openshift/OcpLoginPage';
+import { OauthPage } from '../git-providers/OauthPage';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../configs/inversify.types';
 import { TestConstants } from '../../constants/TestConstants';
@@ -20,34 +21,50 @@ import { DriverHelper } from '../../utils/DriverHelper';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
+  private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = `//div[@class='panel-login']`;
+  private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
 
-    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = `//div[@class='panel-login']`;
-    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
+  constructor(
+    @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
+    @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+    @inject(CLASSES.OauthPage) private readonly oauthPage: OauthPage
+  ) {}
 
-    constructor(
-        @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+  async login(): Promise<void> {
+    Logger.debug('RegularUserOcpCheLoginPage.login');
 
-    async login(): Promise<void> {
-        Logger.debug('RegularUserOcpCheLoginPage.login');
+    Logger.debug(
+      'RegularUserOcpCheLoginPage.login wait for LogInWithOpenShift page and click button'
+    );
+    await this.driverHelper.waitPresence(
+      By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR),
+      TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+    );
+    await this.driverHelper.waitAndClick(
+      By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR)
+    );
 
-        Logger.debug('RegularUserOcpCheLoginPage.login wait for LogInWithOpenShift page and click button');
-        await this.driverHelper.waitPresence(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-        await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
-
-        if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
-            await this.ocpLogin.clickOnLoginProviderTitle();
-        }
-
-        await this.ocpLogin.waitOpenShiftLoginWelcomePage();
-        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
-        await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
-
-        if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
-            await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
-            await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
-        }
+    if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
+      await this.ocpLogin.clickOnLoginProviderTitle();
     }
+
+    if (TestConstants.TS_SELENIUM_GIT_PROVIDER_OAUTH) {
+      await this.oauthPage.login();
+    } else {
+      await this.ocpLogin.waitOpenShiftLoginWelcomePage();
+      await this.ocpLogin.enterUserNameOpenShift(
+        TestConstants.TS_SELENIUM_OCP_USERNAME
+      );
+      await this.ocpLogin.enterPasswordOpenShift(
+        TestConstants.TS_SELENIUM_OCP_PASSWORD
+      );
+      await this.ocpLogin.clickOnLoginButton();
+      await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
+    }
+
+    if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
+      await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
+      await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
+    }
+  }
 }

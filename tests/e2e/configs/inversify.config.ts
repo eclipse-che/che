@@ -25,6 +25,7 @@ import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { WorkspaceDetails } from '../pageobjects/dashboard/workspace-details/WorkspaceDetails';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
 import { OcpLoginPage } from '../pageobjects/openshift/OcpLoginPage';
+import { OauthPage } from '../pageobjects/git-providers/OauthPage';
 import { CheLoginPage } from '../pageobjects/openshift/CheLoginPage';
 import { IAuthorizationHeaderHandler } from '../utils/request-handlers/headers/IAuthorizationHeaderHandler';
 import { CheMultiuserAuthorizationHeaderHandler } from '../utils/request-handlers/headers/CheMultiuserAuthorizationHeaderHandler';
@@ -43,11 +44,12 @@ import { OcpMainPage } from '../pageobjects/openshift/OcpMainPage';
 import { OcpImportFromGitPage } from '../pageobjects/openshift/OcpImportFromGitPage';
 import { OcpApplicationPage } from '../pageobjects/openshift/OcpApplicationPage';
 
-const e2eContainer: Container = new Container({defaultScope: 'Transient'});
+const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
+e2eContainer.bind<OauthPage>(CLASSES.OauthPage).to(OauthPage);
 e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
 e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
@@ -73,7 +75,7 @@ e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(Wor
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
 
 TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
+  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
+  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
 
 export { e2eContainer };

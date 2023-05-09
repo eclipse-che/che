@@ -26,6 +26,7 @@ const CLASSES: any = {
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
     CheLoginPage: 'CheLoginPage',
+    OauthPage: 'OauthPage',
     CheApiRequestHandler: 'CheApiRequestHandler',
     CreateWorkspace: 'CreateWorkspace',
     BrowserTabsUtil: 'BrowserTabsUtil',

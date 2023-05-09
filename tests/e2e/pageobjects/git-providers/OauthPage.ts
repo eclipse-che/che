@@ -22,35 +22,60 @@ export class OauthPage {
     private readonly submitButton: By;
     private readonly approveButton: By;
     private readonly denyAccessButton: By;
+    private readonly twoFactorInfoBox: By;
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
+    constructor(
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper
+    ) {
         switch (TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER) {
-            case GitProviderType.BITBUCKET : {
-                this.loginForm = By.id('j_username');
-                this.passwordForm = By.id('j_password');
-                this.approveButton = By.xpath('//*[@id="approve"]');
-                this.submitButton = By.xpath('//*[@id="submit"]');
-                this.denyAccessButton = By.xpath('//*[@id="deny"]');
-            }
+            case GitProviderType.BITBUCKET:
+                {
+                    this.loginForm = By.id('j_username');
+                    this.passwordForm = By.id('j_password');
+                    this.approveButton = By.xpath('//*[@id="approve"]');
+                    this.submitButton = By.xpath('//*[@id="submit"]');
+                    this.denyAccessButton = By.xpath('//*[@id="deny"]');
+                    this.twoFactorInfoBox = By.xpath(
+                        '//h1[contains(., "Two-factor authentication")]'
+                    );
+                }
                 break;
-            case GitProviderType.GITLAB: {
-                this.loginForm = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN ? By.id('username') : By.id('user_login');
-                this.passwordForm = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN ? By.id('password') : By.id('user_password');
-                this.submitButton = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN ? By.xpath('//input[@data-qa-selector="sign_in_button"]') : By.xpath('//button[@data-qa-selector="sign_in_button"]');
-                this.approveButton = By.xpath('//*[@value="Authorize"]');
-                this.denyAccessButton = By.xpath('//input[@value="Deny"]');
-            }
+            case GitProviderType.GITLAB:
+                {
+                    this.loginForm = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
+                        ? By.id('username')
+                        : By.id('user_login');
+                    this.passwordForm =
+                        TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
+                            ? By.id('password')
+                            : By.id('user_password');
+                    this.submitButton =
+                        TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
+                            ? By.xpath('//input[@data-qa-selector="sign_in_button"]')
+                            : By.xpath('//button[@data-qa-selector="sign_in_button"]');
+                    this.approveButton = By.xpath('//*[@value="Authorize"]');
+                    this.denyAccessButton = By.xpath('//input[@value="Deny"]');
+                    this.twoFactorInfoBox = By.xpath(
+                        '//h1[contains(., "Two-factor authentication")]'
+                    );
+                }
                 break;
-            case GitProviderType.GITHUB: {
-                this.loginForm = By.id('login_field');
-                this.passwordForm = By.id('password');
-                this.approveButton = By.xpath('//*[@id="js-oauth-authorize-btn"]');
-                this.submitButton = By.xpath('//*[@value="Sign in"]');
-                this.denyAccessButton = By.xpath('//button[contains(., "Cancel")]');
-            }
+            case GitProviderType.GITHUB:
+                {
+                    this.loginForm = By.id('login_field');
+                    this.passwordForm = By.id('password');
+                    this.approveButton = By.xpath('//*[@id="js-oauth-authorize-btn"]');
+                    this.submitButton = By.xpath('//*[@value="Sign in"]');
+                    this.denyAccessButton = By.xpath('//button[contains(., "Cancel")]');
+                    this.twoFactorInfoBox = By.xpath(
+                        '//div[contains(@class, "auth-form-header")]'
+                    );
+                }
                 break;
             default: {
-                throw new Error(`Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB} or ${GitProviderType.BITBUCKET}`);
+                throw new Error(
+                    `Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB} or ${GitProviderType.BITBUCKET}`
+                );
             }
         }
     }
@@ -59,15 +84,34 @@ export class OauthPage {
         Logger.debug('OauthPage.waitLoginPage');
 
         // for gitlab server https://gitlab.cee.redhat.com
-        if (!TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN &&
-            TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITLAB) {
+        if (
+            !TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN &&
+            TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITLAB
+        ) {
             {
-                Logger.debug(`OauthPage.login - go to ${TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} Standard login section`);
-                await this.driverHelper.waitAndClick(By.xpath('//a[@data-qa-selector="standard_tab"]'));
+                Logger.debug(
+                    `OauthPage.login - go to ${TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} Standard login section`
+                );
+                await this.driverHelper.waitAndClick(
+                    By.xpath('//a[@data-qa-selector="standard_tab"]')
+                );
             }
         }
 
-        await this.driverHelper.waitVisibility(this.loginForm, TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM * 3);
+        await this.driverHelper.waitVisibility(
+            this.loginForm,
+            TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM * 3
+        );
+    }
+
+    async waitDisappearanceTwoFactorInfoBox(): Promise<void> {
+        Logger.debug(`OauthPage.waitDisappearanceTwoFactorInfoBox`);
+
+        await this.driverHelper.waitDisappearance(
+            this.twoFactorInfoBox,
+            TimeoutConstants.TS_SELENIUM_GIT_TWO_FACTOR_TIMEOUT,
+            1000
+        );
     }
 
     async enterUserName(userName: string): Promise<void> {
@@ -126,6 +170,7 @@ export class OauthPage {
         await this.enterPassword(TestConstants.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
         await this.clickOnLoginButton();
         await this.waitClosingLoginPage();
+        await this.waitDisappearanceTwoFactorInfoBox();
     }
 
     async confirmAccess(): Promise<void> {
@@ -135,11 +180,14 @@ export class OauthPage {
             await this.clickOnApproveButton();
             await this.waitDisappearanceOauthPage();
         } catch (e) {
-            Logger.debug('OauthPage.confirmAccess - access was not confirmed, retrying to click conformation button');
+            Logger.debug(
+                'OauthPage.confirmAccess - access was not confirmed, retrying to click conformation button'
+            );
             // workaround for github oauth conformation page (bot security)
-            await this.driverHelper.getAction()
+            await this.driverHelper
+                .getAction()
                 .move({
-                    origin: await this.driverHelper.waitPresence(this.approveButton)
+                    origin: await this.driverHelper.waitPresence(this.approveButton),
                 })
                 .click()
                 .perform();
