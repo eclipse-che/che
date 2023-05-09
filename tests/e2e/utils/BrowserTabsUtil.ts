@@ -90,11 +90,24 @@ export class BrowserTabsUtil {
         }, timeout);
     }
 
-    public async maximize(): Promise<void> {
+    async maximize(): Promise<void> {
         Logger.trace(`BrowserTabsUtil.maximize`);
         if (TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
             Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
             await this.driverHelper.getDriver().manage().window().maximize();
         }
+    }
+
+    async closeAllTabsExceptCurrent(): Promise<void> {
+        Logger.trace(`${this.constructor.name}.${this.closeAllTabsExceptCurrent.name}`);
+        const allTabsHandles: string[] = await this.getAllWindowHandles();
+        const currentTabHandle: string = await this.getCurrentWindowHandle();
+        allTabsHandles.splice(allTabsHandles.indexOf(currentTabHandle), 1);
+
+        for (const tabHandle of allTabsHandles) {
+            await this.switchToWindow(tabHandle);
+            await this.driverHelper.getDriver().close();
+        }
+        await this.switchToWindow(currentTabHandle);
     }
 }

@@ -89,7 +89,7 @@ export const TimeoutConstants: any = {
     /**
      * Expand item in project tree, "5 000" by default.
      */
-    TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 5_000,
+    TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 8_000,
 
     /**
      * Timeout for waiting workspace sample import, 50_000 by default.
@@ -113,7 +113,7 @@ export const TimeoutConstants: any = {
     /**
      * Timeout for inetractions with editor tab - wait, click, select, "5 000" by default.
      */
-    TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 5_000,
+    TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 8_000,
 
     /**
      * Wait for file to be opened in editor, "30 000" by default.

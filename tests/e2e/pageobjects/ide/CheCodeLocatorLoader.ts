@@ -36,6 +36,11 @@ export class CheCodeLocatorLoader extends LocatorLoader {
                     button: By.xpath('//a[contains(., "trust")]')
                 },
             },
+            extras: {
+                ExtensionsViewSection: {
+                    requireReloadButton: By.xpath('//a[text()=\'Reload Required\']')
+                }
+            }
         };
     }
 

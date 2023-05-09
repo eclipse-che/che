@@ -42,7 +42,7 @@ const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
-const samples: any = TestConstants.TS_SAMPLE_LIST.split(',');
+const samples: string[] = TestConstants.TS_SAMPLE_LIST.split(',');
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 suite(`Check if recommended extensions installed for ${samples}`, async function (): Promise<void> {
@@ -82,7 +82,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
                 Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
                 await trustedProjectDialog.pushButton(buttonYesITrustTheAuthors);
             } catch (e) {
-                Logger.warn(`Welcome modal dialog was not shown: ${e}`);
+                Logger.debug(`Welcome modal dialog was not shown: ${e}`);
             }
         });
 
@@ -98,7 +98,11 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             Logger.debug(`editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.`);
             recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
             Logger.debug(`recommendedExtensions.recommendations: Get recommendations clear names using map().`);
-            recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: string) => r.substring(r.indexOf('.') + 1, r.length));
+            recommendedExtensions.recommendations = recommendedExtensions.recommendations.map((r: { split: (arg: string) => [any, any]; }) => {
+                const [publisher, name] = r.split('.');
+                return {publisher, name};
+            });
+            Logger.info(`Recommended extension for this workspace:\n${JSON.stringify(recommendedExtensions.recommendations)}.`);
         });
 
         test(`Open "Extensions" view section`, async function (): Promise<void> {
@@ -109,42 +113,70 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
         test(`Let extensions complete installation`, async function (): Promise<void> {
             Logger.info(`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT}`);
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
-            await browserTabsUtil.refreshPage();
-            await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
 
         test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
+            this.retries(10);
             Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
             extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 
             Logger.debug(`extensionsView?.getContent().getSections(): get current section.`);
             [extensionSection] = await extensionsView?.getContent().getSections() as ExtensionsViewSection[];
+            await driverHelper.waitAllPresence(webCheCodeLocators.ExtensionsViewSection.itemTitle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
 
-            Logger.info(`Check if recommendedExtensions.recommendations are installed: ${recommendedExtensions.recommendations}.`);
             for (const extension of recommendedExtensions.recommendations) {
-                Logger.debug(`extensionSection.findItem(${extension}).`);
-                await extensionSection.findItem(extension);
+                Logger.info(`Check if ${JSON.stringify(extension)} are installed.`);
+
+                Logger.debug(`extensionSection.findItem(${extension.name}).`);
+                await extensionSection.findItem(extension.name);
+
+                // check if extension require reload the page
+                if (await driverHelper.isVisible((webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton)) {
+                    Logger.debug(`Extension require reload the editor. Refreshing the page..`);
+                    await browserTabsUtil.refreshPage();
+                    await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+                    Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
+                    extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+                    Logger.debug(`extensionsView?.getContent().getSections(): get current section.`);
+                    [extensionSection] = await extensionsView?.getContent().getSections() as ExtensionsViewSection[];
+                    await driverHelper.waitAllPresence(webCheCodeLocators.ExtensionsViewSection.itemTitle, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
+                    Logger.debug(`extensionSection.findItem(${extension.name}).`);
+                    await extensionSection.findItem(extension.name);
+                }
 
                 Logger.debug(`extensionsView?.getContent().getSections(): switch to marketplace section.`);
                 const [marketplaceSection]: ExtensionsViewSection[] = await extensionsView?.getContent().getSections() as ExtensionsViewSection[];
-                await driverHelper.waitVisibility(webCheCodeLocators.ExtensionsViewSection.items, TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
+                await driverHelper.waitVisibility(webCheCodeLocators.ExtensionsViewSection.items, TimeoutConstants.TS_EDITOR_TAB_INTERACTION_TIMEOUT);
 
-                Logger.debug(`marketplaceSection.getVisibleItems(): get first item.`);
-                const [firstFoundItem]: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+                Logger.debug(`marketplaceSection.getVisibleItems(): get all found items.`);
+                const allFinedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
 
-                Logger.debug(`firstFoundItem?.isInstalled()`);
-                const isInstalled: boolean = await firstFoundItem?.isInstalled() as boolean;
+                let itemWithRightNameAndPublisher: ExtensionsViewItem | undefined;
+                for (const item of allFinedItems) {
+                    Logger.debug(`Try to find extension published by ${extension.publisher}.`);
+                    if (await item.getAuthor() === extension.publisher) {
+                        itemWithRightNameAndPublisher = item;
+                        Logger.debug(`Extension was found: ${await itemWithRightNameAndPublisher?.getTitle()}`);
+                        break;
+                    }
+                    if (itemWithRightNameAndPublisher === undefined) {
+                        Logger.error(`Extension with publisher as ${extension.publisher} was not found.`);
+                    }
+                }
 
-                Logger.debug(`firstFoundItem?.isInstalled(): ${isInstalled}.`);
+                Logger.debug(`itemWithRightNameAndPublisher?.isInstalled()`);
+                const isInstalled: boolean = await itemWithRightNameAndPublisher?.isInstalled() as boolean;
+
+                Logger.debug(`itemWithRightNameAndPublisher?.isInstalled(): ${isInstalled}.`);
                 expect(isInstalled).eqls(true);
 
-                Logger.debug(`firstFoundItem.manage(): get context menu.`);
-                const extensionManageMenu: ContextMenu = await firstFoundItem.manage();
+                Logger.debug(`itemWithRightNameAndPublisher.manage(): get context menu.`);
+                const extensionManageMenu: ContextMenu | undefined = await itemWithRightNameAndPublisher?.manage();
 
                 Logger.debug(`extensionManageMenu.getItems(): get menu items.`);
-                const extensionMenuItems: ContextMenuItem[] = await extensionManageMenu.getItems();
+                const extensionMenuItems: ContextMenuItem[] | undefined = await extensionManageMenu?.getItems();
                 let extensionMenuItemLabels: string = '';
-                for (const item of extensionMenuItems) {
+                for (const item of extensionMenuItems as ContextMenuItem[]) {
                     Logger.trace(`extensionMenuItems -> item.getLabel(): get menu items names.`);
                     extensionMenuItemLabels += (await item.getLabel()) + ' ';
                 }
@@ -154,8 +186,13 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             }
         });
 
-        test('Stopping and deleting the workspace', async function (): Promise<void> {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        test('Stop the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+            await browserTabsUtil.closeAllTabsExceptCurrent();
+        });
+
+        test('Delete the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
     }
 

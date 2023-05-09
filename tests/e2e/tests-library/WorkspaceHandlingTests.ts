@@ -103,12 +103,12 @@ export class WorkspaceHandlingTests {
                     break;
                 } catch (err) {
                     if (err instanceof error.StaleElementReferenceError) {
-                        Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
+                        Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
                         await this.driverHelper.wait(polling);
                         continue;
                     }
                     if (err instanceof error.NoSuchElementError) {
-                        Logger.warn(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element not visible yet. Retrying.`);
+                        Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element not visible yet. Retrying.`);
                         await this.driverHelper.wait(polling);
                         continue;
                     }
