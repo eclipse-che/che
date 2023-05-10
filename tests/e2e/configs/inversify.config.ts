@@ -47,35 +47,52 @@ import { OcpApplicationPage } from '../pageobjects/openshift/OcpApplicationPage'
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
-e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
+e2eContainer
+  .bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil)
+  .to(TestWorkspaceUtil);
 e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpUserLoginPage);
 e2eContainer.bind<OauthPage>(CLASSES.OauthPage).to(OauthPage);
-e2eContainer.bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler).to(CheMultiuserAuthorizationHeaderHandler);
+e2eContainer
+  .bind<IAuthorizationHeaderHandler>(TYPES.IAuthorizationHeaderHandler)
+  .to(CheMultiuserAuthorizationHeaderHandler);
 e2eContainer.bind<BrowserTabsUtil>(CLASSES.BrowserTabsUtil).to(BrowserTabsUtil);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper);
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard);
 e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces);
-e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetails);
+e2eContainer
+  .bind<WorkspaceDetails>(CLASSES.WorkspaceDetails)
+  .to(WorkspaceDetails);
 e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher);
 e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage);
 
 e2eContainer.bind<OcpMainPage>(CLASSES.OcpMainPage).to(OcpMainPage);
-e2eContainer.bind<OcpImportFromGitPage>(CLASSES.OcpImportFromGitPage).to(OcpImportFromGitPage);
-e2eContainer.bind<OcpApplicationPage>(CLASSES.OcpApplicationPage).to(OcpApplicationPage);
-
+e2eContainer
+  .bind<OcpImportFromGitPage>(CLASSES.OcpImportFromGitPage)
+  .to(OcpImportFromGitPage);
+e2eContainer
+  .bind<OcpApplicationPage>(CLASSES.OcpApplicationPage)
+  .to(OcpApplicationPage);
 
 e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage);
-e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
+e2eContainer
+  .bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler)
+  .to(CheApiRequestHandler);
 e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
-e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
+e2eContainer
+  .bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests)
+  .to(ProjectAndFileTests);
 e2eContainer.bind<LoginTests>(CLASSES.LoginTests).to(LoginTests);
 e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
 e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
-e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
+e2eContainer
+  .bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests)
+  .to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
 
-TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
-  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
-  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
+TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH
+  ? e2eContainer
+      .bind<ICheLoginPage>(TYPES.CheLogin)
+      .to(RegularUserOcpCheLoginPage)
+  : e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
 
 export { e2eContainer };
