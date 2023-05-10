@@ -18,7 +18,7 @@ startWorkspace ${BASE_URL} ${TEST_DEVFILE_PATH} ${WORKSPACE_NAME}
 
 testProjectImported ${WORKSPACE_NAME} ${containerName} ${projectName}
 
-echo "---- Test 'build' command execution ----"
+echo "---- Test 'go build' command execution ----"
 testCommand ${WORKSPACE_NAME} ${containerName} "${commandToTest}" "${expectedCommandOutput}"
 
 deleteWorkspace ${WORKSPACE_NAME}

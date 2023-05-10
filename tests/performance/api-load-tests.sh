@@ -51,6 +51,7 @@ oc delete pods -l group=load-tests --all-namespaces || true
 # Delete all workspaces in test users namespaces
 for ((i=1; i<=$USER_COUNT; i++)); do
   oc delete dw --all -n user$i-devspaces || true
+  oc delete dwt --all -n user$i-devspaces || true
 done
 
 # Set common variables to template.yaml
