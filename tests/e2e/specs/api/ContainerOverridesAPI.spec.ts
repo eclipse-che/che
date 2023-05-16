@@ -13,16 +13,16 @@ suite(`Test defining container overrides via attribute.`, async function (): Pro
         kubernetesCommandLineToolsExecutor.loginToOcp();
     });
 
-    suiteTeardown('Delete DewWorkspace', function (): void {
+    suiteTeardown('Delete DevWorkspace', function (): void {
         kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
     });
 
-    test('Apply container-overrides sample as DewWorkspace with OC client', function (): void {
+    test('Apply container-overrides sample as DevWorkspace with OC client', function (): void {
         kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsFile(pathToSampleFile);
         kubernetesCommandLineToolsExecutor.wait(5);
     });
 
-    test('Check that fields are overridden in the Deployment for DewWorkspace', function (): void {
+    test('Check that fields are overridden in the Deployment for DevWorkspace', function (): void {
        const devWorkspaceFullYamlOutput: any = YAML.parse(kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration());
        expect(devWorkspaceFullYamlOutput.spec.template.components[0].attributes['container-overrides']).eqls({
            resources: {

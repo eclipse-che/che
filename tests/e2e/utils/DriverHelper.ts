@@ -706,6 +706,10 @@ export class DriverHelper {
         await this.enterValue(elementLocator, value, timeout);
     }
 
+    public async highLightElement(element: WebElement): Promise<void> {
+        await this.getDriver().executeScript('arguments[0].style.border=\'2px solid red\'', element);
+    }
+
         getDriver(): ThenableWebDriver {
         Logger.trace('DriverHelper.getDriver');
 
