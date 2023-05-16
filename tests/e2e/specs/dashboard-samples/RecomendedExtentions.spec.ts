@@ -115,7 +115,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
             await driverHelper.wait(TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT);
         });
 
-        test(`Check if extensions is installed and enabled`, async function (): Promise<void> {
+        test(`Check if extensions are installed and enabled`, async function (): Promise<void> {
             this.retries(10);
             Logger.debug(`ActivityBar().getViewControl('Extensions'))?.openView(): open Extensions view.`);
             extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
@@ -171,12 +171,12 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
                 expect(isInstalled).eqls(true);
 
                 Logger.debug(`itemWithRightNameAndPublisher.manage(): get context menu.`);
-                const extensionManageMenu: ContextMenu | undefined = await itemWithRightNameAndPublisher?.manage();
+                const extensionManageMenu: ContextMenu = await (itemWithRightNameAndPublisher as ExtensionsViewItem).manage();
 
                 Logger.debug(`extensionManageMenu.getItems(): get menu items.`);
-                const extensionMenuItems: ContextMenuItem[] | undefined = await extensionManageMenu?.getItems();
+                const extensionMenuItems: ContextMenuItem[] = await extensionManageMenu.getItems();
                 let extensionMenuItemLabels: string = '';
-                for (const item of extensionMenuItems as ContextMenuItem[]) {
+                for (const item of extensionMenuItems) {
                     Logger.trace(`extensionMenuItems -> item.getLabel(): get menu items names.`);
                     extensionMenuItemLabels += (await item.getLabel()) + ' ';
                 }

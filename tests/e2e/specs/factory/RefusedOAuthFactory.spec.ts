@@ -167,7 +167,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             Logger.debug(`scmView.getProviders: "${scmProvider}, ${scmProvider}"`);
         });
 
-        test('Check if the changes is displayed in the source control manager', async function (): Promise<void> {
+        test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
             await driverHelper.wait(timeToRefresh);
             Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
