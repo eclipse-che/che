@@ -9,6 +9,9 @@
  **********************************************************************/
 
 import { injectable } from 'inversify';
+import YAML from 'yaml';
+import { ShellExecutor } from '../ShellExecutor';
+import { Logger } from '../Logger';
 
 @injectable()
 export class GitUtil {
@@ -19,7 +22,21 @@ export class GitUtil {
      * @param url git https url (which using for "git clone")
      * @return project name
      */
-    static getProjectNameFromGitUrl(url: string): string {
-        return url.split(/[\/.]/).filter((e: string) => e !== '' && e !== 'git').reverse()[0];
+    getProjectNameFromGitUrl(url: string): string {
+        Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${url}`);
+        const projectName: string = url.split(/[\/.]/).filter((e: string) => e !== '' && e !== 'git').reverse()[0];
+        Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${projectName}`);
+        return projectName;
+    }
+    /**
+     * Method extracts a git url for DevWorkspace configuration from meta.yaml file;
+     * @param linkToMetaYaml raw url to git repository where meta.yaml is;
+     * @return git link which uses in DevWorkspaceConfigurationHelper as DevfileUrl parameter
+     */
+    getProjectGitLinkFromLinkToMetaYaml(linkToMetaYaml: string): string {
+        Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${linkToMetaYaml}`);
+        const metaYamlContent: any = YAML.parse((new ShellExecutor).curl(linkToMetaYaml).stdout);
+        Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${metaYamlContent.links.v2}`);
+        return metaYamlContent.links.v2;
     }
 }

@@ -77,9 +77,9 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         return this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${KubernetesCommandLineToolsExecutor.container} -- sh -c "${commandToExecute}"`);
     }
 
-    applyYamlConfigurationAsStringOutput(yamlConfiguration: string): void {
+    applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
         Logger.debug(`${this.getLoggingName(this.applyYamlConfigurationAsStringOutput.name)}:`);
-        this.execWithLog(`cat <<EOF | ${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f - \n` +
+        return this.execWithLog(`cat <<EOF | ${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f - \n` +
             yamlConfiguration + '\n' +
             'EOF');
     }
