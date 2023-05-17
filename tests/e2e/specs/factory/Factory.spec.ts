@@ -62,7 +62,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     const commitChangesButtonLabel: string = `Commit Changes on "${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
     const refreshButtonLabel: string = 'Refresh';
     const pushItemLabel: string = 'Push';
-    const testRepoProjectName: string = GitUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+    let testRepoProjectName: string;
 
     loginTests.loginIntoChe();
     test(`Navigate to the factory URL`, async function (): Promise<void> {
@@ -88,6 +88,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     });
 
     test('Check if a project folder has been created', async function (): Promise<void> {
+        testRepoProjectName = (new GitUtil).getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
         Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
         projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
     });

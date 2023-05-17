@@ -84,7 +84,7 @@ suite(`DevConsole Integration`, async function (): Promise<void> {
     });
 
     test('Check if project and files imported', async function (): Promise<void> {
-        const applicationSourceProjectName: string = GitUtil.getProjectNameFromGitUrl(gitImportRepo);
+        const applicationSourceProjectName: string = (new GitUtil).getProjectNameFromGitUrl(gitImportRepo);
         const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
         const isFileImported: ViewItem | undefined = await projectSection.findItem(TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
         expect(isFileImported).not.eqls(undefined);

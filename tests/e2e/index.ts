@@ -6,6 +6,7 @@ export * from './constants/TimeoutConstants';
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
 export * from './utils/BrowserTabsUtil';
+export * from './utils/DevWorkspaceConfigurationHelper';
 export * from './utils/DriverHelper';
 export * from './utils/KubernetesCommandLineToolsExecutor';
 export * from './utils/Logger';

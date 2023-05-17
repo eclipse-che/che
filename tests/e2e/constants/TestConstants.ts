@@ -243,5 +243,8 @@ export const TestConstants: any = {
 
     TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: process.env.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI || `https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml`,
 
-    TS_API_TEST_NAMESPACE: process.env.TS_API_TEST_NAMESPACE || undefined
+    TS_API_TEST_NAMESPACE: process.env.TS_API_TEST_NAMESPACE || undefined,
+
+    // choose from repo https://github.com/eclipse-che/che-devfile-registry/tree/main/devfiles file as raw
+    TS_API_TEST_LINK_TO_META_YAML: process.env.TS_API_TEST_LINK_TO_META_YAML || 'https://raw.githubusercontent.com/eclipse-che/che-devfile-registry/main/devfiles/java-web-spring/meta.yaml'
 };
