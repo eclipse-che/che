@@ -229,8 +229,8 @@ export const TimeoutConstants: any = {
     TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 30_000,
 
     /**
-     * Timeout waiting for disappearance of Two Factor Authentication info box, "360 000" by default
+     * Timeout waiting for disappearance of Two Factor Authentication info box, "60 000" by default
      */
     TS_SELENIUM_GIT_TWO_FACTOR_TIMEOUT:
-        Number(process.env.TS_SELENIUM_GIT_TWO_FACTOR_TIMEOUT) || 360_000,
+        Number(process.env.TS_SELENIUM_GIT_TWO_FACTOR_TIMEOUT) || 60_000,
 };
