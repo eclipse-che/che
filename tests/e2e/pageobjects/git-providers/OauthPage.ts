@@ -15,14 +15,15 @@ import { GitProviderType, TestConstants } from '../../constants/TestConstants';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 
+
 @injectable()
 export class OauthPage {
-  private readonly loginForm: By;
-  private readonly passwordForm: By;
-  private readonly submitButton: By;
-  private readonly approveButton: By;
-  private readonly denyAccessButton: By;
-  private readonly twoFactorInfoBox: By;
+  private static loginForm: By;
+  private static passwordForm: By;
+  private static submitButton: By;
+  private static approveButton: By;
+  private static denyAccessButton: By;
+  private static twoFactorInfoBox: By;
 
   constructor(
     @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper
@@ -30,42 +31,42 @@ export class OauthPage {
     switch (TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER) {
       case GitProviderType.BITBUCKET:
         {
-          this.loginForm = By.id('j_username');
-          this.passwordForm = By.id('j_password');
-          this.approveButton = By.xpath('//*[@id="approve"]');
-          this.submitButton = By.xpath('//*[@id="submit"]');
-          this.denyAccessButton = By.xpath('//*[@id="deny"]');
-          this.twoFactorInfoBox = By.xpath(
+          OauthPage.loginForm = By.id('j_username');
+          OauthPage.passwordForm = By.id('j_password');
+          OauthPage.approveButton = By.xpath('//*[@id="approve"]');
+          OauthPage.submitButton = By.xpath('//*[@id="submit"]');
+          OauthPage.denyAccessButton = By.xpath('//*[@id="deny"]');
+          OauthPage.twoFactorInfoBox = By.xpath(
             '//*[contains(., "Verification code")]'
           );
         }
         break;
       case GitProviderType.GITLAB:
         {
-          this.loginForm = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
+          OauthPage.loginForm = TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
             ? By.id('username')
             : By.id('user_login');
-          this.passwordForm =
+          OauthPage.passwordForm =
             TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
               ? By.id('password')
               : By.id('user_password');
-          this.submitButton =
+          OauthPage.submitButton =
             TestConstants.TS_SELENIUM_GIT_PROVIDER_IS_LDAP_LOGIN
               ? By.xpath('//input[@data-qa-selector="sign_in_button"]')
               : By.xpath('//button[@data-qa-selector="sign_in_button"]');
-          this.approveButton = By.xpath('//*[@value="Authorize"]');
-          this.denyAccessButton = By.xpath('//input[@value="Deny"]');
-          this.twoFactorInfoBox = By.xpath('input[@id="user_otp_attempt"]');
+          OauthPage.approveButton = By.xpath('//*[@value="Authorize"]');
+          OauthPage.denyAccessButton = By.xpath('//input[@value="Deny"]');
+          OauthPage.twoFactorInfoBox = By.xpath('input[@id="user_otp_attempt"]');
         }
         break;
       case GitProviderType.GITHUB:
         {
-          this.loginForm = By.id('login_field');
-          this.passwordForm = By.id('password');
-          this.approveButton = By.xpath('//*[@id="js-oauth-authorize-btn"]');
-          this.submitButton = By.xpath('//*[@value="Sign in"]');
-          this.denyAccessButton = By.xpath('//button[contains(., "Cancel")]');
-          this.twoFactorInfoBox = By.xpath(
+          OauthPage.loginForm = By.id('login_field');
+          OauthPage.passwordForm = By.id('password');
+          OauthPage.approveButton = By.xpath('//*[@id="js-oauth-authorize-btn"]');
+          OauthPage.submitButton = By.xpath('//*[@value="Sign in"]');
+          OauthPage.denyAccessButton = By.xpath('//button[contains(., "Cancel")]');
+          OauthPage.twoFactorInfoBox = By.xpath(
             '//div[contains(@class, "auth-form-header")]'
           );
         }
@@ -97,7 +98,7 @@ export class OauthPage {
     }
 
     await this.driverHelper.waitVisibility(
-      this.loginForm,
+      OauthPage.loginForm,
       TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM * 3
     );
   }
@@ -109,55 +110,55 @@ export class OauthPage {
       TimeoutConstants.TS_SELENIUM_GIT_TWO_FACTOR_TIMEOUT /
       TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
-    await this.driverHelper.waitDisappearance(this.twoFactorInfoBox, attempts);
+    await this.driverHelper.waitDisappearance(OauthPage.twoFactorInfoBox, attempts);
   }
 
   async enterUserName(userName: string): Promise<void> {
     Logger.debug(`this.enterUserName "${userName}"`);
 
-    await this.driverHelper.enterValue(this.loginForm, userName);
+    await this.driverHelper.enterValue(OauthPage.loginForm, userName);
   }
 
   async enterPassword(password: string): Promise<void> {
     Logger.debug(`OauthPage.enterPassword`);
 
-    await this.driverHelper.enterValue(this.passwordForm, password);
+    await this.driverHelper.enterValue(OauthPage.passwordForm, password);
   }
 
   async clickOnLoginButton(): Promise<void> {
     Logger.debug('OauthPage.clickOnLoginButton');
 
-    await this.driverHelper.waitAndClick(this.submitButton);
+    await this.driverHelper.waitAndClick(OauthPage.submitButton);
   }
 
   async waitClosingLoginPage(): Promise<void> {
     Logger.debug('OauthPage.waitClosingLoginPage');
 
-    await this.driverHelper.waitDisappearance(this.loginForm);
+    await this.driverHelper.waitDisappearance(OauthPage.loginForm);
   }
 
   async waitOauthPage(): Promise<void> {
     Logger.debug('OauthPage.waitOauthPage');
 
-    await this.driverHelper.waitVisibility(this.approveButton);
+    await this.driverHelper.waitVisibility(OauthPage.approveButton);
   }
 
   async clickOnApproveButton(): Promise<void> {
     Logger.debug('OauthPage.clickOnApproveButton');
 
-    await this.driverHelper.waitAndClick(this.approveButton);
+    await this.driverHelper.waitAndClick(OauthPage.approveButton);
   }
 
   async clickOnDenyAccessButton(): Promise<void> {
     Logger.debug('OauthPage.clickOnDenyAccessButton');
 
-    await this.driverHelper.waitAndClick(this.denyAccessButton);
+    await this.driverHelper.waitAndClick(OauthPage.denyAccessButton);
   }
 
   async waitDisappearanceOauthPage(): Promise<void> {
     Logger.debug('OauthPage.waitDisappearanceOauthPage');
 
-    await this.driverHelper.waitDisappearance(this.approveButton);
+    await this.driverHelper.waitDisappearance(OauthPage.approveButton);
   }
 
   async login(): Promise<void> {
@@ -185,7 +186,7 @@ export class OauthPage {
       await this.driverHelper
         .getAction()
         .move({
-          origin: await this.driverHelper.waitPresence(this.approveButton),
+          origin: await this.driverHelper.waitPresence(OauthPage.approveButton),
         })
         .click()
         .perform();
