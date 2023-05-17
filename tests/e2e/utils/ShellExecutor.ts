@@ -6,6 +6,10 @@ export class ShellExecutor {
         this.execWithLog(`sleep ${seconds}s`);
     }
 
+    curl(link: string): ShellString {
+        return this.execWithLog(`curl -k ${link}`);
+    }
+
     protected execWithLog(command: string): ShellString {
         echo(command);
         return exec(command);

@@ -11,7 +11,7 @@ suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async fun
     // works only for root user
     const namespace: string = TestConstants.TS_API_TEST_NAMESPACE ? TestConstants.TS_API_TEST_NAMESPACE : undefined;
     const workspaceName: string = 'empty-' + Math.floor(Math.random() * 1000);
-    const clonedProjectName: string = GitUtil.getProjectNameFromGitUrl(gitRepository);
+    let clonedProjectName: string;
     let containerWorkDir: string = '';
 
     const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(workspaceName, namespace);
@@ -60,6 +60,7 @@ suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async fun
         });
 
         test('Check if project was created', function (): void {
+            clonedProjectName = (new GitUtil).getProjectNameFromGitUrl(gitRepository);
             expect(containerTerminal.ls().stdout).includes(clonedProjectName);
         });
 
