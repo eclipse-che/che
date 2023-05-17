@@ -228,6 +228,7 @@ export const TimeoutConstants: any = {
      */
     TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 30_000,
 
+    // ----------------------------------------- GIT OAUTH RELATED -----------------------------------------
     /**
      * Timeout waiting for disappearance of Two Factor Authentication info box, "60 000" by default
      */
