@@ -18,7 +18,6 @@ suite(`Devfile acceptance test`, async function (): Promise<void> {
 
         devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
             devfileUrl,
-            projects: []
         });
         devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
         devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
