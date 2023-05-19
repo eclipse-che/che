@@ -25,7 +25,7 @@ export class LoginTests {
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) {
     }
 
-    public loginIntoChe(): void {
+    loginIntoChe(): void {
         test('Login', async () => {
             if (!(await this.browserTabsUtil.getCurrentUrl()).includes(TestConstants.TS_SELENIUM_BASE_URL)) {
                 await this.browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
@@ -36,7 +36,7 @@ export class LoginTests {
         });
     }
 
-    public loginIntoOcpConsole(): void {
+    loginIntoOcpConsole(): void {
         test('Login into ocp console', async () => {
             const openshiftConsoleUrl: string =  TestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
             await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
@@ -45,7 +45,7 @@ export class LoginTests {
         });
     }
 
-    public logoutFromChe(): void {
+    logoutFromChe(): void {
         test('Logout', async () => {
             await this.dashboard.logout();
         });

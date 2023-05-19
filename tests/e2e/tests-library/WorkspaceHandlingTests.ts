@@ -25,7 +25,7 @@ import { TestConstants } from '../constants/TestConstants';
 @injectable()
 export class WorkspaceHandlingTests {
 
-    public static getWorkspaceName(): string {
+    static getWorkspaceName(): string {
         return WorkspaceHandlingTests.workspaceName;
     }
 
@@ -41,15 +41,15 @@ export class WorkspaceHandlingTests {
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver,
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
 
-    public setWindowHandle(guid: string): void {
+    setWindowHandle(guid: string): void {
         WorkspaceHandlingTests.parentGUID = guid;
     }
 
-    public getWindowHandle(): string {
+    getWindowHandle(): string {
         return WorkspaceHandlingTests.parentGUID;
     }
 
-    public createAndOpenWorkspace(stack: string): void {
+    createAndOpenWorkspace(stack: string): void {
         test(`Create and open new workspace, stack:${stack}`, async () => {
             await this.dashboard.clickWorkspacesButton();
             await this.dashboard.waitPage();
@@ -63,7 +63,7 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public createAndOpenWorkspaceFromGitRepository(factoryUrl: string): void {
+    createAndOpenWorkspaceFromGitRepository(factoryUrl: string): void {
         test(`Create and open new workspace from factory:${factoryUrl}`, async () => {
             await this.dashboard.waitPage();
             Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
@@ -76,7 +76,7 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public openExistingWorkspace(workspaceName: string): void {
+    openExistingWorkspace(workspaceName: string): void {
         test('Open and start existing workspace', async () => {
             await this.dashboard.waitPage();
             Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
@@ -87,7 +87,7 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public obtainWorkspaceNameFromStartingPage(): void {
+    obtainWorkspaceNameFromStartingPage(): void {
         test('Obtain workspace name from workspace loader page', async() => {
             const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
             const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
@@ -125,17 +125,17 @@ export class WorkspaceHandlingTests {
         });
     }
 
-    public async stopWorkspace(workspaceName: string): Promise<void> {
+    async stopWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.stopWorkspaceByUI(workspaceName);
     }
 
-    public async removeWorkspace(workspaceName: string): Promise<void> {
+    async removeWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.deleteStoppedWorkspaceByUI(workspaceName);
     }
 
-    public async stopAndRemoveWorkspace(workspaceName: string): Promise<void> {
+    async stopAndRemoveWorkspace(workspaceName: string): Promise<void> {
         await this.dashboard.openDashboard();
         await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
     }

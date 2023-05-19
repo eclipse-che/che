@@ -32,7 +32,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         @inject(CLASSES.ApiUrlResolver) private readonly apiUrlResolver: ApiUrlResolver
     ) { }
 
-    public async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void> {
+    async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void> {
         Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
 
         let workspaceStatus: string = '';
@@ -60,7 +60,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
     }
 
-    public async stopWorkspaceByName(workspaceName: string): Promise<void> {
+    async stopWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
 
         const stopWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
@@ -81,7 +81,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // delete a workspace without stopping phase (similar with force deleting)
-    public async deleteWorkspaceByName(workspaceName: string): Promise<void> {
+    async deleteWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName ${workspaceName}` );
 
         const deleteWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
@@ -120,7 +120,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop workspace before deleting with checking stopping phase
-    public async stopAndDeleteWorkspaceByName(workspaceName: string): Promise<void> {
+    async stopAndDeleteWorkspaceByName(workspaceName: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteWorkspaceByName');
 
         await this.stopWorkspaceByName(workspaceName);
@@ -128,7 +128,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop all run workspaces in the namespace
-    public async stopAllRunningWorkspaces(namespace: string): Promise<void> {
+    async stopAllRunningWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         for (let i: number = 0; i < response.data.items.length; i++) {
@@ -138,7 +138,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     // stop all run workspaces, check statuses and remove the workspaces
-    public async stopAndDeleteAllRunningWorkspaces(namespace: string): Promise<void> {
+    async stopAndDeleteAllRunningWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         await this.stopAllRunningWorkspaces(namespace);
@@ -150,7 +150,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // stop all run workspaces without stopping and waiting for of 'Stopped' phase
     // similar with 'force' deleting
-    public async deleteAllWorkspaces(namespace: string): Promise<void> {
+    async deleteAllWorkspaces(namespace: string): Promise<void> {
         Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
