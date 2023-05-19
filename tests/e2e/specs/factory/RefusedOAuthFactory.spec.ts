@@ -97,7 +97,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     });
 
     test('Check if a project folder has been created', async function (): Promise<void> {
-        testRepoProjectName = (new GitUtil).getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+        testRepoProjectName = GitUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
         Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
         projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
     });

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import { expect } from 'chai';
+import { ShellExecutor } from '../../utils/ShellExecutor';
 
 suite(`Test defining container overrides via attribute.`, async function (): Promise<void> {
     const pathToSampleFile: string = path.resolve('resources/container-overrides.yaml');
@@ -19,7 +20,7 @@ suite(`Test defining container overrides via attribute.`, async function (): Pro
 
     test('Apply container-overrides sample as DevWorkspace with OC client', function (): void {
         kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsFile(pathToSampleFile);
-        kubernetesCommandLineToolsExecutor.wait(5);
+        ShellExecutor.wait(5);
     });
 
     test('Check that fields are overridden in the Deployment for DevWorkspace', function (): void {
