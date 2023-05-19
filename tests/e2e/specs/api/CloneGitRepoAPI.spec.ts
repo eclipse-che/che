@@ -60,7 +60,7 @@ suite(`Test cloning of repo "${gitRepository}" into empty workspace.`, async fun
         });
 
         test('Check if project was created', function (): void {
-            clonedProjectName = (new GitUtil).getProjectNameFromGitUrl(gitRepository);
+            clonedProjectName = GitUtil.getProjectNameFromGitUrl(gitRepository);
             expect(containerTerminal.ls().stdout).includes(clonedProjectName);
         });
 

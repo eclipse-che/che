@@ -43,22 +43,22 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     getContainerName(): string {
         Logger.debug(`${this.getLoggingName(this.getContainerName.name)}: Get container name.`);
-        const output: ShellString = this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} get ${(KubernetesCommandLineToolsExecutor.pod)} -o jsonpath='{.spec.containers[*].name}' -n ${this.namespace}`);
+        const output: ShellString = ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} get ${(KubernetesCommandLineToolsExecutor.pod)} -o jsonpath='{.spec.containers[*].name}' -n ${this.namespace}`);
         echo('\n');
         return output.stderr ? output.stderr : output.stdout;
     }
 
     getWorkspacePodName(): string {
         Logger.debug(`${this.getLoggingName(this.getWorkspacePodName.name)}: Get workspace pod name.`);
-        const output: ShellString = this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} get pod -l controller.devfile.io/devworkspace_name=${this.workspaceName} -n ${this.namespace} -o name`);
+        const output: ShellString = ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} get pod -l controller.devfile.io/devworkspace_name=${this.workspaceName} -n ${this.namespace} -o name`);
         return output.stderr ? output.stderr : output.stdout.replace('\n', '');
     }
 
     deleteDevWorkspace(): void {
         Logger.debug(`${this.getLoggingName(this.deleteDevWorkspace.name)}: Delete '${this.workspaceName}' workspace`);
-        this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`);
-        this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
-        this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${TestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
+        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`);
+        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
+        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${TestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
     }
 
     applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {
@@ -74,48 +74,48 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     executeCommand(commandToExecute: string): ShellString {
         Logger.debug(`${this.getLoggingName(this.executeCommand.name)}:`);
-        return this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${KubernetesCommandLineToolsExecutor.container} -- sh -c "${commandToExecute}"`);
+        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${KubernetesCommandLineToolsExecutor.container} -- sh -c "${commandToExecute}"`);
     }
 
     applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
         Logger.debug(`${this.getLoggingName(this.applyYamlConfigurationAsStringOutput.name)}:`);
-        return this.execWithLog(`cat <<EOF | ${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f - \n` +
+        return ShellExecutor.execWithLog(`cat <<EOF | ${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f - \n` +
             yamlConfiguration + '\n' +
             'EOF');
     }
 
     applyYamlConfigurationAsFile(pathToFile: string): void {
         Logger.debug(`${this.getLoggingName(this.applyYamlConfigurationAsFile.name)}:`);
-        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f "${path.resolve(pathToFile)}"`);
+        ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} apply -n ${this.namespace} -f "${path.resolve(pathToFile)}"`);
     }
 
     getDevWorkspaceYamlConfiguration(): ShellString {
         Logger.debug(`${this.getLoggingName(this.getDevWorkspaceYamlConfiguration.name)}:`);
-        return this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} get dw ${this.workspaceName} -n ${this.namespace} -o yaml`);
+        return ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} get dw ${this.workspaceName} -n ${this.namespace} -o yaml`);
     }
 
     waitDevWorkspace(timeout: number = 360): ShellString {
         Logger.debug(`${this.getLoggingName(this.waitDevWorkspace.name)}: Wait till workspace ready.`);
-        return this.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} wait -n ${this.namespace} --for=condition=Ready dw ${this.workspaceName} --timeout=${timeout}s`);
+        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} wait -n ${this.namespace} --for=condition=Ready dw ${this.workspaceName} --timeout=${timeout}s`);
     }
 
     createNamespace(): void {
         Logger.debug(`${this.getLoggingName(this.createNamespace.name)}: Create namespace "${this.namespace}".`);
-        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} create namespace ${this.namespace}`);
+        ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} create namespace ${this.namespace}`);
     }
 
     createProject(projectName: string): void {
         Logger.debug(`${this.getLoggingName(this.createProject.name)}: Create new project "${projectName}".`);
-        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
+        ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} new-project ${projectName} -n ${this.namespace}`);
     }
 
     deleteProject(projectName: string): void {
         Logger.debug(`${this.getLoggingName(this.deleteProject.name)}: Delete "${projectName}".`);
-        this.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace}`);
+        ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace}`);
     }
 
     private isUserLoggedIn(): boolean {
-        const whoamiCommandOutput: ShellString = this.execWithLog('oc whoami && oc whoami --show-server=true');
+        const whoamiCommandOutput: ShellString = ShellExecutor.execWithLog('oc whoami && oc whoami --show-server=true');
 
         return whoamiCommandOutput.stdout.includes(TestConstants.TS_SELENIUM_OCP_USERNAME) && whoamiCommandOutput.stdout.includes(this.getServerUrl());
     }

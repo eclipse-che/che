@@ -10,10 +10,10 @@
 import { TestConstants } from './TestConstants';
 import { ShellExecutor } from '../utils/ShellExecutor';
 
-function getFullDevfileRegistryUrl(): string {
+function getdevfileRegistryUrl(): string {
     return `${TestConstants.TS_SELENIUM_BASE_URL}/devfile-registry/devfiles/`;
 }
 
-export const devfileRegistry: object = JSON.parse(
-    (new ShellExecutor).curl(getFullDevfileRegistryUrl()).stdout
+export const devfileRegistryConstants: object = JSON.parse(
+    ShellExecutor.curl(getdevfileRegistryUrl()).stdout
 );
