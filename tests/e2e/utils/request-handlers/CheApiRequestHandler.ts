@@ -21,7 +21,7 @@ export class CheApiRequestHandler {
     /**
      * This method adds a request interceptor into axios request interceptors list and returns an ID of the interceptor
      */
-    public static enableRequestInterceptor(): number {
+    static enableRequestInterceptor(): number {
         Logger.debug(`CheApiRequestHandler.enableRequestInterceptor`);
         return axios.interceptors.request.use( request => {
                 try {
@@ -47,7 +47,7 @@ export class CheApiRequestHandler {
     /**
      * This method adds a response interceptor into axios response interceptors list and returns an ID of the interceptor
      */
-    public static enableResponseInterceptor(): number {
+    static enableResponseInterceptor(): number {
         Logger.debug(`CheApiRequestHandler.enableResponseRedirects`);
         return axios.interceptors.response.use( response => {
                 try {

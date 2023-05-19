@@ -22,7 +22,7 @@ export class ProjectAndFileTests {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {}
 
-    public async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
+    async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
         Logger.debug(`${this.constructor.name}.${this.waitWorkspaceReadinessForCheCodeEditor.name} - Waiting for editor.`);
         try {
             const start: number = new Date().getTime();

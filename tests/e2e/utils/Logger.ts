@@ -17,7 +17,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static error(text: string, indentLevel: number = 1): void {
+    static error(text: string, indentLevel: number = 1): void {
         this.logText(indentLevel, `[ERROR] ${text}`);
     }
 
@@ -26,7 +26,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static warn(text: string, indentLevel: number = 1): void {
+    static warn(text: string, indentLevel: number = 1): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
             return;
         }
@@ -38,7 +38,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static info(text: string, indentLevel: number = 3): void {
+    static info(text: string, indentLevel: number = 3): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN') {
             return;
@@ -51,7 +51,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static debug(text: string, indentLevel: number = 5): void {
+    static debug(text: string, indentLevel: number = 5): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
@@ -66,7 +66,7 @@ export abstract class Logger {
      * @param text log text
      * @param indentLevel log level
      */
-    public static trace(text: string, indentLevel: number = 6): void {
+    static trace(text: string, indentLevel: number = 6): void {
         if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
             TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO' ||
