@@ -27,7 +27,8 @@ export class DevWorkspaceConfigurationHelper {
     private readonly params: IContextParams;
 
     constructor(params: IContextParams) {
-        if (!(params.editorPath && params.editorEntry && params.editorContent)) {
+        // check if all undefined
+        if (!(params.editorPath || params.editorEntry || params.editorContent)) {
             params.editorEntry = 'che-incubator/che-code/latest';
         }
         this.params = params;

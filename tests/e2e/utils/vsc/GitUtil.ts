@@ -22,7 +22,7 @@ export class GitUtil {
      * @param url git https url (which using for "git clone")
      * @return project name
      */
-    getProjectNameFromGitUrl(url: string): string {
+    static getProjectNameFromGitUrl(url: string): string {
         Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${url}`);
         const projectName: string = url.split(/[\/.]/).filter((e: string) => e !== '' && e !== 'git').reverse()[0];
         Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${projectName}`);
@@ -33,9 +33,9 @@ export class GitUtil {
      * @param linkToMetaYaml raw url to git repository where meta.yaml is;
      * @return git link which uses in DevWorkspaceConfigurationHelper as DevfileUrl parameter
      */
-    getProjectGitLinkFromLinkToMetaYaml(linkToMetaYaml: string): string {
+    static getProjectGitLinkFromLinkToMetaYaml(linkToMetaYaml: string): string {
         Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${linkToMetaYaml}`);
-        const metaYamlContent: any = YAML.parse((new ShellExecutor).curl(linkToMetaYaml).stdout);
+        const metaYamlContent: any = YAML.parse(ShellExecutor.curl(linkToMetaYaml).stdout);
         Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${metaYamlContent.links.v2}`);
         return metaYamlContent.links.v2;
     }
