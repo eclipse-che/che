@@ -22,11 +22,11 @@ export class ApiUrlResolver {
 
     constructor(@inject(CLASSES.CheApiRequestHandler) private readonly processRequestHandler: CheApiRequestHandler) {}
 
-    public async getWorkspaceApiUrl(workspaceName: string): Promise<string> {
+    async getWorkspaceApiUrl(workspaceName: string): Promise<string> {
         return `${await this.getWorkspacesApiUrl()}/${workspaceName}`;
     }
 
-    public async getWorkspacesApiUrl(): Promise<string> {
+    async getWorkspacesApiUrl(): Promise<string> {
         const namespace: string = await this.obtainUserNamespace();
         return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
     }

@@ -25,13 +25,13 @@ export class DriverHelper {
         this.driver = driver.get() as ThenableWebDriver;
     }
 
-    public getAction(): Actions {
+    getAction(): Actions {
         Logger.trace('DriverHelper.getAction');
 
         return this.driver.actions();
     }
 
-    public async isVisible(locator: By): Promise<boolean> {
+    async isVisible(locator: By): Promise<boolean> {
         Logger.trace(`DriverHelper.isVisible ${locator}`);
 
         try {
@@ -42,19 +42,19 @@ export class DriverHelper {
         }
     }
 
-    public async wait(milliseconds: number): Promise<void> {
+    async wait(milliseconds: number): Promise<void> {
         Logger.trace(`DriverHelper.wait (${milliseconds} milliseconds)`);
 
         await this.driver.sleep(milliseconds);
     }
 
-    public async refreshPage(): Promise<void> {
+    async refreshPage(): Promise<void> {
         Logger.trace(`DriverHelper.refreshPage`);
 
         await this.driver.navigate().refresh();
     }
 
-    public async waitVisibilityBoolean(locator: By,
+    async waitVisibilityBoolean(locator: By,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<boolean> {
 
@@ -73,7 +73,7 @@ export class DriverHelper {
         return false;
     }
 
-    public async waitDisappearanceBoolean(locator: By,
+    async waitDisappearanceBoolean(locator: By,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<boolean> {
 
@@ -92,7 +92,7 @@ export class DriverHelper {
         return false;
     }
 
-    public async waitVisibility(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
+    async waitVisibility(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -150,7 +150,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum visibility checkings attempts for '${elementLocator}' element, timeouted after ${timeout}`);
     }
 
-    public async waitPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
+    async waitPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -178,7 +178,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum presence checking attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
-    public async waitAllPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<Array<WebElement>> {
+    async waitAllPresence(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<Array<WebElement>> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -206,7 +206,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
-    public async waitAllVisibility(locators: Array<By>, timeout: number): Promise<void> {
+    async waitAllVisibility(locators: Array<By>, timeout: number): Promise<void> {
         Logger.trace(`DriverHelper.waitAllVisibility ${locators}`);
 
         for (const elementLocator of locators) {
@@ -214,7 +214,7 @@ export class DriverHelper {
         }
     }
 
-    public async waitDisappearance(elementLocator: By,
+    async waitDisappearance(elementLocator: By,
         attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
 
@@ -227,7 +227,7 @@ export class DriverHelper {
         }
     }
 
-    public async waitDisappearanceWithTimeout(elementLocator: By, timeout: number): Promise<void> {
+    async waitDisappearanceWithTimeout(elementLocator: By, timeout: number): Promise<void> {
         Logger.trace(`DriverHelper.waitDisappearanceWithTimeout ${elementLocator}`);
 
         await this.getDriver().wait(async () => {
@@ -239,7 +239,7 @@ export class DriverHelper {
         }, timeout);
     }
 
-    public async waitAllDisappearance(locators: Array<By>,
+    async waitAllDisappearance(locators: Array<By>,
         attemptsPerLocator: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
         pollingPerLocator: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
 
@@ -250,7 +250,7 @@ export class DriverHelper {
         }
     }
 
-    public async waitAndClick(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async waitAndClick(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -308,7 +308,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum clicking attempts, the '${elementLocator}' element is not clickable`);
     }
 
-    public async waitAndGetElementAttribute(elementLocator: By, attribute: string,
+    async waitAndGetElementAttribute(elementLocator: By, attribute: string,
         timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<string> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
@@ -350,7 +350,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`);
     }
 
-    public async waitAndGetCssValue(elementLocator: By, cssAttribute: string,
+    async waitAndGetCssValue(elementLocator: By, cssAttribute: string,
         timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<string> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
@@ -392,7 +392,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
     }
 
-    public async waitAttributeValue(elementLocator: By,
+    async waitAttributeValue(elementLocator: By,
         attribute: string,
         expectedValue: string,
         timeout: number): Promise<void> {
@@ -408,7 +408,7 @@ export class DriverHelper {
             `The '${attribute}' attribute value doesn't match with expected value '${expectedValue}'`);
     }
 
-    public async type(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async type(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -454,7 +454,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
     }
 
-    public async typeToInvisible(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async typeToInvisible(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -496,7 +496,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
     }
 
-    public async clear(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async clear(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -538,7 +538,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum clearing attempts, to the '${elementLocator}' element`);
     }
 
-    public async clearInvisible(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async clearInvisible(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -580,7 +580,7 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum clearing attempts, to the '${elementLocator}' element`);
     }
 
-    public async enterValue(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async enterValue(elementLocator: By, text: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         if (elementLocator.toString().toLocaleLowerCase().includes('password')) {
             Logger.trace(`DriverHelper.enterValue ${elementLocator} text: ***`);
         } else {
@@ -594,13 +594,13 @@ export class DriverHelper {
         await this.waitAttributeValue(elementLocator, 'value', text, timeout);
     }
 
-    public async waitAndSwitchToFrame(iframeLocator: By, timeout: number): Promise<void> {
+    async waitAndSwitchToFrame(iframeLocator: By, timeout: number): Promise<void> {
         Logger.trace(`DriverHelper.waitAndSwitchToFrame ${iframeLocator}`);
 
         await this.driver.wait(until.ableToSwitchToFrame(iframeLocator), timeout);
     }
 
-    public async waitAndGetText(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<string> {
+    async waitAndGetText(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<string> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -641,19 +641,19 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum text obtaining attempts, from the '${elementLocator}' element`);
     }
 
-    public async waitAndGetValue(elementLocator: By, timeout: number): Promise<string> {
+    async waitAndGetValue(elementLocator: By, timeout: number): Promise<string> {
         Logger.trace(`DriverHelper.waitAndGetValue ${elementLocator}`);
 
         return await this.waitAndGetElementAttribute(elementLocator, 'value', timeout);
     }
 
-    public async waitUntilTrue(callback: any, timeout: number): Promise<void> {
+    async waitUntilTrue(callback: any, timeout: number): Promise<void> {
         Logger.trace('DriverHelper.waitUntilTrue');
 
         await this.driver.wait(callback, timeout);
     }
 
-    public async scrollTo(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async scrollTo(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
@@ -696,17 +696,18 @@ export class DriverHelper {
         throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
     }
 
-    public async scrollToAndClick(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async scrollToAndClick(elementLocator: By, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         await this.scrollTo(elementLocator, timeout);
         await this.waitAndClick(elementLocator, timeout);
     }
 
-    public async scrollToAndEnterValue(elementLocator: By, value: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+    async scrollToAndEnterValue(elementLocator: By, value: string, timeout: number = TimeoutConstants.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
         await this.scrollTo(elementLocator, timeout);
         await this.enterValue(elementLocator, value, timeout);
     }
 
-    public async highLightElement(element: WebElement): Promise<void> {
+    // method is useful to debug page object elements
+    async highLightElement(element: WebElement): Promise<void> {
         await this.getDriver().executeScript('arguments[0].style.border=\'2px solid red\'', element);
     }
 
