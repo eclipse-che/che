@@ -14,7 +14,7 @@ suite(`Devfile acceptance test`, async function (): Promise<void> {
     let devWorkspaceName: string | undefined;
 
     suiteSetup('Get DevWorkspace configuration from meta.yaml', async function (): Promise<void> {
-        devfileUrl = GitUtil.getProjectGitLinkFromLinkToMetaYaml(TestConstants.TS_API_TEST_LINK_TO_META_YAML);
+        devfileUrl = await GitUtil.getProjectGitLinkFromLinkToMetaYaml(TestConstants.TS_API_TEST_LINK_TO_META_YAML);
 
         devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
             devfileUrl,

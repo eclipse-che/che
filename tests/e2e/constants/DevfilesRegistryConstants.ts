@@ -8,12 +8,19 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { TestConstants } from './TestConstants';
-import { ShellExecutor } from '../utils/ShellExecutor';
+import axios, { AxiosResponse } from 'axios';
+import { Logger } from '../utils/Logger';
 
-function getdevfileRegistryUrl(): string {
+function getDevfileRegistryUrl(): string {
     return `${TestConstants.TS_SELENIUM_BASE_URL}/devfile-registry/devfiles/`;
 }
 
-export const devfileRegistryConstants: object = JSON.parse(
-    ShellExecutor.curl(getdevfileRegistryUrl()).stdout
-);
+export const DevfilesRegistryConstants: Promise<object> = (async () => {
+    let response: AxiosResponse | undefined;
+try {
+    response = await axios.get(getDevfileRegistryUrl());
+} catch (error) {
+    Logger.error(error);
+}
+return response?.data;
+})();

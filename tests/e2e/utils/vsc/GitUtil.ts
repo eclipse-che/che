@@ -10,8 +10,8 @@
 
 import { injectable } from 'inversify';
 import YAML from 'yaml';
-import { ShellExecutor } from '../ShellExecutor';
 import { Logger } from '../Logger';
+import axios, { AxiosResponse } from 'axios';
 
 @injectable()
 export class GitUtil {
@@ -33,9 +33,10 @@ export class GitUtil {
      * @param linkToMetaYaml raw url to git repository where meta.yaml is;
      * @return git link which uses in DevWorkspaceConfigurationHelper as DevfileUrl parameter
      */
-    static getProjectGitLinkFromLinkToMetaYaml(linkToMetaYaml: string): string {
+     static async getProjectGitLinkFromLinkToMetaYaml(linkToMetaYaml: string): Promise<string> {
         Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${linkToMetaYaml}`);
-        const metaYamlContent: any = YAML.parse(ShellExecutor.curl(linkToMetaYaml).stdout);
+        const response: AxiosResponse = await axios.get(linkToMetaYaml);
+        const metaYamlContent: any = YAML.parse(response.data);
         Logger.debug(`${this.constructor.name}.${this.getProjectGitLinkFromLinkToMetaYaml.name} - ${metaYamlContent.links.v2}`);
         return metaYamlContent.links.v2;
     }
