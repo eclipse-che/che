@@ -4,10 +4,10 @@ import { TestConstants } from '../constants/TestConstants';
 
 module.exports = {
     timeout: 1200000,
-    reporter: './dist/utils/CheReporter.js',
+    reporter: 'dist/utils/CheReporter.js',
     ui: 'tdd',
     require: [
-        './dist/specs/MochaHooks.js',
+        'dist/specs/MochaHooks.js',
         'ts-node/register',
     ],
     bail: true,
