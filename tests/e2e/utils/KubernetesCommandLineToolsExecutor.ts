@@ -66,15 +66,12 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
             this.createNamespace();
         }
         this.applyYamlConfigurationAsStringOutput(yamlConfiguration);
-        const output: ShellString = this.waitDevWorkspace();
-        KubernetesCommandLineToolsExecutor.pod = this.getWorkspacePodName();
-        KubernetesCommandLineToolsExecutor.container = this.getContainerName();
-        return output;
+        return this.waitDevWorkspace();
     }
 
-    executeCommand(commandToExecute: string): ShellString {
+    executeCommand(commandToExecute: string, container: string = KubernetesCommandLineToolsExecutor.container): ShellString {
         Logger.debug(`${this.getLoggingName(this.executeCommand.name)}:`);
-        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${KubernetesCommandLineToolsExecutor.container} -- sh -c "${commandToExecute}"`);
+        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c "${commandToExecute}"`);
     }
 
     applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
@@ -96,7 +93,9 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     waitDevWorkspace(timeout: number = 360): ShellString {
         Logger.debug(`${this.getLoggingName(this.waitDevWorkspace.name)}: Wait till workspace ready.`);
-        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} wait -n ${this.namespace} --for=condition=Ready dw ${this.workspaceName} --timeout=${timeout}s`);
+        const output: ShellString = ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} wait -n ${this.namespace} --for=condition=Ready dw ${this.workspaceName} --timeout=${timeout}s`);
+        this.getPodAndContainerNames();
+        return output;
     }
 
     createNamespace(): void {
@@ -112,6 +111,11 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     deleteProject(projectName: string): void {
         Logger.debug(`${this.getLoggingName(this.deleteProject.name)}: Delete "${projectName}".`);
         ShellExecutor.execWithLog(`${this.KUBERNETES_COMMAND_LINE_TOOL} delete project ${projectName} -n ${this.namespace}`);
+    }
+
+    private getPodAndContainerNames(): void {
+        KubernetesCommandLineToolsExecutor.pod = this.getWorkspacePodName();
+        KubernetesCommandLineToolsExecutor.container = this.getContainerName();
     }
 
     private isUserLoggedIn(): boolean {
@@ -162,6 +166,15 @@ export namespace KubernetesCommandLineToolsExecutor {
 
         removeFolder(path: string): ShellString {
             return this.executeCommand('rm -rf ' + path);
+        }
+
+        getEnvValue(envName: string): string {
+            envName = envName.replace(/[${}]/g, '');
+            const output: ShellString = this.executeCommand(`env | grep ${envName}`);
+            return output.stderr ? output.stderr :
+                output.stdout
+                    .substring(output.stdout.lastIndexOf('=') + 1)
+                    .replace('\n', '');
         }
     }
 }

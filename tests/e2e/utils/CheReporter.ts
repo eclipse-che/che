@@ -18,13 +18,12 @@ import { ScreenCatcher } from './ScreenCatcher';
 import { ITestWorkspaceUtil } from './workspace/ITestWorkspaceUtil';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
 import { Logger } from './Logger';
-import { Sanitizer } from './Sanitizer';
 import { e2eContainer } from '../configs/inversify.config';
 import { WriteStream } from 'fs';
+import { StringUtil } from './StringUtil';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
-const sanitizer: Sanitizer = e2eContainer.get(CLASSES.Sanitizer);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
 let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
@@ -129,10 +128,10 @@ class CheReporter extends mocha.reporters.Spec {
       deleteScreencast = false;
 
       Logger.trace(`FullTitle:${test.fullTitle()}`);
-      const testFullTitle: string = sanitizer.sanitize(test.fullTitle());
+      const testFullTitle: string = StringUtil.sanitizeTitle(test.fullTitle());
       Logger.trace(`FullTitleSanitized:${testFullTitle}`);
       Logger.trace(`TestTitle:${test.title}`);
-      const testTitle: string = sanitizer.sanitize(test.title);
+      const testTitle: string = StringUtil.sanitizeTitle(test.title);
       Logger.trace(`TestTitleSanitized:${testTitle}`);
 
       const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;

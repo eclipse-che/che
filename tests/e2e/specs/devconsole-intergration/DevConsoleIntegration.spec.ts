@@ -24,7 +24,7 @@ import { TestConstants } from '../../constants/TestConstants';
 import { OcpMainPage } from '../../pageobjects/openshift/OcpMainPage';
 import { OcpImportFromGitPage } from '../../pageobjects/openshift/OcpImportFromGitPage';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
-import { GitUtil } from '../../utils/vsc/GitUtil';
+import { StringUtil } from '../../utils/StringUtil';
 import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPage';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -84,7 +84,7 @@ suite(`DevConsole Integration`, async function (): Promise<void> {
     });
 
     test('Check if project and files imported', async function (): Promise<void> {
-        const applicationSourceProjectName: string = GitUtil.getProjectNameFromGitUrl(gitImportRepo);
+        const applicationSourceProjectName: string = StringUtil.getProjectNameFromGitUrl(gitImportRepo);
         const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
         const isFileImported: ViewItem | undefined = await projectSection.findItem(TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
         expect(isFileImported).not.eqls(undefined);

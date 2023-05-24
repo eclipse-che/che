@@ -28,7 +28,7 @@ import {
 import { TestConstants } from '../../constants/TestConstants';
 import { expect } from 'chai';
 import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
-import { GitUtil } from '../../utils/vsc/GitUtil';
+import { StringUtil } from '../../utils/StringUtil';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
@@ -88,7 +88,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     });
 
     test('Check if a project folder has been created', async function (): Promise<void> {
-        testRepoProjectName = GitUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+        testRepoProjectName = StringUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
         Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
         projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
     });

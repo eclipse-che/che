@@ -32,7 +32,6 @@ import { CheApiRequestHandler } from '../utils/request-handlers/CheApiRequestHan
 import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
-import { Sanitizer } from '../utils/Sanitizer';
 import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { ProjectAndFileTests } from '../tests-library/ProjectAndFileTests';
@@ -42,6 +41,7 @@ import { OcpRedHatLoginPage } from '../pageobjects/login/OcpRedHatLoginPage';
 import { OcpMainPage } from '../pageobjects/openshift/OcpMainPage';
 import { OcpImportFromGitPage } from '../pageobjects/openshift/OcpImportFromGitPage';
 import { OcpApplicationPage } from '../pageobjects/openshift/OcpApplicationPage';
+import { StringUtil } from '../utils/StringUtil';
 
 const e2eContainer: Container = new Container({defaultScope: 'Transient'});
 
@@ -67,7 +67,7 @@ e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiR
 e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
 e2eContainer.bind<LoginTests>(CLASSES.LoginTests).to(LoginTests);
-e2eContainer.bind<Sanitizer>(CLASSES.Sanitizer).to(Sanitizer);
+e2eContainer.bind<StringUtil>(CLASSES.StringUtil).to(StringUtil);
 e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);

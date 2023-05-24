@@ -1,7 +1,7 @@
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
-import { GitUtil } from '../../utils/vsc/GitUtil';
+import { StringUtil } from '../../utils/StringUtil';
 import { TestConstants } from '../../constants/TestConstants';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
@@ -51,11 +51,11 @@ suite(`Empty workspace API test`, async function (): Promise<void> {
         });
 
         test('Check if project was created', function (): void {
-            clonedProjectName = GitUtil.getProjectNameFromGitUrl(gitRepository);
+            clonedProjectName = StringUtil.getProjectNameFromGitUrl(gitRepository);
             expect(containerTerminal.ls().stdout).includes(clonedProjectName);
         });
 
-        test('Check if files were imported ', function (): void {
+        test('Check if project files are imported', function (): void {
             expect(containerTerminal.ls(`${containerWorkDir}/${clonedProjectName}`).stdout)
                 .includes(TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
         });
