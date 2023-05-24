@@ -7,32 +7,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
-function getBaseUrl(): string {
-    const baseUrl: string | undefined = process.env.TS_SELENIUM_BASE_URL;
-    if (!baseUrl) {
-        return 'http://sample-url';
-    }
-
-    return baseUrl.replace(/\/$/, '');
-}
-
 export enum GitProviderType {
     GITHUB = 'github',
     GITLAB = 'gitlab',
     BITBUCKET = 'bitbucket'
 }
 
+
 export enum KubernetesCommandLineTool {
     OC = 'oc',
     KUBECTL = 'kubectl',
 }
 
+export const SupportedDevfilesRegistries: any = {
+    INBUILT_APPLICATION_DEVFILE_REGISTRY_URL: () => `${TestConstants.TS_SELENIUM_BASE_URL}/devfile-registry/devfiles/`,
+    GIT_HUB_CHE_DEVFILE_REGISTRY_URL: `https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/`,
+};
 export const TestConstants: any = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: getBaseUrl(),
+    TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
     /**
      * Run browser in "Headless" (hidden) mode, "false" by default.
@@ -253,6 +248,8 @@ export const TestConstants: any = {
 
     TS_API_TEST_NAMESPACE: process.env.TS_API_TEST_NAMESPACE || undefined,
 
-    // choose from repo https://github.com/eclipse-che/che-devfile-registry/tree/main/devfiles file as raw
-    TS_API_TEST_LINK_TO_META_YAML: process.env.TS_API_TEST_LINK_TO_META_YAML || 'https://raw.githubusercontent.com/eclipse-che/che-devfile-registry/main/devfiles/java-web-spring/meta.yaml'
+    // to run all devfile from registry. used in DevfileAcceptanceTestAPI.suite.ts
+    TS_API_ACCEPTANCE_TEST_REGISTRY_URL(): string {
+        return process.env.TS_API_ACCEPTANCE_TEST_REGISTRY_URL || SupportedDevfilesRegistries.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL();
+    },
 };

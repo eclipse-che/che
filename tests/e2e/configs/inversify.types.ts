@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-
 const TYPES: any = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
@@ -30,7 +29,7 @@ const CLASSES: any = {
     CreateWorkspace: 'CreateWorkspace',
     BrowserTabsUtil: 'BrowserTabsUtil',
     ProjectAndFileTests: 'ProjectAndFileTests',
-    Sanitizer: 'Sanitizer',
+    StringUtil: 'StringUtil',
     ApiUrlResolver: 'ApiUrlResolver',
     LoginTests: 'LoginTests',
     WorkspaceHandlingTests: 'WorkspaceHandlingTests',

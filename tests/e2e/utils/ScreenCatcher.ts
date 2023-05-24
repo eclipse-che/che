@@ -11,15 +11,14 @@ import * as fs from 'fs';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
-import { Sanitizer } from './Sanitizer';
 import { error } from 'selenium-webdriver';
 import { TestConstants } from '../constants/TestConstants';
 import { WriteStream } from 'fs';
+import { StringUtil } from './StringUtil';
 
 @injectable()
 export class ScreenCatcher {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-                @inject(CLASSES.Sanitizer) private readonly sanitizer: Sanitizer) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number): Promise<void> {
         const executionScreenCastDir: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
@@ -38,7 +37,7 @@ export class ScreenCatcher {
         const date: Date = new Date();
         const timeStr: string = date.toLocaleTimeString('en-us', { hour12: false }) + '.' + new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(date.getMilliseconds());
 
-        const screenshotPath: string = `${executionScreenCastDir}/${formattedMethodIndex}-${formattedScreenshotIndex}--(${this.sanitizer.sanitize(timeStr)})_${this.sanitizer.sanitize(methodName)}.png`;
+        const screenshotPath: string = `${executionScreenCastDir}/${formattedMethodIndex}-${formattedScreenshotIndex}--(${StringUtil.sanitizeTitle(timeStr)})_${StringUtil.sanitizeTitle(methodName)}.png`;
 
         try {
             await this.catchScreen(screenshotPath);
