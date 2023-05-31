@@ -21,7 +21,7 @@ RUN sed -i "s/nodaemon=true/nodaemon=false/" /etc/supervisord.conf
 COPY package.json package-lock.json /tmp/e2e/
 
 RUN cd /tmp/e2e && \
-    npm --silent i
+    npm i
 
 COPY . /tmp/e2e
 
