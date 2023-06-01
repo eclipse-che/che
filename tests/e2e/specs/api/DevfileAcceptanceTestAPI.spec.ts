@@ -47,7 +47,7 @@ import { Logger } from '../../utils/Logger';
                     Logger.info(`Devfile does not contains any commands.`);
                 } else {
                     devfileContext.devfile.commands.forEach((command: any) => {
-                        if (command.exec.group.kind === 'build') {
+                        if (command.exec?.group?.kind === 'build') {
                             Logger.debug(`Build command found: ${command.exec.commandLine}`);
                             devfilesBuildCommands.push(command);
                         }
@@ -84,14 +84,10 @@ import { Logger } from '../../utils/Logger';
                 if (devfilesBuildCommands.length === 0) {
                     Logger.info(`Devfile does not contains build commands.`);
                 } else {
-                    let workingDir: string;
                     devfilesBuildCommands.forEach((command) => {
-                        Logger.info(`command.exec.commandLine: ${command.exec.commandLine}`);
-                        Logger.info(`command.exec.component: ${command.exec.component}`);
-                        Logger.info(`command.exec.workingDir: ${command.exec.workingDir}`);
+                        Logger.info(`command.exec: ${JSON.stringify(command.exec)}`);
 
-                        workingDir = StringUtil.getFullWorkingDirPathExplicit(command.exec.workingDir, containerTerminal);
-                        const commandString: string = `cd ${workingDir} && ${command.exec.commandLine}`;
+                        const commandString: string = StringUtil.updateCommandEnvsToShStyle(`cd ${command.exec.workingDir} && ${command.exec.commandLine}`);
                         Logger.info(`Full build command to be executed: ${commandString}`);
 
                         const output: ShellString = containerTerminal.executeCommand(commandString, command.exec.component);
