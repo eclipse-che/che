@@ -31,31 +31,17 @@ export class StringUtil {
         return projectName;
     }
 
-    /**
-     * Uses in DevfileAcceptanceTestAPI.spec.ts to get full path to execute build command without unknown environmental variable
-     * @param pathWithUnknownEnvVariable command.exec.workingDir from devfileContext.devfile
-     * @param containerTerminal instance of KubernetesCommandLineToolsExecutor.ContainerTerminal
-     * @return full path of imported project working dir in workspace
-     */
-    static getFullWorkingDirPathExplicit(pathWithUnknownEnvVariable: string, containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal): string {
-        const envVariable: { name: string; value: string } = {
-            name: '',
-            value: ''
-        };
-
-        envVariable.name = pathWithUnknownEnvVariable.substring(
-            pathWithUnknownEnvVariable.indexOf('{') + 1,
-            pathWithUnknownEnvVariable.lastIndexOf('}'));
-
-        if (pathWithUnknownEnvVariable.includes('/')) {
-            pathWithUnknownEnvVariable = pathWithUnknownEnvVariable.substring(pathWithUnknownEnvVariable.indexOf('/'));
-        }
-
-        envVariable.value = containerTerminal.getEnvValue(envVariable.name);
-        return envVariable.value + pathWithUnknownEnvVariable;
-    }
-
     static sanitizeTitle(arg: string): string {
         return arg.replace(/\//g, '+').replace(/,/g, '.').replace(/:/g, '-').replace(/['"]/g, '').replace(/[^a-z0-9+\-.()\[\]_]/gi, '_');
+    }
+
+    /**
+     * Replaces ${ENV}, $ENV to "$ENV"
+     * @param command string command with environmental variables in unsupported format
+     * @return updated command with environmental variables in supported format
+     */
+
+    static updateCommandEnvsToShStyle(command: string): string {
+        return command.replace(/[{}]/g, '').replace(/(?<!")\${?[a-zA-Z0-9_+\-\s]+\b}?/gm, `"\$&"`);
     }
 }
