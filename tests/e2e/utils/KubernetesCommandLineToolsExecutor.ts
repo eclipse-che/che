@@ -71,7 +71,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     executeCommand(commandToExecute: string, container: string = KubernetesCommandLineToolsExecutor.container): ShellString {
         Logger.debug(`${this.getLoggingName(this.executeCommand.name)}:`);
-        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c "${commandToExecute}"`);
+        return ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`);
     }
 
     applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
