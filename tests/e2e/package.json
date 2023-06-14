@@ -17,7 +17,7 @@
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
   "devDependencies": {
-    "@eclipse-che/che-devworkspace-generator": "7.68.0",
+    "@eclipse-che/che-devworkspace-generator": "next",
     "@types/chai": "^4.3.4",
     "@types/clone-deep": "^4.0.1",
     "@types/mocha": "5.2.6",
