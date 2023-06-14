@@ -122,51 +122,6 @@ repositories:
     description: >-
       JS library to interact with a che-server.
     useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-container-tools
-    name: che-container-tools
-    description: >-
-      Base image used for sidecars that service container tooling plugins
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-custom-nodejs-deasync
-    name: che-custom-nodejs-deasync
-    description: >-
-      Provides a custom nodejs binary embedding deasync node-gyp module as builtin module
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-cert-manager-ca-cert-generator-image
-    name: che-cert-manager-ca-cert-generator-image
-    description: >-
-      CA cert generation job image used by chectl
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-buildkit-base
-    name: che-buildkit-base
-    description: >-
-      Eclipse Che Sidecar container for buildkit tooling
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-buildah-base
-    name: che-buildah-base
-    description: >-
-      Use this image to build docker images using buildah
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-docker-registry-image-copier
-    name: che-docker-registry-image-copier
-    description: >-
-      copy images between public and private docker registry inside k8s cluster
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-php-base
-    name: che-php-base
-    description: >-
-      Base image to be used for the PHP devfile
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-dockerfiles/che-tls-secret-creator
-    name: che-tls-secret-creator
-    description: >-
-      This images generates TLS certificates
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-incubator/che-theia-openshift-auth
-    name: che-theia-openshift-auth
-    description: >-
-      OpenShift authentication plugin
-    useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/configbump
     name: configbump
     description: >-
@@ -252,4 +207,39 @@ repositories:
     name: devworkspace-operator-docs
     description: >-
       DevWorkspace operator documentation
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/check-license-header
+    name: check-license-header
+    description: >-
+      License header format checker
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/devworkspace-telemetry-woopra-plugin
+    name: devworkspace-telemetry-woopra-plugin
+    description: >-
+      Devworkspace telemetry Woopra plugin
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/setup-minikube-action
+    name: setup-minikube-action
+    description: >-
+      Github action for starting Minikube to be able to Install/Run Eclipse Che
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/dependencies-license-action
+    name: dependencies-license-action
+    description: >-
+      Github action to check file with list golang runtime dependencies and license information.
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/dash-licenses
+    name: dash-licenses
+    description: >-
+      A container wrapper for The Eclipse Dash License Tool.
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/devfile-api
+    name: devfile-api
+    description: >-
+      Devfile API library
+    useCheReleaseLifecycle: false
+  - url: https://github.com/che-incubator/devfile-api
+    name: devfile-api
+    description: >-
+      Devfile API library
     useCheReleaseLifecycle: false
