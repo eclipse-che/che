@@ -14,16 +14,18 @@ import { DriverHelper } from '../../DriverHelper';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../Logger';
 import { IWebDriverCookie } from 'selenium-webdriver';
+import { Platform, TestConstants } from '../../../constants/TestConstants';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
     private authorizationToken: string = '';
+    private readonly cookiesType: string = TestConstants.TS_PLATFORM === Platform.OPENSHIFT ? '_oauth_proxy' : '_oauth2_proxy';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async get(): Promise<AxiosRequestConfig> {
         try {
-            let token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie('_oauth_proxy');
+            let token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie(this.cookiesType);
             if (this.authorizationToken !== token.value) {
                 this.authorizationToken = token.value;
             }
@@ -35,6 +37,6 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
             }
         }
 
-        return { headers: { 'cookie': `_oauth_proxy=${this.authorizationToken}` } };
+        return { headers: { 'cookie': `${this.cookiesType}=${this.authorizationToken}` } };
     }
 }

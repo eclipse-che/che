@@ -34,6 +34,8 @@ const CLASSES: any = {
     LoginTests: 'LoginTests',
     WorkspaceHandlingTests: 'WorkspaceHandlingTests',
     RedHatLoginPage: 'RedHatLoginPage',
+    KubernetesLoginPage: 'KubernetesLoginPage',
+    DexLoginPage: 'DexLoginPage',
     OcpRedHatLoginPage: 'OcpRedHatLoginPage',
     OcpApplicationPage: 'OcpApplicationPage',
     OcpMainPage: 'OcpMainPage',
