@@ -19,6 +19,11 @@ export enum KubernetesCommandLineTool {
     KUBECTL = 'kubectl',
 }
 
+export enum Platform {
+    OPENSHIFT = 'openshift',
+    KUBERNETES = 'kubernetes',
+}
+
 export const SupportedDevfilesRegistries: any = {
     INBUILT_APPLICATION_DEVFILE_REGISTRY_URL: () => `${TestConstants.TS_SELENIUM_BASE_URL}/devfile-registry/devfiles/`,
     GIT_HUB_CHE_DEVFILE_REGISTRY_URL: `https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/`,
@@ -28,6 +33,11 @@ export const TestConstants: any = {
      * Base URL of the application which should be checked
      */
     TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
+
+    /**
+     * Choose the platform where "che" application deployed, "openshift" by default.
+     */
+    TS_PLATFORM: process.env.TS_PLATFORM || Platform.OPENSHIFT,
 
     /**
      * Run browser in "Headless" (hidden) mode, "false" by default.
@@ -128,6 +138,15 @@ export const TestConstants: any = {
      * Password regular user used to login in OCP.
      */
     TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
+    /**
+     * Regular username used to login in Kubernetes.
+     */
+    TS_SELENIUM_K8S_USERNAME: process.env.TS_SELENIUM_K8S_USERNAME || 'che@eclipse.org',
+
+    /**
+     * Password regular user used to login in Kubernetes.
+     */
+    TS_SELENIUM_K8S_PASSWORD: process.env.TS_SELENIUM_K8S_PASSWORD || '',
 
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.

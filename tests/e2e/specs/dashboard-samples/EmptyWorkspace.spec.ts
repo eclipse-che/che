@@ -15,10 +15,13 @@ import { Logger } from '../../utils/Logger';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { registerRunningWorkspace } from '../MochaHooks';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+
 const stackName: string = 'Empty Workspace';
 
 suite(`${stackName} test`, async () => {
@@ -44,8 +47,13 @@ suite(`${stackName} test`, async () => {
     });
 
     suite('Stopping and deleting the workspace', async () => {
-        test(`Stop and remove workspace`, async () => {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        test('Stop the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+            await browserTabsUtil.closeAllTabsExceptCurrent();
+        });
+
+        test('Delete the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
         loginTests.logoutFromChe();
     });
