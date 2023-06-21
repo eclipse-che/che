@@ -60,7 +60,7 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItem(workspaceName);
         await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
         await this.workspaces.waitPage();
-        await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
+        await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
     }
 
     async stopAndRemoveWorkspaceByUI(workspaceName: string): Promise<void> {
@@ -68,7 +68,7 @@ export class Dashboard {
 
         await this.stopWorkspaceByUI(workspaceName);
         await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
-        await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
+        await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
     }
 
     async openDashboard(): Promise<void> {
