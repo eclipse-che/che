@@ -29,7 +29,16 @@ Note: If there is any modifications in package.json, manually execute the `npm i
 - Use environment variables for setting timeouts if needed. You can see the list in **```'TimeoutConstants.ts'```**. You can see the list of those variables and their value if you set the ```'TS_SELENIUM_PRINT_TIMEOUT_VARIABLES = true'```
 - To test one specification export file name as ```export USERSTORY=<spec-file-name-without-extension> && npm run test``` (example: ```-e USERSTORY=Quarkus```)
 - To run test without Selenium WebDriver (API tests etc.) use ```export USERSTORY=<spec-file-name-without-extension> && npm run driver-less-test``` (example: ```-e USERSTORY=CloneGitRepoAPI```)
-
+- This project support application testing deployed on Kubernetes or Openshift platform. Openshift is default value. To switch into Kubernetes, please, use `TS_PLATFORM=kubernetes` environmental variable and `TS_SELENIUM_K8S_PASSWORD`, `TS_SELENIUM_K8S_USERNAME` to provide credentials. The sample of test command in this case:
+  ```
+  export TS_PLATFORM=kubernetes && \
+  export TS_SELENIUM_K8S_USERNAME=<username> && \
+  export TS_SELENIUM_K8S_PASSWORD=<password> && \
+  export TS_SELENIUM_BASE_URL=<ingress-url> && \
+  npm run test
+  ```
+  Also, environmental variables can be set in `TestConstants.ts` file.
+  
 ## Docker launch
 
 - open terminal and go to the "e2e" directory
