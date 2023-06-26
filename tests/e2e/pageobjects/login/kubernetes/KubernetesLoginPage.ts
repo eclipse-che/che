@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../../configs/inversify.types';
 import { TestConstants } from '../../../constants/TestConstants';
 import { Logger } from '../../../utils/Logger';
-import { ICheLoginPage } from '../interfaces /ICheLoginPage';
+import { ICheLoginPage } from '../interfaces/ICheLoginPage';
 import { DexLoginPage } from './DexLoginPage';
 
 @injectable()

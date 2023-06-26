@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { IOcpLoginPage } from '../interfaces /IOcpLoginPage';
+import { IOcpLoginPage } from '../interfaces/IOcpLoginPage';
 import { injectable, inject } from 'inversify';
 import { OcpLoginPage } from '../../openshift/OcpLoginPage';
 import { CLASSES } from '../../../configs/inversify.types';
