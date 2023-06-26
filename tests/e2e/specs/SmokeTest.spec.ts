@@ -15,12 +15,14 @@ import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests'
 import { registerRunningWorkspace } from './MochaHooks';
 import { Logger } from '../utils/Logger';
 import { LoginTests } from '../tests-library/LoginTests';
+import { TestConstants } from '../constants/TestConstants';
+import { StringUtil } from '../utils/StringUtil';
 
-const factoryUrl: string = 'https://github.com/che-incubator/quarkus-api-example.git';
-const projectName: string = 'quarkus-api-example';
+const factoryUrl: string = TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+let projectName: string;
 
 suite(`The SmokeTest userstory`, async function (): Promise<void> {
     let projectSection: ViewSection;
@@ -35,6 +37,7 @@ suite(`The SmokeTest userstory`, async function (): Promise<void> {
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
         test('Check a project folder has been created', async function (): Promise<void> {
+            projectName = StringUtil.getProjectNameFromGitUrl(factoryUrl);
             projectSection = await new SideBarView().getContent().getSection(projectName);
             Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
         });
