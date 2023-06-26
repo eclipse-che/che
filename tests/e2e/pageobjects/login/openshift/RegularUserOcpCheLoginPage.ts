@@ -8,15 +8,15 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { ICheLoginPage } from './ICheLoginPage';
-import { OcpLoginPage } from '../openshift/OcpLoginPage';
+import { ICheLoginPage } from '../interfaces /ICheLoginPage';
+import { OcpLoginPage } from '../../openshift/OcpLoginPage';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../configs/inversify.types';
-import { TestConstants } from '../../constants/TestConstants';
-import { Logger } from '../../utils/Logger';
-import { TimeoutConstants } from '../../constants/TimeoutConstants';
+import { CLASSES } from '../../../configs/inversify.types';
+import { TestConstants } from '../../../constants/TestConstants';
+import { Logger } from '../../../utils/Logger';
+import { TimeoutConstants } from '../../../constants/TimeoutConstants';
 import { By } from 'selenium-webdriver';
-import { DriverHelper } from '../../utils/DriverHelper';
+import { DriverHelper } from '../../../utils/DriverHelper';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {

@@ -8,12 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { IOcpLoginPage } from './IOcpLoginPage';
+import { IOcpLoginPage } from '../interfaces /IOcpLoginPage';
 import { injectable, inject } from 'inversify';
-import { OcpLoginPage } from '../openshift/OcpLoginPage';
-import { CLASSES } from '../../configs/inversify.types';
-import { TestConstants } from '../../constants/TestConstants';
-import { Logger } from '../../utils/Logger';
+import { OcpLoginPage } from '../../openshift/OcpLoginPage';
+import { CLASSES } from '../../../configs/inversify.types';
+import { TestConstants } from '../../../constants/TestConstants';
+import { Logger } from '../../../utils/Logger';
 
 @injectable()
 export class OcpUserLoginPage implements IOcpLoginPage {

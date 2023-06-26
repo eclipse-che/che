@@ -10,13 +10,13 @@
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { RedHatLoginPage } from './RedHatLoginPage';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES } from '../../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
-import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { ICheLoginPage } from './ICheLoginPage';
-import { OcpLoginPage } from '../openshift/OcpLoginPage';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { Logger } from '../../utils/Logger';
+import { TimeoutConstants } from '../../../constants/TimeoutConstants';
+import { ICheLoginPage } from '../interfaces /ICheLoginPage';
+import { OcpLoginPage } from '../../openshift/OcpLoginPage';
+import { DriverHelper } from '../../../utils/DriverHelper';
+import { Logger } from '../../../utils/Logger';
 
 @injectable()
 export class OcpRedHatLoginPage implements ICheLoginPage {
