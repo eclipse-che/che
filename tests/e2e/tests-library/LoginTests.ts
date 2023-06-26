@@ -9,12 +9,12 @@
  **********************************************************************/
 
 import { CLASSES, TYPES } from '../configs/inversify.types';
-import { ICheLoginPage } from '../pageobjects/login/ICheLoginPage';
+import { ICheLoginPage } from '../pageobjects/login/interfaces /ICheLoginPage';
 import { TestConstants } from '../constants/TestConstants';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { inject, injectable } from 'inversify';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
-import { IOcpLoginPage } from '../pageobjects/login/IOcpLoginPage';
+import { IOcpLoginPage } from '../pageobjects/login/interfaces /IOcpLoginPage';
 
 @injectable()
 export class LoginTests {

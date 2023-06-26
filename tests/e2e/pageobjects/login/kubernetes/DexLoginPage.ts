@@ -9,11 +9,11 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../configs/inversify.types';
-import { Logger } from '../../utils/Logger';
+import { CLASSES } from '../../../configs/inversify.types';
+import { Logger } from '../../../utils/Logger';
 import { By } from 'selenium-webdriver';
-import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { DriverHelper } from '../../utils/DriverHelper';
+import { TimeoutConstants } from '../../../constants/TimeoutConstants';
+import { DriverHelper } from '../../../utils/DriverHelper';
 
 @injectable()
 export class DexLoginPage {

@@ -9,11 +9,11 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../configs/inversify.types';
-import { TestConstants } from '../../constants/TestConstants';
-import { Logger } from '../../utils/Logger';
-import { ICheLoginPage } from './ICheLoginPage';
-import { DexLoginPage } from '../kubernetes/DexLoginPage';
+import { CLASSES } from '../../../configs/inversify.types';
+import { TestConstants } from '../../../constants/TestConstants';
+import { Logger } from '../../../utils/Logger';
+import { ICheLoginPage } from '../interfaces /ICheLoginPage';
+import { DexLoginPage } from './DexLoginPage';
 
 @injectable()
 export class KubernetesLoginPage implements ICheLoginPage {
