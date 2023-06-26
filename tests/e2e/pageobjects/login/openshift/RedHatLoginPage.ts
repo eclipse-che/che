@@ -10,10 +10,10 @@
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
 import { By } from 'selenium-webdriver';
-import { CLASSES } from '../../configs/inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { Logger } from '../../utils/Logger';
-import { TestConstants } from '../../constants/TestConstants';
+import { CLASSES } from '../../../configs/inversify.types';
+import { DriverHelper } from '../../../utils/DriverHelper';
+import { Logger } from '../../../utils/Logger';
+import { TestConstants } from '../../../constants/TestConstants';
 
 @injectable()
 export class RedHatLoginPage {
