@@ -25,7 +25,7 @@ Note: If there is any modifications in package.json, manually execute the `npm i
 
 ## Custom launch
 
-- Use environment variables which described in the **```'TestConstants.ts'```** file
+- Use environment variables which described in the "constants" folder
 - Use environment variables for setting timeouts if needed. You can see the list in **```'TimeoutConstants.ts'```**. You can see the list of those variables and their value if you set the ```'TS_SELENIUM_PRINT_TIMEOUT_VARIABLES = true'```
 - To test one specification export file name as ```export USERSTORY=<spec-file-name-without-extension> && npm run test``` (example: ```-e USERSTORY=Quarkus```)
 - To run test without Selenium WebDriver (API tests etc.) use ```export USERSTORY=<spec-file-name-without-extension> && npm run driver-less-test``` (example: ```-e USERSTORY=CloneGitRepoAPI```)
@@ -37,7 +37,7 @@ Note: If there is any modifications in package.json, manually execute the `npm i
   export TS_SELENIUM_BASE_URL=<ingress-url> && \
   npm run test
   ```
-  Also, environmental variables can be set in `TestConstants.ts` file.
+  Also, environmental variables can be set in files in "constants" folder.
   
 ## Docker launch
 
@@ -68,7 +68,7 @@ For running tests without docker, please perform next steps:**
   - link to devfile ( **```For successfull test passing, exactly provided devfile should be used```** )
     <https://gist.githubusercontent.com/Ohrimenko1988/93f5426f4ebc1705c55feb8ff0396a49/raw/cbea89ad145ba33ed34a151a12c50f045f9f3b78/yaml-ls-bug.yaml>
 - Provide the **```'TS_SELENIUM_BASE_URL'```** environment variable as described above
-- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see TestConstants.ts)
+- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see BaseTestConstants.ts)
 - perform command **```export USERSTORY=$TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME && npm run test-all-devfiles```**
 
 ## Launching the DevWorkspaceHappyPath spec file using Che with oauth authentication
@@ -81,7 +81,7 @@ For running tests without docker, please perform next steps:**
 - export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH="true"
 - export TS_OCP_LOGIN_PAGE_PROVIDER_TITLE=\<login-provide-title\>
 - export TS_SELENIUM_DEVWORKSPACE_URL=\<devworkspace-url\>
-- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see TestConstants.ts)
+- export TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME=EmptyWorkspace (default value, see BaseTestConstants.ts)
 
 **Execute the npm command:**
 - perform command ```export USERSTORY=$TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME && npm run test-all-devfiles```
