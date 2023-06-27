@@ -20,12 +20,12 @@ import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { expect } from 'chai';
-import { TestConstants } from '../../constants/TestConstants';
 import { OcpMainPage } from '../../pageobjects/openshift/OcpMainPage';
 import { OcpImportFromGitPage } from '../../pageobjects/openshift/OcpImportFromGitPage';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { StringUtil } from '../../utils/StringUtil';
 import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPage';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -86,7 +86,7 @@ suite(`DevConsole Integration`, async function (): Promise<void> {
     test('Check if project and files imported', async function (): Promise<void> {
         const applicationSourceProjectName: string = StringUtil.getProjectNameFromGitUrl(gitImportRepo);
         const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
-        const isFileImported: ViewItem | undefined = await projectSection.findItem(TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
+        const isFileImported: ViewItem | undefined = await projectSection.findItem(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
         expect(isFileImported).not.eqls(undefined);
     });
 

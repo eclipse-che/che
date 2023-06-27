@@ -20,7 +20,6 @@ import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
 import { DriverHelper } from '../utils/DriverHelper';
 import { By, error } from 'selenium-webdriver';
-import { TestConstants } from '../constants/TestConstants';
 
 @injectable()
 export class WorkspaceHandlingTests {
@@ -90,7 +89,7 @@ export class WorkspaceHandlingTests {
     obtainWorkspaceNameFromStartingPage(): void {
         test('Obtain workspace name from workspace loader page', async() => {
             const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
-            const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+            const polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING;
             const attempts: number = Math.ceil(timeout / polling);
 
             for (let i: number = 0; i < attempts; i++) {

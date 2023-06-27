@@ -13,7 +13,7 @@ import { By } from 'selenium-webdriver';
 import { CLASSES } from '../../../configs/inversify.types';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { Logger } from '../../../utils/Logger';
-import { TestConstants } from '../../../constants/TestConstants';
+import { OAuthConstants } from '../../../constants/OAuthConstants';
 
 @injectable()
 export class RedHatLoginPage {
@@ -34,7 +34,7 @@ export class RedHatLoginPage {
         Logger.debug('RedHatLoginPage.enterPasswordRedHat');
         const passwordFieldLocator: By = By.id(this.PASSWORD_INPUT_ID);
         await this.driverHelper.waitVisibility(passwordFieldLocator, 3000);
-        await this.driverHelper.enterValue(passwordFieldLocator, TestConstants.TS_SELENIUM_OCP_PASSWORD);
+        await this.driverHelper.enterValue(passwordFieldLocator, OAuthConstants.TS_SELENIUM_OCP_PASSWORD);
     }
     async clickOnLoginButton(): Promise<void> {
         Logger.debug('RedHatLoginPage.clickOnLoginButton');
@@ -49,7 +49,7 @@ export class RedHatLoginPage {
         Logger.debug('RedHatLoginPage.enterUserNameRedHat');
         const usernameFieldLocator: By = By.id(this.USERNAME_INPUT_ID);
         await this.driverHelper.waitVisibility(usernameFieldLocator, 20000);
-        await this.driverHelper.enterValue(usernameFieldLocator, TestConstants.TS_SELENIUM_OCP_USERNAME);
+        await this.driverHelper.enterValue(usernameFieldLocator, OAuthConstants.TS_SELENIUM_OCP_USERNAME);
     }
 
     async clickNextButton(): Promise<void> {

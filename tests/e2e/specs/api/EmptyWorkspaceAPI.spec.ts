@@ -2,13 +2,14 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
 import { StringUtil } from '../../utils/StringUtil';
-import { TestConstants } from '../../constants/TestConstants';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
+import { APITestConstants } from '../../constants/APITestConstants';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 suite(`Empty workspace API test`, async function (): Promise<void> {
     // works only for root user
-    const namespace: string = TestConstants.TS_API_TEST_NAMESPACE;
+    const namespace: string = APITestConstants.TS_API_TEST_NAMESPACE;
     let clonedProjectName: string;
     let containerWorkDir: string;
     let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
@@ -57,7 +58,7 @@ suite(`Empty workspace API test`, async function (): Promise<void> {
 
         test('Check if project files are imported', function (): void {
             expect(containerTerminal.ls(`${containerWorkDir}/${clonedProjectName}`).stdout)
-                .includes(TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
+                .includes(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
         });
 
         suiteTeardown('Delete cloned project', function (): void {
