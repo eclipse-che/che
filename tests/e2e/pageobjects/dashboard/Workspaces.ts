@@ -14,7 +14,6 @@ import { CLASSES } from '../../configs/inversify.types';
 import { By, WebElement } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { TestConstants } from '../../constants/TestConstants';
 
 export enum WorkspaceStatusUI {
     Running = 'green',
@@ -163,7 +162,7 @@ export class Workspaces {
     async waitWorkspaceListItemAbsence(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
         Logger.debug(`Workspaces.waitWorkspaceListItemAbsence "${workspaceName}"`);
 
-        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+        const polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING;
         const attempts: number = Math.ceil(timeout / polling);
 
         const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));

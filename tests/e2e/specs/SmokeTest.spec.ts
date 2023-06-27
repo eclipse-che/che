@@ -15,10 +15,10 @@ import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests'
 import { registerRunningWorkspace } from './MochaHooks';
 import { Logger } from '../utils/Logger';
 import { LoginTests } from '../tests-library/LoginTests';
-import { TestConstants } from '../constants/TestConstants';
 import { StringUtil } from '../utils/StringUtil';
+import { FactoryTestConstants } from '../constants/FactoryTestConstants';
 
-const factoryUrl: string = TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
+const factoryUrl: string = FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);

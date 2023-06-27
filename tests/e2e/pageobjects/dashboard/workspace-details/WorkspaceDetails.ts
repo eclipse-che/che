@@ -11,7 +11,6 @@ import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES, TYPES } from '../../../configs/inversify.types';
 import 'reflect-metadata';
-import { TestConstants } from '../../../constants/TestConstants';
 import { By } from 'selenium-webdriver';
 import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 import { Logger } from '../../../utils/Logger';
@@ -31,7 +30,7 @@ export class WorkspaceDetails {
                 @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil,
                 @inject(CLASSES.ProjectAndFileTests) private readonly testProjectAndFileCheCode: ProjectAndFileTests) { }
 
-    async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
+    async waitLoaderDisappearance(attempts: number = TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
         Logger.debug('WorkspaceDetails.waitLoaderDisappearance');
 
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);
@@ -125,7 +124,7 @@ export class WorkspaceDetails {
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.ENABLED_SAVE_BUTTON_CSS), timeout);
     }
 
-    private async waitSaveButtonDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
+    private async waitSaveButtonDisappearance(attempts: number = TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.SAVE_BUTTON_CSS), attempts, polling);
     }
 

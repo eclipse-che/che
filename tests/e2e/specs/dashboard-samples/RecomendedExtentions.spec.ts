@@ -33,8 +33,9 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { expect } from 'chai';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { TestConstants } from '../../constants/TestConstants';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { PluginsTestConstants } from '../../constants/PluginsTestConstants';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -42,7 +43,7 @@ const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
-const samples: string[] = TestConstants.TS_SAMPLE_LIST.split(',');
+const samples: string[] = PluginsTestConstants.TS_SAMPLE_LIST.split(',');
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 suite(`Check if recommended extensions installed for ${samples}`, async function (): Promise<void> {
@@ -71,7 +72,7 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
 
         test('Wait until the project will be imported and accept it as trusted one', async function (): Promise<void> {
             [projectSection] = await new SideBarView().getContent().getSections();
-            const label: string = TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
+            const label: string = BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
             Logger.debug(`projectSection.findItem: find ${label}`);
             const isFileImported: ViewItem | undefined = await projectSection.findItem(label);
             expect(isFileImported).not.eqls(undefined);

@@ -14,12 +14,12 @@ import { DriverHelper } from '../../DriverHelper';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../Logger';
 import { IWebDriverCookie } from 'selenium-webdriver';
-import { Platform, TestConstants } from '../../../constants/TestConstants';
+import { BaseTestConstants, Platform } from '../../../constants/BaseTestConstants';
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
     private authorizationToken: string = '';
-    private readonly cookiesType: string = TestConstants.TS_PLATFORM === Platform.OPENSHIFT ? '_oauth_proxy' : '_oauth2_proxy';
+    private readonly cookiesType: string = BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT ? '_oauth_proxy' : '_oauth2_proxy';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 

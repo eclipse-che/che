@@ -14,7 +14,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { By, Key } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { TestConstants } from '../../constants/TestConstants';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 @injectable()
 export class CreateWorkspace {
@@ -60,7 +60,7 @@ export class CreateWorkspace {
     }
 
     private async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
-        Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}, editor ${TestConstants.TS_SELENIUM_EDITOR}"`);
+        Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}, editor ${BaseTestConstants.TS_SELENIUM_EDITOR}"`);
 
         const editorDropdownListLocator: By = this.getEditorsDropdownListLocator(sampleName);
         await this.driverHelper.waitAndClick(editorDropdownListLocator, timeout);

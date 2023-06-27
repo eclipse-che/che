@@ -11,7 +11,6 @@ import * as mocha from 'mocha';
 import { TYPES, CLASSES } from '../configs/inversify.types';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
-import { TestConstants } from '../constants/TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from './DriverHelper';
 import { ScreenCatcher } from './ScreenCatcher';
@@ -21,6 +20,11 @@ import { Logger } from './Logger';
 import { e2eContainer } from '../configs/inversify.config';
 import { WriteStream } from 'fs';
 import { StringUtil } from './StringUtil';
+import { BaseTestConstants } from '../constants/BaseTestConstants';
+import { UITestConstants } from '../constants/UITestConstants';
+import { OAuthConstants } from '../constants/OAuthConstants';
+import { ReporterConstants } from '../constants/ReporterConstants';
+import { PluginsTestConstants } from '../constants/PluginsTestConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
@@ -39,32 +43,32 @@ class CheReporter extends mocha.reporters.Spec {
       let launchInformation: string =
         `################## Launch Information ##################
 
-      TS_SELENIUM_BASE_URL: ${TestConstants.TS_SELENIUM_BASE_URL}
-      TS_SELENIUM_HEADLESS: ${TestConstants.TS_SELENIUM_HEADLESS}
-      TS_SELENIUM_OCP_USERNAME: ${TestConstants.TS_SELENIUM_OCP_USERNAME}
-      TS_SELENIUM_EDITOR:   ${TestConstants.TS_SELENIUM_EDITOR}
+      TS_SELENIUM_BASE_URL: ${BaseTestConstants.TS_SELENIUM_BASE_URL}
+      TS_SELENIUM_HEADLESS: ${UITestConstants.TS_SELENIUM_HEADLESS}
+      TS_SELENIUM_OCP_USERNAME: ${OAuthConstants.TS_SELENIUM_OCP_USERNAME}
+      TS_SELENIUM_EDITOR:   ${BaseTestConstants.TS_SELENIUM_EDITOR}
 
-      TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
-      TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
-      TS_SELENIUM_REPORT_FOLDER: ${TestConstants.TS_SELENIUM_REPORT_FOLDER}
-      TS_SELENIUM_EXECUTION_SCREENCAST: ${TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST}
-      DELETE_SCREENCAST_IF_TEST_PASS: ${TestConstants.DELETE_SCREENCAST_IF_TEST_PASS}
-      TS_SELENIUM_REMOTE_DRIVER_URL: ${TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL}
-      DELETE_WORKSPACE_ON_FAILED_TEST: ${TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST}
-      TS_SELENIUM_LOG_LEVEL: ${TestConstants.TS_SELENIUM_LOG_LEVEL}
-      TS_SELENIUM_LAUNCH_FULLSCREEN: ${TestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN}
+      TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${BaseTestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
+      TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${ReporterConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
+      TS_SELENIUM_REPORT_FOLDER: ${ReporterConstants.TS_SELENIUM_REPORT_FOLDER}
+      TS_SELENIUM_EXECUTION_SCREENCAST: ${ReporterConstants.TS_SELENIUM_EXECUTION_SCREENCAST}
+      DELETE_SCREENCAST_IF_TEST_PASS: ${ReporterConstants.DELETE_SCREENCAST_IF_TEST_PASS}
+      TS_SELENIUM_REMOTE_DRIVER_URL: ${UITestConstants.TS_SELENIUM_REMOTE_DRIVER_URL}
+      DELETE_WORKSPACE_ON_FAILED_TEST: ${BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST}
+      TS_SELENIUM_LOG_LEVEL: ${ReporterConstants.TS_SELENIUM_LOG_LEVEL}
+      TS_SELENIUM_LAUNCH_FULLSCREEN: ${UITestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN}
 
       TS_COMMON_DASHBOARD_WAIT_TIMEOUT: ${TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT}
       TS_SELENIUM_START_WORKSPACE_TIMEOUT: ${TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT}
       TS_WAIT_LOADER_PRESENCE_TIMEOUT: ${TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT}
 
-      TS_SAMPLE_LIST: ${TestConstants.TS_SAMPLE_LIST}
+      TS_SAMPLE_LIST: ${PluginsTestConstants.TS_SAMPLE_LIST}
 
       ${process.env.MOCHA_DIRECTORY ? 'MOCHA_DIRECTORY: ' + process.env.MOCHA_DIRECTORY : 'MOCHA_DRIRECTORY is not set'}
       ${process.env.USERSTORY ? 'USERSTORY: ' + process.env.USERSTORY : 'USERSTORY is not set'}
 `;
 
-      if (TestConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES) {
+      if (ReporterConstants.TS_SELENIUM_PRINT_TIMEOUT_VARIABLES) {
         launchInformation += `\n      TS_SELENIUM_PRINT_TIMEOUT_VARIABLES is set to true: \n`;
         Object.entries(TimeoutConstants).forEach(
           ([key, value]) => launchInformation += `\n         ${key}: ${value}`);
@@ -76,11 +80,11 @@ class CheReporter extends mocha.reporters.Spec {
 
       console.log(launchInformation);
 
-      rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      rm.sync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
     });
 
     runner.on('test', async function (test: mocha.Test): Promise<void> {
-      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
+      if (!ReporterConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
         return;
       }
 
@@ -92,13 +96,13 @@ class CheReporter extends mocha.reporters.Spec {
         await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
         iterationIndex = iterationIndex + 1;
 
-        await driverHelper.wait(TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
+        await driverHelper.wait(ReporterConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
       }
     });
 
     runner.on('pass', async (test: mocha.Test) => {
-      if (TestConstants.TS_LOAD_TESTS) {
-        const loadTestReportFolder: string = TestConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
+      if (BaseTestConstants.TS_LOAD_TESTS) {
+        const loadTestReportFolder: string = ReporterConstants.TS_SELENIUM_LOAD_TEST_REPORT_FOLDER;
         const loadTestFilePath: string = loadTestReportFolder + '/load-test-results.txt';
         const report: string = test.title + ': ' + test.duration + '\r';
         if (!fs.existsSync(loadTestReportFolder)) {
@@ -117,8 +121,8 @@ class CheReporter extends mocha.reporters.Spec {
       await driverHelper.getDriver().quit();
 
       // delete screencast folder if conditions matched
-      if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
-        rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      if (deleteScreencast && ReporterConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
+        rm.sync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
       }
     });
 
@@ -134,17 +138,17 @@ class CheReporter extends mocha.reporters.Spec {
       const testTitle: string = StringUtil.sanitizeTitle(test.title);
       Logger.trace(`TestTitleSanitized:${testTitle}`);
 
-      const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
+      const testReportDirPath: string = `${ReporterConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
       const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
 
 
       // create reporter dir if not exist
-      const reportDirExists: boolean = fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      const reportDirExists: boolean = fs.existsSync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
 
       if (!reportDirExists) {
-        fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+        fs.mkdirSync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
       }
 
       // create dir for failed test report if not exist
@@ -179,7 +183,7 @@ class CheReporter extends mocha.reporters.Spec {
       browserLogsStream.end();
 
       // stop and remove running workspace
-      if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
+      if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
         Logger.warn('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
         await testWorkspaceUtil.stopAndDeleteWorkspaceByName(CheReporter.latestWorkspace);
       }

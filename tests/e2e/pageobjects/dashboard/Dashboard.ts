@@ -12,10 +12,11 @@ import 'reflect-metadata';
 import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { TestConstants } from '../../constants/TestConstants';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { Workspaces } from './Workspaces';
 import { Logger } from '../../utils/Logger';
+import { OAuthConstants } from '../../constants/OAuthConstants';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 @injectable()
 export class Dashboard {
@@ -29,7 +30,7 @@ export class Dashboard {
     private static getUserDropdownMenuButtonLocator(): By {
         Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: get current user.`);
 
-        const currentUser: string = TestConstants.TS_SELENIUM_OCP_USERNAME;
+        const currentUser: string = OAuthConstants.TS_SELENIUM_OCP_USERNAME;
         Logger.debug(`Dashboard.getUserDropdownMenuButtonLocator: ${currentUser}.`);
 
         return By.xpath(`//*[text()="${currentUser}"]//parent::button`);
@@ -73,7 +74,7 @@ export class Dashboard {
 
     async openDashboard(): Promise<void> {
         Logger.debug('Dashboard.openDashboard');
-        await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
+        await this.driverHelper.getDriver().navigate().to(BaseTestConstants.TS_SELENIUM_BASE_URL);
         await this.waitPage();
 
     }
@@ -125,7 +126,7 @@ export class Dashboard {
         Logger.debug(`Dashboard.waitStartingPageLoaderDisappearance`);
 
         await this.driverHelper.waitDisappearance(By.css(Dashboard.STARTING_PAGE_LOADER_CSS), timeout);
-        await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+        await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING);
     }
 
     async getRecentWorkspaceName(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string> {

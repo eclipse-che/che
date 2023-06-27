@@ -12,11 +12,11 @@ import { ICheLoginPage } from '../interfaces/ICheLoginPage';
 import { OcpLoginPage } from '../../openshift/OcpLoginPage';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../../configs/inversify.types';
-import { TestConstants } from '../../../constants/TestConstants';
 import { Logger } from '../../../utils/Logger';
 import { TimeoutConstants } from '../../../constants/TimeoutConstants';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../../utils/DriverHelper';
+import { OAuthConstants } from '../../../constants/OAuthConstants';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
@@ -40,8 +40,8 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
         }
 
         await this.ocpLogin.waitOpenShiftLoginWelcomePage();
-        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
+        await this.ocpLogin.enterUserNameOpenShift(OAuthConstants.TS_SELENIUM_OCP_USERNAME);
+        await this.ocpLogin.enterPasswordOpenShift(OAuthConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
         await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
 

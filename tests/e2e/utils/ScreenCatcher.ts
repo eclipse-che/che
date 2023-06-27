@@ -12,22 +12,22 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { error } from 'selenium-webdriver';
-import { TestConstants } from '../constants/TestConstants';
 import { WriteStream } from 'fs';
 import { StringUtil } from './StringUtil';
+import { ReporterConstants } from '../constants/ReporterConstants';
 
 @injectable()
 export class ScreenCatcher {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number): Promise<void> {
-        const executionScreenCastDir: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
-        const executionScreenCastErrorsDir: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencastErrors`;
+        const executionScreenCastDir: string = `${ReporterConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
+        const executionScreenCastErrorsDir: string = `${ReporterConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencastErrors`;
         const formattedMethodIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 3 }).format(methodIndex);
         const formattedScreenshotIndex: string = new Intl.NumberFormat('en-us', { minimumIntegerDigits: 5 }).format(screenshotIndex).replace(/,/g, '');
 
-        if (!fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER)) {
-            fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+        if (!fs.existsSync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER)) {
+            fs.mkdirSync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
         }
 
         if (!fs.existsSync(executionScreenCastDir)) {

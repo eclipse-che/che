@@ -1,15 +1,17 @@
 import { echo, exec, ShellString } from 'shelljs';
-import { KubernetesCommandLineTool, TestConstants } from '../constants/TestConstants';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
 import * as path from 'path';
+import { APITestConstants, KubernetesCommandLineTool } from '../constants/APITestConstants';
+import { BaseTestConstants } from '../constants/BaseTestConstants';
+import { OAuthConstants } from '../constants/OAuthConstants';
 
 export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     private static container: string;
     private static pod: string;
     private readonly namespace: string;
     private readonly workspaceName: string | undefined;
-    private readonly KUBERNETES_COMMAND_LINE_TOOL: string = TestConstants.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL;
+    private readonly KUBERNETES_COMMAND_LINE_TOOL: string = APITestConstants.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL;
 
     constructor(_workspaceName?: string, _namespace?: string) {
         super();
@@ -33,8 +35,8 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
             if (this.isUserLoggedIn()) {
                 Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: User already logged`);
             } else {
-                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${TestConstants.TS_SELENIUM_OCP_USERNAME}`);
-                exec(`oc login --server=${url} -u=${TestConstants.TS_SELENIUM_OCP_USERNAME} -p=${TestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${APITestConstants.TS_SELENIUM_OCP_USERNAME}`);
+                exec(`oc login --server=${url} -u=${APITestConstants.TS_SELENIUM_OCP_USERNAME} -p=${APITestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
             }
         } else {
             Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: doesn't support login command`);
@@ -58,7 +60,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         Logger.debug(`${this.getLoggingName(this.deleteDevWorkspace.name)}: Delete '${this.workspaceName}' workspace`);
         ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`);
         ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
-        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${TestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
+        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${APITestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
     }
 
     applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {
@@ -121,7 +123,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
     private isUserLoggedIn(): boolean {
         const whoamiCommandOutput: ShellString = ShellExecutor.execWithLog('oc whoami && oc whoami --show-server=true');
 
-        return whoamiCommandOutput.stdout.includes(TestConstants.TS_SELENIUM_OCP_USERNAME) && whoamiCommandOutput.stdout.includes(this.getServerUrl());
+        return whoamiCommandOutput.stdout.includes(OAuthConstants.TS_SELENIUM_OCP_USERNAME) && whoamiCommandOutput.stdout.includes(this.getServerUrl());
     }
 
     private getLoggingName(methodName: string): string {
@@ -130,15 +132,15 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
 
     private setNamespace(_namespace: string | undefined): string {
         _namespace = _namespace !== undefined ? _namespace
-            : TestConstants.TS_SELENIUM_BASE_URL.includes('devspaces') ? TestConstants.TS_SELENIUM_OCP_USERNAME + '-devspaces'
-                : TestConstants.TS_SELENIUM_BASE_URL.includes('che') ? TestConstants.TS_SELENIUM_OCP_USERNAME + '-che'
+            : BaseTestConstants.TS_SELENIUM_BASE_URL.includes('devspaces') ? OAuthConstants.TS_SELENIUM_OCP_USERNAME + '-devspaces'
+                : BaseTestConstants.TS_SELENIUM_BASE_URL.includes('che') ? OAuthConstants.TS_SELENIUM_OCP_USERNAME + '-che'
                     : 'default';
         return _namespace;
     }
 
     private getServerUrl(): string {
         Logger.debug(`${this.getLoggingName(this.getServerUrl.name)}: Get server api url.`);
-        return TestConstants.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':6443';
+        return BaseTestConstants.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':6443';
     }
 }
 

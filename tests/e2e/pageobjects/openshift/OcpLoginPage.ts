@@ -13,8 +13,8 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
-import { TestConstants } from '../../constants/TestConstants';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
+import { OAuthConstants } from '../../constants/OAuthConstants';
 
 @injectable()
 export class OcpLoginPage {
@@ -33,14 +33,14 @@ export class OcpLoginPage {
     async clickOnLoginProviderTitle(): Promise<void> {
         Logger.debug('OcpLoginPage.clickOnLoginProviderTitle');
 
-        const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         await this.driverHelper.waitAndClick(loginProviderTitleLocator, TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL);
     }
 
     async isIdentityProviderLinkVisible(): Promise<boolean> {
         Logger.debug('OcpLoginPage.isIdentityProviderLinkVisible');
 
-        const loginWithHtpaswdLocator: By = By.xpath(`//a[text()=\'${TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
+        const loginWithHtpaswdLocator: By = By.xpath(`//a[text()=\'${OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
         return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
     }
 
