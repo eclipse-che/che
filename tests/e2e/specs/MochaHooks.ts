@@ -10,7 +10,6 @@
 
 import 'reflect-metadata';
 import { CLASSES, TYPES } from '../configs/inversify.types';
-import { TestConstants } from '../constants/TestConstants';
 import { CheApiRequestHandler } from '../utils/request-handlers/CheApiRequestHandler';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
 import * as monacoPageObjects from 'monaco-page-objects';
@@ -19,6 +18,8 @@ import { e2eContainer } from '../configs/inversify.config';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { Logger } from '../utils/Logger';
+import { BaseTestConstants } from '../constants/BaseTestConstants';
+import { UITestConstants } from '../constants/UITestConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
@@ -33,21 +34,21 @@ export function registerRunningWorkspace(workspaceName: string): void {
 exports.mochaHooks = {
     beforeAll: [
         async function enableRequestInterceptor(): Promise<void> {
-            if (TestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
+            if (BaseTestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
                 CheApiRequestHandler.enableRequestInterceptor();
             }
         },
         async function enableResponseInterceptor(): Promise<void> {
-            if (TestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
+            if (BaseTestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
                 CheApiRequestHandler.enableResponseInterceptor();
             }
         },
         async function initMonacoPageObjects(): Promise<void> {
             // init vscode-extension-tester monaco-page-objects
-            monacoPageObjects.initPageObjects(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
+            monacoPageObjects.initPageObjects(UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
         },
         async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
-            if (TestConstants.TS_DEBUG_MODE) {
+            if (BaseTestConstants.TS_DEBUG_MODE) {
                 for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
                     Object.defineProperty(TimeoutConstants, timeout, {value: seconds as number * 100});
                 }
@@ -57,13 +58,13 @@ exports.mochaHooks = {
     afterAll: [
         // stop and remove running workspace
         async () => {
-            if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
+            if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
                 Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
                 testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
             }
         },
         async function stopTheDriver(): Promise<void> {
-            if (!TestConstants.TS_DEBUG_MODE && TestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+            if (!BaseTestConstants.TS_DEBUG_MODE && UITestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
                 await driverHelper.getDriver().quit();
                 Logger.info('Chrome driver session stopped.');
             }

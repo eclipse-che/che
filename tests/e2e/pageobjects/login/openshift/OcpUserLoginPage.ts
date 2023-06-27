@@ -12,8 +12,8 @@ import { IOcpLoginPage } from '../interfaces/IOcpLoginPage';
 import { injectable, inject } from 'inversify';
 import { OcpLoginPage } from '../../openshift/OcpLoginPage';
 import { CLASSES } from '../../../configs/inversify.types';
-import { TestConstants } from '../../../constants/TestConstants';
 import { Logger } from '../../../utils/Logger';
+import { OAuthConstants } from '../../../constants/OAuthConstants';
 
 @injectable()
 export class OcpUserLoginPage implements IOcpLoginPage {
@@ -24,13 +24,13 @@ export class OcpUserLoginPage implements IOcpLoginPage {
     async login(): Promise<void> {
         Logger.debug('OcpUserLoginPage.login');
 
-        if (TestConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
+        if (OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
             await this.ocpLogin.clickOnLoginProviderTitle();
         }
 
         await this.ocpLogin.waitOpenShiftLoginWelcomePage();
-        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
+        await this.ocpLogin.enterUserNameOpenShift(OAuthConstants.TS_SELENIUM_OCP_USERNAME);
+        await this.ocpLogin.enterPasswordOpenShift(OAuthConstants.TS_SELENIUM_OCP_PASSWORD);
         await this.ocpLogin.clickOnLoginButton();
         await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
     }

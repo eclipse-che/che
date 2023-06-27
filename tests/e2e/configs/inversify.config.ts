@@ -16,7 +16,6 @@ import { TYPES, CLASSES } from './inversify.types';
 import { TestWorkspaceUtil } from '../utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
 import { OcpUserLoginPage } from '../pageobjects/login/openshift/OcpUserLoginPage';
-import { Platform, TestConstants } from '../constants/TestConstants';
 import { ICheLoginPage } from '../pageobjects/login/interfaces/ICheLoginPage';
 import { RegularUserOcpCheLoginPage } from '../pageobjects/login/openshift/RegularUserOcpCheLoginPage';
 import { DriverHelper } from '../utils/DriverHelper';
@@ -44,6 +43,8 @@ import { OcpApplicationPage } from '../pageobjects/openshift/OcpApplicationPage'
 import { StringUtil } from '../utils/StringUtil';
 import { KubernetesLoginPage } from '../pageobjects/login/kubernetes/KubernetesLoginPage';
 import { DexLoginPage } from '../pageobjects/login/kubernetes/DexLoginPage';
+import { OAuthConstants } from '../constants/OAuthConstants';
+import { BaseTestConstants, Platform } from '../constants/BaseTestConstants';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -74,8 +75,8 @@ e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
 
-TestConstants.TS_PLATFORM === Platform.OPENSHIFT  ?
-    TestConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
+BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT  ?
+    OAuthConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
         e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage) :
     e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(KubernetesLoginPage);

@@ -10,11 +10,11 @@
 
 import { CLASSES, TYPES } from '../configs/inversify.types';
 import { ICheLoginPage } from '../pageobjects/login/interfaces/ICheLoginPage';
-import { TestConstants } from '../constants/TestConstants';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { inject, injectable } from 'inversify';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
+import { BaseTestConstants } from '../constants/BaseTestConstants';
 
 @injectable()
 export class LoginTests {
@@ -27,8 +27,8 @@ export class LoginTests {
 
     loginIntoChe(): void {
         test('Login', async () => {
-            if (!(await this.browserTabsUtil.getCurrentUrl()).includes(TestConstants.TS_SELENIUM_BASE_URL)) {
-                await this.browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_BASE_URL);
+            if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BaseTestConstants.TS_SELENIUM_BASE_URL)) {
+                await this.browserTabsUtil.navigateTo(BaseTestConstants.TS_SELENIUM_BASE_URL);
             }
             await this.productLoginPage.login();
             await this.browserTabsUtil.maximize();
@@ -38,7 +38,7 @@ export class LoginTests {
 
     loginIntoOcpConsole(): void {
         test('Login into ocp console', async () => {
-            const openshiftConsoleUrl: string =  TestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
+            const openshiftConsoleUrl: string = BaseTestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
             await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
             await this.ocpLoginPage.login();
             await this.browserTabsUtil.maximize();

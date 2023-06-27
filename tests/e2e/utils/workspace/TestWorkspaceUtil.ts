@@ -9,7 +9,6 @@
  **********************************************************************/
 
 import 'reflect-metadata';
-import { TestConstants } from '../../constants/TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { WorkspaceStatus } from './WorkspaceStatus';
@@ -20,11 +19,12 @@ import { Logger } from '../Logger';
 import axios, { AxiosResponse } from 'axios';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import { ApiUrlResolver } from './ApiUrlResolver';
+import { TimeoutConstants } from '../../constants/TimeoutConstants';
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
-    readonly attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
-    readonly polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
+    readonly attempts: number = TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+    readonly polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING;
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,

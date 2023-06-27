@@ -12,7 +12,7 @@ import { getLocatorsPath } from 'vscode-extension-tester-locators';
 import { LocatorDiff, Locators } from 'monaco-page-objects';
 import { By } from 'selenium-webdriver';
 import clone from 'clone-deep';
-import { TestConstants } from '../../constants/TestConstants';
+import { UITestConstants } from '../../constants/UITestConstants';
 
 /**
  * This class allows us to change or add some specific locators base on "monaco-page-object" and "vscode-extension-tester-locators".
@@ -24,7 +24,7 @@ export class CheCodeLocatorLoader extends LocatorLoader {
     readonly webCheCodeLocators: Locators;
 
     constructor() {
-        super(TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, TestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, getLocatorsPath());
+        super(UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, getLocatorsPath());
         this.webCheCodeLocators = this.mergeLocators() as Locators;
     }
 

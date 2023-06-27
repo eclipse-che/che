@@ -4,10 +4,9 @@ echo "Generating index.ts file..."
 echo "import * as inversifyConfig from './configs/inversify.config';
 export { inversifyConfig };
 export * from './configs/inversify.types';
-export * from './constants/TestConstants';
-export * from './constants/TimeoutConstants';" > ./index.ts
+export * from './configs/mocharc';" > ./index.ts
 
-listOfDirs="driver utils pageobjects tests-library"
+listOfDirs="driver utils pageobjects tests-library constants"
 listOfExcludes="./utils/CheReporter.ts"
 for dir in $listOfDirs
 do

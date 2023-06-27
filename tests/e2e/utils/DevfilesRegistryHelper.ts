@@ -7,10 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { SupportedDevfilesRegistries, TestConstants } from '../constants/TestConstants';
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from './Logger';
 import YAML from 'yaml';
+import { APITestConstants, SupportedDevfilesRegistries } from '../constants/APITestConstants';
 
 export class DevfilesRegistryHelper {
 
@@ -28,7 +28,7 @@ export class DevfilesRegistryHelper {
         Logger.debug(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}`);
         const devfileSamples: object[] = [];
         const sampleNames: string[] = [];
-        switch (TestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
+        switch (APITestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
             case (SupportedDevfilesRegistries.GIT_HUB_CHE_DEVFILE_REGISTRY_URL): {
                 const content: any[any] = await this.getGitHubCheDevfileRegistryContent();
                 content.forEach((e: any) => {
@@ -55,7 +55,7 @@ export class DevfilesRegistryHelper {
             }
                 break;
             default: {
-                Logger.error(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}: unsupported registry url - ${TestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()}\n
+                Logger.error(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}: unsupported registry url - ${APITestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()}\n
                 supported registries: ${JSON.stringify(SupportedDevfilesRegistries)}`);
             }
         }

@@ -9,11 +9,11 @@
  **********************************************************************/
 
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { TestConstants } from '../../constants/TestConstants';
 import { TYPES } from '../../configs/inversify.types';
 import { inject, injectable } from 'inversify';
 import { IAuthorizationHeaderHandler } from './headers/IAuthorizationHeaderHandler';
 import { Logger } from '../Logger';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 @injectable()
 export class CheApiRequestHandler {
@@ -104,7 +104,7 @@ export class CheApiRequestHandler {
     }
 
     private assembleUrl(relativeUrl: string): string {
-        return `${TestConstants.TS_SELENIUM_BASE_URL}/${relativeUrl}`;
+        return `${BaseTestConstants.TS_SELENIUM_BASE_URL}/${relativeUrl}`;
     }
 
 }

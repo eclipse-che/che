@@ -1,5 +1,3 @@
-import { TestConstants } from '../constants/TestConstants';
-
 /*********************************************************************
  * Copyright (c) 2019-2023 Red Hat, Inc.
  *
@@ -9,6 +7,7 @@ import { TestConstants } from '../constants/TestConstants';
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { ReporterConstants } from '../constants/ReporterConstants';
 
 export abstract class Logger {
 
@@ -27,7 +26,7 @@ export abstract class Logger {
      * @param indentLevel log level
      */
     static warn(text: string, indentLevel: number = 1): void {
-        if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
+        if (ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
             return;
         }
         this.logText(indentLevel, `[WARN] ${text}`);
@@ -39,8 +38,8 @@ export abstract class Logger {
      * @param indentLevel log level
      */
     static info(text: string, indentLevel: number = 3): void {
-        if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN') {
+        if (ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'WARN') {
             return;
         }
         this.logText(indentLevel, `• ${text}`);
@@ -52,9 +51,9 @@ export abstract class Logger {
      * @param indentLevel log level
      */
     static debug(text: string, indentLevel: number = 5): void {
-        if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
+        if (ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'INFO') {
             return;
         }
         this.logText(indentLevel, `▼ ${text}`);
@@ -67,10 +66,10 @@ export abstract class Logger {
      * @param indentLevel log level
      */
     static trace(text: string, indentLevel: number = 6): void {
-        if (TestConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'INFO' ||
-            TestConstants.TS_SELENIUM_LOG_LEVEL === 'DEBUG') {
+        if (ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'WARN' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'INFO' ||
+            ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'DEBUG') {
             return;
         }
         this.logText(indentLevel, `‣ ${text}`);

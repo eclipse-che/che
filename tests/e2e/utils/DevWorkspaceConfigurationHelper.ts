@@ -4,8 +4,8 @@ import { V1alpha2DevWorkspaceTemplate } from '@devfile/api';
 import YAML from 'yaml';
 import * as axios from 'axios';
 import { Logger } from './Logger';
-import { TestConstants } from '../constants/TestConstants';
 import { ShellExecutor } from './ShellExecutor';
+import { APITestConstants } from '../constants/APITestConstants';
 
 /**
  * to see more about IContextParams and generateDevfileContext(params) check README.md in "@eclipse-che/che-devworkspace-generator;
@@ -39,19 +39,19 @@ export class DevWorkspaceConfigurationHelper {
             params.editorEntry = 'che-incubator/che-code/latest';
         }
         // check if one or both has value
-        if (TestConstants.TS_API_TEST_UDI_IMAGE || params.defaultComponentImage) {
+        if (APITestConstants.TS_API_TEST_UDI_IMAGE || params.defaultComponentImage) {
             params.injectDefaultComponent = 'true';
             // check if not explicitly passed than assign value from the constants
             if (!params.defaultComponentImage) {
-                params.defaultComponentImage = TestConstants.TS_API_TEST_UDI_IMAGE;
+                params.defaultComponentImage = APITestConstants.TS_API_TEST_UDI_IMAGE;
             }
         }
         // assign value from the constants if not explicitly passed
-        if (TestConstants.TS_API_TEST_PLUGIN_REGISTRY_URL && !params.pluginRegistryUrl) {
-            params.pluginRegistryUrl = TestConstants.TS_API_TEST_PLUGIN_REGISTRY_URL;
+        if (APITestConstants.TS_API_TEST_PLUGIN_REGISTRY_URL && !params.pluginRegistryUrl) {
+            params.pluginRegistryUrl = APITestConstants.TS_API_TEST_PLUGIN_REGISTRY_URL;
         }
-        if (TestConstants.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI && !params.editorContent) {
-            params.editorContent = ShellExecutor.curl(TestConstants.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI).stdout;
+        if (APITestConstants.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI && !params.editorContent) {
+            params.editorContent = ShellExecutor.curl(APITestConstants.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI).stdout;
         }
         this.params = params;
     }

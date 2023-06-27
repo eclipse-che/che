@@ -38,10 +38,12 @@ import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
-import { GitProviderType, TestConstants } from '../../constants/TestConstants';
 import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
+import { FactoryTestConstants, GitProviderType } from '../../constants/FactoryTestConstants';
+import { OAuthConstants } from '../../constants/OAuthConstants';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -52,7 +54,7 @@ const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 
-suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`, async function (): Promise<void> {
+suite(`Create a workspace via launching a factory from the ${FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`, async function (): Promise<void> {
 
     let projectSection: ViewSection;
     let scmProvider: SingleScmProvider;
@@ -65,11 +67,11 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     const changesToCommit: string = (new Date()).getTime().toString();
     const fileToChange: string = 'Date.txt';
     const pushItemLabel: string = 'Push';
-    const commitChangesButtonLabel: string = `Commit Changes on "${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
+    const commitChangesButtonLabel: string = `Commit Changes on "${FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
     const refreshButtonLabel: string = 'Refresh';
-    const label: string = TestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
+    const label: string = BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
     let testRepoProjectName: string;
-    const isPrivateRepo: string = TestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
+    const isPrivateRepo: string = FactoryTestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
     loginTests.loginIntoChe();
 
@@ -80,10 +82,10 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     });
 
     test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
-        await browserTabsUtil.navigateTo(TestConstants.TS_SELENIUM_FACTORY_URL());
+        await browserTabsUtil.navigateTo(FactoryTestConstants.TS_SELENIUM_FACTORY_URL());
     });
 
-    if (TestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
+    if (FactoryTestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
 
         test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
             await dashboard.waitLoader();
@@ -114,7 +116,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
         });
 
         test('Check if a project folder has been created', async function (): Promise<void> {
-            testRepoProjectName = StringUtil.getProjectNameFromGitUrl(TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+            testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_REPO_URL);
             Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
             projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
         });
@@ -136,7 +138,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
                 await driverHelper.waitDisappearance(webCheCodeLocators.WelcomeContent.text);
             } catch (e) {
                 Logger.info(`"Accept the project as a trusted one" dialog was not shown firstly for "${isPrivateRepo}"`);
-                if (!TestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
+                if (!FactoryTestConstants.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
                     throw new WebDriverError(e as string);
                 }
             }
@@ -208,7 +210,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
         });
 
         test('Push the changes', async function (): Promise<void> {
-            await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(`Push 1 commits to origin/${TestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`));
+            await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(`Push 1 commits to origin/${FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`));
             await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
             Logger.debug(`scmProvider.openMoreActions`);
             scmContextMenu = await scmProvider.openMoreActions();
@@ -217,7 +219,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
             await scmContextMenu.select(pushItemLabel);
         });
 
-        if (TestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITHUB) {
+        if (FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITHUB) {
             test('Decline GitHub Extension', async function (): Promise<void> {
                 await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
                 const gitHaExtensionDialog: ModalDialog = new ModalDialog();
@@ -235,11 +237,11 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
                 Known issue for github.com - https://issues.redhat.com/browse/CRW-4066`);
             }
             const input: InputBox = new InputBox();
-            await input.setText(TestConstants.TS_SELENIUM_GIT_PROVIDER_USERNAME);
+            await input.setText(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_USERNAME);
             await driverHelper.wait(timeToRefresh);
             await input.confirm();
             await driverHelper.wait(timeToRefresh);
-            await input.setText(TestConstants.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
+            await input.setText(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
             await input.confirm();
             await driverHelper.wait(timeToRefresh);
         });
@@ -265,7 +267,7 @@ suite(`Create a workspace via launching a factory from the ${TestConstants.TS_SE
     }
 
     suiteTeardown('Close the browser', async function (): Promise<void> {
-        if (!TestConstants.TS_DEBUG_MODE) {
+        if (!BaseTestConstants.TS_DEBUG_MODE) {
             await driverHelper.getDriver().close();
         }
     });

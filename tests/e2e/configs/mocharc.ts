@@ -1,6 +1,16 @@
+/*********************************************************************
+ * Copyright (c) 2020-2023 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
+
 'use strict';
 
-import { TestConstants } from '../constants/TestConstants';
+import { TimeoutConstants } from '../constants/TimeoutConstants';
 
 module.exports = {
     timeout: 1200000,
@@ -23,5 +33,5 @@ module.exports = {
             : process.env.USERSTORY ?
                 [`dist/specs/**/${process.env.USERSTORY}.spec.js`, `dist/specs/${process.env.USERSTORY}.spec.js`]
                 : [`dist/specs/**/**.spec.js`, `dist/specs/**.spec.js`],
-    retries: TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+    retries: TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
 };
