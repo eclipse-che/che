@@ -9,12 +9,12 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { injectable, inject } from 'inversify';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { CLASSES } from '../../configs/inversify.types';
+import { DriverHelper } from '../../../utils/DriverHelper';
+import { CLASSES } from '../../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
-import { Logger } from '../../utils/Logger';
-import { TimeoutConstants } from '../../constants/TimeoutConstants';
-import { OAuthConstants } from '../../constants/OAuthConstants';
+import { Logger } from '../../../utils/Logger';
+import { TimeoutConstants } from '../../../constants/TimeoutConstants';
+import { OAuthConstants } from '../../../constants/OAuthConstants';
 
 @injectable()
 export class OcpLoginPage {

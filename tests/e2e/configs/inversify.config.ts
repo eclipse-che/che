@@ -23,8 +23,7 @@ import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 import { WorkspaceDetails } from '../pageobjects/dashboard/workspace-details/WorkspaceDetails';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
-import { OcpLoginPage } from '../pageobjects/openshift/OcpLoginPage';
-import { CheLoginPage } from '../pageobjects/openshift/CheLoginPage';
+import { OcpLoginPage } from '../pageobjects/login/openshift/OcpLoginPage';
 import { IAuthorizationHeaderHandler } from '../utils/request-handlers/headers/IAuthorizationHeaderHandler';
 import { CheMultiuserAuthorizationHeaderHandler } from '../utils/request-handlers/headers/CheMultiuserAuthorizationHeaderHandler';
 import { CheApiRequestHandler } from '../utils/request-handlers/CheApiRequestHandler';
@@ -65,7 +64,6 @@ e2eContainer.bind<OcpMainPage>(CLASSES.OcpMainPage).to(OcpMainPage);
 e2eContainer.bind<OcpImportFromGitPage>(CLASSES.OcpImportFromGitPage).to(OcpImportFromGitPage);
 e2eContainer.bind<OcpApplicationPage>(CLASSES.OcpApplicationPage).to(OcpApplicationPage);
 
-e2eContainer.bind<CheLoginPage>(CLASSES.CheLoginPage).to(CheLoginPage);
 e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
 e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);

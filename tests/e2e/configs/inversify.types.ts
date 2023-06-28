@@ -24,7 +24,6 @@ const CLASSES: any = {
     WorkspaceDetails: 'WorkspaceDetails',
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
-    CheLoginPage: 'CheLoginPage',
     CheApiRequestHandler: 'CheApiRequestHandler',
     CreateWorkspace: 'CreateWorkspace',
     BrowserTabsUtil: 'BrowserTabsUtil',

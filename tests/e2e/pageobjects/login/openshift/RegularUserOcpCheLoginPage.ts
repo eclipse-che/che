@@ -9,7 +9,7 @@
  **********************************************************************/
 import 'reflect-metadata';
 import { ICheLoginPage } from '../interfaces/ICheLoginPage';
-import { OcpLoginPage } from '../../openshift/OcpLoginPage';
+import { OcpLoginPage } from './OcpLoginPage';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../../utils/Logger';

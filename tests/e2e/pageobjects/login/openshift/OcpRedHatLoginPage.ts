@@ -14,7 +14,7 @@ import { CLASSES } from '../../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { TimeoutConstants } from '../../../constants/TimeoutConstants';
 import { ICheLoginPage } from '../interfaces/ICheLoginPage';
-import { OcpLoginPage } from '../../openshift/OcpLoginPage';
+import { OcpLoginPage } from './OcpLoginPage';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { Logger } from '../../../utils/Logger';
 
