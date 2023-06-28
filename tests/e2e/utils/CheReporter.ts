@@ -21,7 +21,7 @@ import { e2eContainer } from '../configs/inversify.config';
 import { WriteStream } from 'fs';
 import { StringUtil } from './StringUtil';
 import { BaseTestConstants } from '../constants/BaseTestConstants';
-import { UITestConstants } from '../constants/UITestConstants';
+import { ChromeDriverConstants } from '../constants/ChromeDriverConstants';
 import { OAuthConstants } from '../constants/OAuthConstants';
 import { ReporterConstants } from '../constants/ReporterConstants';
 import { PluginsTestConstants } from '../constants/PluginsTestConstants';
@@ -44,7 +44,7 @@ class CheReporter extends mocha.reporters.Spec {
         `################## Launch Information ##################
 
       TS_SELENIUM_BASE_URL: ${BaseTestConstants.TS_SELENIUM_BASE_URL}
-      TS_SELENIUM_HEADLESS: ${UITestConstants.TS_SELENIUM_HEADLESS}
+      TS_SELENIUM_HEADLESS: ${ChromeDriverConstants.TS_SELENIUM_HEADLESS}
       TS_SELENIUM_OCP_USERNAME: ${OAuthConstants.TS_SELENIUM_OCP_USERNAME}
       TS_SELENIUM_EDITOR:   ${BaseTestConstants.TS_SELENIUM_EDITOR}
 
@@ -53,10 +53,10 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_REPORT_FOLDER: ${ReporterConstants.TS_SELENIUM_REPORT_FOLDER}
       TS_SELENIUM_EXECUTION_SCREENCAST: ${ReporterConstants.TS_SELENIUM_EXECUTION_SCREENCAST}
       DELETE_SCREENCAST_IF_TEST_PASS: ${ReporterConstants.DELETE_SCREENCAST_IF_TEST_PASS}
-      TS_SELENIUM_REMOTE_DRIVER_URL: ${UITestConstants.TS_SELENIUM_REMOTE_DRIVER_URL}
+      TS_SELENIUM_REMOTE_DRIVER_URL: ${ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL}
       DELETE_WORKSPACE_ON_FAILED_TEST: ${BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST}
       TS_SELENIUM_LOG_LEVEL: ${ReporterConstants.TS_SELENIUM_LOG_LEVEL}
-      TS_SELENIUM_LAUNCH_FULLSCREEN: ${UITestConstants.TS_SELENIUM_LAUNCH_FULLSCREEN}
+      TS_SELENIUM_LAUNCH_FULLSCREEN: ${ChromeDriverConstants.TS_SELENIUM_LAUNCH_FULLSCREEN}
 
       TS_COMMON_DASHBOARD_WAIT_TIMEOUT: ${TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT}
       TS_SELENIUM_START_WORKSPACE_TIMEOUT: ${TimeoutConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT}

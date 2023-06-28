@@ -13,7 +13,7 @@ import { injectable } from 'inversify';
 import { ThenableWebDriver, Builder } from 'selenium-webdriver';
 import { IDriver } from './IDriver';
 import { Options } from 'selenium-webdriver/chrome';
-import { UITestConstants } from '../constants/UITestConstants';
+import { ChromeDriverConstants } from '../constants/ChromeDriverConstants';
 
 @injectable()
 export class ChromeDriver implements IDriver {
@@ -21,7 +21,7 @@ export class ChromeDriver implements IDriver {
 
     constructor() {
         const options: Options = this.getDriverOptions();
-        if (UITestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+        if (ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
             this.driver = this.getDriverBuilder(options).build();
         }
     }
@@ -34,7 +34,7 @@ export class ChromeDriver implements IDriver {
         await (this.driver as ThenableWebDriver)
             .manage()
             .window()
-            .setSize(UITestConstants.TS_SELENIUM_RESOLUTION_WIDTH, UITestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
+            .setSize(ChromeDriverConstants.TS_SELENIUM_RESOLUTION_WIDTH, ChromeDriverConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
     }
 
     private getDriverOptions(): Options {
@@ -44,7 +44,7 @@ export class ChromeDriver implements IDriver {
             .addArguments('--allow-running-insecure-content')
             .addArguments('--ignore-certificate-errors');
         // if 'true' run in 'headless' mode
-        if (UITestConstants.TS_SELENIUM_HEADLESS) {
+        if (ChromeDriverConstants.TS_SELENIUM_HEADLESS) {
             options = options.addArguments('headless');
         }
         return options;
@@ -57,15 +57,15 @@ export class ChromeDriver implements IDriver {
             .setChromeOptions(options);
 
         // if 'false' w3c protocol is disabled
-        if (! UITestConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
+        if (! ChromeDriverConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
             builder.withCapabilities(disableW3copts)
             .forBrowser('chrome')
             .setChromeOptions(options);
         }
 
         // if 'true' run with remote driver
-        if (UITestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
-            builder = builder.usingServer(UITestConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
+        if (ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
+            builder = builder.usingServer(ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
         }
 
         return builder;
