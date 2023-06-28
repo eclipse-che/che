@@ -10,7 +10,7 @@
 import 'reflect-metadata';
 import { IOcpLoginPage } from '../interfaces/IOcpLoginPage';
 import { injectable, inject } from 'inversify';
-import { OcpLoginPage } from '../../openshift/OcpLoginPage';
+import { OcpLoginPage } from './OcpLoginPage';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../../utils/Logger';
 import { OAuthConstants } from '../../../constants/OAuthConstants';
