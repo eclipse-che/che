@@ -19,7 +19,8 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { Logger } from '../utils/Logger';
 import { BaseTestConstants } from '../constants/BaseTestConstants';
-import { UITestConstants } from '../constants/UITestConstants';
+import { ChromeDriverConstants } from '../constants/ChromeDriverConstants';
+import { MonacoConstants } from '../constants/MonacoConstants';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
@@ -45,7 +46,7 @@ exports.mochaHooks = {
         },
         async function initMonacoPageObjects(): Promise<void> {
             // init vscode-extension-tester monaco-page-objects
-            monacoPageObjects.initPageObjects(UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, UITestConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
+            monacoPageObjects.initPageObjects(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
         },
         async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
             if (BaseTestConstants.TS_DEBUG_MODE) {
@@ -64,7 +65,7 @@ exports.mochaHooks = {
             }
         },
         async function stopTheDriver(): Promise<void> {
-            if (!BaseTestConstants.TS_DEBUG_MODE && UITestConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+            if (!BaseTestConstants.TS_DEBUG_MODE && ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
                 await driverHelper.getDriver().quit();
                 Logger.info('Chrome driver session stopped.');
             }
