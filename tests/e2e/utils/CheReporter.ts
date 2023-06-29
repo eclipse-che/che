@@ -8,13 +8,12 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import * as mocha from 'mocha';
-import { TYPES, CLASSES } from '../configs/inversify.types';
+import { CLASSES } from '../configs/inversify.types';
 import * as fs from 'fs';
 import * as rm from 'rimraf';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from './DriverHelper';
 import { ScreenCatcher } from './ScreenCatcher';
-import { ITestWorkspaceUtil } from './workspace/ITestWorkspaceUtil';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
 import { Logger } from './Logger';
 import { e2eContainer } from '../configs/inversify.config';
@@ -30,11 +29,8 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
-let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
 class CheReporter extends mocha.reporters.Spec {
-
-  private static latestWorkspace: string = '';
 
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
@@ -181,12 +177,6 @@ class CheReporter extends mocha.reporters.Spec {
       const browserLogsStream: WriteStream = fs.createWriteStream(browserLogsFileName);
       browserLogsStream.write(Buffer.from(browserLogs));
       browserLogsStream.end();
-
-      // stop and remove running workspace
-      if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
-        Logger.warn('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
-        await testWorkspaceUtil.stopAndDeleteWorkspaceByName(CheReporter.latestWorkspace);
-      }
 
     });
   }

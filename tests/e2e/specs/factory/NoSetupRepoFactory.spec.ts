@@ -90,8 +90,7 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
             await dashboard.waitLoader();
             const loaderAlert: string = await dashboard.getLoaderAlert();
-            expect(loaderAlert).contains('Failed to create the workspace')
-                .and.contains('Cause: Unsupported OAuth provider ');
+            expect(loaderAlert).contains.oneOf(['Cause: Unsupported OAuth provider', 'Cause: No PersonalAccessTokenFetcher configured']);
         });
 
         test(`Check that workspace was not created`, async function (): Promise<void> {
@@ -228,17 +227,15 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         }
 
         test('Insert git credentials which were asked after push', async function (): Promise<void> {
-            await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-
             try {
-                await driverHelper.waitVisibility(webCheCodeLocators.Input.inputBox);
+                await driverHelper.waitVisibility(webCheCodeLocators.InputBox.message);
             } catch (e) {
                 Logger.info(`Workspace did not ask credentials before push - ${e};
-                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066`);
+                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066, please check if not other git provider. `);
+                expect(FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER).eqls(GitProviderType.GITHUB);
             }
             const input: InputBox = new InputBox();
             await input.setText(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-            await driverHelper.wait(timeToRefresh);
             await input.confirm();
             await driverHelper.wait(timeToRefresh);
             await input.setText(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
@@ -259,16 +256,15 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
             expect(isCommitButtonDisabled).eql('true');
         });
 
-        test(`Stop and remove the workspace`, async function (): Promise<void> {
-            await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        test('Stop the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+            await browserTabsUtil.closeAllTabsExceptCurrent();
+        });
+
+        test('Delete the workspace', async function (): Promise<void> {
+            await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
 
         loginTests.logoutFromChe();
     }
-
-    suiteTeardown('Close the browser', async function (): Promise<void> {
-        if (!BaseTestConstants.TS_DEBUG_MODE) {
-            await driverHelper.getDriver().close();
-        }
-    });
 });

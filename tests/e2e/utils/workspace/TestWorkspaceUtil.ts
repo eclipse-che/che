@@ -61,7 +61,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async stopWorkspaceByName(workspaceName: string): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.stopWorkspaceByName');
+        Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName}`);
 
         const stopWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let stopWorkspaceResponse: AxiosResponse;
@@ -69,7 +69,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         try {
             stopWorkspaceResponse = await this.processRequestHandler.patch(stopWorkspaceApiUrl, [{'op': 'replace', 'path': '/spec/started', 'value': false}]);
         } catch (err) {
-            console.log(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
+            Logger.error(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
         }
 
@@ -78,11 +78,12 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
 
         await this.waitWorkspaceStatus(workspaceName, WorkspaceStatus.STOPPED);
+        Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName} stopped successfully`);
     }
 
     // delete a workspace without stopping phase (similar with force deleting)
     async deleteWorkspaceByName(workspaceName: string): Promise<void> {
-        Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName ${workspaceName}` );
+        Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName: ${workspaceName}` );
 
         const deleteWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let deleteWorkspaceResponse: AxiosResponse;
@@ -108,6 +109,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             } catch (error) {
                 if (axios.isAxiosError(error) && error.response?.status === 404) {
                     deleteWorkspaceStatus = true;
+                    Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName} deleted successfully`);
                     break;
                 }
             }
@@ -115,7 +117,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
         if (!deleteWorkspaceStatus) {
             let waitTime: number = this.attempts * this.polling;
-            throw new error.TimeoutError(`The workspace was not stopped in ${waitTime} ms.`);
+            throw new error.TimeoutError(`The workspace was not deleted in ${waitTime} ms.`);
         }
     }
 

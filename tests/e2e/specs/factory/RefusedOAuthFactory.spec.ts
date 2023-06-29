@@ -42,7 +42,7 @@ import { TimeoutConstants } from '../../constants/TimeoutConstants';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { OAuthConstants } from '../../constants/OAuthConstants';
 import { BaseTestConstants } from '../../constants/BaseTestConstants';
-import { FactoryTestConstants } from '../../constants/FactoryTestConstants';
+import { FactoryTestConstants, GitProviderType } from '../../constants/FactoryTestConstants';
 
 const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -217,13 +217,12 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         });
 
         test('Insert git credentials which were asked after push', async function (): Promise<void> {
-            await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-
             try {
-                await driverHelper.waitVisibility(webCheCodeLocators.Input.inputBox);
+                await driverHelper.waitVisibility(webCheCodeLocators.InputBox.message);
             } catch (e) {
                 Logger.info(`Workspace did not ask credentials before push - ${e};
-                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066`);
+                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066, please check if not other git provider. `);
+                expect(FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER).eqls(GitProviderType.GITHUB);
             }
             const input: InputBox = new InputBox();
             await input.setText(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_USERNAME);
@@ -248,15 +247,14 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         });
     }
 
-    test(`Stop and remove the workspace`, async function (): Promise<void> {
-        await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+    test('Stop the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        await browserTabsUtil.closeAllTabsExceptCurrent();
+    });
+
+    test('Delete the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
     });
 
     loginTests.logoutFromChe();
-
-    suiteTeardown('Close the browser', async function (): Promise<void> {
-        if (!BaseTestConstants.TS_DEBUG_MODE) {
-            await driverHelper.getDriver().close();
-        }
-    });
 });
