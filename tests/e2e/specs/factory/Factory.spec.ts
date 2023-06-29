@@ -187,15 +187,14 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         expect(isCommitButtonDisabled).eql('true');
     });
 
-    test(`Stop and remove the workspace`, async function (): Promise<void> {
-        await workspaceHandlingTests.stopAndRemoveWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+    test('Stop the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        await browserTabsUtil.closeAllTabsExceptCurrent();
+    });
+
+    test('Delete the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
     });
 
     loginTests.logoutFromChe();
-
-    suiteTeardown('Close the browser', async function (): Promise<void> {
-        if (!BaseTestConstants.TS_DEBUG_MODE) {
-            await driverHelper.getDriver().close();
-        }
-    });
 });
