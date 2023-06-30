@@ -11,7 +11,7 @@
 
 Che is composed of multiple sub projects. For each projects we provide a *CONTRIBUTE.md* file describing how to setup the development environment to start your contribution. Most of the time, we encourage you to use Che to contribute to Che.
 
-If creating a new repo under the [eclipse-che](https://github.com/eclipse-che) or [che-incubator](https://github.com/che-incubator) organizations, you may need to upload a secret to enable GH actions and workflow automation. You can do so using [github-secrets-generator](https://github.com/nickboldt/github-secrets-generator). If using an existing secret, for example to enable the che-bot or che-incubator-bot, contact someone on the Che development team to get access to the current secret or token you need to upload. 
+If creating a new repo under the [eclipse-che](https://github.com/eclipse-che) or [che-incubator](https://github.com/che-incubator) organizations, you may need to upload a secret to enable GH actions and workflow automation. You can do so using [github-secrets-generator](https://github.com/che-incubator/github-secrets-generator). If using an existing secret, for example to enable the che-bot or che-incubator-bot, contact someone on the Che development team to get access to the current secret or token you need to upload. 
 
 <!-- begin repository list -->
 Repository | Component | Description | Devfile | Documentation
