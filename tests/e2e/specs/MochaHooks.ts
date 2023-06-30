@@ -56,14 +56,18 @@ exports.mochaHooks = {
             }
         },
     ],
-    afterAll: [
+    afterEach: [
         // stop and remove running workspace
-        async () => {
-            if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
-                Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
-                await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
+        async function (this: Mocha.Context): Promise<void> {
+            if (this.currentTest?.state === 'failed') {
+                if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
+                    Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
+                    await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
+                }
             }
         },
+    ],
+    afterAll: [
         async function stopTheDriver(): Promise<void> {
             if (!BaseTestConstants.TS_DEBUG_MODE && ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
                 await driverHelper.getDriver().quit();
