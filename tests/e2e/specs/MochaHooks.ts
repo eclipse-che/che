@@ -51,7 +51,7 @@ exports.mochaHooks = {
         async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
             if (BaseTestConstants.TS_DEBUG_MODE) {
                 for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
-                    Object.defineProperty(TimeoutConstants, timeout, {value: seconds as number * 100});
+                    Object.defineProperty(TimeoutConstants, timeout, { value: seconds as number * 100 });
                 }
             }
         },
@@ -61,7 +61,7 @@ exports.mochaHooks = {
         async () => {
             if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
                 Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
-                testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
+                await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
             }
         },
         async function stopTheDriver(): Promise<void> {
