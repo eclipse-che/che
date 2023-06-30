@@ -23,8 +23,8 @@ import { TimeoutConstants } from '../../constants/TimeoutConstants';
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
-    readonly attempts: number = TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
     readonly polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING;
+    readonly attempts: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT / this.polling;
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
