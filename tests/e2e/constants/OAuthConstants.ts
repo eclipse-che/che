@@ -41,6 +41,7 @@ export const OAuthConstants: any = {
 
     /**
      * For login via github for example on https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com
+     * For factory tests
      */
     TS_SELENIUM_GIT_PROVIDER_OAUTH: process.env.TS_SELENIUM_GIT_PROVIDER_OAUTH === 'true',
 
