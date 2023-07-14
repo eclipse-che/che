@@ -4,7 +4,7 @@
 ## Requirements
 
 - node 16.x
-- "Chrome" browser 111.x or later
+- "Chrome" browser 114.x or later
 - deployed Che 7 with accessible URL
 
 ## Before launch
