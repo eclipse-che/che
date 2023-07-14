@@ -12,7 +12,8 @@ import { BaseTestConstants } from './BaseTestConstants';
 export enum GitProviderType {
     GITHUB = 'github',
     GITLAB = 'gitlab',
-    BITBUCKET = 'bitbucket'
+    BITBUCKET = 'bitbucket',
+    AZURE = 'azure'
 }
 
 export const FactoryTestConstants: any = {

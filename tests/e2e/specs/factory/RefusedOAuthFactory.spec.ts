@@ -76,7 +76,7 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         await browserTabsUtil.navigateTo(FactoryTestConstants.TS_SELENIUM_FACTORY_URL());
     });
 
-    if (FactoryTestConstants.TS_SELENIUM_GIT_PROVIDER_OAUTH) {
+    if (OAuthConstants.TS_SELENIUM_GIT_PROVIDER_OAUTH) {
         test(`Authorize with a ${FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER} OAuth and deny access`, async function (): Promise<void> {
             await oauthPage.login();
             await oauthPage.waitOauthPage();
