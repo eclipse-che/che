@@ -35,8 +35,8 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
             if (this.isUserLoggedIn()) {
                 Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: User already logged`);
             } else {
-                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${APITestConstants.TS_SELENIUM_OCP_USERNAME}`);
-                exec(`oc login --server=${url} -u=${APITestConstants.TS_SELENIUM_OCP_USERNAME} -p=${APITestConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
+                Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: Login ${url}, ${OAuthConstants.TS_SELENIUM_OCP_USERNAME}`);
+                exec(`oc login --server=${url} -u=${OAuthConstants.TS_SELENIUM_OCP_USERNAME} -p=${OAuthConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
             }
         } else {
             Logger.debug(`${this.getLoggingName(this.loginToOcp.name)}: doesn't support login command`);
@@ -60,7 +60,7 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
         Logger.debug(`${this.getLoggingName(this.deleteDevWorkspace.name)}: Delete '${this.workspaceName}' workspace`);
         ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`);
         ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
-        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${APITestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
+        ShellExecutor.execWithLog(`${(this.KUBERNETES_COMMAND_LINE_TOOL)} delete dwt ${BaseTestConstants.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`);
     }
 
     applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {
