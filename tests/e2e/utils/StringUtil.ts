@@ -23,6 +23,9 @@ export class StringUtil {
      */
     static getProjectNameFromGitUrl(url: string): string {
         Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${url}`);
+        if (url.includes('?')) {
+            url = url.substring(0, url.indexOf('?'));
+        }
         if (url.includes('/tree/')) {
             url = url.split('/').slice(0, -2).join('/');
         }

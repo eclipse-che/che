@@ -1,0 +1,174 @@
+#
+# Copyright (c) 2021-2023 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+#This GitHub Action runs Empty Workspace API test, build Che e2e test container and runs Empty Workspace UI test
+#on Che Next deployed on minikube;
+#Empty Workspace tests were chosen because of low resource of VM (7RAM, 2CPU, 14Gb disk);
+#other cases returned "Insufficient cpu" error
+
+name: Empty Workspace test suite on minikube
+
+# Trigger the workflow on pull request
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - 7.**.x
+    paths:
+      - 'tests/e2e/**'
+      - '.github/workflows/pr-check.yml'
+env:
+  LOCAL_TEST_DIR: /tmp
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Branch name
+        run: |
+          echo running on PR ${GITHUB_REF}, branch - ${GITHUB_HEAD_REF}
+          echo "pr_number=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> "$GITHUB_ENV"
+
+      - name: Configuring nodejs 16.x version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Pull Che-Code Docker image
+        run: |
+          #
+          # pull che-code:next docker image
+          #
+          docker pull quay.io/che-incubator/che-code:next
+
+      - name: Start minikube
+        id: run-minikube
+        uses: che-incubator/setup-minikube-action@next
+        with:
+          minikube-version: v1.23.2
+
+      - name: Install chectl
+        run: bash <(curl -sL https://www.eclipse.org/che/chectl/) --channel=next
+
+      - name: Deploy Che
+        run: |
+          #
+          # load Che-Code image into minikube
+          #
+          minikube image load quay.io/che-incubator/che-code:next
+          minikube image list
+
+          # get patch file to set up resources
+          wget https://raw.githubusercontent.com/che-incubator/che-code/main/build/test/github-minikube-checluster-patch.yaml -P /tmp
+          
+          #
+          # deploy Che
+          #
+          chectl server:deploy \
+            --batch \
+            --platform minikube \
+            --k8spodwaittimeout=120000 \
+            --k8spodreadytimeout=120000 \
+            --che-operator-cr-patch-yaml "/tmp/github-minikube-checluster-patch.yaml"
+
+          #
+          # apply patch
+          #
+          kubectl patch devworkspaceoperatorconfigs \
+            -n eclipse-che devworkspace-config \
+            --patch '{"config": {"workspace": {"imagePullPolicy": "IfNotPresent"}}}' \
+            --type merge
+
+      - name: Pull Universal Base Image
+        run: |
+          minikube image pull quay.io/devfile/universal-developer-image:ubi8-latest
+
+      - name: Run Empty Workspace API test
+        run: |
+          cd tests/e2e
+          npm ci
+          export TS_PLATFORM=kubernetes && 
+          export TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL=kubectl && 
+          export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH=false && 
+          export TS_SELENIUM_BASE_URL=https://$(kubectl get ingress che -n eclipse-che -o jsonpath='{.spec.rules[0].host}') && 
+          export NODE_TLS_REJECT_UNAUTHORIZED=0 && 
+          export TS_SELENIUM_LOG_LEVEL=TRACE && 
+          export TS_SELENIUM_DEFAULT_ATTEMPTS=2 &&
+          export USERSTORY=EmptyWorkspaceAPI && 
+          export TS_API_TEST_UDI_IMAGE=quay.io/devfile/universal-developer-image:ubi8-latest &&
+          npm run driver-less-test
+
+      - name: Build E2E test docker image
+        run: |
+          set -xe
+
+          cd tests/e2e
+          docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
+
+      - name: Run Empty Workspace UI test from che-e2e container
+        run: |
+          docker run \
+            --shm-size=2048m \
+            -p 5920:5920 \
+            --network="host" \
+            -e TS_PLATFORM=kubernetes \
+            -e TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL=kubectl \
+            -e TS_SELENIUM_K8S_USERNAME=che@eclipse.org \
+            -e TS_SELENIUM_K8S_PASSWORD=admin \
+            -e TS_SELENIUM_VALUE_OPENSHIFT_OAUTH=false \
+            -e TS_SELENIUM_BASE_URL=https://$(kubectl get ingress che -n eclipse-che -o jsonpath='{.spec.rules[0].host}') \
+            -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=60000 \
+            -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=120000 \
+            -e TS_COMMON_DASHBOARD_WAIT_TIMEOUT=30000 \
+            -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+            -e DELETE_WORKSPACE_ON_FAILED_TEST=true \
+            -e VIDEO_RECORDING=true \
+            -e TS_SELENIUM_LOG_LEVEL=TRACE \
+            -e TS_SELENIUM_DEFAULT_ATTEMPTS=2 \
+            -v ${LOCAL_TEST_DIR}/tests/e2e/report:/tmp/e2e/report:Z \
+            -v ${LOCAL_TEST_DIR}/tests/e2e/video:/tmp/ffmpeg_report:Z \
+            -e TEST_SUITE=test \
+            -e USERSTORY=EmptyWorkspace \
+            quay.io/eclipse/che-e2e:"${{ env.pr_number }}"
+
+      - name: Bump logs
+        if: always()
+        run: |
+          NS=admin-che
+          TARGET_DIR="/tmp/pr-check-artifacts/${NS}-info"
+          mkdir -p "$TARGET_DIR"
+          for POD in $(kubectl get pods -o name -n ${NS}); do
+            for CONTAINER in $(kubectl get -n ${NS} ${POD} -o jsonpath="{.spec.containers[*].name}"); do
+            echo "[INFO] Downloading logs $POD/$CONTAINER in $NS"
+            # container name includes `pod/` prefix. remove it
+            LOGS_FILE=$TARGET_DIR/$(echo ${POD}-${CONTAINER}.log | sed 's|pod/||g')
+            kubectl logs ${POD} -c ${CONTAINER} -n ${NS} > $LOGS_FILE || true
+            done
+          done
+          echo "[INFO] Bumping events in namespace ${NS}"
+          kubectl get events -n $NS  > $TARGET_DIR/events.log || true
+
+      - name: Store e2e artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-artifacts
+          path: /tmp/tests
+
+      - name: Store k8s logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8s-logs
+          path: /tmp/pr-check-artifacts/admin-che-info
