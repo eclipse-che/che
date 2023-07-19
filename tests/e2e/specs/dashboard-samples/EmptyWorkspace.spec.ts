@@ -25,36 +25,37 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const stackName: string = 'Empty Workspace';
 
 suite(`${stackName} test`, async () => {
-    suite(`Create ${stackName} workspace`, async () => {
-        loginTests.loginIntoChe();
-        workspaceHandlingTests.createAndOpenWorkspace(stackName);
-        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-        test('Register running workspace', async () => {
-            registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-        });
-        test('Wait workspace readiness', async() => {
-            await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+    loginTests.loginIntoChe();
 
-            const workbench: Workbench = new Workbench();
-            const activityBar: ActivityBar = workbench.getActivityBar();
-            const activityBarControls: ViewControl[] = await activityBar.getViewControls();
+    workspaceHandlingTests.createAndOpenWorkspace(stackName);
 
-            Logger.debug(`Editor sections:`);
-            for (const control of activityBarControls) {
-                Logger.debug(`${await control.getTitle()}`);
-            }
-        });
+    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
+    test('Register running workspace', async () => {
+        registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
     });
 
-    suite('Stopping and deleting the workspace', async () => {
-        test('Stop the workspace', async function (): Promise<void> {
-            await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-            await browserTabsUtil.closeAllTabsExceptCurrent();
-        });
+    test('Wait workspace readiness', async () => {
+        await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 
-        test('Delete the workspace', async function (): Promise<void> {
-            await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-        });
-        loginTests.logoutFromChe();
+        const workbench: Workbench = new Workbench();
+        const activityBar: ActivityBar = workbench.getActivityBar();
+        const activityBarControls: ViewControl[] = await activityBar.getViewControls();
+
+        Logger.debug(`Editor sections:`);
+        for (const control of activityBarControls) {
+            Logger.debug(`${await control.getTitle()}`);
+        }
     });
+
+    test('Stop the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+        await browserTabsUtil.closeAllTabsExceptCurrent();
+    });
+
+    test('Delete the workspace', async function (): Promise<void> {
+        await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+    });
+
+    loginTests.logoutFromChe();
 });

@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-name: typescript-publish-next
+name: Publish Next Che E2E Tests to npmjs
 
 on:
   workflow_dispatch:

@@ -8,7 +8,7 @@
 #
 
 # Eclipse Che workflow for checking repository list in CONTRIBUTING.md file
-name: CI
+name: Check repository list in CONTRIBUTING.md file
 
 # Trigger the workflow on push or pull request
 on: 
