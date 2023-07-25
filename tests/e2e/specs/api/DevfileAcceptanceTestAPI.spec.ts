@@ -1,3 +1,12 @@
+/** *******************************************************************
+ * copyright (c) 2023 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { ShellString } from 'shelljs';
@@ -8,101 +17,103 @@ import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 
 /**
- * Dynamically generating tests
+ * dynamically generating tests
  * info: https://mochajs.org/#delayed-root-suite
  */
+// todo: skipped while don`t use to avoid sending useless requests
+// eslint-disable-next-line @typescript-eslint/require-await
+void (async function (): Promise<void> {
+	// const devfilesRegistryHelper: DevfilesRegistryHelper = new DevfilesRegistryHelper();
+	const devfileSamples: any = [];
+	// devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry();
 
-(async function(): Promise<void> {
+	for (const devfileSample of devfileSamples) {
+		suite.skip(`Devfile acceptance test suite for ${devfileSample.name}`, function (): void {
+			this.bail(false);
+			this.timeout(1500000); // 25 minutes because build of Quarkus sample takes 20+ minutes
+			let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
+			let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
+			let containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal;
+			let devfileContext: DevfileContext;
+			let devWorkspaceName: string | undefined;
+			let clonedProjectName: string;
+			let containerWorkDir: string;
+			const devfilesBuildCommands: any[] = [];
 
-  // todo: skipped while don`t use to avoid sending useless requests
-  // const devfilesRegistryHelper: DevfilesRegistryHelper = new DevfilesRegistryHelper();
-  const devfileSamples: any = [];
-  // devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry();
+			test('Get DevWorkspace configuration', async function (): Promise<void> {
+				devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
+					devfileUrl: devfileSample.link
+				});
+				devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
+				devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
 
-  for (const devfileSample of devfileSamples) {
-    suite.skip(`Devfile acceptance test suite for ${devfileSample.name}`, async function(): Promise<void> {
-      this.bail(false);
-      this.timeout(1500000); // 25 minutes because build of Quarkus sample takes 20+ minutes
-      let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
-      let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
-      let containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal;
-      let devfileContext: DevfileContext;
-      let devWorkspaceName: string | undefined;
-      let clonedProjectName: string;
-      let containerWorkDir: string;
-      let devfilesBuildCommands: any[] = [];
+				kubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(devWorkspaceName);
+				containerTerminal = new KubernetesCommandLineToolsExecutor.ContainerTerminal(kubernetesCommandLineToolsExecutor);
+				kubernetesCommandLineToolsExecutor.loginToOcp();
+			});
 
-      test('Get DevWorkspace configuration', async function(): Promise<void> {
-        devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
-          devfileUrl: devfileSample.link
-        });
-        devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
-        devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
+			test('Collect build commands from the devfile', function (): void {
+				if (devfileContext.devfile.commands === undefined) {
+					Logger.info('Devfile does not contains any commands.');
+				} else {
+					devfileContext.devfile?.commands?.forEach((command: any): void => {
+						if (command.exec?.group?.kind === 'build') {
+							Logger.debug(`Build command found: ${command.exec.commandLine}`);
+							devfilesBuildCommands.push(command);
+						}
+					});
+				}
+			});
 
-        kubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(devWorkspaceName);
-        containerTerminal = new KubernetesCommandLineToolsExecutor.ContainerTerminal(kubernetesCommandLineToolsExecutor);
-        kubernetesCommandLineToolsExecutor.loginToOcp();
-      });
+			test('Create DevWorkspace', function (): void {
+				const devWorkspaceConfigurationYamlString: string =
+					devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
+				const applyOutput: ShellString =
+					kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsStringOutput(devWorkspaceConfigurationYamlString);
 
-      test('Collect build commands from the devfile', async function(): Promise<void> {
-        if (devfileContext.devfile.commands === undefined) {
-          Logger.info(`Devfile does not contains any commands.`);
-        } else {
-          devfileContext.devfile.commands.forEach((command: any) => {
-            if (command.exec?.group?.kind === 'build') {
-              Logger.debug(`Build command found: ${command.exec.commandLine}`);
-              devfilesBuildCommands.push(command);
-            }
-          });
-        }
-      });
+				expect(applyOutput.stdout)
+					.contains('devworkspacetemplate')
+					.and.contains('devworkspace')
+					.and.contains.oneOf(['created', 'configured']);
+			});
 
-      test('Create DevWorkspace', async function(): Promise<void> {
-        const devWorkspaceConfigurationYamlString: string = await devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
-        const applyOutput: ShellString = kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsStringOutput(devWorkspaceConfigurationYamlString);
+			test('Wait until DevWorkspace has status "ready"', function (): void {
+				expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
+			});
 
-        expect(applyOutput.stdout)
-          .contains('devworkspacetemplate')
-          .and.contains('devworkspace')
-          .and.contains.oneOf(['created', 'configured']);
+			test('Check if project was created', function (): void {
+				clonedProjectName = StringUtil.getProjectNameFromGitUrl(devfileSample.link);
+				expect(containerTerminal.ls().stdout).includes(clonedProjectName);
+			});
 
-      });
+			test('Check if project files are imported', function (): void {
+				containerWorkDir = containerTerminal.pwd().stdout.replace('\n', '');
+				expect(containerTerminal.ls(`${containerWorkDir}/${clonedProjectName}`).stdout).includes('devfile.yaml');
+			});
 
-      test('Wait until DevWorkspace has status "ready"', async function(): Promise<void> {
-        expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
-      });
+			test('Check if build commands returns success', function (): void {
+				if (devfilesBuildCommands.length === 0) {
+					Logger.info('Devfile does not contains build commands.');
+				} else {
+					devfilesBuildCommands.forEach((command): void => {
+						Logger.info(`command.exec: ${JSON.stringify(command.exec)}`);
 
-      test('Check if project was created', function(): void {
-        clonedProjectName = StringUtil.getProjectNameFromGitUrl(devfileSample.link);
-        expect(containerTerminal.ls().stdout).includes(clonedProjectName);
-      });
+						const commandString: string = StringUtil.updateCommandEnvsToShStyle(
+							`cd ${command.exec.workingDir} && ${command.exec.commandLine}`
+						);
+						Logger.info(`Full build command to be executed: ${commandString}`);
 
-      test('Check if project files are imported', function(): void {
-        containerWorkDir = containerTerminal.pwd().stdout.replace('\n', '');
-        expect(containerTerminal.ls(`${containerWorkDir}/${clonedProjectName}`).stdout).includes(`devfile.yaml`);
-      });
+						const output: ShellString = containerTerminal.executeCommand(commandString, command.exec.component);
+						expect(output.code).eqls(0);
+					});
+				}
+			});
 
-      test(`Check if build commands returns success`, function(): void {
-        if (devfilesBuildCommands.length === 0) {
-          Logger.info(`Devfile does not contains build commands.`);
-        } else {
-          devfilesBuildCommands.forEach((command) => {
-            Logger.info(`command.exec: ${JSON.stringify(command.exec)}`);
+			test('Delete DevWorkspace', function (): void {
+				kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+			});
+		});
+	}
 
-            const commandString: string = StringUtil.updateCommandEnvsToShStyle(`cd ${command.exec.workingDir} && ${command.exec.commandLine}`);
-            Logger.info(`Full build command to be executed: ${commandString}`);
-
-            const output: ShellString = containerTerminal.executeCommand(commandString, command.exec.component);
-            expect(output.code).eqls(0);
-          });
-        }
-      });
-
-      test('Delete DevWorkspace', async function(): Promise<void> {
-        kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
-      });
-    });
-  }
-
-  run();
+	run();
 })();

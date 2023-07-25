@@ -1,5 +1,5 @@
-/*********************************************************************
- * Copyright (c) 2019-2023 Red Hat, Inc.
+/** *******************************************************************
+ * copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,80 +13,87 @@ import { DriverHelper } from '../../../utils/DriverHelper';
 import { CLASSES } from '../../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { Logger } from '../../../utils/Logger';
-import { TimeoutConstants } from '../../../constants/TimeoutConstants';
-import { OAuthConstants } from '../../../constants/OAuthConstants';
+import { TIMEOUT_CONSTANTS } from '../../../constants/TIMEOUT_CONSTANTS';
+import { OAUTH_CONSTANTS } from '../../../constants/OAUTH_CONSTANTS';
 
 @injectable()
 export class OcpLoginPage {
+	private static readonly LOGIN_PAGE_OPENSHIFT_XPATH: string = '//*[contains(text(), "Welcome")]';
 
-  private static readonly LOGIN_PAGE_OPENSHIFT_XPATH: string = '//*[contains(text(), \'Welcome\')]';
+	constructor(
+		@inject(CLASSES.DriverHelper)
+		private readonly driverHelper: DriverHelper
+	) {}
 
-  constructor(
-    @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+	async waitOpenShiftLoginWelcomePage(): Promise<void> {
+		Logger.debug();
 
-  async waitOpenShiftLoginWelcomePage(): Promise<void> {
-    Logger.debug();
+		await this.driverHelper.waitVisibility(
+			By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH),
+			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+		);
+	}
 
-    await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-  }
+	async clickOnLoginProviderTitle(): Promise<void> {
+		Logger.debug();
 
-  async clickOnLoginProviderTitle(): Promise<void> {
-    Logger.debug();
+		const loginProviderTitleLocator: By = By.xpath(`//a[text()="${OAUTH_CONSTANTS.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}"]`);
+		await this.driverHelper.waitAndClick(loginProviderTitleLocator, TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
+	}
 
-    const loginProviderTitleLocator: By = By.xpath(`//a[text()=\'${OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
-    await this.driverHelper.waitAndClick(loginProviderTitleLocator, TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL);
-  }
+	async isIdentityProviderLinkVisible(): Promise<boolean> {
+		Logger.debug();
 
-  async isIdentityProviderLinkVisible(): Promise<boolean> {
-    Logger.debug();
+		const loginWithHtpaswdLocator: By = By.xpath(`//a[text()="${OAUTH_CONSTANTS.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}"]`);
+		return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
+	}
 
-    const loginWithHtpaswdLocator: By = By.xpath(`//a[text()=\'${OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}\']`);
-    return await this.driverHelper.waitVisibilityBoolean(loginWithHtpaswdLocator, 3, 5000);
-  }
+	async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {
+		Logger.debug();
 
-  async isAuthorizeOpenShiftIdentityProviderPageVisible(): Promise<boolean> {
-    Logger.debug();
+		const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()="Authorize Access"]');
+		return await this.driverHelper.isVisible(authorizeOpenshiftIdentityProviderPageLocator);
+	}
 
-    const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
-    return await this.driverHelper.isVisible(authorizeOpenshiftIdentityProviderPageLocator);
-  }
+	async waitAuthorizeOpenShiftIdentityProviderPage(): Promise<void> {
+		Logger.debug();
 
-  async waitAuthorizeOpenShiftIdentityProviderPage(): Promise<void> {
-    Logger.debug();
+		const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()="Authorize Access"]');
+		await this.driverHelper.waitVisibility(
+			authorizeOpenshiftIdentityProviderPageLocator,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+		);
+	}
 
-    const authorizeOpenshiftIdentityProviderPageLocator: By = By.xpath('//h1[text()=\'Authorize Access\']');
-    await this.driverHelper.waitVisibility(authorizeOpenshiftIdentityProviderPageLocator, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-  }
+	async clickOnApproveAuthorizeAccessButton(): Promise<void> {
+		Logger.debug();
 
-  async clickOnApproveAuthorizeAccessButton(): Promise<void> {
-    Logger.debug();
+		const approveAuthorizeAccessOcpLocator: By = By.css('input[name="approve"]');
+		await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator);
+	}
 
-    const approveAuthorizeAccessOcpLocator: By = By.css('input[name=\'approve\']');
-    await this.driverHelper.waitAndClick(approveAuthorizeAccessOcpLocator);
-  }
+	async enterUserNameOpenShift(userName: string): Promise<void> {
+		Logger.debug(`"${userName}"`);
 
-  async enterUserNameOpenShift(userName: string): Promise<void> {
-    Logger.debug(`"${userName}"`);
+		await this.driverHelper.enterValue(By.id('inputUsername'), userName);
+	}
 
-    await this.driverHelper.enterValue(By.id('inputUsername'), userName);
-  }
+	async enterPasswordOpenShift(passw: string): Promise<void> {
+		Logger.debug();
 
-  async enterPasswordOpenShift(passw: string): Promise<void> {
-    Logger.debug();
+		await this.driverHelper.enterValue(By.id('inputPassword'), passw);
+	}
 
-    await this.driverHelper.enterValue(By.id('inputPassword'), passw);
-  }
+	async clickOnLoginButton(): Promise<void> {
+		Logger.debug();
 
-  async clickOnLoginButton(): Promise<void> {
-    Logger.debug();
+		const loginButtonLocator: By = By.css('button[type=submit]');
+		await this.driverHelper.waitAndClick(loginButtonLocator);
+	}
 
-    const loginButtonLocator: By = By.css('button[type=submit]');
-    await this.driverHelper.waitAndClick(loginButtonLocator);
-  }
+	async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {
+		Logger.debug();
 
-  async waitDisappearanceOpenShiftLoginWelcomePage(): Promise<void> {
-    Logger.debug();
-
-    await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
-  }
+		await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT_XPATH));
+	}
 }

@@ -1,5 +1,5 @@
-/*********************************************************************
- * Copyright (c) 2019-2023 Red Hat, Inc.
+/** *******************************************************************
+ * copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,21 +13,22 @@ import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../../utils/Logger';
 import { ICheLoginPage } from '../interfaces/ICheLoginPage';
 import { DexLoginPage } from './DexLoginPage';
-import { OAuthConstants } from '../../../constants/OAuthConstants';
+import { OAUTH_CONSTANTS } from '../../../constants/OAUTH_CONSTANTS';
 
 @injectable()
 export class KubernetesLoginPage implements ICheLoginPage {
+	constructor(
+		@inject(CLASSES.DexLoginPage)
+		private readonly dexLoginPage: DexLoginPage
+	) {}
 
-  constructor(
-    @inject(CLASSES.DexLoginPage) private readonly dexLoginPage: DexLoginPage) { }
+	async login(): Promise<void> {
+		Logger.debug();
 
-  async login(): Promise<void> {
-    Logger.debug();
-
-    await this.dexLoginPage.waitDexLoginPage();
-    await this.dexLoginPage.enterUserNameKubernetes(OAuthConstants.TS_SELENIUM_K8S_USERNAME);
-    await this.dexLoginPage.enterPasswordKubernetes(OAuthConstants.TS_SELENIUM_K8S_PASSWORD);
-    await this.dexLoginPage.clickOnLoginButton();
-    await this.dexLoginPage.waitDexLoginPageDisappearance();
-  }
+		await this.dexLoginPage.waitDexLoginPage();
+		await this.dexLoginPage.enterUserNameKubernetes(OAUTH_CONSTANTS.TS_SELENIUM_K8S_USERNAME);
+		await this.dexLoginPage.enterPasswordKubernetes(OAUTH_CONSTANTS.TS_SELENIUM_K8S_PASSWORD);
+		await this.dexLoginPage.clickOnLoginButton();
+		await this.dexLoginPage.waitDexLoginPageDisappearance();
+	}
 }
