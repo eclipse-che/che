@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2020-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
-export interface IOcpLoginPage {
-	login(): void;
-}
+export const PLUGIN_TEST_CONSTANTS: { TS_SAMPLE_LIST: string } = {
+	/**
+	 * dashboard samples to check in RecommendedExtensions.spec.ts
+	 */
+	TS_SAMPLE_LIST: process.env.TS_SAMPLE_LIST || 'Node.js MongoDB,Node.js Express'
+};

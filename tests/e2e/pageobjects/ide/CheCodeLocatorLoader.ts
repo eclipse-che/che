@@ -1,5 +1,5 @@
-/*********************************************************************
- * Copyright (c) 2019 Red Hat, Inc.
+/** *******************************************************************
+ * copyright (c) 2019 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,63 +12,66 @@ import { getLocatorsPath } from 'vscode-extension-tester-locators';
 import { LocatorDiff, Locators } from 'monaco-page-objects';
 import { By } from 'selenium-webdriver';
 import clone from 'clone-deep';
-import { MonacoConstants } from '../../constants/MonacoConstants';
+import { MONACO_CONSTANTS } from '../../constants/MONACO_CONSTANTS';
 
 /**
- * This class allows us to change or add some specific locators base on "monaco-page-object" and "vscode-extension-tester-locators".
+ * this class allows us to change or add some specific locators base on "monaco-page-object" and "vscode-extension-tester-locators".
  * Use method webLocatorDiff(). To change place locator into field "locators", to add - "extras".
  * To see full locators list check "node_modules/vscode-extension-tester-locators/out/lib".
  */
 
 export class CheCodeLocatorLoader extends LocatorLoader {
-  readonly webCheCodeLocators: Locators;
+	readonly webCheCodeLocators: Locators;
 
-  constructor() {
-    super(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, getLocatorsPath());
-    this.webCheCodeLocators = this.mergeLocators() as Locators;
-  }
+	constructor() {
+		super(
+			MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION,
+			MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION,
+			getLocatorsPath()
+		);
+		this.webCheCodeLocators = this.mergeLocators();
+	}
 
-  private webLocatorDiff(): LocatorDiff {
-    return {
-      locators: {
-        WelcomeContent: {
-          text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
-          button: By.xpath('//a[contains(., "trust")]')
-        }
-      },
-      extras: {
-        ExtensionsViewSection: {
-          requireReloadButton: By.xpath('//a[text()=\'Reload Required\']')
-        }
-      }
-    };
-  }
+	private webLocatorDiff(): LocatorDiff {
+		return {
+			locators: {
+				WelcomeContent: {
+					text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
+					button: By.xpath('//a[contains(., "trust")]')
+				}
+			},
+			extras: {
+				ExtensionsViewSection: {
+					requireReloadButton: By.xpath('//a[text()="Reload Required"]')
+				}
+			}
+		};
+	}
 
-  private merge(target: any, obj: any): object {
-    for (const key in obj) {
-      if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-        continue;
-      }
+	private merge(target: any, obj: any): object {
+		for (const key in obj) {
+			if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+				continue;
+			}
 
-      let oldVal: any = obj[key];
-      let newVal: any = target[key];
+			const oldVal: any = obj[key];
+			const newVal: any = target[key];
 
-      if (typeof (newVal) === 'object' && typeof (oldVal) === 'object') {
-        target[key] = this.merge(newVal, oldVal);
-      } else {
-        target[key] = clone(oldVal);
-      }
-    }
-    return target;
-  }
+			if (typeof newVal === 'object' && typeof oldVal === 'object') {
+				target[key] = this.merge(newVal, oldVal);
+			} else {
+				target[key] = clone(oldVal);
+			}
+		}
+		return target;
+	}
 
-  private mergeLocators(): Locators {
-    const target: Locators = super.loadLocators();
+	private mergeLocators(): Locators {
+		const target: Locators = super.loadLocators();
 
-    this.merge(target, this.webLocatorDiff().locators as Locators);
-    this.merge(target, this.webLocatorDiff().extras as Locators);
+		this.merge(target, this.webLocatorDiff().locators as Locators);
+		this.merge(target, this.webLocatorDiff().extras as Locators);
 
-    return target;
-  }
+		return target;
+	}
 }
-

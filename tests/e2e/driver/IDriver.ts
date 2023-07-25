@@ -1,5 +1,5 @@
-/*********************************************************************
- * Copyright (c) 2019-2023 Red Hat, Inc.
+/** *******************************************************************
+ * copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,5 +10,5 @@
 import { ThenableWebDriver } from 'selenium-webdriver';
 
 export interface IDriver {
-  get(): ThenableWebDriver;
+	get(): ThenableWebDriver;
 }

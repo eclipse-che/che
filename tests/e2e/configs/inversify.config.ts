@@ -1,5 +1,5 @@
-/*********************************************************************
- * Copyright (c) 2019-2023 Red Hat, Inc.
+/** *******************************************************************
+ * copyright (c) 2019-2023 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -42,8 +42,8 @@ import { OcpApplicationPage } from '../pageobjects/openshift/OcpApplicationPage'
 import { StringUtil } from '../utils/StringUtil';
 import { KubernetesLoginPage } from '../pageobjects/login/kubernetes/KubernetesLoginPage';
 import { DexLoginPage } from '../pageobjects/login/kubernetes/DexLoginPage';
-import { OAuthConstants } from '../constants/OAuthConstants';
-import { BaseTestConstants, Platform } from '../constants/BaseTestConstants';
+import { OAUTH_CONSTANTS } from '../constants/OAUTH_CONSTANTS';
+import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
 
@@ -73,10 +73,14 @@ e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
 
-BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT ?
-  OAuthConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage) :
-  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(KubernetesLoginPage);
+if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
+	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {
+		e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage);
+	} else {
+		e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage);
+	}
+} else {
+	e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(KubernetesLoginPage);
+}
 
 export { e2eContainer };

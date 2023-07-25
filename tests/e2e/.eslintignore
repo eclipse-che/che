@@ -1,0 +1,10 @@
+build
+**report
+**results**
+dist
+node-modules
+load**
+resources
+**/*.html
+**/**/*.sh
+index.ts
