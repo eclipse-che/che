@@ -105,7 +105,7 @@ startHappyPathTest() {
   sed -i "s@CHE_URL@${ECLIPSE_CHE_URL}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@WORKSPACE_ROUTE@${TS_SELENIUM_DEVWORKSPACE_URL}@g" ${WORKDIR}/e2e-pod.yaml
   sed -i "s@CHE-NAMESPACE@${CHE_NAMESPACE}@g" ${WORKDIR}/e2e-pod.yaml
-  sed -i "s@image: .*@image: ${E2E_TEST_IMAGE}@g" ${WORKDIR}/e2e-pod.yaml
+  sed -i "s|image: .*|image: ${E2E_TEST_IMAGE}|g" ${WORKDIR}/e2e-pod.yaml
   echo "[INFO] Applying the following patched Che Happy Path Pod:"
   cat ${WORKDIR}/e2e-pod.yaml
   echo "[INFO] --------------------------------------------------"
