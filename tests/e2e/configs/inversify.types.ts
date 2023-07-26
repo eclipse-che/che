@@ -9,36 +9,36 @@
  **********************************************************************/
 
 const TYPES: any = {
-    Driver: Symbol.for('Driver'),
-    CheLogin: Symbol.for('CheLogin'),
-    OcpLogin: Symbol.for('OcpLogin'),
-    WorkspaceUtil: Symbol.for('WorkspaceUtil'),
-    IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
-    ITokenHandler: Symbol.for('ITokenHandler')
+  Driver: Symbol.for('Driver'),
+  CheLogin: Symbol.for('CheLogin'),
+  OcpLogin: Symbol.for('OcpLogin'),
+  WorkspaceUtil: Symbol.for('WorkspaceUtil'),
+  IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
+  ITokenHandler: Symbol.for('ITokenHandler')
 };
 
 const CLASSES: any = {
-    DriverHelper: 'DriverHelper',
-    Dashboard: 'Dashboard',
-    Workspaces: 'Workspaces',
-    WorkspaceDetails: 'WorkspaceDetails',
-    ScreenCatcher: 'ScreenCatcher',
-    OcpLoginPage: 'OcpLoginPage',
-    CheApiRequestHandler: 'CheApiRequestHandler',
-    CreateWorkspace: 'CreateWorkspace',
-    BrowserTabsUtil: 'BrowserTabsUtil',
-    ProjectAndFileTests: 'ProjectAndFileTests',
-    StringUtil: 'StringUtil',
-    ApiUrlResolver: 'ApiUrlResolver',
-    LoginTests: 'LoginTests',
-    WorkspaceHandlingTests: 'WorkspaceHandlingTests',
-    RedHatLoginPage: 'RedHatLoginPage',
-    KubernetesLoginPage: 'KubernetesLoginPage',
-    DexLoginPage: 'DexLoginPage',
-    OcpRedHatLoginPage: 'OcpRedHatLoginPage',
-    OcpApplicationPage: 'OcpApplicationPage',
-    OcpMainPage: 'OcpMainPage',
-    OcpImportFromGitPage: 'OcpImportFromGitPage'
+  DriverHelper: 'DriverHelper',
+  Dashboard: 'Dashboard',
+  Workspaces: 'Workspaces',
+  WorkspaceDetails: 'WorkspaceDetails',
+  ScreenCatcher: 'ScreenCatcher',
+  OcpLoginPage: 'OcpLoginPage',
+  CheApiRequestHandler: 'CheApiRequestHandler',
+  CreateWorkspace: 'CreateWorkspace',
+  BrowserTabsUtil: 'BrowserTabsUtil',
+  ProjectAndFileTests: 'ProjectAndFileTests',
+  StringUtil: 'StringUtil',
+  ApiUrlResolver: 'ApiUrlResolver',
+  LoginTests: 'LoginTests',
+  WorkspaceHandlingTests: 'WorkspaceHandlingTests',
+  RedHatLoginPage: 'RedHatLoginPage',
+  KubernetesLoginPage: 'KubernetesLoginPage',
+  DexLoginPage: 'DexLoginPage',
+  OcpRedHatLoginPage: 'OcpRedHatLoginPage',
+  OcpApplicationPage: 'OcpApplicationPage',
+  OcpMainPage: 'OcpMainPage',
+  OcpImportFromGitPage: 'OcpImportFromGitPage'
 };
 
 export { TYPES, CLASSES };

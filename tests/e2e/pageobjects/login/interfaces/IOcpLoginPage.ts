@@ -9,5 +9,5 @@
  **********************************************************************/
 
 export interface IOcpLoginPage {
-    login(): void;
+  login(): void;
 }

@@ -11,5 +11,5 @@
 import { AxiosRequestConfig } from 'axios';
 
 export interface IAuthorizationHeaderHandler {
-    get(): Promise<AxiosRequestConfig>;
+  get(): Promise<AxiosRequestConfig>;
 }

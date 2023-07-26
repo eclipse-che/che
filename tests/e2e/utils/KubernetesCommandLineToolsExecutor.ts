@@ -35,7 +35,8 @@ export class KubernetesCommandLineToolsExecutor extends ShellExecutor {
       const url: string = this.getServerUrl();
       if (this.isUserLoggedIn()) {
         Logger.debug(`${this.KUBERNETES_COMMAND_LINE_TOOL} - user already logged`);
-      } else {Logger.debug(`${this.KUBERNETES_COMMAND_LINE_TOOL} - login ${url}, ${OAuthConstants.TS_SELENIUM_OCP_USERNAME}`);
+      } else {
+        Logger.debug(`${this.KUBERNETES_COMMAND_LINE_TOOL} - login ${url}, ${OAuthConstants.TS_SELENIUM_OCP_USERNAME}`);
         exec(`oc login --server=${url} -u=${OAuthConstants.TS_SELENIUM_OCP_USERNAME} -p=${OAuthConstants.TS_SELENIUM_OCP_PASSWORD} --insecure-skip-tls-verify`);
       }
     } else {

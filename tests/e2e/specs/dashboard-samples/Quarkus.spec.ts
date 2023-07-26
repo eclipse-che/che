@@ -27,44 +27,44 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 const stackName: string = 'Java 11 with Quarkus';
 const projectName: string = 'quarkus-quickstarts';
 
-suite(`The ${stackName} userstory`, async function (): Promise<void> {
-    let projectSection: ViewSection;
+suite(`The ${stackName} userstory`, async function(): Promise<void> {
+  let projectSection: ViewSection;
 
-    loginTests.loginIntoChe();
+  loginTests.loginIntoChe();
 
-    test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
-        await workspaceHandlingTests.createAndOpenWorkspace(stackName);
-    });
+  test(`Create and open new workspace, stack:${stackName}`, async function(): Promise<void> {
+    await workspaceHandlingTests.createAndOpenWorkspace(stackName);
+  });
 
-    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
-        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-    });
+  test('Obtain workspace name from workspace loader page', async function(): Promise<void> {
+    await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+  });
 
-    test('Register running workspace', async function (): Promise<void> {
-        registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-    });
+  test('Register running workspace', async function(): Promise<void> {
+    registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+  });
 
-    test('Wait workspace readiness', async function (): Promise<void> {
-        await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-    });
+  test('Wait workspace readiness', async function(): Promise<void> {
+    await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+  });
 
-    test('Check a project folder has been created', async function (): Promise<void> {
-        projectSection = await new SideBarView().getContent().getSection(projectName);
-        Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
-    });
+  test('Check a project folder has been created', async function(): Promise<void> {
+    projectSection = await new SideBarView().getContent().getSection(projectName);
+    Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
+  });
 
-    test('Check the project files was imported', async function (): Promise<void> {
-        await projectSection.findItem(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-        Logger.debug(`projectSection.findItem: find ${BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME}`);
-    });
+  test('Check the project files was imported', async function(): Promise<void> {
+    await projectSection.findItem(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
+    Logger.debug(`projectSection.findItem: find ${BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME}`);
+  });
 
-    test('Stop the workspace', async function (): Promise<void> {
-        await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-        await browserTabsUtil.closeAllTabsExceptCurrent();
-    });
+  test('Stop the workspace', async function(): Promise<void> {
+    await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+    await browserTabsUtil.closeAllTabsExceptCurrent();
+  });
 
-    test('Delete the workspace', async function (): Promise<void> {
-        await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-    });
-    loginTests.logoutFromChe();
+  test('Delete the workspace', async function(): Promise<void> {
+    await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+  });
+  loginTests.logoutFromChe();
 });

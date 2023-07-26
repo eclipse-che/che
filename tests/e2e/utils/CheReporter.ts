@@ -10,6 +10,7 @@
 import * as mocha from 'mocha';
 import { CLASSES } from '../configs/inversify.types';
 import * as fs from 'fs';
+import { WriteStream } from 'fs';
 import * as rm from 'rimraf';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from './DriverHelper';
@@ -17,7 +18,6 @@ import { ScreenCatcher } from './ScreenCatcher';
 import { TimeoutConstants } from '../constants/TimeoutConstants';
 import { Logger } from './Logger';
 import { e2eContainer } from '../configs/inversify.config';
-import { WriteStream } from 'fs';
 import { StringUtil } from './StringUtil';
 import { BaseTestConstants } from '../constants/BaseTestConstants';
 import { ChromeDriverConstants } from '../constants/ChromeDriverConstants';
@@ -79,7 +79,7 @@ class CheReporter extends mocha.reporters.Spec {
       rm.sync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);
     });
 
-    runner.on('test', async function (test: mocha.Test): Promise<void> {
+    runner.on('test', async function(test: mocha.Test): Promise<void> {
       if (!ReporterConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
         return;
       }
@@ -108,8 +108,7 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
-
-    runner.on('end', async function (): Promise<void> {
+    runner.on('end', async function(): Promise<void> {
       // ensure that fired events done
       await driverHelper.wait(5000);
 
@@ -122,7 +121,7 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
-    runner.on('fail', async function (test: mocha.Test): Promise<void> {
+    runner.on('fail', async function(test: mocha.Test): Promise<void> {
       Logger.error(`CheReporter runner.on.fail: ${test.fullTitle()} failed after ${test.duration}ms`);
       // raise flag for keeping the screencast
       deleteScreencast = false;
@@ -138,7 +137,6 @@ class CheReporter extends mocha.reporters.Spec {
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
       const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
-
 
       // create reporter dir if not exist
       const reportDirExists: boolean = fs.existsSync(ReporterConstants.TS_SELENIUM_REPORT_FOLDER);

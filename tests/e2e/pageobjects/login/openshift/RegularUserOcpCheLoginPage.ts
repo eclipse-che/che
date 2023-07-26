@@ -10,7 +10,7 @@
 import 'reflect-metadata';
 import { ICheLoginPage } from '../interfaces/ICheLoginPage';
 import { OcpLoginPage } from './OcpLoginPage';
-import { injectable, inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../../utils/Logger';
 import { TimeoutConstants } from '../../../constants/TimeoutConstants';
@@ -21,33 +21,33 @@ import { OAuthConstants } from '../../../constants/OAuthConstants';
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 
-    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = `//div[@class='panel-login']`;
-    private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
+  private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = `//div[@class='panel-login']`;
+  private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
 
-    constructor(
-        @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+  constructor(
+    @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
+    @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async login(): Promise<void> {
-        Logger.debug();
+  async login(): Promise<void> {
+    Logger.debug();
 
-        Logger.debug('wait for LogInWithOpenShift page and click button');
-        await this.driverHelper.waitPresence(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-        await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
+    Logger.debug('wait for LogInWithOpenShift page and click button');
+    await this.driverHelper.waitPresence(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+    await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
 
-        if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
-            await this.ocpLogin.clickOnLoginProviderTitle();
-        }
-
-        await this.ocpLogin.waitOpenShiftLoginWelcomePage();
-        await this.ocpLogin.enterUserNameOpenShift(OAuthConstants.TS_SELENIUM_OCP_USERNAME);
-        await this.ocpLogin.enterPasswordOpenShift(OAuthConstants.TS_SELENIUM_OCP_PASSWORD);
-        await this.ocpLogin.clickOnLoginButton();
-        await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
-
-        if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
-            await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
-            await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
-        }
+    if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
+      await this.ocpLogin.clickOnLoginProviderTitle();
     }
+
+    await this.ocpLogin.waitOpenShiftLoginWelcomePage();
+    await this.ocpLogin.enterUserNameOpenShift(OAuthConstants.TS_SELENIUM_OCP_USERNAME);
+    await this.ocpLogin.enterPasswordOpenShift(OAuthConstants.TS_SELENIUM_OCP_PASSWORD);
+    await this.ocpLogin.clickOnLoginButton();
+    await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
+
+    if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
+      await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
+      await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
+    }
+  }
 }

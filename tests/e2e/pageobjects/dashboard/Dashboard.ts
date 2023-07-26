@@ -19,100 +19,100 @@ import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 @injectable()
 export class Dashboard {
-    private static readonly WORKSPACES_BUTTON: By = By.xpath(`//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`);
-    private static readonly CREATE_WORKSPACE_BUTTON: By = By.xpath(`//div[@id='page-sidebar']//a[text()='Create Workspace']`);
-    private static readonly LOADER_PAGE_STEP_TITLES: By = By.xpath('//*[@data-testid="step-title"]');
-    private static readonly STARTING_PAGE_LOADER: By = By.css('.main-page-loader');
-    private static readonly LOADER_ALERT: By = By.xpath('//*[@data-testid="loader-alert"]');
-    private static readonly LOGOUT_BUTTON: By = By.xpath('//button[text()="Logout"]');
-    private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=\'\']//parent::button');
+  private static readonly WORKSPACES_BUTTON: By = By.xpath(`//div[@id='page-sidebar']//a[contains(text(), 'Workspaces (')]`);
+  private static readonly CREATE_WORKSPACE_BUTTON: By = By.xpath(`//div[@id='page-sidebar']//a[text()='Create Workspace']`);
+  private static readonly LOADER_PAGE_STEP_TITLES: By = By.xpath('//*[@data-testid="step-title"]');
+  private static readonly STARTING_PAGE_LOADER: By = By.css('.main-page-loader');
+  private static readonly LOADER_ALERT: By = By.xpath('//*[@data-testid="loader-alert"]');
+  private static readonly LOGOUT_BUTTON: By = By.xpath('//button[text()="Logout"]');
+  private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=\'\']//parent::button');
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-                @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) {
-    }
+  constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+              @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) {
+  }
 
-    async stopWorkspaceByUI(workspaceName: string): Promise<void> {
-        Logger.debug(`"${workspaceName}"`);
+  async stopWorkspaceByUI(workspaceName: string): Promise<void> {
+    Logger.debug(`"${workspaceName}"`);
 
-        await this.clickWorkspacesButton();
-        await this.workspaces.waitPage();
-        await this.workspaces.waitWorkspaceListItem(workspaceName);
-        await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
+    await this.clickWorkspacesButton();
+    await this.workspaces.waitPage();
+    await this.workspaces.waitWorkspaceListItem(workspaceName);
+    await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
 
-        await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
-        await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
-    }
+    await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
+    await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
+  }
 
-    async deleteStoppedWorkspaceByUI(workspaceName: string): Promise<void> {
-        Logger.debug(`"${workspaceName}"`);
+  async deleteStoppedWorkspaceByUI(workspaceName: string): Promise<void> {
+    Logger.debug(`"${workspaceName}"`);
 
-        await this.clickWorkspacesButton();
-        await this.workspaces.waitPage();
-        await this.workspaces.waitWorkspaceListItem(workspaceName);
-        await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
-        await this.workspaces.waitPage();
-        await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
-    }
+    await this.clickWorkspacesButton();
+    await this.workspaces.waitPage();
+    await this.workspaces.waitWorkspaceListItem(workspaceName);
+    await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
+    await this.workspaces.waitPage();
+    await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
+  }
 
-    async stopAndRemoveWorkspaceByUI(workspaceName: string): Promise<void> {
-        Logger.debug(`"${workspaceName}"`);
+  async stopAndRemoveWorkspaceByUI(workspaceName: string): Promise<void> {
+    Logger.debug(`"${workspaceName}"`);
 
-        await this.stopWorkspaceByUI(workspaceName);
-        await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
-        await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
-    }
+    await this.stopWorkspaceByUI(workspaceName);
+    await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
+    await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
+  }
 
-    async openDashboard(): Promise<void> {
-        Logger.debug();
-        await this.driverHelper.getDriver().navigate().to(BaseTestConstants.TS_SELENIUM_BASE_URL);
-        await this.waitPage();
+  async openDashboard(): Promise<void> {
+    Logger.debug();
+    await this.driverHelper.getDriver().navigate().to(BaseTestConstants.TS_SELENIUM_BASE_URL);
+    await this.waitPage();
 
-    }
+  }
 
-    async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.driverHelper.waitVisibility(Dashboard.WORKSPACES_BUTTON, timeout);
-        await this.driverHelper.waitVisibility(Dashboard.CREATE_WORKSPACE_BUTTON, timeout);
-    }
+    await this.driverHelper.waitVisibility(Dashboard.WORKSPACES_BUTTON, timeout);
+    await this.driverHelper.waitVisibility(Dashboard.CREATE_WORKSPACE_BUTTON, timeout);
+  }
 
-    async clickWorkspacesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async clickWorkspacesButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.driverHelper.waitAndClick(Dashboard.WORKSPACES_BUTTON, timeout);
-    }
+    await this.driverHelper.waitAndClick(Dashboard.WORKSPACES_BUTTON, timeout);
+  }
 
-    async clickCreateWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async clickCreateWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.driverHelper.waitAndClick(Dashboard.CREATE_WORKSPACE_BUTTON, timeout);
-    }
+    await this.driverHelper.waitAndClick(Dashboard.CREATE_WORKSPACE_BUTTON, timeout);
+  }
 
-    async getLoaderAlert(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<string> {
-        Logger.debug();
+  async getLoaderAlert(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<string> {
+    Logger.debug();
 
-        return await this.driverHelper.waitAndGetText(Dashboard.LOADER_ALERT, timeout);
-    }
+    return await this.driverHelper.waitAndGetText(Dashboard.LOADER_ALERT, timeout);
+  }
 
-    async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async waitLoader(timeout: number = TimeoutConstants.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.driverHelper.waitAllPresence(Dashboard.LOADER_PAGE_STEP_TITLES, timeout);
-    }
+    await this.driverHelper.waitAllPresence(Dashboard.LOADER_PAGE_STEP_TITLES, timeout);
+  }
 
-    async waitStartingPageLoaderDisappearance(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async waitStartingPageLoaderDisappearance(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.driverHelper.waitDisappearance(Dashboard.STARTING_PAGE_LOADER, timeout);
-        await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING);
-    }
+    await this.driverHelper.waitDisappearance(Dashboard.STARTING_PAGE_LOADER, timeout);
+    await this.driverHelper.wait(TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING);
+  }
 
-    async logout(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug();
+  async logout(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+    Logger.debug();
 
-        await this.openDashboard();
-        await this.driverHelper.waitAndClick(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
-        await this.driverHelper.waitAndClick(Dashboard.LOGOUT_BUTTON, timeout);
-        await this.driverHelper.waitDisappearance(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
-    }
+    await this.openDashboard();
+    await this.driverHelper.waitAndClick(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
+    await this.driverHelper.waitAndClick(Dashboard.LOGOUT_BUTTON, timeout);
+    await this.driverHelper.waitDisappearance(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
+  }
 }

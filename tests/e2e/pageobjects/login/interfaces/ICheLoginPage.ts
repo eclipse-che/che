@@ -9,5 +9,5 @@
  **********************************************************************/
 
 export interface ICheLoginPage {
-    login(): void;
+  login(): void;
 }
