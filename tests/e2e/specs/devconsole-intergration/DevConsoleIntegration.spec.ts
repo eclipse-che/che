@@ -73,7 +73,9 @@ suite(`DevConsole Integration`, async function (): Promise<void> {
 
     loginTests.loginIntoChe();
 
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
     test('Registering the running workspace', async function (): Promise<void> {
         registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());

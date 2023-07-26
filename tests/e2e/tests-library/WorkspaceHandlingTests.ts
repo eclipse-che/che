@@ -48,46 +48,30 @@ export class WorkspaceHandlingTests {
         return WorkspaceHandlingTests.parentGUID;
     }
 
-    createAndOpenWorkspace(stack: string): void {
-        test(`Create and open new workspace, stack:${stack}`, async () => {
+    async createAndOpenWorkspace(stack: string): Promise<void> {
             await this.dashboard.clickWorkspacesButton();
             await this.dashboard.waitPage();
-            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            Logger.debug(`fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
             await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
             await this.createWorkspace.clickOnSampleNoEditorSelection(stack);
             await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-        });
     }
 
-    createAndOpenWorkspaceFromGitRepository(factoryUrl: string): void {
-        test(`Create and open new workspace from factory:${factoryUrl}`, async () => {
+    async createAndOpenWorkspaceFromGitRepository(factoryUrl: string): Promise<void> {
             await this.dashboard.waitPage();
-            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
+            Logger.debug(`fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
             await this.apiUrlResolver.getWorkspacesApiUrl();
             await this.dashboard.clickCreateWorkspaceButton();
             await this.createWorkspace.waitPage();
             WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
             await this.createWorkspace.importFromGitUsingUI(factoryUrl);
             await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TimeoutConstants.TS_IDE_LOAD_TIMEOUT);
-        });
     }
 
-    openExistingWorkspace(workspaceName: string): void {
-        test('Open and start existing workspace', async () => {
-            await this.dashboard.waitPage();
-            Logger.debug(`Fetching user kubernetes namespace, storing auth token by getting workspaces API URL.`);
-            await this.apiUrlResolver.getWorkspacesApiUrl();
-            await this.dashboard.clickWorkspacesButton();
-            await this.workspaces.waitPage();
-            await this.workspaces.clickOpenButton(workspaceName);
-        });
-    }
-
-    obtainWorkspaceNameFromStartingPage(): void {
-        test('Obtain workspace name from workspace loader page', async() => {
+    async obtainWorkspaceNameFromStartingPage(): Promise<void> {
             const timeout: number = TimeoutConstants.TS_IDE_LOAD_TIMEOUT;
             const polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING;
             const attempts: number = Math.ceil(timeout / polling);
@@ -95,33 +79,32 @@ export class WorkspaceHandlingTests {
             for (let i: number = 0; i < attempts; i++) {
                 try {
                     let startingWorkspaceLineContent: string = await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_NAME_LOCATOR).getText();
-                    Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage obtained starting workspace getText():${startingWorkspaceLineContent}`);
+                    Logger.trace(`obtained starting workspace getText():${startingWorkspaceLineContent}`);
                     // cutting away leading text
                     WorkspaceHandlingTests.workspaceName = startingWorkspaceLineContent.substring('Starting workspace '.length).trim();
-                    Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage trimmed workspace name from getText():${WorkspaceHandlingTests.workspaceName}`);
+                    Logger.trace(`trimmed workspace name from getText():${WorkspaceHandlingTests.workspaceName}`);
                     break;
                 } catch (err) {
                     if (err instanceof error.StaleElementReferenceError) {
-                        Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
+                        Logger.trace(`failed to obtain name from workspace start page, element possibly detached from DOM. Retrying.`);
                         await this.driverHelper.wait(polling);
                         continue;
                     }
                     if (err instanceof error.NoSuchElementError) {
-                        Logger.trace(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Failed to obtain name from workspace start page, element not visible yet. Retrying.`);
+                        Logger.trace(`failed to obtain name from workspace start page, element not visible yet. Retrying.`);
                         await this.driverHelper.wait(polling);
                         continue;
                     }
-                    Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage Obtaining workspace name failed with an unexpected error:${err}`);
+                    Logger.error(`obtaining workspace name failed with an unexpected error:${err}`);
                     throw err;
                 }
             }
             if (WorkspaceHandlingTests.workspaceName !== '' && WorkspaceHandlingTests.workspaceName !== 'undefined') {
-                Logger.info(`Obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
+                Logger.info(`obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
                 return;
             }
-            Logger.error(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
+            Logger.error(`failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
             throw new error.InvalidArgumentError(`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
-        });
     }
 
     async stopWorkspace(workspaceName: string): Promise<void> {

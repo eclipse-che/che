@@ -31,13 +31,13 @@ export class WorkspaceDetails {
                 @inject(CLASSES.ProjectAndFileTests) private readonly testProjectAndFileCheCode: ProjectAndFileTests) { }
 
     async waitLoaderDisappearance(attempts: number = TimeoutConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TimeoutConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
-        Logger.debug('WorkspaceDetails.waitLoaderDisappearance');
+        Logger.debug();
 
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);
     }
 
     async saveChanges(): Promise<void> {
-        Logger.debug('WorkspaceDetails.saveChanges');
+        Logger.debug();
 
         await this.waitSaveButton();
         await this.clickOnSaveButton();
@@ -45,7 +45,7 @@ export class WorkspaceDetails {
     }
 
     async waitPage(workspaceName: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug(`WorkspaceDetails.saveChanges workspace: "${workspaceName}"`);
+        Logger.debug(`workspace: "${workspaceName}"`);
 
         await this.waitWorkspaceTitle(workspaceName, timeout);
         await this.waitOpenButton(timeout);
@@ -55,7 +55,7 @@ export class WorkspaceDetails {
     }
 
     async waitWorkspaceTitle(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`WorkspaceDetails.waitWorkspaceTitle title: "${workspaceName}"`);
+        Logger.debug(`title: "${workspaceName}"`);
 
         const workspaceTitleLocator: By = By.css(this.getWorkspaceTitleCssLocator(workspaceName));
 
@@ -63,25 +63,25 @@ export class WorkspaceDetails {
     }
 
     async waitRunButton(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug('WorkspaceDetails.waitRunButton');
+        Logger.debug();
 
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
     }
 
     async clickOnRunButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug('WorkspaceDetails.clickOnRunButton');
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
     }
 
     async waitOpenButton(timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug('WorkspaceDetails.waitOpenButton');
+        Logger.debug();
 
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout);
     }
 
     async openWorkspace(namespace: string, workspaceName: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug(`WorkspaceDetails.openWorkspace "${namespace}/${workspaceName}"`);
+        Logger.debug(`"${namespace}/${workspaceName}"`);
 
         await this.clickOnOpenButton(timeout);
         await this.testProjectAndFileCheCode.waitWorkspaceReadinessForCheCodeEditor();

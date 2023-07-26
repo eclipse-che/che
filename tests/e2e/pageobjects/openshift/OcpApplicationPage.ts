@@ -28,13 +28,13 @@ export class OcpApplicationPage {
     }
 
     async waitApplicationIcon(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.waitApplicationIcon.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitPresence(OcpApplicationPage.APPLICATION_ICON_LOCATOR, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async waitAndOpenEditSourceCodeIcon(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.waitAndOpenEditSourceCodeIcon.name}`);
+        Logger.debug();
         const parentGUID: string = await this.browserTabsUtil.getCurrentWindowHandle();
         await this.driverHelper.waitAndClick(OcpApplicationPage.EDIT_SOURCE_CODE_ICON_LOCATOR);
         await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);

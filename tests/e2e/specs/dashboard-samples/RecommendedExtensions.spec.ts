@@ -59,8 +59,12 @@ suite(`Check if recommended extensions installed for ${samples}`, async function
     loginTests.loginIntoChe();
 
     for (const sample of samples) {
-        workspaceHandlingTests.createAndOpenWorkspace(sample);
-        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+        test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
+        await workspaceHandlingTests.createAndOpenWorkspace(sample);
+    });
+        test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
         test('Registering the running workspace', async function (): Promise<void> {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());

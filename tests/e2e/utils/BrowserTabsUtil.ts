@@ -20,37 +20,37 @@ export class BrowserTabsUtil {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async switchToWindow(windowHandle: string): Promise<void> {
-        Logger.debug('BrowserTabsUtil.switchToWindow');
+        Logger.debug();
         await this.driverHelper.getDriver().switchTo().window(windowHandle);
     }
 
     async getAllWindowHandles(): Promise<string[]> {
-        Logger.debug('BrowserTabsUtil.getAllWindowHandles');
+        Logger.debug();
 
         return (await this.driverHelper.getDriver()).getAllWindowHandles();
     }
 
     async getCurrentWindowHandle(): Promise<string> {
-        Logger.debug('BrowserTabsUtil.getCurrentWindowHandle');
+        Logger.debug();
 
         return await this.driverHelper.getDriver().getWindowHandle();
     }
 
     async navigateTo(url: string): Promise<void> {
-        Logger.debug(`BrowserTabsUtil.navigateTo ${url}`);
+        Logger.debug(`${url}`);
 
         await this.driverHelper.getDriver().navigate().to(url);
     }
 
     async navigateAndWaitToUrl(url: string, timeout: number = TimeoutConstants.TS_SELENIUM_WAIT_FOR_URL): Promise<void> {
-        Logger.trace(`BrowserTabsUtil.navigateAndWaitToUrl ${url}`);
+        Logger.trace(`${url}`);
 
         await this.navigateTo(url);
         await this.waitURL(url, timeout);
     }
 
     async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number): Promise<void> {
-        Logger.debug('BrowserTabsUtil.waitAndSwitchToAnotherWindow');
+        Logger.debug();
 
         await this.driverHelper.waitUntilTrue(async () => {
             const windowHandles: string[] = await this.getAllWindowHandles();
@@ -68,7 +68,7 @@ export class BrowserTabsUtil {
     }
 
     async refreshPage(): Promise<void> {
-        Logger.debug('BrowserTabsUtil.refreshPage');
+        Logger.debug();
 
         await (await this.driverHelper.getDriver()).navigate().refresh();
     }
@@ -78,7 +78,7 @@ export class BrowserTabsUtil {
     }
 
     async waitURL(expectedUrl: string, timeout: number): Promise<void> {
-        Logger.trace(`BrowserTabsUtil.waitURL ${expectedUrl}`);
+        Logger.trace(`${expectedUrl}`);
 
         await this.driverHelper.getDriver().wait(async () => {
             const currentUrl: string = await this.driverHelper.getDriver().getCurrentUrl();
@@ -91,7 +91,7 @@ export class BrowserTabsUtil {
     }
 
     async maximize(): Promise<void> {
-        Logger.trace(`BrowserTabsUtil.maximize`);
+        Logger.trace();
         if (ChromeDriverConstants.TS_SELENIUM_LAUNCH_FULLSCREEN) {
             Logger.debug(`TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.`);
             await this.driverHelper.getDriver().manage().window().maximize();
@@ -99,7 +99,7 @@ export class BrowserTabsUtil {
     }
 
     async closeAllTabsExceptCurrent(): Promise<void> {
-        Logger.trace(`${this.constructor.name}.${this.closeAllTabsExceptCurrent.name}`);
+        Logger.trace();
         const allTabsHandles: string[] = await this.getAllWindowHandles();
         const currentTabHandle: string = await this.getCurrentWindowHandle();
         allTabsHandles.splice(allTabsHandles.indexOf(currentTabHandle), 1);

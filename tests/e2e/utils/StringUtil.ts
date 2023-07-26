@@ -21,7 +21,7 @@ export class StringUtil {
      * @return project name
      */
     static getProjectNameFromGitUrl(url: string): string {
-        Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${url}`);
+        Logger.debug(`${url}`);
         if (url.includes('?')) {
             url = url.substring(0, url.indexOf('?'));
         }
@@ -29,7 +29,7 @@ export class StringUtil {
             url = url.split('/').slice(0, -2).join('/');
         }
         const projectName: string = url.split(/[\/.]/).filter((e: string) => !['git', ''].includes(e)).reverse()[0];
-        Logger.debug(`${this.constructor.name}.${this.getProjectNameFromGitUrl.name} - ${projectName}`);
+        Logger.debug(`${projectName}`);
         return projectName;
     }
 

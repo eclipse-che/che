@@ -32,11 +32,15 @@ suite(`The ${stackName} userstory`, async function (): Promise<void> {
 
     loginTests.loginIntoChe();
 
-    workspaceHandlingTests.createAndOpenWorkspace(stackName);
+    test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
+        await workspaceHandlingTests.createAndOpenWorkspace(stackName);
+    });
 
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
-    test('Register running workspace', async () => {
+    test('Register running workspace', async function (): Promise<void> {
         registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
     });
 

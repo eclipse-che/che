@@ -33,7 +33,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     ) { }
 
     async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.waitWorkspaceStatus');
+        Logger.debug();
 
         let workspaceStatus: string = '';
         let expectedStatus: boolean = false;
@@ -61,7 +61,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     async stopWorkspaceByName(workspaceName: string): Promise<void> {
-        Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName}`);
+        Logger.debug(`${workspaceName}`);
 
         const stopWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let stopWorkspaceResponse: AxiosResponse;
@@ -69,7 +69,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         try {
             stopWorkspaceResponse = await this.processRequestHandler.patch(stopWorkspaceApiUrl, [{'op': 'replace', 'path': '/spec/started', 'value': false}]);
         } catch (err) {
-            Logger.error(`Stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
+            Logger.error(`stop workspace call failed. URL used: ${stopWorkspaceApiUrl}`);
             throw err;
         }
 
@@ -78,12 +78,12 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
         }
 
         await this.waitWorkspaceStatus(workspaceName, WorkspaceStatus.STOPPED);
-        Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName} stopped successfully`);
+        Logger.debug(`${workspaceName} stopped successfully`);
     }
 
     // delete a workspace without stopping phase (similar with force deleting)
     async deleteWorkspaceByName(workspaceName: string): Promise<void> {
-        Logger.debug(`TestWorkspaceUtil.deleteWorkspaceByName: ${workspaceName}` );
+        Logger.debug(`${workspaceName}` );
 
         const deleteWorkspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
         let deleteWorkspaceResponse: AxiosResponse;
@@ -92,10 +92,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             deleteWorkspaceResponse = await this.processRequestHandler.delete(deleteWorkspaceApiUrl);
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 404) {
-                Logger.error(`The workspace :${workspaceName} not found`);
+                Logger.error(`the workspace :${workspaceName} not found`);
                 throw error;
             }
-            Logger.error(`Delete workspace call failed. URL used: ${deleteWorkspaceStatus}`);
+            Logger.error(`delete workspace call failed. URL used: ${deleteWorkspaceStatus}`);
             throw error;
         }
 
@@ -109,7 +109,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
             } catch (error) {
                 if (axios.isAxiosError(error) && error.response?.status === 404) {
                     deleteWorkspaceStatus = true;
-                    Logger.debug(`TestWorkspaceUtil.stopWorkspaceByName: ${workspaceName} deleted successfully`);
+                    Logger.debug(`${workspaceName} deleted successfully`);
                     break;
                 }
             }
@@ -123,7 +123,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // stop workspace before deleting with checking stopping phase
     async stopAndDeleteWorkspaceByName(workspaceName: string): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.stopAndDeleteWorkspaceByName');
+        Logger.debug();
 
         await this.stopWorkspaceByName(workspaceName);
         await this.deleteWorkspaceByName(workspaceName);
@@ -131,21 +131,21 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 
     // stop all run workspaces in the namespace
     async stopAllRunningWorkspaces(namespace: string): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.stopAllRunProjects');
+        Logger.debug();
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         for (let i: number = 0; i < response.data.items.length; i++) {
-            Logger.info('The project is being stopped: ' +  response.data.items[i].metadata.name);
+            Logger.info('the project is being stopped: ' +  response.data.items[i].metadata.name);
             await this.stopWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
 
     // stop all run workspaces, check statuses and remove the workspaces
     async stopAndDeleteAllRunningWorkspaces(namespace: string): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.stopAndDeleteAllRunProjects');
+        Logger.debug();
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
         await this.stopAllRunningWorkspaces(namespace);
         for (let i: number = 0; i < response.data.items.length; i++) {
-            Logger.info('The project is being deleted: ' +  response.data.items[i].metadata.name);
+            Logger.info('the project is being deleted: ' +  response.data.items[i].metadata.name);
             await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }
     }
@@ -153,11 +153,11 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     // stop all run workspaces without stopping and waiting for of 'Stopped' phase
     // similar with 'force' deleting
     async deleteAllWorkspaces(namespace: string): Promise<void> {
-        Logger.debug('TestWorkspaceUtil.deleteAllRunProjects');
+        Logger.debug();
         let response: AxiosResponse = await this.processRequestHandler.get(await this.apiUrlResolver.getWorkspacesApiUrl());
 
         for (let i: number = 0; i < response.data.items.length; i++) {
-            Logger.info('The project is being deleted .......: ' +  response.data.items[i].metadata.name);
+            Logger.info('the project is being deleted .......: ' +  response.data.items[i].metadata.name);
             await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
         }
     }

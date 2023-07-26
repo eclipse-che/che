@@ -24,38 +24,42 @@ const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUti
 
 const stackName: string = 'Empty Workspace';
 
-suite(`${stackName} test`, async () => {
-    loginTests.loginIntoChe();
+suite(`${stackName} test`, async function(): Promise<void> {
+  loginTests.loginIntoChe();
 
-    workspaceHandlingTests.createAndOpenWorkspace(stackName);
+  test(`Create and open new workspace, stack:${stackName}`, async function(): Promise<void> {
+    await workspaceHandlingTests.createAndOpenWorkspace(stackName);
+  });
 
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+  test('Obtain workspace name from workspace loader page', async function(): Promise<void> {
+    await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+  });
 
-    test('Register running workspace', async () => {
-        registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-    });
+  test('Register running workspace', async function(): Promise<void> {
+    registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+  });
 
-    test('Wait workspace readiness', async () => {
-        await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+  test('Wait workspace readiness', async function(): Promise<void> {
+    await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 
-        const workbench: Workbench = new Workbench();
-        const activityBar: ActivityBar = workbench.getActivityBar();
-        const activityBarControls: ViewControl[] = await activityBar.getViewControls();
+    const workbench: Workbench = new Workbench();
+    const activityBar: ActivityBar = workbench.getActivityBar();
+    const activityBarControls: ViewControl[] = await activityBar.getViewControls();
 
-        Logger.debug(`Editor sections:`);
-        for (const control of activityBarControls) {
-            Logger.debug(`${await control.getTitle()}`);
-        }
-    });
+    Logger.debug(`Editor sections:`);
+    for (const control of activityBarControls) {
+      Logger.debug(`${await control.getTitle()}`);
+    }
+  });
 
-    test('Stop the workspace', async function (): Promise<void> {
-        await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-        await browserTabsUtil.closeAllTabsExceptCurrent();
-    });
+  test('Stop the workspace', async function(): Promise<void> {
+    await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+    await browserTabsUtil.closeAllTabsExceptCurrent();
+  });
 
-    test('Delete the workspace', async function (): Promise<void> {
-        await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-    });
+  test('Delete the workspace', async function(): Promise<void> {
+    await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+  });
 
-    loginTests.logoutFromChe();
+  loginTests.logoutFromChe();
 });

@@ -27,31 +27,31 @@ export class DexLoginPage {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitDexLoginPage(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.waitDexLoginPage.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitVisibility(DexLoginPage.dexPageContentContainer, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnLoginButton(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.clickOnLoginButton.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(DexLoginPage.submitButton);
     }
 
     async enterUserNameKubernetes(userName: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.enterUserNameKubernetes.name}`);
+        Logger.debug();
 
         await this.driverHelper.enterValue(DexLoginPage.loginInput, userName);
     }
 
     async enterPasswordKubernetes(password: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.enterPasswordKubernetes.name}`);
+        Logger.debug();
 
         await this.driverHelper.enterValue(DexLoginPage.passwordInput, password);
     }
 
     async waitDexLoginPageDisappearance(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.waitDexLoginPageDisappearance.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitDisappearance(DexLoginPage.dexPageContentContainer, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }

@@ -57,8 +57,12 @@ suite(`Create predefined workspace and check it `, async function (): Promise<vo
 
     loginTests.loginIntoChe();
     // create the Empty workspace using CHE Dashboard
-    workspaceHandlingTests.createAndOpenWorkspace('Empty Workspace');
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    test(`Create and open new workspace, stack:${'Empty Workspace'}`, async function (): Promise<void> {
+        await workspaceHandlingTests.createAndOpenWorkspace('Empty Workspace');
+    });
+    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
     // verify that just created workspace with unique name is present in the predefined namespace
     test('Validate the created workspace is present in predefined namespace', async function (): Promise<void> {

@@ -32,15 +32,15 @@ export class ApiUrlResolver {
     }
 
     private async obtainUserNamespace(): Promise<string> {
-        Logger.debug(`ApiUrlResolver.obtainUserNamespace ${this.userNamespace}`);
+        Logger.debug(`${this.userNamespace}`);
         if (this.userNamespace.length === 0) {
-            Logger.trace(`ApiUrlResolver.obtainUserNamespace USER_NAMESPACE.length = 0, calling kubernetes API`);
+            Logger.trace(`USER_NAMESPACE.length = 0, calling kubernetes API`);
             const kubernetesResponse: AxiosResponse = await this.processRequestHandler.get(ApiUrlResolver.KUBERNETES_API_URL);
             if (kubernetesResponse.status !== 200) {
                 throw new Error(`Cannot get user namespace from kubernetes API. Code: ${kubernetesResponse.status} Data: ${kubernetesResponse.data}`);
             }
             this.userNamespace = kubernetesResponse.data[0].name;
-            Logger.debug(`ApiUrlResolver.obtainUserNamespace kubeapi success: ${this.userNamespace}`);
+            Logger.debug(`kubeapi success: ${this.userNamespace}`);
         }
         return this.userNamespace;
     }

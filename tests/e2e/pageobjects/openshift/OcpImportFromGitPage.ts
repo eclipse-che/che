@@ -34,13 +34,13 @@ export class OcpImportFromGitPage {
         }
 
     async enterGitRepoUrl(gitRepoUrl: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.enterGitRepoUrl.name} "${gitRepoUrl}"`);
+        Logger.debug();
 
         await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_URL_INPUT_LOCATOR, gitRepoUrl);
     }
 
     async clickOnAdvancedOptionsButton(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.clickOnAdvancedOptionsButton.name}`);
+        Logger.debug();
 
         if (!(await this.driverHelper.isVisible(OcpImportFromGitPage.HIDE_ADVANCED_GIT_OPTIONS_LOCATOR))) {
             await this.driverHelper.waitAndClick(OcpImportFromGitPage.SHOW_ADVANCED_GIT_OPTIONS_LINK_LOCATOR);
@@ -48,20 +48,20 @@ export class OcpImportFromGitPage {
     }
 
     async enterGitReference(gitReference: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.enterGitReference.name} "${gitReference}"`);
+        Logger.debug(`"${gitReference}"`);
 
         await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT_LOCATOR, gitReference);
     }
 
     async selectBuilderImageImportStrategy(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.selectBuilderImageImportStrategy.name}`);
+        Logger.debug();
 
         await this.driverHelper.scrollToAndClick(OcpImportFromGitPage.EDIT_IMPORT_STRATEGY_LINK_LOCATOR);
         await this.driverHelper.scrollToAndClick(OcpImportFromGitPage.BUILDER_IMAGE_STRATEGY_ITEM_LOCATOR);
     }
 
     async addLabel(label: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.addLabel.name} "${label}"`);
+        Logger.debug(`"${label}"`);
 
         await this.driverHelper.scrollToAndClick(OcpImportFromGitPage.ADD_LABEL_LINK_LOCATOR);
         await this.driverHelper.scrollToAndEnterValue(OcpImportFromGitPage.ADD_LABEL_INPUT_LOCATOR, label);
