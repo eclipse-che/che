@@ -57,7 +57,7 @@ export class DevWorkspaceConfigurationHelper {
     }
 
     async generateDevfileContext(): Promise<DevfileContext> {
-        Logger.debug(`${this.constructor.name}.${this.generateDevfileContext.name}`);
+        Logger.debug();
         if (!this.params.projects) {
             this.params.projects = [];
         }
@@ -72,7 +72,7 @@ export class DevWorkspaceConfigurationHelper {
 
     // write templates and then DevWorkspace in a single file
     async getDevWorkspaceConfigurationYamlAsString(context: DevfileContext): Promise<string> {
-        Logger.debug(`${this.constructor.name}.${this.getDevWorkspaceConfigurationYamlAsString.name}`);
+        Logger.debug();
         const allContentArray: any[] = context.devWorkspaceTemplates.map(
             (template: V1alpha2DevWorkspaceTemplate) => YAML.stringify(template)
         );

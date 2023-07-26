@@ -22,7 +22,7 @@ export class OcpUserLoginPage implements IOcpLoginPage {
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage) { }
 
     async login(): Promise<void> {
-        Logger.debug('OcpUserLoginPage.login');
+        Logger.debug();
 
         if (OAuthConstants.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
             await this.ocpLogin.clickOnLoginProviderTitle();

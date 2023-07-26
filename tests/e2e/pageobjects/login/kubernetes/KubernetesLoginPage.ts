@@ -22,7 +22,7 @@ export class KubernetesLoginPage implements ICheLoginPage {
         @inject(CLASSES.DexLoginPage) private readonly dexLoginPage: DexLoginPage) { }
 
     async login(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.login.name}`);
+        Logger.debug();
 
         await this.dexLoginPage.waitDexLoginPage();
         await this.dexLoginPage.enterUserNameKubernetes(OAuthConstants.TS_SELENIUM_K8S_USERNAME);

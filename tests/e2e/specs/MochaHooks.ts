@@ -28,7 +28,7 @@ const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUt
 let latestWorkspace: string = '';
 
 export function registerRunningWorkspace(workspaceName: string): void {
-    Logger.debug(`MochaHooks.registerRunningWorkspace with workspaceName:${workspaceName}`);
+    Logger.debug(`with workspaceName:${workspaceName}`);
     latestWorkspace = workspaceName;
 }
 

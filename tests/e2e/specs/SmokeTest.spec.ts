@@ -31,9 +31,13 @@ suite(`The SmokeTest userstory`, async function (): Promise<void> {
     let projectSection: ViewSection;
     suite(`Create workspace from factory:${factoryUrl}`, async function (): Promise<void> {
         loginTests.loginIntoChe();
-        workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
-        workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-        test('Register running workspace', async () => {
+        test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {
+            await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
+        });
+        test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
+        test('Register running workspace', async function (): Promise<void> {
             registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
         });
         test('Wait workspace readiness', async function (): Promise<void> {

@@ -18,25 +18,25 @@ import { BaseTestConstants, Platform } from '../../../constants/BaseTestConstant
 
 @injectable()
 export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHeaderHandler {
-    private authorizationToken: string = '';
-    private readonly cookiesType: string = BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT ? '_oauth_proxy' : '_oauth2_proxy';
+  private authorizationToken: string = '';
+  private readonly cookiesType: string = BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT ? '_oauth_proxy' : '_oauth2_proxy';
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+  constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async get(): Promise<AxiosRequestConfig> {
-        try {
-            let token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie(this.cookiesType);
-            if (this.authorizationToken !== token.value) {
-                this.authorizationToken = token.value;
-            }
-        } catch (err) {
-            if (this.authorizationToken.length > 0) {
-                Logger.warn(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.`);
-            } else {
-                throw new Error(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. No stored token present!`);
-            }
-        }
-
-        return { headers: { 'cookie': `${this.cookiesType}=${this.authorizationToken}` } };
+  async get(): Promise<AxiosRequestConfig> {
+    try {
+      let token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie(this.cookiesType);
+      if (this.authorizationToken !== token.value) {
+        this.authorizationToken = token.value;
+      }
+    } catch (err) {
+      if (this.authorizationToken.length > 0) {
+        Logger.warn(`could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.`);
+      } else {
+        throw new Error(`Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. No stored token present!`);
+      }
     }
+
+    return { headers: { 'cookie': `${this.cookiesType}=${this.authorizationToken}` } };
+  }
 }

@@ -15,17 +15,17 @@ import { APITestConstants, SupportedDevfilesRegistries } from '../constants/APIT
 export class DevfilesRegistryHelper {
 
     async getInbuiltDevfilesRegistryContent(): Promise<AxiosResponse> {
-        Logger.debug(`${this.constructor.name}.${this.getInbuiltDevfilesRegistryContent.name}`);
+        Logger.debug();
         return await this.getContent(SupportedDevfilesRegistries.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL());
     }
 
     async getGitHubCheDevfileRegistryContent(): Promise<AxiosResponse> {
-        Logger.debug(`${this.constructor.name}.${this.getGitHubCheDevfileRegistryContent.name}`);
+        Logger.debug();
         return await this.getContent(SupportedDevfilesRegistries.GIT_HUB_CHE_DEVFILE_REGISTRY_URL);
     }
 
     async collectPathsToDevfilesFromRegistry(): Promise<object[]> {
-        Logger.debug(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}`);
+        Logger.debug();
         const devfileSamples: object[] = [];
         const sampleNames: string[] = [];
         switch (APITestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
@@ -42,7 +42,7 @@ export class DevfilesRegistryHelper {
                     const metaYamlContent: any = YAML.parse(decodedFileContent);
                     devfileSamples.push({name: sample, link: metaYamlContent.links.v2});
                 }
-                Logger.debug(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}: samples list: ${JSON.stringify(devfileSamples)}`);
+                Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
             }
                 break;
             case (SupportedDevfilesRegistries.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL()): {
@@ -51,11 +51,11 @@ export class DevfilesRegistryHelper {
                 for (const sample of content) {
                     devfileSamples.push({name: sample.displayName, link: sample.links.v2});
                 }
-                Logger.debug(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}: samples list: ${JSON.stringify(devfileSamples)}`);
+                Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
             }
                 break;
             default: {
-                Logger.error(`${this.constructor.name}.${this.collectPathsToDevfilesFromRegistry.name}: unsupported registry url - ${APITestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()}\n
+                Logger.error(`unsupported registry url - ${APITestConstants.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()}\n
                 supported registries: ${JSON.stringify(SupportedDevfilesRegistries)}`);
             }
         }
@@ -63,7 +63,7 @@ export class DevfilesRegistryHelper {
     }
 
     private async getContent(url: string, headers?: object): Promise<AxiosResponse> {
-        Logger.debug(`${this.constructor.name}.${this.getContent.name}: ${url}`);
+        Logger.debug(`${url}`);
 
         let response: AxiosResponse | undefined;
         try {

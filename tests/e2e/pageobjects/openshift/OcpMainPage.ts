@@ -40,25 +40,25 @@ export class OcpMainPage {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitOpenMainPage(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.waitOpenMainPage.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitVisibility(OcpMainPage.MAIN_PAGE_HEADER_LOCATOR, TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnSelectRoleButton(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.clickOnSelectRoleButton.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(OcpMainPage.SELECT_ROLE_BUTTON_LOCATOR);
     }
 
     async clickAddToProjectButton(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.clickAddToProjectButton.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(OcpMainPage.ADD_BUTTON_LOCATOR);
     }
 
     async selectDeveloperRole(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.selectDeveloperRole.name}`);
+        Logger.debug();
 
         await this.waitOpenMainPage();
         await this.tryToSkipWebTour();
@@ -68,21 +68,21 @@ export class OcpMainPage {
     }
 
     async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
-        Logger.debug(`${this.constructor.name}.${this.selectImportFromGitMethod.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM_LOCATOR);
         return e2eContainer.get(CLASSES.OcpImportFromGitPage);
     }
 
     async openImportFromGitPage(): Promise<OcpImportFromGitPage> {
-        Logger.debug(`${this.constructor.name}.${this.openImportFromGitPage.name}`);
+        Logger.debug();
 
         await this.clickAddToProjectButton();
         return await this.selectImportFromGitMethod();
     }
 
     async selectProject(projectName: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.selectProject.name}`);
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN_LOCATOR);
         await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT_LOCATOR, projectName);
@@ -90,20 +90,20 @@ export class OcpMainPage {
     }
 
     private async selectRole(role: string): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.selectRole.name} - selecting role ${role}`);
+        Logger.debug(`selecting role ${role}`);
 
         await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator(role));
     }
 
     private async tryToSkipWebTour(): Promise<void> {
-        Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name}`);
+        Logger.debug();
 
         if (await this.driverHelper.isVisible(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR)) {
             await this.driverHelper.waitAndClick(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR);
 
-            Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name} - Welcome tour modal dialog was located and skipped`);
+            Logger.debug(`welcome tour modal dialog was located and skipped`);
         } else {
-            Logger.debug(`${this.constructor.name}.${this.tryToSkipWebTour.name} - Welcome tour modal dialog was not located`);
+            Logger.debug(`welcome tour modal dialog was not located`);
         }
     }
 }

@@ -23,7 +23,7 @@ export class CreateWorkspace {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitTitleContains(expectedText: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`CreateWorkspace.waitTitleContains text: "${expectedText}"`);
+        Logger.debug(`text: "${expectedText}"`);
 
         const pageTitleLocator: By = By.xpath(`//h1[contains(text(), '${expectedText}')]`);
 
@@ -31,13 +31,13 @@ export class CreateWorkspace {
     }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug('CreateWorkspace.waitPage');
+        Logger.debug();
 
         await this.waitTitleContains('Create Workspace', timeout);
     }
 
     async clickOnSampleNoEditorSelection(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}"`);
+        Logger.debug(`sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocator(sampleName);
 
@@ -47,20 +47,20 @@ export class CreateWorkspace {
     async clickOnSampleForSpecificEditor(sampleName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
         await this.clickOnEditorsDropdownListButton(sampleName, timeout);
 
-        Logger.debug(`CreateWorkspace.clickOnSampleForSpecificEditor sampleName: "${sampleName}"`);
+        Logger.debug(`sampleName: "${sampleName}"`);
 
         const sampleLocator: By = this.getSampleLocatorWithSpecificEditor(sampleName);
         await this.driverHelper.waitAndClick(sampleLocator, timeout);
     }
 
     async importFromGitUsingUI(factoryUrl: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug(`CreateWorkspace.importFromGitUsingUI factoryUrl: "${factoryUrl}"`);
+        Logger.debug(`factoryUrl: "${factoryUrl}"`);
         await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL_LOCATOR, timeout);
         await this.driverHelper.type(CreateWorkspace.FACTORY_URL_LOCATOR, Key.chord(factoryUrl, Key.ENTER), timeout);
     }
 
     private async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
-        Logger.debug(`CreateWorkspace.clickOnSample sampleName: "${sampleName}, editor ${BaseTestConstants.TS_SELENIUM_EDITOR}"`);
+        Logger.debug(`sampleName: "${sampleName}, editor ${BaseTestConstants.TS_SELENIUM_EDITOR}"`);
 
         const editorDropdownListLocator: By = this.getEditorsDropdownListLocator(sampleName);
         await this.driverHelper.waitAndClick(editorDropdownListLocator, timeout);
@@ -80,7 +80,7 @@ export class CreateWorkspace {
                 throw new Error(`Unsupported editor ${process.env.TS_SELENIUM_EDITOR}`);
         }
 
-        Logger.trace(`CreateWorkspace.getSampleLocatorWithSpecificEditor sampleName: ${sampleName}, editor "${editor}"`);
+        Logger.trace(`sampleName: ${sampleName}, editor "${editor}"`);
 
         return By.xpath(`//div[text()='${sampleName}']//parent::article//span[text()[
                 contains(
@@ -90,7 +90,7 @@ export class CreateWorkspace {
     }
 
     private getSampleLocator(sampleName: string): By {
-        Logger.trace(`CreateWorkspace.getSampleLocator sampleName: ${sampleName}, used default editor`);
+        Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
         return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
     }

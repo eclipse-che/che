@@ -22,7 +22,7 @@ export class CheApiRequestHandler {
      * This method adds a request interceptor into axios request interceptors list and returns an ID of the interceptor
      */
     static enableRequestInterceptor(): number {
-        Logger.debug(`CheApiRequestHandler.enableRequestInterceptor`);
+        Logger.debug();
         return axios.interceptors.request.use( request => {
                 try {
                     let request_censored: AxiosRequestConfig = JSON.parse(JSON.stringify(request));
@@ -31,14 +31,14 @@ export class CheApiRequestHandler {
                         return request;
                     }
                     if (request_censored.headers === undefined) {
-                        Logger.warn('Request does not contain any headers object');
+                        Logger.warn('request does not contain any headers object');
                         return request;
                     }
                     request_censored.headers.Authorization = 'CENSORED';
                     request_censored.headers.Cookie = 'CENSORED';
-                    Logger.info(`RequestHandler request:\n` + request_censored);
+                    Logger.info(`request:\n` + request_censored);
                 } catch (err) {
-                    Logger.error(`RequestHandler request: Failed to deep clone AxiosRequestConfig:` + err);
+                    Logger.error(`request: Failed to deep clone AxiosRequestConfig:` + err);
                 }
             return request;
         });
@@ -48,7 +48,7 @@ export class CheApiRequestHandler {
      * This method adds a response interceptor into axios response interceptors list and returns an ID of the interceptor
      */
     static enableResponseInterceptor(): number {
-        Logger.debug(`CheApiRequestHandler.enableResponseRedirects`);
+        Logger.debug();
         return axios.interceptors.response.use( response => {
                 try {
                     let response_censored: AxiosResponse = JSON.parse(JSON.stringify(response, (key, value) => {
@@ -62,11 +62,11 @@ export class CheApiRequestHandler {
                         return response;
                     }
                     if (response_censored.config === undefined) {
-                        Logger.warn('Response does not contain any config object');
+                        Logger.warn('response does not contain any config object');
                         return response;
                     }
                     if (response_censored.config.headers === undefined) {
-                        Logger.warn('Response does not contain any config.headers object');
+                        Logger.warn('response does not contain any config.headers object');
                         return response;
                     }
                     response_censored.config.headers.Authorization = 'CENSORED';
@@ -77,9 +77,9 @@ export class CheApiRequestHandler {
                     if (response_censored.data.refresh_token !== null) {
                         response_censored.data.refresh_token = 'CENSORED';
                     }
-                    Logger.info(`RequestHandler response:\n` + response_censored);
+                    Logger.info(`response:\n` + response_censored);
                 } catch (err) {
-                    Logger.error(`RequestHandler response: Failed to deep clone AxiosResponse:` + err);
+                    Logger.error(`response: Failed to deep clone AxiosResponse:` + err);
                 }
             return response;
         });

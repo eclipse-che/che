@@ -79,7 +79,9 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         });
     }
 
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
     test('Registering the running workspace', async function (): Promise<void> {
         registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());

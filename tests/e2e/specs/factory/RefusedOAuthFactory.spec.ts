@@ -84,7 +84,9 @@ suite(`Create a workspace via launching a factory from the ${FactoryTestConstant
         });
     }
 
-    workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+    });
 
     test('The workspace starts with access deny flag in the url', async function (): Promise<void> {
         expect(await driverHelper.getDriver().getCurrentUrl()).contains('&error_code=access_denied');

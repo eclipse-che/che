@@ -29,25 +29,25 @@ export class Workspaces {
     }
 
     async waitPage(timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug('Workspaces.waitPage');
+        Logger.debug();
 
         await this.driverHelper.waitVisibility(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickAddWorkspaceButton(timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug('Workspaces.clickAddWorkspaceButton');
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
     }
 
     async clickOpenButton(workspaceName: string, timeout: number = TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
-        Logger.debug('Workspaces.clickOpenButton');
+        Logger.debug();
 
         await this.driverHelper.waitAndClick(this.getOpenButtonLocator(workspaceName), timeout);
     }
 
     async waitWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.waitWorkspaceListItem "${workspaceName}"`);
+        Logger.debug(`"${workspaceName}"`);
 
         const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
@@ -55,7 +55,7 @@ export class Workspaces {
     }
 
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.waitWorkspaceWithRunningStatus "${workspaceName}"`);
+        Logger.debug(`"${workspaceName}"`);
 
         const runningStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Running);
 
@@ -63,7 +63,7 @@ export class Workspaces {
     }
 
     async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.waitWorkspaceWithStoppedStatus "${workspaceName}"`);
+        Logger.debug(`"${workspaceName}"`);
 
         const stoppedStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped);
 
@@ -71,7 +71,7 @@ export class Workspaces {
     }
 
     async clickWorkspaceListItem(workspaceName: string, timeout: number = TimeoutConstants.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.clickWorkspaceListItem "${workspaceName}"`);
+        Logger.debug(`"${workspaceName}"`);
 
         const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
 
@@ -79,36 +79,36 @@ export class Workspaces {
     }
 
     async clickActionsButton(workspaceName: string): Promise<void> {
-        Logger.debug(`Workspaces.clickActionsButton of the '${workspaceName}' list item`);
+        Logger.debug(`of the '${workspaceName}' list item`);
 
         await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
     }
 
     async waitActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.waitActionsPopup of the '${workspaceName}' list item`);
+        Logger.debug(`of the '${workspaceName}' list item`);
 
         await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
     }
 
     async openActionsPopup(workspaceName: string, timeout: number = TimeoutConstants.TS_CONTEXT_MENU_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.openActionsPopup for the '${workspaceName}' list item`);
+        Logger.debug(`for the '${workspaceName}' list item`);
         await this.clickActionsButton(workspaceName);
         await this.waitActionsPopup(workspaceName, timeout);
     }
 
     async clickActionsDeleteButton(workspaceName: string): Promise<void> {
-        Logger.debug(`Workspaces.clickActionsDeleteButton for the '${workspaceName}' list item`);
+        Logger.debug(`for the '${workspaceName}' list item`);
 
         await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Delete Workspace'));
     }
 
     async clickActionsStopWorkspaceButton(workspaceName: string): Promise<void> {
-        Logger.debug(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item`);
+        Logger.debug(`for the '${workspaceName}' list item`);
         // todo: workaround because of issue CRW-3649
         try {
             await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
         } catch (e) {
-            Logger.warn(`Workspaces.clickActionsStopWorkspaceButton for the '${workspaceName}' list item - popup was missed, try to click one more time (issue CRW-3649).`);
+            Logger.warn(`for the '${workspaceName}' list item - popup was missed, try to click one more time (issue CRW-3649).`);
 
             await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
             await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
@@ -116,7 +116,7 @@ export class Workspaces {
     }
 
     async waitDeleteWorkspaceConfirmationWindow(timeout: number = TimeoutConstants.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
-        Logger.debug(`Workspaces.waitDeleteWorkspaceConfirmationWindow`);
+        Logger.debug();
 
         const confirmationWindowLocator: By = By.xpath(`//div[@aria-label='Delete workspaces confirmation window']`);
 

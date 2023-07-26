@@ -30,9 +30,9 @@ export class OcpRedHatLoginPage implements ICheLoginPage {
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async login(): Promise<void> {
-        Logger.debug('OcpRedHatLoginPage.login');
+        Logger.debug();
 
-        Logger.debug('OcpRedHatLoginPage.login wait for LogInWithOpenShift page and click button');
+        Logger.debug('wait for LogInWithOpenShift page and click button');
         await this.driverHelper.waitPresence(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR), TimeoutConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
         await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
 
