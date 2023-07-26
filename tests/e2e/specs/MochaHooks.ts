@@ -28,51 +28,51 @@ const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUt
 let latestWorkspace: string = '';
 
 export function registerRunningWorkspace(workspaceName: string): void {
-    Logger.debug(`with workspaceName:${workspaceName}`);
-    latestWorkspace = workspaceName;
+  Logger.debug(`with workspaceName:${workspaceName}`);
+  latestWorkspace = workspaceName;
 }
 
 exports.mochaHooks = {
-    beforeAll: [
-        async function enableRequestInterceptor(): Promise<void> {
-            if (BaseTestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
-                CheApiRequestHandler.enableRequestInterceptor();
-            }
-        },
-        async function enableResponseInterceptor(): Promise<void> {
-            if (BaseTestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
-                CheApiRequestHandler.enableResponseInterceptor();
-            }
-        },
-        async function initMonacoPageObjects(): Promise<void> {
-            // init vscode-extension-tester monaco-page-objects
-            monacoPageObjects.initPageObjects(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
-        },
-        async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
-            if (BaseTestConstants.TS_DEBUG_MODE) {
-                for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
-                    Object.defineProperty(TimeoutConstants, timeout, { value: seconds as number * 100 });
-                }
-            }
-        },
-    ],
-    afterEach: [
-        // stop and remove running workspace
-        async function (this: Mocha.Context): Promise<void> {
-            if (this.currentTest?.state === 'failed') {
-                if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
-                    Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
-                    await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
-                }
-            }
-        },
-    ],
-    afterAll: [
-        async function stopTheDriver(): Promise<void> {
-            if (!BaseTestConstants.TS_DEBUG_MODE && ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
-                await driverHelper.getDriver().quit();
-                Logger.info('Chrome driver session stopped.');
-            }
-        },
-    ]
+  beforeAll: [
+    async function enableRequestInterceptor(): Promise<void> {
+      if (BaseTestConstants.TS_SELENIUM_REQUEST_INTERCEPTOR) {
+        CheApiRequestHandler.enableRequestInterceptor();
+      }
+    },
+    async function enableResponseInterceptor(): Promise<void> {
+      if (BaseTestConstants.TS_SELENIUM_RESPONSE_INTERCEPTOR) {
+        CheApiRequestHandler.enableResponseInterceptor();
+      }
+    },
+    async function initMonacoPageObjects(): Promise<void> {
+      // init vscode-extension-tester monaco-page-objects
+      monacoPageObjects.initPageObjects(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, vscodeExtensionTesterLocators.getLocatorsPath(), driverHelper.getDriver(), 'google-chrome');
+    },
+    async function prolongTimeoutConstantsInDebugMode(): Promise<void> {
+      if (BaseTestConstants.TS_DEBUG_MODE) {
+        for (let [timeout, seconds] of Object.entries(TimeoutConstants)) {
+          Object.defineProperty(TimeoutConstants, timeout, { value: seconds as number * 100 });
+        }
+      }
+    },
+  ],
+  afterEach: [
+    // stop and remove running workspace
+    async function(this: Mocha.Context): Promise<void> {
+      if (this.currentTest?.state === 'failed') {
+        if (BaseTestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
+          Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
+          await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
+        }
+      }
+    },
+  ],
+  afterAll: [
+    async function stopTheDriver(): Promise<void> {
+      if (!BaseTestConstants.TS_DEBUG_MODE && ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+        await driverHelper.getDriver().quit();
+        Logger.info('Chrome driver session stopped.');
+      }
+    },
+  ]
 };

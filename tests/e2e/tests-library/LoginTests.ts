@@ -18,36 +18,36 @@ import { BaseTestConstants } from '../constants/BaseTestConstants';
 
 @injectable()
 export class LoginTests {
-    constructor(
-        @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
-        @inject(TYPES.CheLogin) private readonly productLoginPage: ICheLoginPage,
-        @inject(TYPES.OcpLogin) private readonly ocpLoginPage: IOcpLoginPage,
-        @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) {
-    }
+  constructor(
+    @inject(CLASSES.BrowserTabsUtil) private readonly browserTabsUtil: BrowserTabsUtil,
+    @inject(TYPES.CheLogin) private readonly productLoginPage: ICheLoginPage,
+    @inject(TYPES.OcpLogin) private readonly ocpLoginPage: IOcpLoginPage,
+    @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) {
+  }
 
-    loginIntoChe(): void {
-        test('Login', async () => {
-            if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BaseTestConstants.TS_SELENIUM_BASE_URL)) {
-                await this.browserTabsUtil.navigateTo(BaseTestConstants.TS_SELENIUM_BASE_URL);
-            }
-            await this.productLoginPage.login();
-            await this.browserTabsUtil.maximize();
-            await this.dashboard.waitStartingPageLoaderDisappearance();
-        });
-    }
+  loginIntoChe(): void {
+    test('Login', async () => {
+      if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BaseTestConstants.TS_SELENIUM_BASE_URL)) {
+        await this.browserTabsUtil.navigateTo(BaseTestConstants.TS_SELENIUM_BASE_URL);
+      }
+      await this.productLoginPage.login();
+      await this.browserTabsUtil.maximize();
+      await this.dashboard.waitStartingPageLoaderDisappearance();
+    });
+  }
 
-    loginIntoOcpConsole(): void {
-        test('Login into ocp console', async () => {
-            const openshiftConsoleUrl: string = BaseTestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
-            await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
-            await this.ocpLoginPage.login();
-            await this.browserTabsUtil.maximize();
-        });
-    }
+  loginIntoOcpConsole(): void {
+    test('Login into ocp console', async () => {
+      const openshiftConsoleUrl: string = BaseTestConstants.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
+      await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
+      await this.ocpLoginPage.login();
+      await this.browserTabsUtil.maximize();
+    });
+  }
 
-    logoutFromChe(): void {
-        test('Logout', async () => {
-            await this.dashboard.logout();
-        });
-    }
+  logoutFromChe(): void {
+    test('Logout', async () => {
+      await this.dashboard.logout();
+    });
+  }
 }

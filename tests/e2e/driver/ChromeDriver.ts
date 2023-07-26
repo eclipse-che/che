@@ -10,66 +10,66 @@
 import 'chromedriver';
 import 'reflect-metadata';
 import { injectable } from 'inversify';
-import { ThenableWebDriver, Builder } from 'selenium-webdriver';
+import { Builder, ThenableWebDriver } from 'selenium-webdriver';
 import { IDriver } from './IDriver';
 import { Options } from 'selenium-webdriver/chrome';
 import { ChromeDriverConstants } from '../constants/ChromeDriverConstants';
 
 @injectable()
 export class ChromeDriver implements IDriver {
-    private readonly driver: ThenableWebDriver | undefined;
+  private readonly driver: ThenableWebDriver | undefined;
 
-    constructor() {
-        const options: Options = this.getDriverOptions();
-        if (ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
-            this.driver = this.getDriverBuilder(options).build();
-        }
+  constructor() {
+    const options: Options = this.getDriverOptions();
+    if (ChromeDriverConstants.TS_USE_WEB_DRIVER_FOR_TEST) {
+      this.driver = this.getDriverBuilder(options).build();
+    }
+  }
+
+  get(): ThenableWebDriver {
+    return this.driver as ThenableWebDriver;
+  }
+
+  async setWindowSize(): Promise<void> {
+    await (this.driver as ThenableWebDriver)
+      .manage()
+      .window()
+      .setSize(ChromeDriverConstants.TS_SELENIUM_RESOLUTION_WIDTH, ChromeDriverConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
+  }
+
+  private getDriverOptions(): Options {
+    let options: Options = new Options()
+      .addArguments('--no-sandbox')
+      .addArguments('--disable-web-security')
+      .addArguments('--allow-running-insecure-content')
+      .addArguments('--ignore-certificate-errors');
+    // if 'true' run in 'headless' mode
+    if (ChromeDriverConstants.TS_SELENIUM_HEADLESS) {
+      options = options.addArguments('headless');
+    }
+    return options;
+  }
+
+  private getDriverBuilder(options: Options): Builder {
+    const disableW3copts: object = { 'goog:chromeOptions': { 'w3c': false } };
+    let builder: Builder = new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(options);
+
+    // if 'false' w3c protocol is disabled
+    if (!ChromeDriverConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
+      builder.withCapabilities(disableW3copts)
+        .forBrowser('chrome')
+        .setChromeOptions(options);
     }
 
-    get(): ThenableWebDriver {
-        return this.driver as ThenableWebDriver;
+    // if 'true' run with remote driver
+    if (ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
+      builder = builder.usingServer(ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
     }
 
-    async setWindowSize(): Promise<void> {
-        await (this.driver as ThenableWebDriver)
-            .manage()
-            .window()
-            .setSize(ChromeDriverConstants.TS_SELENIUM_RESOLUTION_WIDTH, ChromeDriverConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
-    }
+    return builder;
 
-    private getDriverOptions(): Options {
-        let options: Options = new Options()
-            .addArguments('--no-sandbox')
-            .addArguments('--disable-web-security')
-            .addArguments('--allow-running-insecure-content')
-            .addArguments('--ignore-certificate-errors');
-        // if 'true' run in 'headless' mode
-        if (ChromeDriverConstants.TS_SELENIUM_HEADLESS) {
-            options = options.addArguments('headless');
-        }
-        return options;
-    }
-
-    private getDriverBuilder(options: Options): Builder {
-        const disableW3copts: object = { 'goog:chromeOptions' : { 'w3c' : false }};
-        let builder: Builder = new Builder()
-            .forBrowser('chrome')
-            .setChromeOptions(options);
-
-        // if 'false' w3c protocol is disabled
-        if (! ChromeDriverConstants.TS_SELENIUM_W3C_CHROME_OPTION) {
-            builder.withCapabilities(disableW3copts)
-            .forBrowser('chrome')
-            .setChromeOptions(options);
-        }
-
-        // if 'true' run with remote driver
-        if (ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
-            builder = builder.usingServer(ChromeDriverConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
-        }
-
-        return builder;
-
-    }
+  }
 
 }

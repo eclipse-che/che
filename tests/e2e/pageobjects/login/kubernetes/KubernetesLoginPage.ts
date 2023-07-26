@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { injectable, inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../../configs/inversify.types';
 import { Logger } from '../../../utils/Logger';
 import { ICheLoginPage } from '../interfaces/ICheLoginPage';
@@ -18,16 +18,16 @@ import { OAuthConstants } from '../../../constants/OAuthConstants';
 @injectable()
 export class KubernetesLoginPage implements ICheLoginPage {
 
-    constructor(
-        @inject(CLASSES.DexLoginPage) private readonly dexLoginPage: DexLoginPage) { }
+  constructor(
+    @inject(CLASSES.DexLoginPage) private readonly dexLoginPage: DexLoginPage) { }
 
-    async login(): Promise<void> {
-        Logger.debug();
+  async login(): Promise<void> {
+    Logger.debug();
 
-        await this.dexLoginPage.waitDexLoginPage();
-        await this.dexLoginPage.enterUserNameKubernetes(OAuthConstants.TS_SELENIUM_K8S_USERNAME);
-        await this.dexLoginPage.enterPasswordKubernetes(OAuthConstants.TS_SELENIUM_K8S_PASSWORD);
-        await this.dexLoginPage.clickOnLoginButton();
-        await this.dexLoginPage.waitDexLoginPageDisappearance();
-    }
+    await this.dexLoginPage.waitDexLoginPage();
+    await this.dexLoginPage.enterUserNameKubernetes(OAuthConstants.TS_SELENIUM_K8S_USERNAME);
+    await this.dexLoginPage.enterPasswordKubernetes(OAuthConstants.TS_SELENIUM_K8S_PASSWORD);
+    await this.dexLoginPage.clickOnLoginButton();
+    await this.dexLoginPage.waitDexLoginPageDisappearance();
+  }
 }

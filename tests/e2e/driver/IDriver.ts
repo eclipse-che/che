@@ -10,5 +10,5 @@
 import { ThenableWebDriver } from 'selenium-webdriver';
 
 export interface IDriver {
-    get(): ThenableWebDriver;
+  get(): ThenableWebDriver;
 }

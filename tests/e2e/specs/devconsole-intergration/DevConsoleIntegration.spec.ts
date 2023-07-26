@@ -8,11 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import {
-    SideBarView,
-    ViewItem,
-    ViewSection
-} from 'monaco-page-objects';
+import { SideBarView, ViewItem, ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
@@ -36,65 +32,65 @@ let ocpApplicationPage: OcpApplicationPage;
 const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor();
 
 // works only with no-admin user
-suite(`DevConsole Integration`, async function (): Promise<void> {
-    // test specific data
-    const gitImportRepo: string = 'https://github.com/crw-qe/summit-lab-spring-music.git';
-    const gitImportReference: string = 'pipeline';
-    const projectLabel: string = 'app.openshift.io/runtime=spring';
-    const projectName: string = 'devconsole-integration-test';
+suite(`DevConsole Integration`, async function(): Promise<void> {
+  // test specific data
+  const gitImportRepo: string = 'https://github.com/crw-qe/summit-lab-spring-music.git';
+  const gitImportReference: string = 'pipeline';
+  const projectLabel: string = 'app.openshift.io/runtime=spring';
+  const projectName: string = 'devconsole-integration-test';
 
-    suiteSetup('Create new empty project using ocp', async function (): Promise<void> {
-        kubernetesCommandLineToolsExecutor.loginToOcp();
-        kubernetesCommandLineToolsExecutor.createProject(projectName);
-    });
+  suiteSetup('Create new empty project using ocp', async function(): Promise<void> {
+    kubernetesCommandLineToolsExecutor.loginToOcp();
+    kubernetesCommandLineToolsExecutor.createProject(projectName);
+  });
 
-    loginTests.loginIntoOcpConsole();
+  loginTests.loginIntoOcpConsole();
 
-    test('Select test project and Developer role on DevConsole', async function (): Promise<void> {
-        await ocpMainPage.selectDeveloperRole();
-        await ocpMainPage.selectProject(projectName);
-    });
+  test('Select test project and Developer role on DevConsole', async function(): Promise<void> {
+    await ocpMainPage.selectDeveloperRole();
+    await ocpMainPage.selectProject(projectName);
+  });
 
-    test('Open import from git project page', async function (): Promise<void> {
-        ocpImportPage = await ocpMainPage.openImportFromGitPage();
-    });
+  test('Open import from git project page', async function(): Promise<void> {
+    ocpImportPage = await ocpMainPage.openImportFromGitPage();
+  });
 
-    test('Fill and submit import data', async function (): Promise<void> {
-        ocpApplicationPage = await ocpImportPage.fitAndSubmitConfiguration(gitImportRepo, gitImportReference, projectLabel);
-    });
+  test('Fill and submit import data', async function(): Promise<void> {
+    ocpApplicationPage = await ocpImportPage.fitAndSubmitConfiguration(gitImportRepo, gitImportReference, projectLabel);
+  });
 
-    test('Wait until application creates', async function (): Promise<void> {
-        await ocpApplicationPage.waitApplicationIcon();
-    });
+  test('Wait until application creates', async function(): Promise<void> {
+    await ocpApplicationPage.waitApplicationIcon();
+  });
 
-    test('Check if application has worked link "Open Source Code"', async function (): Promise<void> {
-        await ocpApplicationPage.waitAndOpenEditSourceCodeIcon();
-    });
+  test('Check if application has worked link "Open Source Code"', async function(): Promise<void> {
+    await ocpApplicationPage.waitAndOpenEditSourceCodeIcon();
+  });
 
-    loginTests.loginIntoChe();
+  loginTests.loginIntoChe();
 
-    test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
-        await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-    });
+  test('Obtain workspace name from workspace loader page', async function(): Promise<void> {
+    await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+  });
 
-    test('Registering the running workspace', async function (): Promise<void> {
-        registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-    });
+  test('Registering the running workspace', async function(): Promise<void> {
+    registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+  });
 
-    test('Check if application source code opens in workspace', async function (): Promise<void> {
-        await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-    });
+  test('Check if application source code opens in workspace', async function(): Promise<void> {
+    await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+  });
 
-    test('Check if project and files imported', async function (): Promise<void> {
-        const applicationSourceProjectName: string = StringUtil.getProjectNameFromGitUrl(gitImportRepo);
-        const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
-        const isFileImported: ViewItem | undefined = await projectSection.findItem(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-        expect(isFileImported).not.eqls(undefined);
-    });
+  test('Check if project and files imported', async function(): Promise<void> {
+    const applicationSourceProjectName: string = StringUtil.getProjectNameFromGitUrl(gitImportRepo);
+    const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
+    const isFileImported: ViewItem | undefined = await projectSection.findItem(BaseTestConstants.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
+    expect(isFileImported).not.eqls(undefined);
+  });
 
-    loginTests.logoutFromChe();
+  loginTests.logoutFromChe();
 
-    suiteTeardown('Delete project using ocp', async function (): Promise<void> {
-        kubernetesCommandLineToolsExecutor.deleteProject(projectName);
-    });
+  suiteTeardown('Delete project using ocp', async function(): Promise<void> {
+    kubernetesCommandLineToolsExecutor.deleteProject(projectName);
+  });
 });

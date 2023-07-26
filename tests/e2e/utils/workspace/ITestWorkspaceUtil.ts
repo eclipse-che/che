@@ -11,33 +11,33 @@
 import { WorkspaceStatus } from './WorkspaceStatus';
 
 export interface ITestWorkspaceUtil {
-    waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): void;
+  waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): void;
 
-    stopWorkspaceByName(workspaceName: string): void;
+  stopWorkspaceByName(workspaceName: string): void;
 
-    /**
-     * Delete a workspace without stopping phase (similar with force deleting)
-     */
-    deleteWorkspaceByName(workspaceName: string): void;
+  /**
+   * Delete a workspace without stopping phase (similar with force deleting)
+   */
+  deleteWorkspaceByName(workspaceName: string): void;
 
-    /**
-     * Stop workspace before deleting with checking stopping phase
-     */
-    stopAndDeleteWorkspaceByName(workspaceName: string): void;
+  /**
+   * Stop workspace before deleting with checking stopping phase
+   */
+  stopAndDeleteWorkspaceByName(workspaceName: string): void;
 
-    /**
-     * Stop all run workspaces in the namespace
-     */
-    stopAllRunningWorkspaces(namespace: string): void;
+  /**
+   * Stop all run workspaces in the namespace
+   */
+  stopAllRunningWorkspaces(namespace: string): void;
 
-    /**
-     * Stop all run workspaces, check statused and remove the workspaces
-     */
-    stopAndDeleteAllRunningWorkspaces(namespace: string): void;
+  /**
+   * Stop all run workspaces, check statused and remove the workspaces
+   */
+  stopAndDeleteAllRunningWorkspaces(namespace: string): void;
 
-    /**
-     * Stop all run workspaces without stopping and waiting for of 'Stopped' phase
-     * Similar with 'force' deleting
-     */
-    deleteAllWorkspaces(namespace: string): void;
+  /**
+   * Stop all run workspaces without stopping and waiting for of 'Stopped' phase
+   * Similar with 'force' deleting
+   */
+  deleteAllWorkspaces(namespace: string): void;
 }

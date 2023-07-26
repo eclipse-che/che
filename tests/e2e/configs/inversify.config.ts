@@ -12,7 +12,7 @@ import 'reflect-metadata';
 import { Container } from 'inversify';
 import { IDriver } from '../driver/IDriver';
 import { ChromeDriver } from '../driver/ChromeDriver';
-import { TYPES, CLASSES } from './inversify.types';
+import { CLASSES, TYPES } from './inversify.types';
 import { TestWorkspaceUtil } from '../utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
 import { OcpUserLoginPage } from '../pageobjects/login/openshift/OcpUserLoginPage';
@@ -73,10 +73,10 @@ e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
 
-BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT  ?
-    OAuthConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
-        e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage) :
-    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(KubernetesLoginPage);
+BaseTestConstants.TS_PLATFORM === Platform.OPENSHIFT ?
+  OAuthConstants.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH ?
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(RegularUserOcpCheLoginPage) :
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(OcpRedHatLoginPage) :
+  e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(KubernetesLoginPage);
 
 export { e2eContainer };

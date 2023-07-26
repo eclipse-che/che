@@ -21,54 +21,54 @@ import { MonacoConstants } from '../../constants/MonacoConstants';
  */
 
 export class CheCodeLocatorLoader extends LocatorLoader {
-    readonly webCheCodeLocators: Locators;
+  readonly webCheCodeLocators: Locators;
 
-    constructor() {
-        super(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, getLocatorsPath());
-        this.webCheCodeLocators = this.mergeLocators() as Locators;
-    }
+  constructor() {
+    super(MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, MonacoConstants.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION, getLocatorsPath());
+    this.webCheCodeLocators = this.mergeLocators() as Locators;
+  }
 
-    private webLocatorDiff(): LocatorDiff {
-        return {
-            locators: {
-                WelcomeContent: {
-                    text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
-                    button: By.xpath('//a[contains(., "trust")]')
-                },
-            },
-            extras: {
-                ExtensionsViewSection: {
-                    requireReloadButton: By.xpath('//a[text()=\'Reload Required\']')
-                }
-            }
-        };
-    }
-
-    private merge(target: any, obj: any): object {
-        for (const key in obj) {
-            if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-                continue;
-            }
-
-            let oldVal: any = obj[key];
-            let newVal: any = target[key];
-
-            if (typeof (newVal) === 'object' && typeof (oldVal) === 'object') {
-                target[key] = this.merge(newVal, oldVal);
-            } else {
-                target[key] = clone(oldVal);
-            }
+  private webLocatorDiff(): LocatorDiff {
+    return {
+      locators: {
+        WelcomeContent: {
+          text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
+          button: By.xpath('//a[contains(., "trust")]')
         }
-        return target;
+      },
+      extras: {
+        ExtensionsViewSection: {
+          requireReloadButton: By.xpath('//a[text()=\'Reload Required\']')
+        }
+      }
+    };
+  }
+
+  private merge(target: any, obj: any): object {
+    for (const key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+        continue;
+      }
+
+      let oldVal: any = obj[key];
+      let newVal: any = target[key];
+
+      if (typeof (newVal) === 'object' && typeof (oldVal) === 'object') {
+        target[key] = this.merge(newVal, oldVal);
+      } else {
+        target[key] = clone(oldVal);
+      }
     }
+    return target;
+  }
 
-    private mergeLocators(): Locators {
-        const target: Locators = super.loadLocators();
+  private mergeLocators(): Locators {
+    const target: Locators = super.loadLocators();
 
-        this.merge(target, this.webLocatorDiff().locators as Locators);
-        this.merge(target, this.webLocatorDiff().extras as Locators);
+    this.merge(target, this.webLocatorDiff().locators as Locators);
+    this.merge(target, this.webLocatorDiff().extras as Locators);
 
-        return target;
-    }
+    return target;
+  }
 }
 
