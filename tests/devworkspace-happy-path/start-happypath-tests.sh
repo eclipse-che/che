@@ -17,7 +17,7 @@ set -u
 # uncomment to print each command before executing it
 # set -x
 
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 
 export WORKDIR="${WORKDIR:-${SCRIPT_DIR}/workdir/e2e}"
 export CHE_NAMESPACE="${CHE_NAMESPACE:-eclipse-che}"

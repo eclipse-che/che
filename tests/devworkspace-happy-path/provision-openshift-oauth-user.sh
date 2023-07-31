@@ -15,7 +15,7 @@ set -o pipefail
 # error on unset variables
 set -u
 # uncomment to print each command before executing it
-set -x
+# set -x
 
 SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 WORKDIR_KUBE="${WORKDIR:-${SCRIPT_DIR}/workdir/.kube}"
