@@ -33,11 +33,7 @@ run() {
   oc create namespace "${CHE_NAMESPACE}" || true
   oc delete pod happy-path-che -n "${CHE_NAMESPACE}" --grace-period=30 --ignore-not-found
   # patch happy-path-che.yaml
-  set +u
-    if [[ -z "${ECLIPSE_CHE_URL}" ]]; then
-      ECLIPSE_CHE_URL=http://$(oc get route -n "${CHE_NAMESPACE}" che -o jsonpath='{.status.ingress[0].host}')
-    fi
-  set -u
+  ECLIPSE_CHE_URL=${ECLIPSE_CHE_URL:-http://$(oc get route -n "${CHE_NAMESPACE}" che -o jsonpath='{.status.ingress[0].host}')}
   TS_SELENIUM_DEVWORKSPACE_URL="${ECLIPSE_CHE_URL}/#${HAPPY_PATH_TEST_PROJECT}"
   HAPPY_PATH_POD_FILE=${SCRIPT_DIR}/resources/pod-che-happy-path.yaml
   cp $HAPPY_PATH_POD_FILE ${WORKDIR}/e2e-pod.yaml
