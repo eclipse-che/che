@@ -13,7 +13,7 @@ export enum GitProviderType {
     GITHUB = 'github',
     GITLAB = 'gitlab',
     BITBUCKET = 'bitbucket',
-    AZURE = 'azure'
+    AZURE_DEVOPS = 'azure-devops'
 }
 
 export const FactoryTestConstants: any = {
