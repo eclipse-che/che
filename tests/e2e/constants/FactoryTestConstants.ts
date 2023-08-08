@@ -28,6 +28,11 @@ export const FactoryTestConstants: any = {
     TS_SELENIUM_FACTORY_GIT_REPO_URL: process.env.TS_SELENIUM_FACTORY_GIT_REPO_URL || '',
 
     /**
+     * Git repository name
+     */
+    TS_SELENIUM_PROJECT_NAME: process.env.TS_SELENIUM_PROJECT_NAME || '',
+
+    /**
      * Is factory repository URL private or no
      */
     TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: process.env.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO === 'true',

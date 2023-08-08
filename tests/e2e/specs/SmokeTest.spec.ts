@@ -40,7 +40,7 @@ suite(`The SmokeTest userstory`, async function (): Promise<void> {
             await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
         });
         test('Check a project folder has been created', async function (): Promise<void> {
-            const projectName: string = StringUtil.getProjectNameFromGitUrl(factoryUrl);
+            const projectName: string = FactoryTestConstants.TS_SELENIUM_PROJECT_NAME || StringUtil.getProjectNameFromGitUrl(factoryUrl);
             projectSection = await new SideBarView().getContent().getSection(projectName);
             Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
         });
