@@ -39,18 +39,14 @@ jobs:
         run: |
           echo running on PR ${GITHUB_REF}, branch - ${GITHUB_HEAD_REF}
           echo "pr_number=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> "$GITHUB_ENV"
+          docker images
+          # remove build-in images form the VM becqause it is not used
+          docker rmi -f $(docker images -aq)
 
       - name: Configuring nodejs 16.x version
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-
-      - name: Pull Che-Code Docker image
-        run: |
-          #
-          # pull che-code:next docker image
-          #
-          docker pull quay.io/che-incubator/che-code:next
 
       - name: Start minikube
         id: run-minikube
@@ -71,7 +67,7 @@ jobs:
 
           # get patch file to set up resources
           wget https://raw.githubusercontent.com/che-incubator/che-code/main/build/test/github-minikube-checluster-patch.yaml -P /tmp
-          
+
           #
           # deploy Che
           #
@@ -111,10 +107,17 @@ jobs:
 
       - name: Build E2E test docker image
         run: |
-          set -xe
+            # for saving disk space we can remove the assembly folder because it is legacy code
+            rm -rf assembly
+            cd tests/e2e
+            docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
 
-          cd tests/e2e
-          docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
+        # we have already ran API test, built test image and do not need e2e test-code, remove for saving disk space
+      - name: Clean up resources
+        run: |
+           ls -la ${GITHUB_WORKSPACE}
+           rm -rf ${GITHUB_WORKSPACE}/che
+           docker images
 
       - name: Run Empty Workspace UI test from che-e2e container
         run: |
