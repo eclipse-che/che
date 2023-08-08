@@ -9,7 +9,7 @@
  **********************************************************************/
 export const PluginsTestConstants: any = {
     /**
-     * Dashboard samples to check in RecomendedExtentions.spec.ts
+     * Dashboard samples to check in RecommendedExtensions.spec.ts
      */
     TS_SAMPLE_LIST: process.env.TS_SAMPLE_LIST || 'Node.js MongoDB,Node.js Express',
 };
