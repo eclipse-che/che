@@ -51,7 +51,7 @@ export class OauthPage {
                 OauthPage.DENY_ACCESS_BUTTON = By.xpath('//button[contains(., "Cancel")]');
             }
                 break;
-            case GitProviderType.AZURE: {
+            case GitProviderType.AZURE_DEVOPS: {
                 OauthPage.LOGIN_FORM = By.xpath('//input[@type="email"]');
                 OauthPage.PASSWORD_FORM = By.xpath('//input[@type="password"]');
                 OauthPage.APPROVE_BUTTON = By.id('accept-button');
@@ -61,7 +61,7 @@ export class OauthPage {
             }
                 break;
             default: {
-                throw new Error(`Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB}, ${GitProviderType.AZURE} or ${GitProviderType.BITBUCKET}`);
+                throw new Error(`Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB}, ${GitProviderType.AZURE_DEVOPS} or ${GitProviderType.BITBUCKET}`);
             }
         }
     }
@@ -131,12 +131,12 @@ export class OauthPage {
 
         await this.waitLoginPage();
         await this.enterUserName(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-        if (FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE) {
+        if (FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE_DEVOPS) {
             await this.clickOnSubmitButton();
         }
         await this.enterPassword(OAuthConstants.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
         await this.clickOnSubmitButton();
-        if (FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE) {
+        if (FactoryTestConstants.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE_DEVOPS) {
             await this.clickOnNotRememberCredentialsButton();
         }
         await this.waitClosingLoginPage();
@@ -149,8 +149,8 @@ export class OauthPage {
             await this.clickOnApproveButton();
             await this.waitDisappearanceOauthPage();
         } catch (e) {
-            Logger.debug('OauthPage.confirmAccess - access was not confirmed, retrying to click conformation button');
-            // workaround for github, azure oauth conformation page (bot security)
+            Logger.debug('OauthPage.confirmAccess - access was not confirmed, retrying to click confirmation button');
+            // workaround for github, AZURE_DEVOPS oauth confirmation page (bot security)
             await this.driverHelper.getAction()
                 .move({
                     origin: await this.driverHelper.waitPresence(OauthPage.APPROVE_BUTTON)
@@ -168,8 +168,8 @@ export class OauthPage {
             await this.clickOnDenyAccessButton();
             await this.waitDisappearanceOauthPage();
         } catch (e) {
-            Logger.debug('OauthPage.denyAccess - deny access was not confirmed, retrying to click conformation button');
-            // workaround for github, azure oauth conformation page (bot security)
+            Logger.debug('OauthPage.denyAccess - deny access was not confirmed, retrying to click confirmation button');
+            // workaround for github, AZURE_DEVOPS oauth confirmation page (bot security)
             await this.driverHelper.getAction()
                 .move({
                     origin: await this.driverHelper.waitPresence(OauthPage.DENY_ACCESS_BUTTON)
