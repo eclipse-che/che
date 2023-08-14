@@ -75,7 +75,7 @@ sleep 3
 
 echo "[INFO] Downloading test report."
 mkdir "${ARTIFACT_DIR}/e2e"
-oc rsync -n "${CHE_NAMESPACE}" ${HAPPY_PATH_POD_NAME}:/tmp/e2e/report/" ${ARTIFACT_DIR}/e2e" -c download-reports
+oc rsync -n "${CHE_NAMESPACE}" ${HAPPY_PATH_POD_NAME}:/tmp/e2e/report/ "${ARTIFACT_DIR}/e2e" -c download-reports
 oc exec -n "${CHE_NAMESPACE}" ${HAPPY_PATH_POD_NAME} -c download-reports -- touch /tmp/done
 
 EXIT_CODE=$(oc logs -n "${CHE_NAMESPACE}" ${HAPPY_PATH_POD_NAME} -c happy-path-test | grep EXIT_CODE)
