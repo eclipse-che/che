@@ -76,7 +76,9 @@ bump_version () {
 
   pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
-  sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client|@eclipse-che\/che-devworkspace-generator/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
+  # update devworkspace generator version
+  jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\" |" package.json > package.json.update
+  mv package.json.update package.json
   popd  >/dev/null || exit
 
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
@@ -154,7 +156,9 @@ set -e
 echo "${VERSION}" > VERSION
 
 pushd tests/e2e >/dev/null || exit
-sed_in_place -r -e "/@eclipse-che\/api|@eclipse-che\/workspace-client|@eclipse-che\/workspace-telemetry-client|@eclipse-che\/che-devworkspace-generator/!s/(\"@eclipse-che\/..*\": )(\".*\")/\1\"$VERSION\"/" package.json
+# update devworkspace generator version
+jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\" |" package.json > package.json.update
+mv package.json.update package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
 popd >/dev/null || exit
 
