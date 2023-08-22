@@ -18,6 +18,8 @@ export const BaseTestConstants: any = {
    */
   TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
+  IS_CLUSTER_DISCONNECTED: () => BaseTestConstants.TS_SELENIUM_BASE_URL.includes('airgap'),
+
   /**
    * Choose the platform where "che" application deployed, "openshift" by default.
    */
