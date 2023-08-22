@@ -4,9 +4,10 @@ import path from 'path';
 import YAML from 'yaml';
 import { expect } from 'chai';
 import { ShellExecutor } from '../../utils/ShellExecutor';
+import { BaseTestConstants } from '../../constants/BaseTestConstants';
 
 suite(`Test defining pod overrides via attribute.`, async function(): Promise<void> {
-  const pathToSampleFile: string = path.resolve('resources/pod-overrides.yaml');
+  const pathToSampleFile: string = path.resolve(`resources/pod-overrides${BaseTestConstants.IS_CLUSTER_DISCONNECTED() ? '-airgap' : ''}.yaml`);
   const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
   const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(workspaceName);
 
