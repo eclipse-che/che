@@ -16,9 +16,12 @@ export abstract class Logger {
    * @param indentLevel log level
    */
   static error(text: string = '', indentLevel: number = 1): void {
+    const callerInfo: string = this.getCallerInfo();
+    const logLevelSymbol: string = '[ERROR] ';
     this.logText(
       indentLevel,
-      `[ERROR] ${this.getCallerInfo()} ${this.separator(text)} ${text}`
+      logLevelSymbol,
+      `${this.getFullMessage(callerInfo, text)}`
     );
   }
 
@@ -31,9 +34,12 @@ export abstract class Logger {
     if (ReporterConstants.TS_SELENIUM_LOG_LEVEL === 'ERROR') {
       return;
     }
+    const callerInfo: string = this.getCallerInfo();
+    const logLevelSymbol: string = '[WARN] ';
     this.logText(
       indentLevel,
-      `[WARN] ${this.getCallerInfo()} ${this.separator(text)} ${text}`
+      logLevelSymbol,
+      `${this.getFullMessage(callerInfo, text)}`
     );
   }
 
@@ -49,9 +55,12 @@ export abstract class Logger {
     ) {
       return;
     }
+    const callerInfo: string = this.getCallerInfo();
+    const logLevelSymbol: string = '• ';
     this.logText(
       indentLevel,
-      `• ${this.getCallerInfo()} ${this.separator(text)} ${text}`
+      logLevelSymbol,
+      `${this.getFullMessage(callerInfo, text)}`
     );
   }
 
@@ -68,9 +77,12 @@ export abstract class Logger {
     ) {
       return;
     }
+    const callerInfo: string = this.getCallerInfo();
+    const logLevelSymbol: string = '▼ ';
     this.logText(
       indentLevel,
-      `▼ ${this.getCallerInfo()} ${this.separator(text)} ${text}`
+      logLevelSymbol,
+      `${this.getFullMessage(callerInfo, text)}`
     );
   }
 
@@ -89,23 +101,32 @@ export abstract class Logger {
     ) {
       return;
     }
+    const callerInfo: string = this.getCallerInfo();
+    const logLevelSymbol: string = '‣ ';
     this.logText(
       indentLevel,
-      `‣ ${this.getCallerInfo()} ${this.separator(text)} ${text}`
+      logLevelSymbol,
+      `${this.getFullMessage(callerInfo, text)}`
     );
   }
 
-  private static logText(messageIndentationLevel: number, text: string): void {
-    // start group for every level
-    for (let i: number = 0; i < messageIndentationLevel; i++) {
-      console.group();
-    }
-    // print the trimmed text
-    // if multiline, the message should be properly padded
-    console.log(text);
-    // end group for every level
-    for (let i: number = 0; i < messageIndentationLevel; i++) {
-      console.groupEnd();
+  private static getFullMessage(callerInfo: string, text: string): string {
+    return `${callerInfo}${this.separator(text, callerInfo)}${text}`;
+  }
+
+  private static logText(messageIndentationLevel: number, logLevelSymbol: string, text: string): void {
+    if (text) {
+      // start group for every level
+      for (let i: number = 0; i < messageIndentationLevel; i++) {
+        console.group();
+      }
+      // print the trimmed text
+      // if multiline, the message should be properly padded
+      console.log(logLevelSymbol + text);
+      // end group for every level
+      for (let i: number = 0; i < messageIndentationLevel; i++) {
+        console.groupEnd();
+      }
     }
   }
 
@@ -113,10 +134,10 @@ export abstract class Logger {
     const e: Error = new Error();
     const stack: string[] = e.stack ? e.stack.split('\n') : [];
     // " at functionName ( ..." => "functionName"
-    return stack[3].replace(/^\s+at\s+(.+?)\s.+/g, '$1');
+    return stack[3].includes('.<anonymous') ? '' : stack[3].replace(/^\s+at\s+(.+?)\s.+/g, '$1');
   }
 
-  private static separator(text: string): string {
-    return text ? '-' : '';
+  private static separator(text: string, caller: string): string {
+    return text ? caller ? ' - ' : '' : '';
   }
 }
