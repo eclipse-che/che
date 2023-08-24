@@ -68,14 +68,14 @@ export class OcpImportFromGitPage {
   }
 
   async submitConfiguration(): Promise<OcpApplicationPage> {
-    Logger.debug(`${this.constructor.name}.${this.submitConfiguration.name}`);
+    Logger.debug();
 
     await this.driverHelper.waitAndClick(OcpImportFromGitPage.SUBMIT_BUTTON_LOCATOR);
     return e2eContainer.get(CLASSES.OcpApplicationPage);
   }
 
   async fitAndSubmitConfiguration(gitRepoUrl: string, gitReference: string, label: string): Promise<OcpApplicationPage> {
-    Logger.debug(`${this.constructor.name}.${this.fitAndSubmitConfiguration.name}`);
+    Logger.debug();
 
     await this.enterGitRepoUrl(gitRepoUrl);
     await this.clickOnAdvancedOptionsButton();
