@@ -12,7 +12,6 @@ import { inject, injectable } from 'inversify';
 import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
-import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 
 @injectable()
@@ -24,6 +23,7 @@ export class BrowserTabsUtil {
 
 	async switchToWindow(windowHandle: string): Promise<void> {
 		Logger.debug();
+
 		await this.driverHelper.getDriver().switchTo().window(windowHandle);
 	}
 
@@ -42,14 +42,7 @@ export class BrowserTabsUtil {
 	async navigateTo(url: string): Promise<void> {
 		Logger.debug(`${url}`);
 
-		await this.driverHelper.getDriver().navigate().to(url);
-	}
-
-	async navigateAndWaitToUrl(url: string, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL): Promise<void> {
-		Logger.trace(`${url}`);
-
-		await this.navigateTo(url);
-		await this.waitURL(url, timeout);
+		await this.driverHelper.navigateToUrl(url);
 	}
 
 	async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number): Promise<void> {
@@ -77,11 +70,14 @@ export class BrowserTabsUtil {
 	}
 
 	async getCurrentUrl(): Promise<string> {
+		Logger.trace();
+
 		return await this.driverHelper.getDriver().getCurrentUrl();
 	}
 
 	async waitURL(expectedUrl: string, timeout: number): Promise<void> {
 		Logger.trace(`${expectedUrl}`);
+
 		try {
 			await this.driverHelper.getDriver().wait(async (): Promise<boolean | undefined> => {
 				const currentUrl: string = await this.driverHelper.getDriver().getCurrentUrl();
@@ -98,6 +94,7 @@ export class BrowserTabsUtil {
 
 	async maximize(): Promise<void> {
 		Logger.trace();
+
 		if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_LAUNCH_FULLSCREEN) {
 			Logger.debug('TS_SELENIUM_LAUNCH_FULLSCREEN is set to true, maximizing window.');
 			await this.driverHelper.getDriver().manage().window().maximize();
@@ -106,6 +103,7 @@ export class BrowserTabsUtil {
 
 	async closeAllTabsExceptCurrent(): Promise<void> {
 		Logger.trace();
+
 		const allTabsHandles: string[] = await this.getAllWindowHandles();
 		const currentTabHandle: string = await this.getCurrentWindowHandle();
 		allTabsHandles.splice(allTabsHandles.indexOf(currentTabHandle), 1);

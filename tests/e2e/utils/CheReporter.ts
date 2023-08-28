@@ -17,21 +17,27 @@ import { DriverHelper } from './DriverHelper';
 import { ScreenCatcher } from './ScreenCatcher';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { Logger } from './Logger';
-import { e2eContainer } from '../configs/inversify.config';
 import { StringUtil } from './StringUtil';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../constants/OAUTH_CONSTANTS';
 import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
 import { PLUGIN_TEST_CONSTANTS } from '../constants/PLUGIN_TEST_CONSTANTS';
+import { inject, injectable } from 'inversify';
 
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
-let methodIndex: number = 0;
-let deleteScreencast: boolean = true;
-
+@injectable()
 class CheReporter extends mocha.reporters.Spec {
-	constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
+	private static methodIndex: number = 0;
+	private static deleteScreencast: boolean = true;
+
+	constructor(
+		runner: mocha.Runner,
+		options: mocha.MochaOptions,
+		@inject(CLASSES.DriverHelper)
+		private readonly driverHelper: DriverHelper,
+		@inject(CLASSES.ScreenCatcher)
+		private readonly screenCatcher: ScreenCatcher
+	) {
 		super(runner, options);
 
 		runner.on('start', (): void => {
@@ -76,20 +82,20 @@ class CheReporter extends mocha.reporters.Spec {
 			rm.sync(REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER);
 		});
 
-		runner.on('test', async function (test: mocha.Test): Promise<void> {
+		runner.on('test', async (test: mocha.Test): Promise<void> => {
 			if (!REPORTER_CONSTANTS.TS_SELENIUM_EXECUTION_SCREENCAST) {
 				return;
 			}
 
-			methodIndex = methodIndex + 1;
-			const currentMethodIndex: number = methodIndex;
+			CheReporter.methodIndex = CheReporter.methodIndex + 1;
+			const currentMethodIndex: number = CheReporter.methodIndex;
 			let iterationIndex: number = 1;
 
 			while (!(test.state === 'passed' || test.state === 'failed')) {
-				await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
+				await this.screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
 				iterationIndex = iterationIndex + 1;
 
-				await driverHelper.wait(REPORTER_CONSTANTS.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
+				await this.driverHelper.wait(REPORTER_CONSTANTS.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
 			}
 		});
 
@@ -107,21 +113,21 @@ class CheReporter extends mocha.reporters.Spec {
 
 		runner.on('end', async (): Promise<void> => {
 			// ensure that fired events done
-			await driverHelper.wait(5000);
+			await this.driverHelper.wait(5000);
 
 			// close driver
-			await driverHelper.getDriver().quit();
+			await this.driverHelper.getDriver().quit();
 
 			// delete screencast folder if conditions matched
-			if (deleteScreencast && REPORTER_CONSTANTS.DELETE_SCREENCAST_IF_TEST_PASS) {
+			if (CheReporter.deleteScreencast && REPORTER_CONSTANTS.DELETE_SCREENCAST_IF_TEST_PASS) {
 				rm.sync(REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER);
 			}
 		});
 
-		runner.on('fail', async function (test: mocha.Test): Promise<void> {
+		runner.on('fail', async (test: mocha.Test): Promise<void> => {
 			Logger.error(`CheReporter runner.on.fail: ${test.fullTitle()} failed after ${test.duration}ms`);
 			// raise flag for keeping the screencast
-			deleteScreencast = false;
+			CheReporter.deleteScreencast = false;
 
 			Logger.trace(`FullTitle:${test.fullTitle()}`);
 			const testFullTitle: string = StringUtil.sanitizeTitle(test.fullTitle());
@@ -150,19 +156,19 @@ class CheReporter extends mocha.reporters.Spec {
 			}
 
 			// take screenshot and write to file
-			const screenshot: string = await driverHelper.getDriver().takeScreenshot();
+			const screenshot: string = await this.driverHelper.getDriver().takeScreenshot();
 			const screenshotStream: WriteStream = fs.createWriteStream(screenshotFileName);
 			screenshotStream.write(Buffer.from(screenshot, 'base64'));
 			screenshotStream.end();
 
 			// take page source and write to file
-			const pageSource: string = await driverHelper.getDriver().getPageSource();
+			const pageSource: string = await this.driverHelper.getDriver().getPageSource();
 			const pageSourceStream: WriteStream = fs.createWriteStream(pageSourceFileName);
 			pageSourceStream.write(Buffer.from(pageSource));
 			pageSourceStream.end();
 
 			// take browser console logs and write to file
-			const browserLogsEntries: logging.Entry[] = await driverHelper.getDriver().manage().logs().get('browser');
+			const browserLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('browser');
 			let browserLogs: string = '';
 
 			browserLogsEntries.forEach((log): void => {

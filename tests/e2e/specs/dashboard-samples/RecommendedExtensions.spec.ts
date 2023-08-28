@@ -37,16 +37,17 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PLUGIN_TEST_CONSTANTS } from '../../constants/PLUGIN_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-
-const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 suite(`Check if recommended extensions installed for ${samples}`, function (): void {
+	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+	const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+	const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+
 	let projectSection: ViewSection;
 	let extensionsView: SideBarView | undefined;
 	let extensionSection: ExtensionsViewSection;

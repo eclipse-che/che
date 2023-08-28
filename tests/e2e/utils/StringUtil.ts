@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { injectable } from 'inversify';
 import { Logger } from './Logger';
+import { injectable } from 'inversify';
 
 @injectable()
 export class StringUtil {
@@ -22,6 +22,7 @@ export class StringUtil {
 	 */
 	static getProjectNameFromGitUrl(url: string): string {
 		Logger.debug(`${url}`);
+
 		if (url.includes('?')) {
 			url = url.substring(0, url.indexOf('?'));
 		}
@@ -37,6 +38,8 @@ export class StringUtil {
 	}
 
 	static sanitizeTitle(arg: string): string {
+		Logger.trace();
+
 		return arg
 			.replace(/\//g, '+')
 			.replace(/,/g, '.')
@@ -52,6 +55,8 @@ export class StringUtil {
 	 */
 
 	static updateCommandEnvsToShStyle(command: string): string {
+		Logger.trace();
+
 		return command.replace(/[{}]/g, '').replace(/(?<!")\${?[a-zA-Z0-9_+\-\s]+\b}?/gm, '"$&"');
 	}
 }

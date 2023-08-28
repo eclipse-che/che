@@ -23,8 +23,6 @@ import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { MONACO_CONSTANTS } from '../constants/MONACO_CONSTANTS';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-
 let latestWorkspace: string = '';
 
 export function registerRunningWorkspace(workspaceName: string): void {
@@ -44,8 +42,8 @@ exports.mochaHooks = {
 				CheApiRequestHandler.enableResponseInterceptor();
 			}
 		},
+		// init vscode-extension-tester monaco-page-objects
 		function initMonacoPageObjects(): void {
-			// init vscode-extension-tester monaco-page-objects
 			monacoPageObjects.initPageObjects(
 				MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION,
 				MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION,
@@ -66,11 +64,11 @@ exports.mochaHooks = {
 	],
 	afterEach: [
 		// stop and remove running workspace
-		function (this: Mocha.Context): void {
+		function deleteWorkspaceOnFailedTest(this: Mocha.Context): void {
 			if (this.currentTest?.state === 'failed') {
 				if (BASE_TEST_CONSTANTS.DELETE_WORKSPACE_ON_FAILED_TEST) {
 					Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
-					// await
+					const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 					testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
 				}
 			}

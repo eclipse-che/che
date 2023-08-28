@@ -40,7 +40,6 @@ export class Dashboard {
 		await this.workspaces.waitPage();
 		await this.workspaces.waitWorkspaceListItem(workspaceName);
 		await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
-
 		await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
 		await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
 	}
@@ -60,13 +59,13 @@ export class Dashboard {
 		Logger.debug(`"${workspaceName}"`);
 
 		await this.stopWorkspaceByUI(workspaceName);
-		await this.workspaces.deleteWorkspaceByActionsButton(workspaceName);
-		await this.workspaces.waitWorkspaceListItemAbsence(workspaceName);
+		await this.deleteStoppedWorkspaceByUI(workspaceName);
 	}
 
 	async openDashboard(): Promise<void> {
 		Logger.debug();
-		await this.driverHelper.getDriver().navigate().to(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
+
+		await this.driverHelper.navigateToUrl(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 		await this.waitPage();
 	}
 

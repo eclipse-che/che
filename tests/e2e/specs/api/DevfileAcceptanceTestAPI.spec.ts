@@ -7,14 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { ShellString } from 'shelljs';
 import { expect } from 'chai';
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
 import { StringUtil } from '../../utils/StringUtil';
-// import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
 import { Logger } from '../../utils/Logger';
+import { e2eContainer } from '../../configs/inversify.config';
+import { CLASSES } from '../../configs/inversify.types';
 
 /**
  * dynamically generating tests
@@ -23,7 +24,8 @@ import { Logger } from '../../utils/Logger';
 // todo: skipped while don`t use to avoid sending useless requests
 // eslint-disable-next-line @typescript-eslint/require-await
 void (async function (): Promise<void> {
-	// const devfilesRegistryHelper: DevfilesRegistryHelper = new DevfilesRegistryHelper();
+	// const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
+
 	const devfileSamples: any = [];
 	// devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry();
 
@@ -33,7 +35,7 @@ void (async function (): Promise<void> {
 			this.timeout(1500000); // 25 minutes because build of Quarkus sample takes 20+ minutes
 			let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 			let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
-			let containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal;
+			let containerTerminal: ContainerTerminal;
 			let devfileContext: DevfileContext;
 			let devWorkspaceName: string | undefined;
 			let clonedProjectName: string;
@@ -46,9 +48,9 @@ void (async function (): Promise<void> {
 				});
 				devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 				devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
-
-				kubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(devWorkspaceName);
-				containerTerminal = new KubernetesCommandLineToolsExecutor.ContainerTerminal(kubernetesCommandLineToolsExecutor);
+				kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
+				kubernetesCommandLineToolsExecutor.workspaceName = devWorkspaceName;
+				containerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 				kubernetesCommandLineToolsExecutor.loginToOcp();
 			});
 

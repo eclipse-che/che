@@ -18,7 +18,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 @injectable()
 export class CreateWorkspace {
-	static readonly FACTORY_URL_LOCATOR: By = By.xpath('//input[@id="git-repo-url"]');
+	private static readonly FACTORY_URL: By = By.xpath('//input[@id="git-repo-url"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -64,11 +64,12 @@ export class CreateWorkspace {
 
 	async importFromGitUsingUI(factoryUrl: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
-		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL_LOCATOR, timeout);
-		await this.driverHelper.type(CreateWorkspace.FACTORY_URL_LOCATOR, Key.chord(factoryUrl, Key.ENTER), timeout);
+
+		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
+		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl, Key.ENTER), timeout);
 	}
 
-	private async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
+	async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
 		Logger.debug(`sampleName: "${sampleName}, editor ${BASE_TEST_CONSTANTS.TS_SELENIUM_EDITOR}"`);
 
 		const editorDropdownListLocator: By = this.getEditorsDropdownListLocator(sampleName);

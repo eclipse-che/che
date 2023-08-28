@@ -9,10 +9,10 @@
  **********************************************************************/
 
 import 'reflect-metadata';
-import { Container } from 'inversify';
+import { Container, decorate, injectable, unmanaged } from 'inversify';
 import { IDriver } from '../driver/IDriver';
 import { ChromeDriver } from '../driver/ChromeDriver';
-import { CLASSES, TYPES } from './inversify.types';
+import { CLASSES, EXTERNAL_CLASSES, TYPES } from './inversify.types';
 import { TestWorkspaceUtil } from '../utils/workspace/TestWorkspaceUtil';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
 import { OcpUserLoginPage } from '../pageobjects/login/openshift/OcpUserLoginPage';
@@ -44,8 +44,21 @@ import { KubernetesLoginPage } from '../pageobjects/login/kubernetes/KubernetesL
 import { DexLoginPage } from '../pageobjects/login/kubernetes/DexLoginPage';
 import { OAUTH_CONSTANTS } from '../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
+import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
+import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
+import { OauthPage } from '../pageobjects/git-providers/OauthPage';
+import { DevfilesRegistryHelper } from '../utils/DevfilesRegistryHelper';
+import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/main';
+import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
+import { ShellExecutor } from '../utils/ShellExecutor';
 
-const e2eContainer: Container = new Container({ defaultScope: 'Transient' });
+decorate(injectable(), Generator);
+decorate(injectable(), LocatorLoader);
+decorate(unmanaged(), LocatorLoader, 0);
+decorate(unmanaged(), LocatorLoader, 1);
+decorate(unmanaged(), LocatorLoader, 2);
+
+const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 e2eContainer.bind<ITestWorkspaceUtil>(TYPES.WorkspaceUtil).to(TestWorkspaceUtil);
@@ -59,11 +72,12 @@ e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetail
 e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher);
 e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage);
 e2eContainer.bind<DexLoginPage>(CLASSES.DexLoginPage).to(DexLoginPage);
-
+e2eContainer.bind<CheCodeLocatorLoader>(CLASSES.CheCodeLocatorLoader).to(CheCodeLocatorLoader);
+e2eContainer.bind<LocatorLoader>(CLASSES.LocatorLoader).to(LocatorLoader);
+e2eContainer.bind<OauthPage>(CLASSES.OauthPage).to(OauthPage);
 e2eContainer.bind<OcpMainPage>(CLASSES.OcpMainPage).to(OcpMainPage);
 e2eContainer.bind<OcpImportFromGitPage>(CLASSES.OcpImportFromGitPage).to(OcpImportFromGitPage);
 e2eContainer.bind<OcpApplicationPage>(CLASSES.OcpApplicationPage).to(OcpApplicationPage);
-
 e2eContainer.bind<CheApiRequestHandler>(CLASSES.CheApiRequestHandler).to(CheApiRequestHandler);
 e2eContainer.bind<CreateWorkspace>(CLASSES.CreateWorkspace).to(CreateWorkspace);
 e2eContainer.bind<ProjectAndFileTests>(CLASSES.ProjectAndFileTests).to(ProjectAndFileTests);
@@ -72,6 +86,13 @@ e2eContainer.bind<StringUtil>(CLASSES.StringUtil).to(StringUtil);
 e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
+e2eContainer.bind<DevfilesRegistryHelper>(CLASSES.DevfilesRegistryHelper).to(DevfilesRegistryHelper);
+e2eContainer.bind<KubernetesCommandLineToolsExecutor>(CLASSES.KubernetesCommandLineToolsExecutor).to(KubernetesCommandLineToolsExecutor);
+e2eContainer.bind<ShellExecutor>(CLASSES.ShellExecutor).to(ShellExecutor);
+e2eContainer.bind<ContainerTerminal>(CLASSES.ContainerTerminal).to(ContainerTerminal);
+
+e2eContainer.bind<Generator>(EXTERNAL_CLASSES.Generator).to(Generator);
+e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {

@@ -23,7 +23,7 @@ export class OcpUserLoginPage implements IOcpLoginPage {
 		Logger.debug();
 
 		if (OAUTH_CONSTANTS.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
-			await this.ocpLogin.clickOnLoginProviderTitle();
+			await this.ocpLogin.waitAndClickOnLoginProviderTitle();
 		}
 
 		await this.ocpLogin.waitOpenShiftLoginWelcomePage();

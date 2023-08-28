@@ -8,11 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 export const CHROME_DRIVER_CONSTANTS: {
-	TS_SELENIUM_RESOLUTION_WIDTH: number;
 	TS_SELENIUM_W3C_CHROME_OPTION: boolean;
 	TS_SELENIUM_HEADLESS: boolean;
 	TS_USE_WEB_DRIVER_FOR_TEST: boolean;
-	TS_SELENIUM_RESOLUTION_HEIGHT: number;
 	TS_SELENIUM_LAUNCH_FULLSCREEN: boolean;
 	TS_SELENIUM_REMOTE_DRIVER_URL: string;
 } = {
@@ -40,15 +38,5 @@ export const CHROME_DRIVER_CONSTANTS: {
 	/**
 	 * run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
 	 */
-	TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false',
-
-	/**
-	 * browser width resolution, "1920" by default.
-	 */
-	TS_SELENIUM_RESOLUTION_WIDTH: Number(process.env.TS_SELENIUM_RESOLUTION_WIDTH) || 1920,
-
-	/**
-	 * browser height resolution, "1080" by default.
-	 */
-	TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080
+	TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false'
 };

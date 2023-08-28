@@ -35,7 +35,21 @@ module.exports = {
 		'@typescript-eslint/member-ordering': [
 			'error',
 			{
-				classes: ['field', 'constructor', 'method']
+				default: [
+					'static-field',
+					'public-field',
+					'instance-field',
+					'protected-field',
+					'private-field',
+					'abstract-field',
+					'constructor',
+					'public-static-method',
+					'protected-static-method',
+					'private-static-method',
+					'public-method',
+					'protected-method',
+					'private-method'
+				]
 			}
 		],
 		'@typescript-eslint/explicit-function-return-type': [

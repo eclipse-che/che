@@ -8,6 +8,8 @@ export * from './utils/BrowserTabsUtil';
 export * from './utils/DevfilesRegistryHelper';
 export * from './utils/DevWorkspaceConfigurationHelper';
 export * from './utils/DriverHelper';
+export * from './utils/IContextParams';
+export * from './utils/IKubernetesCommandLineToolsExecutor';
 export * from './utils/KubernetesCommandLineToolsExecutor';
 export * from './utils/Logger';
 export * from './utils/request-handlers/CheApiRequestHandler';

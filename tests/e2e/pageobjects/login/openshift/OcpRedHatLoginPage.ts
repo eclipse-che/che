@@ -20,8 +20,9 @@ import { Logger } from '../../../utils/Logger';
 
 @injectable()
 export class OcpRedHatLoginPage implements ICheLoginPage {
-	private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = '//div[@class="panel-login"]';
-	private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
+	private static readonly OPENSHIFT_LOGIN_LANDING_PAGE_BUTTON: By = By.xpath(
+		'//div[@class="panel-login"]/div[contains(@class, "panel-content")]/form/button'
+	);
 
 	constructor(
 		@inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
@@ -33,17 +34,11 @@ export class OcpRedHatLoginPage implements ICheLoginPage {
 
 	async login(): Promise<void> {
 		Logger.debug();
-
-		Logger.debug('wait for LogInWithOpenShift page and click button');
-		await this.driverHelper.waitPresence(
-			By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR),
+		await this.driverHelper.waitAndClick(
+			OcpRedHatLoginPage.OPENSHIFT_LOGIN_LANDING_PAGE_BUTTON,
 			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
 		);
-		await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
-
-		await this.ocpLogin.isIdentityProviderLinkVisible();
-		await this.ocpLogin.clickOnLoginProviderTitle();
-
+		await this.ocpLogin.waitAndClickOnLoginProviderTitle();
 		await this.redHatLogin.waitRedHatLoginWelcomePage();
 		await this.redHatLogin.enterUserNameRedHat();
 		await this.redHatLogin.clickNextButton();

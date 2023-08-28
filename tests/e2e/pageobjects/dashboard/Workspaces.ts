@@ -22,8 +22,13 @@ export enum WorkspaceStatusUI {
 
 @injectable()
 export class Workspaces {
-	private static readonly ADD_WORKSPACE_BUTTON_XPATH: string = '//button[text()="Add Workspace"]';
-	private static readonly WORKSPACE_ITEM_TABLE_NAME_SECTION_XPATH: string = '//td[@data-label="Name"]/span/a';
+	private static readonly ADD_WORKSPACE_BUTTON: By = By.xpath('//button[text()="Add Workspace"]');
+	private static readonly WORKSPACE_ITEM_TABLE_NAME_SECTION: By = By.xpath('//td[@data-label="Name"]/span/a');
+	private static readonly DELETE_WORKSPACE_BUTTON_ENABLED: By = By.xpath(
+		'//button[@data-testid="delete-workspace-button" and not(@disabled)]'
+	);
+	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="confirmation-checkbox"]');
+	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//div[@aria-label="Delete workspaces confirmation window"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -33,13 +38,13 @@ export class Workspaces {
 	async waitPage(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
+		await this.driverHelper.waitVisibility(Workspaces.ADD_WORKSPACE_BUTTON, timeout);
 	}
 
 	async clickAddWorkspaceButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(By.xpath(Workspaces.ADD_WORKSPACE_BUTTON_XPATH), timeout);
+		await this.driverHelper.waitAndClick(Workspaces.ADD_WORKSPACE_BUTTON, timeout);
 	}
 
 	async clickOpenButton(workspaceName: string, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
@@ -54,9 +59,7 @@ export class Workspaces {
 	): Promise<void> {
 		Logger.debug(`"${workspaceName}"`);
 
-		const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
-
-		await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout);
+		await this.driverHelper.waitVisibility(this.getWorkspaceListItemLocator(workspaceName), timeout);
 	}
 
 	async waitWorkspaceWithRunningStatus(
@@ -65,9 +68,7 @@ export class Workspaces {
 	): Promise<void> {
 		Logger.debug(`"${workspaceName}"`);
 
-		const runningStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Running);
-
-		await this.driverHelper.waitVisibility(runningStatusLocator, timeout);
+		await this.driverHelper.waitVisibility(this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Running), timeout);
 	}
 
 	async waitWorkspaceWithStoppedStatus(
@@ -76,9 +77,7 @@ export class Workspaces {
 	): Promise<void> {
 		Logger.debug(`"${workspaceName}"`);
 
-		const stoppedStatusLocator: By = this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped);
-
-		await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout);
+		await this.driverHelper.waitVisibility(this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped), timeout);
 	}
 
 	async clickWorkspaceListItem(
@@ -87,9 +86,7 @@ export class Workspaces {
 	): Promise<void> {
 		Logger.debug(`"${workspaceName}"`);
 
-		const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
-
-		await this.driverHelper.waitAndClick(workspaceListItemLocator, timeout);
+		await this.driverHelper.waitAndClick(this.getWorkspaceListItemLocator(workspaceName), timeout);
 	}
 
 	async clickActionsButton(workspaceName: string): Promise<void> {
@@ -106,6 +103,7 @@ export class Workspaces {
 
 	async openActionsPopup(workspaceName: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug(`for the '${workspaceName}' list item`);
+
 		await this.clickActionsButton(workspaceName);
 		await this.waitActionsPopup(workspaceName, timeout);
 	}
@@ -132,34 +130,28 @@ export class Workspaces {
 	async waitDeleteWorkspaceConfirmationWindow(timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		const confirmationWindowLocator: By = By.xpath('//div[@aria-label="Delete workspaces confirmation window"]');
-
-		await this.driverHelper.waitVisibility(confirmationWindowLocator, timeout);
+		await this.driverHelper.waitVisibility(Workspaces.CONFIRMATION_WINDOW, timeout);
 	}
 
 	async clickToDeleteConfirmationCheckbox(timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT): Promise<void> {
-		Logger.debug('Workspaces.clickToDeleteConfirmationCheckbox');
+		Logger.debug();
 
-		const deleteConfirmationCheckboxLocator: By = By.xpath('//input[@data-testid="confirmation-checkbox"]');
-
-		await this.driverHelper.waitAndClick(deleteConfirmationCheckboxLocator, timeout);
+		await this.driverHelper.waitAndClick(Workspaces.DELETE_CONFIRMATION_CHECKBOX, timeout);
 	}
 
 	async waitAndClickEnabledConfirmationWindowDeleteButton(
 		timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT
 	): Promise<void> {
-		Logger.debug('Workspaces.waitEnabledConfirmationWindowDeleteButton');
+		Logger.debug();
 
-		const enabledConfirmationWindowDeleteButton: By = By.xpath('//button[@data-testid="delete-workspace-button" and not(@disabled)]');
-
-		await this.driverHelper.waitAndClick(enabledConfirmationWindowDeleteButton, timeout);
+		await this.driverHelper.waitAndClick(Workspaces.DELETE_WORKSPACE_BUTTON_ENABLED, timeout);
 	}
 
 	async deleteWorkspaceByActionsButton(
 		workspaceName: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT
 	): Promise<void> {
-		Logger.debug('Workspaces.deleteWorkspaceByActionsButton');
+		Logger.debug();
 
 		await this.waitWorkspaceListItem(workspaceName, timeout);
 		await this.openActionsPopup(workspaceName, timeout);
@@ -173,7 +165,7 @@ export class Workspaces {
 		workspaceName: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT
 	): Promise<void> {
-		Logger.debug('Workspaces.stopWorkspaceByActionsButton');
+		Logger.debug();
 
 		await this.waitWorkspaceListItem(workspaceName, timeout);
 		await this.openActionsPopup(workspaceName, timeout);
@@ -184,63 +176,63 @@ export class Workspaces {
 		workspaceName: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT
 	): Promise<void> {
-		Logger.debug(`Workspaces.waitWorkspaceListItemAbsence "${workspaceName}"`);
+		Logger.debug(`"${workspaceName}"`);
 
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
 
-		const workspaceListItemLocator: By = By.xpath(this.getWorkspaceListItemLocator(workspaceName));
-
-		await this.driverHelper.waitDisappearance(workspaceListItemLocator, attempts, polling);
+		await this.driverHelper.waitDisappearance(this.getWorkspaceListItemLocator(workspaceName), attempts, polling);
 	}
 
 	async getAllCreatedWorkspacesNames(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string[]> {
-		Logger.debug('Workspaces.getAllCreatedWorkspacesNames');
+		Logger.debug();
 
 		const workspaceNames: string[] = [];
 		try {
 			const workspaceItems: WebElement[] = await this.driverHelper.waitAllPresence(
-				By.xpath(Workspaces.WORKSPACE_ITEM_TABLE_NAME_SECTION_XPATH),
+				Workspaces.WORKSPACE_ITEM_TABLE_NAME_SECTION,
 				timeout
 			);
 			for (const item of workspaceItems) {
-				Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - try to get ${workspaceItems.indexOf(item)} items name`);
+				Logger.debug(`try to get ${workspaceItems.indexOf(item)} items name`);
 				workspaceNames.push(await item.getText());
-				Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - workspace name is "${workspaceNames[workspaceNames.length - 1]}"`);
+				Logger.debug(`workspace name is "${workspaceNames[workspaceNames.length - 1]}"`);
 			}
 		} catch (e) {
-			Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - ${e}`);
+			Logger.debug(`${e}`);
 		}
 
-		Logger.debug(`Workspaces.getAllCreatedWorkspacesNames - ${workspaceNames.length} workspaces have been created in DevSpaces`);
+		Logger.debug(`${workspaceNames.length} workspaces have been created in DevSpaces`);
 		return workspaceNames;
 	}
 
-	private getWorkspaceListItemLocator(workspaceName: string): string {
-		return `//tr[td/span/a[text()='${workspaceName}']]`;
+	private getWorkspaceListItemLocator(workspaceName: string): By {
+		return By.xpath(`//tr[td//a[text()='${workspaceName}']]`);
 	}
 
 	private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): By {
 		return By.xpath(
-			`${this.getWorkspaceListItemLocator(
-				workspaceName
-			)}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`
+			`${
+				this.getWorkspaceListItemLocator(workspaceName).value
+			}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`
 		);
 	}
 
 	private getActionsLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}/td/div/button[@aria-label='Actions']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}/td/div/button[@aria-label='Actions']`);
 	}
 
 	private getExpandedActionsLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//button[@aria-label='Actions' and @aria-expanded='true']`);
+		return By.xpath(
+			`${this.getWorkspaceListItemLocator(workspaceName).value}//button[@aria-label='Actions' and @aria-expanded='true']`
+		);
 	}
 
 	private getActionsPopupButtonLocator(workspaceName: string, buttonText: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//li[@role='menuitem']//button[text()='${buttonText}']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//li//button[text()='${buttonText}']`);
 	}
 
 	private getOpenButtonLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//td[@data-key=5]//a[text()='Open']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[@data-key=5]//a[text()='Open']`);
 	}
 }

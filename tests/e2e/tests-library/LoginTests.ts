@@ -27,12 +27,12 @@ export class LoginTests {
 		@inject(CLASSES.Dashboard) private readonly dashboard: Dashboard
 	) {}
 
-	loginIntoChe(): void {
+	loginIntoChe(userName?: string, password?: string): void {
 		test('Login', async (): Promise<void> => {
 			if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL)) {
 				await this.browserTabsUtil.navigateTo(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 			}
-			await this.productLoginPage.login();
+			await this.productLoginPage.login(userName, password);
 			await this.browserTabsUtil.maximize();
 			await this.dashboard.waitStartingPageLoaderDisappearance();
 		});
@@ -42,7 +42,7 @@ export class LoginTests {
 		test('Login into ocp console', async (): Promise<void> => {
 			const openshiftConsoleUrl: string = BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
 			await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
-			this.ocpLoginPage.login();
+			await this.ocpLoginPage.login();
 			await this.browserTabsUtil.maximize();
 		});
 	}

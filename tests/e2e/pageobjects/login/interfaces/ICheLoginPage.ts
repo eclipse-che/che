@@ -9,5 +9,5 @@
  **********************************************************************/
 
 export interface ICheLoginPage {
-	login(): Promise<void>;
+	login(user?: string, password?: string): Promise<void>;
 }

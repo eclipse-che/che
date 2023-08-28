@@ -20,11 +20,11 @@ import { ProjectAndFileTests } from '../../../tests-library/ProjectAndFileTests'
 
 @injectable()
 export class WorkspaceDetails {
-	private static readonly RUN_BUTTON_CSS: string = '#run-workspace-button[che-button-title="Run"]';
-	private static readonly OPEN_BUTTON_CSS: string = '#open-in-ide-button[che-button-title="Open"]';
-	private static readonly SAVE_BUTTON_CSS: string = 'button[name="save-button"]';
-	private static readonly ENABLED_SAVE_BUTTON_CSS: string = 'button[name="save-button"][aria-disabled="false"]';
-	private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = 'workspace-details-overview md-progress-linear';
+	private static readonly RUN_BUTTON: By = By.css('#run-workspace-button[che-button-title="Run"]');
+	private static readonly OPEN_BUTTON: By = By.css('#open-in-ide-button[che-button-title="Open"]');
+	private static readonly SAVE_BUTTON: By = By.css('button[name="save-button"]');
+	private static readonly ENABLED_SAVE_BUTTON: By = By.css('button[name="save-button"][aria-disabled="false"]');
+	private static readonly WORKSPACE_DETAILS_LOADER: By = By.css('workspace-details-overview md-progress-linear');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -41,7 +41,7 @@ export class WorkspaceDetails {
 	): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);
+		await this.driverHelper.waitDisappearance(WorkspaceDetails.WORKSPACE_DETAILS_LOADER, attempts, polling);
 	}
 
 	async saveChanges(): Promise<void> {
@@ -65,7 +65,7 @@ export class WorkspaceDetails {
 	async waitWorkspaceTitle(workspaceName: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug(`title: "${workspaceName}"`);
 
-		const workspaceTitleLocator: By = By.css(this.getWorkspaceTitleCssLocator(workspaceName));
+		const workspaceTitleLocator: By = this.getWorkspaceTitleLocator(workspaceName);
 
 		await this.driverHelper.waitVisibility(workspaceTitleLocator, timeout);
 	}
@@ -73,19 +73,19 @@ export class WorkspaceDetails {
 	async waitRunButton(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
+		await this.driverHelper.waitVisibility(WorkspaceDetails.RUN_BUTTON, timeout);
 	}
 
 	async clickOnRunButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.RUN_BUTTON_CSS), timeout);
+		await this.driverHelper.waitAndClick(WorkspaceDetails.RUN_BUTTON, timeout);
 	}
 
 	async waitOpenButton(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout);
+		await this.driverHelper.waitVisibility(WorkspaceDetails.OPEN_BUTTON, timeout);
 	}
 
 	async openWorkspace(
@@ -97,7 +97,6 @@ export class WorkspaceDetails {
 
 		await this.clickOnOpenButton(timeout);
 		await this.testProjectAndFileCheCode.waitWorkspaceReadinessForCheCodeEditor();
-		// await
 		this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
 	}
 
@@ -118,7 +117,7 @@ export class WorkspaceDetails {
 		];
 
 		for (const tabTitle of workspaceDetailsTabs) {
-			const workspaceDetailsTabLocator: By = By.xpath(this.getTabXpathLocator(tabTitle));
+			const workspaceDetailsTabLocator: By = this.getTabLocator(tabTitle);
 
 			await this.driverHelper.waitVisibility(workspaceDetailsTabLocator, timeout);
 		}
@@ -131,46 +130,44 @@ export class WorkspaceDetails {
 		await this.waitTabSelected(tabTitle, timeout);
 	}
 
-	private getWorkspaceTitleCssLocator(workspaceName: string): string {
-		return `che-row-toolbar[che-title='${workspaceName}']`;
+	private getWorkspaceTitleLocator(workspaceName: string): By {
+		return By.css(`che-row-toolbar[che-title='${workspaceName}']`);
 	}
 
-	private getTabXpathLocator(tabTitle: string): string {
-		return `//md-tabs-canvas//md-tab-item//span[text()='${tabTitle}']`;
+	private getTabLocator(tabTitle: string): By {
+		return By.xpath(`//md-tabs-canvas//md-tab-item//span[text()='${tabTitle}']`);
 	}
 
-	private getSelectedTabXpathLocator(tabTitle: string): string {
-		return `//md-tabs-canvas[@role='tablist']//md-tab-item[@aria-selected='true']//span[text()='${tabTitle}']`;
+	private getSelectedTabLocator(tabTitle: string): By {
+		return By.xpath(`//md-tabs-canvas[@role='tablist']//md-tab-item[@aria-selected='true']//span[text()='${tabTitle}']`);
 	}
 
 	private async waitSaveButton(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-		await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.ENABLED_SAVE_BUTTON_CSS), timeout);
+		await this.driverHelper.waitVisibility(WorkspaceDetails.ENABLED_SAVE_BUTTON, timeout);
 	}
 
 	private async waitSaveButtonDisappearance(
 		attempts: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS,
 		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
 	): Promise<void> {
-		await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.SAVE_BUTTON_CSS), attempts, polling);
+		await this.driverHelper.waitDisappearance(WorkspaceDetails.SAVE_BUTTON, attempts, polling);
 	}
 
 	private async clickOnSaveButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-		await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.ENABLED_SAVE_BUTTON_CSS), timeout);
+		await this.driverHelper.waitAndClick(WorkspaceDetails.ENABLED_SAVE_BUTTON, timeout);
 	}
 
 	private async clickOnOpenButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-		await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout);
+		await this.driverHelper.waitAndClick(WorkspaceDetails.OPEN_BUTTON, timeout);
 	}
 
 	private async clickOnTab(tabTitle: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
-		const workspaceDetailsTabLocator: By = By.xpath(this.getTabXpathLocator(tabTitle));
-
+		const workspaceDetailsTabLocator: By = this.getTabLocator(tabTitle);
 		await this.driverHelper.waitAndClick(workspaceDetailsTabLocator, timeout);
 	}
 
 	private async waitTabSelected(tabTitle: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-		const selectedTabLocator: By = By.xpath(this.getSelectedTabXpathLocator(tabTitle));
-
+		const selectedTabLocator: By = this.getSelectedTabLocator(tabTitle);
 		await this.driverHelper.waitVisibility(selectedTabLocator, timeout);
 	}
 }

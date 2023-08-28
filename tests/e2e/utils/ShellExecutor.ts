@@ -7,19 +7,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { echo, exec, ShellString } from 'shelljs';
+import { exec, ShellString } from 'shelljs';
+import { Logger } from './Logger';
+import { injectable } from 'inversify';
 
+@injectable()
 export class ShellExecutor {
-	static wait(seconds: number): void {
-		this.execWithLog(`sleep ${seconds}s`);
+	wait(seconds: number): void {
+		this.executeCommand(`sleep ${seconds}s`);
 	}
 
-	static curl(link: string): ShellString {
-		return this.execWithLog(`curl -k ${link}`);
+	curl(link: string): ShellString {
+		return this.executeCommand(`curl -k ${link}`);
 	}
 
-	protected static execWithLog(command: string): ShellString {
-		echo(command);
+	executeCommand(command: string): ShellString {
+		Logger.debug(command);
 		return exec(command);
 	}
 }

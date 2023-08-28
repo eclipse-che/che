@@ -17,10 +17,10 @@ import { DriverHelper } from '../../../utils/DriverHelper';
 
 @injectable()
 export class DexLoginPage {
-	private static readonly dexPageContentContainer: By = By.className('dex-container');
-	private static readonly loginInput: By = By.id('login');
-	private static readonly passwordInput: By = By.id('password');
-	private static readonly submitButton: By = By.id('submit-login');
+	private static readonly DEX_PAGE_CONTENT_CONTAINER: By = By.className('dex-container');
+	private static readonly LOGIN_INPUT: By = By.id('login');
+	private static readonly PASSWORD_INPUT: By = By.id('password');
+	private static readonly SUBMIT_BUTTON: By = By.id('submit-login');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -30,30 +30,30 @@ export class DexLoginPage {
 	async waitDexLoginPage(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(DexLoginPage.dexPageContentContainer, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.waitVisibility(DexLoginPage.DEX_PAGE_CONTENT_CONTAINER, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async clickOnLoginButton(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(DexLoginPage.submitButton);
+		await this.driverHelper.waitAndClick(DexLoginPage.SUBMIT_BUTTON);
 	}
 
 	async enterUserNameKubernetes(userName: string): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.enterValue(DexLoginPage.loginInput, userName);
+		await this.driverHelper.enterValue(DexLoginPage.LOGIN_INPUT, userName);
 	}
 
 	async enterPasswordKubernetes(password: string): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.enterValue(DexLoginPage.passwordInput, password);
+		await this.driverHelper.enterValue(DexLoginPage.PASSWORD_INPUT, password);
 	}
 
 	async waitDexLoginPageDisappearance(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitDisappearance(DexLoginPage.dexPageContentContainer, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.waitDisappearance(DexLoginPage.DEX_PAGE_CONTENT_CONTAINER, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 }
