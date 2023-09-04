@@ -13,6 +13,7 @@ import { LocatorDiff, Locators } from 'monaco-page-objects';
 import { By } from 'selenium-webdriver';
 import clone from 'clone-deep';
 import { MONACO_CONSTANTS } from '../../constants/MONACO_CONSTANTS';
+import { injectable } from 'inversify';
 
 /**
  * this class allows us to change or add some specific locators base on "monaco-page-object" and "vscode-extension-tester-locators".
@@ -20,12 +21,13 @@ import { MONACO_CONSTANTS } from '../../constants/MONACO_CONSTANTS';
  * To see full locators list check "node_modules/vscode-extension-tester-locators/out/lib".
  */
 
+@injectable()
 export class CheCodeLocatorLoader extends LocatorLoader {
 	readonly webCheCodeLocators: Locators;
 
 	constructor() {
 		super(
-			MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION,
+			MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION,
 			MONACO_CONSTANTS.TS_SELENIUM_MONACO_PAGE_OBJECTS_BASE_VERSION,
 			getLocatorsPath()
 		);

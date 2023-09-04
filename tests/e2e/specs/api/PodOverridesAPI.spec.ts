@@ -14,14 +14,19 @@ import YAML from 'yaml';
 import { expect } from 'chai';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { e2eContainer } from '../../configs/inversify.config';
+import { CLASSES } from '../../configs/inversify.types';
 
 suite('Test defining pod overrides via attribute.', function (): void {
 	const pathToSampleFile: string = path.resolve(
 		`resources/pod-overrides${BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED() ? '-airgap' : ''}.yaml`
 	);
 	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
-	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(workspaceName);
-
+	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
+		CLASSES.KubernetesCommandLineToolsExecutor
+	);
+	kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
+	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	suiteSetup('Login into OC client', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
@@ -32,7 +37,7 @@ suite('Test defining pod overrides via attribute.', function (): void {
 
 	test('Apply pod-overrides sample as DevWorkspace with OC client', function (): void {
 		kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsFile(pathToSampleFile);
-		ShellExecutor.wait(5);
+		shellExecutor.wait(5);
 	});
 
 	test('Check that fields are overridden in the Deployment for DevWorkspace', function (): void {

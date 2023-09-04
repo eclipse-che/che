@@ -45,18 +45,18 @@ import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import WebDriverError = error.WebDriverError;
 
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`,
 	function (): void {
+		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+		const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
+		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
+		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
 		let scmContextMenu: ContextMenu;
@@ -173,7 +173,7 @@ suite(
 				Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
 				await sourceControl.openView();
 				const scmView: NewScmView = new NewScmView();
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel));
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
 				let rest: SingleScmProvider[];
 				[scmProvider, ...rest] = await scmView.getProviders();
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
@@ -201,7 +201,6 @@ suite(
 			});
 
 			test('Commit the changes', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel));
 				Logger.debug(`scmProvider.commitChanges: commit name "Commit ${changesToCommit}"`);
 				await scmProvider.commitChanges('Commit ' + changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);

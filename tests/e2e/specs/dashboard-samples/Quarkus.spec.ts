@@ -19,16 +19,17 @@ import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-
 const stackName: string = 'Java 11 with Quarkus';
-const projectName: string = 'quarkus-quickstarts';
 
 suite(`The ${stackName} userstory`, function (): void {
+	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+
 	let projectSection: ViewSection;
+
+	const projectName: string = 'quarkus-quickstarts';
 
 	loginTests.loginIntoChe();
 

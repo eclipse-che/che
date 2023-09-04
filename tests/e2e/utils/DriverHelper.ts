@@ -95,7 +95,6 @@ export class DriverHelper {
 	async waitVisibility(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -158,7 +157,6 @@ export class DriverHelper {
 	async waitPresence(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -191,7 +189,6 @@ export class DriverHelper {
 	): Promise<Array<WebElement>> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -246,6 +243,7 @@ export class DriverHelper {
 		pollingPerLocator: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
 	): Promise<void> {
 		Logger.trace(`${locators}`);
+
 		try {
 			for (const elementLocator of locators) {
 				await this.waitDisappearance(elementLocator, attemptsPerLocator, pollingPerLocator);
@@ -258,7 +256,6 @@ export class DriverHelper {
 	async waitAndClick(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -284,7 +281,7 @@ export class DriverHelper {
 				await element.click();
 				return;
 			} catch (err) {
-				function isElementClickInterceptedOnLastAttempt(err: Error, i: number): boolean {
+				function isElementClickInterceptedOnLastAttempt(err: any, i: number): boolean {
 					return err instanceof error.ElementClickInterceptedError && i === attempts - 1;
 				}
 
@@ -320,7 +317,6 @@ export class DriverHelper {
 	): Promise<string> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator} attribute: '${attribute}'`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -367,7 +363,6 @@ export class DriverHelper {
 	): Promise<string> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator} cssAttribute: ${cssAttribute}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -474,7 +469,6 @@ export class DriverHelper {
 	): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator} text: ${text}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -516,7 +510,6 @@ export class DriverHelper {
 	async clear(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -558,7 +551,6 @@ export class DriverHelper {
 	async clearInvisible(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -624,7 +616,6 @@ export class DriverHelper {
 	async waitAndGetText(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<string> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -677,7 +668,6 @@ export class DriverHelper {
 	async scrollTo(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
-
 		Logger.trace(`${elementLocator}`);
 
 		for (let i: number = 0; i < attempts; i++) {
@@ -717,6 +707,8 @@ export class DriverHelper {
 	}
 
 	async scrollToAndClick(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+		Logger.trace();
+
 		await this.scrollTo(elementLocator, timeout);
 		await this.waitAndClick(elementLocator, timeout);
 	}
@@ -726,12 +718,16 @@ export class DriverHelper {
 		value: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 	): Promise<void> {
+		Logger.trace();
+
 		await this.scrollTo(elementLocator, timeout);
 		await this.enterValue(elementLocator, value, timeout);
 	}
 
 	// method is useful to debug page object elements
 	async highLightElement(element: WebElement): Promise<void> {
+		Logger.trace();
+
 		await this.getDriver().executeScript('arguments[0].style.border="2px solid red"', element);
 	}
 
@@ -739,5 +735,11 @@ export class DriverHelper {
 		Logger.trace();
 
 		return this.driver;
+	}
+
+	async navigateToUrl(url: string): Promise<void> {
+		Logger.trace();
+
+		await this.getDriver().navigate().to(url);
 	}
 }

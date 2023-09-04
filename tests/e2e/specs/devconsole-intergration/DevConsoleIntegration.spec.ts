@@ -25,18 +25,19 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
-const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-
-let ocpImportPage: OcpImportFromGitPage;
-let ocpApplicationPage: OcpApplicationPage;
-const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor();
-
 suite('DevConsole Integration', function (): void {
+	let ocpImportPage: OcpImportFromGitPage;
+	let ocpApplicationPage: OcpApplicationPage;
+
+	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
+		CLASSES.KubernetesCommandLineToolsExecutor
+	);
 	// test specific data
 	const gitImportRepo: string = 'https://github.com/crw-qe/summit-lab-spring-music.git';
 	const gitImportReference: string = 'pipeline';

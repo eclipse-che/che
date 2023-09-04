@@ -30,13 +30,6 @@ export class ChromeDriver implements IDriver {
 		return this.driver as ThenableWebDriver;
 	}
 
-	async setWindowSize(): Promise<void> {
-		await (this.driver as ThenableWebDriver)
-			.manage()
-			.window()
-			.setSize(CHROME_DRIVER_CONSTANTS.TS_SELENIUM_RESOLUTION_WIDTH, CHROME_DRIVER_CONSTANTS.TS_SELENIUM_RESOLUTION_HEIGHT);
-	}
-
 	private getDriverOptions(): Options {
 		let options: Options = new Options()
 			.addArguments('--no-sandbox')

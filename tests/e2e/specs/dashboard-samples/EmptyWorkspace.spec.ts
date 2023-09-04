@@ -17,14 +17,14 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-
 const stackName: string = 'Empty Workspace';
 
 suite(`${stackName} test`, function (): void {
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+
 	loginTests.loginIntoChe();
 
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {

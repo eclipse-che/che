@@ -20,8 +20,9 @@ import { OAUTH_CONSTANTS } from '../../../constants/OAUTH_CONSTANTS';
 
 @injectable()
 export class RegularUserOcpCheLoginPage implements ICheLoginPage {
-	private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR: string = '//div[@class="panel-login"]';
-	private readonly OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR: string = `${this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR}/div[contains(@class, 'panel-content')]/form/button`;
+	private static readonly OPENSHIFT_LOGIN_LANDING_PAGE_BUTTON: By = By.xpath(
+		'//div[@class="panel-login"]/div[contains(@class, "panel-content")]/form/button'
+	);
 
 	constructor(
 		@inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage,
@@ -29,28 +30,32 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 		private readonly driverHelper: DriverHelper
 	) {}
 
-	async login(): Promise<void> {
+	/**
+	 * @param userName
+	 * @param password
+	 */
+	async login(
+		userName: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME,
+		password: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD
+	): Promise<void> {
 		Logger.debug();
 
-		Logger.debug('wait for LogInWithOpenShift page and click button');
-		await this.driverHelper.waitPresence(
-			By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_LOCATOR),
+		await this.driverHelper.waitAndClick(
+			RegularUserOcpCheLoginPage.OPENSHIFT_LOGIN_LANDING_PAGE_BUTTON,
 			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
 		);
-		await this.driverHelper.waitAndClick(By.xpath(this.OPEN_SHIFT_LOGIN_LANDING_PAGE_BUTTON_LOCATOR));
 
 		if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
-			await this.ocpLogin.clickOnLoginProviderTitle();
+			await this.ocpLogin.waitAndClickOnLoginProviderTitle();
 		}
 
 		await this.ocpLogin.waitOpenShiftLoginWelcomePage();
-		await this.ocpLogin.enterUserNameOpenShift(OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME);
-		await this.ocpLogin.enterPasswordOpenShift(OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD);
+		await this.ocpLogin.enterUserNameOpenShift(userName);
+		await this.ocpLogin.enterPasswordOpenShift(password);
 		await this.ocpLogin.clickOnLoginButton();
 		await this.ocpLogin.waitDisappearanceOpenShiftLoginWelcomePage();
 
 		if (await this.ocpLogin.isAuthorizeOpenShiftIdentityProviderPageVisible()) {
-			await this.ocpLogin.waitAuthorizeOpenShiftIdentityProviderPage();
 			await this.ocpLogin.clickOnApproveAuthorizeAccessButton();
 		}
 	}

@@ -28,7 +28,6 @@ import {
 import { expect } from 'chai';
 import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
 import { StringUtil } from '../../utils/StringUtil';
-import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
@@ -41,18 +40,16 @@ import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 
-const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-
-const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
-
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository`,
 	function (): void {
-		const oauthPage: OauthPage = new OauthPage(driverHelper);
+		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+		const webCheCodeLocators: Locators = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -131,7 +128,7 @@ suite(
 			Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
 			await sourceControl.openView();
 			const scmView: NewScmView = new NewScmView();
-			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel));
+			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
 			[scmProvider, ...rest] = await scmView.getProviders();
 			Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 		});
@@ -158,7 +155,6 @@ suite(
 		});
 
 		test('Commit the changes', async function (): Promise<void> {
-			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel));
 			Logger.debug(`scmProvider.commitChanges: commit name "Commit ${changesToCommit}"`);
 			await scmProvider.commitChanges('Commit ' + changesToCommit);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);

@@ -14,13 +14,14 @@ import { CLASSES } from '../../../configs/inversify.types';
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { Logger } from '../../../utils/Logger';
 import { OAUTH_CONSTANTS } from '../../../constants/OAUTH_CONSTANTS';
+import { TIMEOUT_CONSTANTS } from '../../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class RedHatLoginPage {
-	private readonly USERNAME_INPUT_ID: string = 'username-verification';
-	private readonly PASSWORD_INPUT_ID: string = 'password';
-	private readonly NEXT_BUTTON_ID: string = 'login-show-step2';
-	private readonly LOGIN_BUTTON_ID: string = 'rh-password-verification-submit-button';
+	private static readonly USERNAME_INPUT: By = By.id('username-verification');
+	private static readonly PASSWORD_INPUT: By = By.id('password');
+	private static readonly NEXT_BUTTON: By = By.id('login-show-step2');
+	private static readonly LOGIN_BUTTON: By = By.id('rh-password-verification-submit-button');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -29,37 +30,37 @@ export class RedHatLoginPage {
 
 	async waitRedHatLoginWelcomePage(): Promise<void> {
 		Logger.debug();
-		await this.driverHelper.waitVisibility(By.id(this.USERNAME_INPUT_ID));
+
+		await this.driverHelper.waitVisibility(RedHatLoginPage.USERNAME_INPUT, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async enterPasswordRedHat(): Promise<void> {
 		Logger.debug();
-		const passwordFieldLocator: By = By.id(this.PASSWORD_INPUT_ID);
-		await this.driverHelper.waitVisibility(passwordFieldLocator, 3000);
-		await this.driverHelper.enterValue(passwordFieldLocator, OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD);
+
+		await this.driverHelper.enterValue(RedHatLoginPage.PASSWORD_INPUT, OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD);
 	}
 
 	async clickOnLoginButton(): Promise<void> {
 		Logger.debug();
-		const loginButtonLocator: By = By.id(this.LOGIN_BUTTON_ID);
-		await this.driverHelper.waitAndClick(loginButtonLocator);
+
+		await this.driverHelper.waitAndClick(RedHatLoginPage.LOGIN_BUTTON);
 	}
 
 	async waitDisappearanceRedHatLoginWelcomePage(): Promise<void> {
 		Logger.debug();
-		await this.driverHelper.waitDisappearance(By.id(this.LOGIN_BUTTON_ID));
+
+		await this.driverHelper.waitDisappearance(RedHatLoginPage.LOGIN_BUTTON);
 	}
 
 	async enterUserNameRedHat(): Promise<void> {
 		Logger.debug();
-		const usernameFieldLocator: By = By.id(this.USERNAME_INPUT_ID);
-		await this.driverHelper.waitVisibility(usernameFieldLocator, 20000);
-		await this.driverHelper.enterValue(usernameFieldLocator, OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME);
+
+		await this.driverHelper.enterValue(RedHatLoginPage.USERNAME_INPUT, OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME);
 	}
 
 	async clickNextButton(): Promise<void> {
 		Logger.debug();
-		const nextButtonLocator: By = By.id(this.NEXT_BUTTON_ID);
-		await this.driverHelper.waitAndClick(nextButtonLocator);
+
+		await this.driverHelper.waitAndClick(RedHatLoginPage.NEXT_BUTTON);
 	}
 }

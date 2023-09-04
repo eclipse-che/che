@@ -19,43 +19,35 @@ import { e2eContainer } from '../../configs/inversify.config';
 
 @injectable()
 export class OcpMainPage {
-	private static readonly MAIN_PAGE_HEADER_LOCATOR: By = By.id('page-main-header');
-	private static readonly SELECT_ROLE_BUTTON_LOCATOR: By = By.xpath('//*[@data-test-id="perspective-switcher-toggle"]');
-	private static readonly ADD_BUTTON_LOCATOR: By = By.xpath('//*[@data-test-id="+Add-header"]');
-	private static readonly IMPORT_FROM_GIT_ITEM_LOCATOR: By = By.xpath('//*[@data-test="item import-from-git"]');
-	private static readonly SELECT_PROJECT_DROPDOWN_LOCATOR: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
-	private static readonly PROJECT_FILTER_INPUT_LOCATOR: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
-	private static readonly SKIP_TOUR_BUTTON_LOCATOR: By = By.xpath('//*[text()="Skip tour"]');
+	private static readonly MAIN_PAGE_HEADER: By = By.id('page-main-header');
+	private static readonly SELECT_ROLE_BUTTON: By = By.xpath('//*[@data-test-id="perspective-switcher-toggle"]');
+	private static readonly ADD_BUTTON: By = By.xpath('//*[@data-test-id="+Add-header"]');
+	private static readonly IMPORT_FROM_GIT_ITEM: By = By.xpath('//*[@data-test="item import-from-git"]');
+	private static readonly SELECT_PROJECT_DROPDOWN: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
+	private static readonly PROJECT_FILTER_INPUT: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
+	private static readonly SKIP_TOUR_BUTTON: By = By.xpath('//*[text()="Skip tour"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper
 	) {}
 
-	private static getRoleLocator(role: string): By {
-		return By.xpath(`//a//*[text()="${role}"]`);
-	}
-
-	private static getProjectDropdownItemLocator(projectName: string): By {
-		return By.xpath(`//button//*[text()="${projectName}"]`);
-	}
-
 	async waitOpenMainPage(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(OcpMainPage.MAIN_PAGE_HEADER_LOCATOR, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.waitVisibility(OcpMainPage.MAIN_PAGE_HEADER, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async clickOnSelectRoleButton(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.SELECT_ROLE_BUTTON_LOCATOR);
+		await this.driverHelper.waitAndClick(OcpMainPage.SELECT_ROLE_BUTTON);
 	}
 
 	async clickAddToProjectButton(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.ADD_BUTTON_LOCATOR);
+		await this.driverHelper.waitAndClick(OcpMainPage.ADD_BUTTON);
 	}
 
 	async selectDeveloperRole(): Promise<void> {
@@ -71,7 +63,7 @@ export class OcpMainPage {
 	async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM_LOCATOR);
+		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM);
 		return e2eContainer.get(CLASSES.OcpImportFromGitPage);
 	}
 
@@ -85,22 +77,29 @@ export class OcpMainPage {
 	async selectProject(projectName: string): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN_LOCATOR);
-		await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT_LOCATOR, projectName);
-		await this.driverHelper.waitAndClick(OcpMainPage.getProjectDropdownItemLocator(projectName));
+		await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN);
+		await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT, projectName);
+		await this.driverHelper.waitAndClick(this.getProjectDropdownItemLocator(projectName));
+	}
+	private getRoleLocator(role: string): By {
+		return By.xpath(`//a//*[text()="${role}"]`);
+	}
+
+	private getProjectDropdownItemLocator(projectName: string): By {
+		return By.xpath(`//button//*[text()="${projectName}"]`);
 	}
 
 	private async selectRole(role: string): Promise<void> {
 		Logger.debug(`selecting role ${role}`);
 
-		await this.driverHelper.waitAndClick(OcpMainPage.getRoleLocator(role));
+		await this.driverHelper.waitAndClick(this.getRoleLocator(role));
 	}
 
 	private async tryToSkipWebTour(): Promise<void> {
 		Logger.debug();
 
-		if (await this.driverHelper.isVisible(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR)) {
-			await this.driverHelper.waitAndClick(OcpMainPage.SKIP_TOUR_BUTTON_LOCATOR);
+		if (await this.driverHelper.isVisible(OcpMainPage.SKIP_TOUR_BUTTON)) {
+			await this.driverHelper.waitAndClick(OcpMainPage.SKIP_TOUR_BUTTON);
 
 			Logger.debug('welcome tour modal dialog was located and skipped');
 		} else {

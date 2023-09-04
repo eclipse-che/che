@@ -11,20 +11,25 @@ import axios, { AxiosResponse } from 'axios';
 import { Logger } from './Logger';
 import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
+import { injectable } from 'inversify';
 
+@injectable()
 export class DevfilesRegistryHelper {
 	async getInbuiltDevfilesRegistryContent(): Promise<AxiosResponse> {
-		Logger.debug();
+		Logger.trace();
+
 		return await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL());
 	}
 
 	async getGitHubCheDevfileRegistryContent(): Promise<AxiosResponse> {
-		Logger.debug();
+		Logger.trace();
+
 		return await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL);
 	}
 
 	async collectPathsToDevfilesFromRegistry(): Promise<object[]> {
 		Logger.debug();
+
 		const devfileSamples: object[] = [];
 		const sampleNames: string[] = [];
 		switch (API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
@@ -72,7 +77,7 @@ export class DevfilesRegistryHelper {
 	}
 
 	private async getContent(url: string, headers?: object): Promise<AxiosResponse> {
-		Logger.debug(`${url}`);
+		Logger.trace(`${url}`);
 
 		let response: AxiosResponse | undefined;
 		try {

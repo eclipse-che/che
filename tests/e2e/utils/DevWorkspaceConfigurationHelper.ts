@@ -15,31 +15,16 @@ import * as axios from 'axios';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
 import { API_TEST_CONSTANTS } from '../constants/API_TEST_CONSTANTS';
+import { injectable } from 'inversify';
+import { IContextParams } from './IContextParams';
+import { e2eContainer } from '../configs/inversify.config';
+import { CLASSES, EXTERNAL_CLASSES } from '../configs/inversify.types';
 
-/**
- * to see more about IContextParams and generateDevfileContext(params) check README.md in "@eclipse-che/che-devworkspace-generator;
- * tests/e2e/node_modules/@eclipse-che/che-devworkspace-generator/README.md
- */
-
-interface IContextParams {
-	devfilePath?: string | undefined;
-	devfileUrl?: string | undefined;
-	devfileContent?: string | undefined;
-	outputFile?: string | undefined;
-	editorPath?: string | undefined;
-	editorContent?: string | undefined;
-	editorEntry?: string | undefined;
-	pluginRegistryUrl?: string | undefined;
-	projects?: {
-		name: string;
-		location: string;
-	}[];
-	injectDefaultComponent?: string | undefined;
-	defaultComponentImage?: string | undefined;
-}
-
+@injectable()
 export class DevWorkspaceConfigurationHelper {
-	private generator: Generator = new Generator();
+	private generator: Generator = e2eContainer.get(EXTERNAL_CLASSES.Generator);
+	private shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+
 	private readonly params: IContextParams;
 
 	constructor(params: IContextParams) {
@@ -60,7 +45,7 @@ export class DevWorkspaceConfigurationHelper {
 			params.pluginRegistryUrl = API_TEST_CONSTANTS.TS_API_TEST_PLUGIN_REGISTRY_URL;
 		}
 		if (API_TEST_CONSTANTS.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI && !params.editorContent) {
-			params.editorContent = ShellExecutor.curl(API_TEST_CONSTANTS.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI).stdout;
+			params.editorContent = this.shellExecutor.curl(API_TEST_CONSTANTS.TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI).stdout;
 		}
 		this.params = params;
 	}

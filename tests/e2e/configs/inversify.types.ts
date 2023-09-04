@@ -14,7 +14,9 @@ const TYPES: any = {
 	OcpLogin: Symbol.for('OcpLogin'),
 	WorkspaceUtil: Symbol.for('WorkspaceUtil'),
 	IAuthorizationHeaderHandler: Symbol.for('IAuthorizationHeaderHandler'),
-	ITokenHandler: Symbol.for('ITokenHandler')
+	ITokenHandler: Symbol.for('ITokenHandler'),
+	IKubernetesCommandLineToolsExecutor: Symbol.for('IKubernetesCommandLineToolsExecutor'),
+	IContextParams: Symbol.for('IContextParams')
 };
 
 const CLASSES: any = {
@@ -38,7 +40,19 @@ const CLASSES: any = {
 	OcpRedHatLoginPage: 'OcpRedHatLoginPage',
 	OcpApplicationPage: 'OcpApplicationPage',
 	OcpMainPage: 'OcpMainPage',
-	OcpImportFromGitPage: 'OcpImportFromGitPage'
+	OcpImportFromGitPage: 'OcpImportFromGitPage',
+	CheCodeLocatorLoader: 'CheCodeLocatorLoader',
+	LocatorLoader: 'LocatorLoader',
+	OauthPage: 'OauthPage',
+	DevfilesRegistryHelper: 'DevfilesRegistryHelper',
+	KubernetesCommandLineToolsExecutor: 'KubernetesCommandLineToolsExecutor',
+	ShellExecutor: 'ShellExecutor',
+	ContainerTerminal: 'ContainerTerminal'
 };
 
-export { TYPES, CLASSES };
+const EXTERNAL_CLASSES: any = {
+	Generator: 'Generator',
+	LocatorLoader: 'LocatorLoader'
+};
+
+export { TYPES, CLASSES, EXTERNAL_CLASSES };

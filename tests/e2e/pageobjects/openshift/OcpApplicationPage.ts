@@ -18,8 +18,8 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class OcpApplicationPage {
-	private static readonly APPLICATION_ICON_LOCATOR: By = By.xpath('//*[@data-test-id="base-node-handler"]');
-	private static readonly EDIT_SOURCE_CODE_ICON_LOCATOR: By = By.xpath('//*[@aria-label="Edit source code"]');
+	private static readonly APPLICATION_ICON: By = By.xpath('//*[@data-test-id="base-node-handler"]');
+	private static readonly EDIT_SOURCE_CODE_ICON: By = By.xpath('//*[@aria-label="Edit source code"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -31,13 +31,14 @@ export class OcpApplicationPage {
 	async waitApplicationIcon(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitPresence(OcpApplicationPage.APPLICATION_ICON_LOCATOR, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.waitPresence(OcpApplicationPage.APPLICATION_ICON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async waitAndOpenEditSourceCodeIcon(): Promise<void> {
 		Logger.debug();
+
 		const parentGUID: string = await this.browserTabsUtil.getCurrentWindowHandle();
-		await this.driverHelper.waitAndClick(OcpApplicationPage.EDIT_SOURCE_CODE_ICON_LOCATOR);
+		await this.driverHelper.waitAndClick(OcpApplicationPage.EDIT_SOURCE_CODE_ICON);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 }

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
 import { StringUtil } from '../../utils/StringUtil';
@@ -15,6 +15,8 @@ import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigu
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
 import { API_TEST_CONSTANTS } from '../../constants/API_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { e2eContainer } from '../../configs/inversify.config';
+import { CLASSES } from '../../configs/inversify.types';
 
 suite('Empty workspace API test', function (): void {
 	// works only for root user
@@ -25,7 +27,7 @@ suite('Empty workspace API test', function (): void {
 	let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
 	let devfileContext: DevfileContext;
 	let devWorkspaceName: string | undefined;
-	let containerTerminal: KubernetesCommandLineToolsExecutor.ContainerTerminal;
+	let containerTerminal: ContainerTerminal;
 
 	const gitRepository: string = 'https://github.com/crw-qe/web-nodejs-sample';
 
@@ -38,8 +40,10 @@ suite('Empty workspace API test', function (): void {
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
-		kubernetesCommandLineToolsExecutor = new KubernetesCommandLineToolsExecutor(devWorkspaceName, namespace);
-		containerTerminal = new KubernetesCommandLineToolsExecutor.ContainerTerminal(kubernetesCommandLineToolsExecutor);
+		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
+		kubernetesCommandLineToolsExecutor.workspaceName = devWorkspaceName;
+		kubernetesCommandLineToolsExecutor.namespace = namespace;
+		containerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 	});
 
 	test('Create empty workspace', function (): void {

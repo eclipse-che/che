@@ -22,7 +22,7 @@ import { By, error } from 'selenium-webdriver';
 
 @injectable()
 export class WorkspaceHandlingTests {
-	private static WORKSPACE_NAME_LOCATOR: By = By.xpath('//h1[contains(.,"Starting workspace ")]');
+	private static WORKSPACE_NAME: By = By.xpath('//h1[contains(.,"Starting workspace ")]');
 	private static workspaceName: string = 'undefined';
 	private static parentGUID: string;
 
@@ -82,7 +82,7 @@ export class WorkspaceHandlingTests {
 			try {
 				const startingWorkspaceLineContent: string = await this.driverHelper
 					.getDriver()
-					.findElement(WorkspaceHandlingTests.WORKSPACE_NAME_LOCATOR)
+					.findElement(WorkspaceHandlingTests.WORKSPACE_NAME)
 					.getText();
 				Logger.trace(`obtained starting workspace getText():${startingWorkspaceLineContent}`);
 				// cutting away leading text
