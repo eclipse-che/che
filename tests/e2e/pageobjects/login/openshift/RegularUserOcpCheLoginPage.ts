@@ -30,10 +30,6 @@ export class RegularUserOcpCheLoginPage implements ICheLoginPage {
 		private readonly driverHelper: DriverHelper
 	) {}
 
-	/**
-	 * @param userName
-	 * @param password
-	 */
 	async login(
 		userName: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME,
 		password: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD
