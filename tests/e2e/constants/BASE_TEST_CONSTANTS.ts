@@ -13,6 +13,8 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
+	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
+	TESTING_APPLICATION_VERSION: string;
 	TS_DEBUG_MODE: boolean;
 	TS_PLATFORM: string;
 	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
@@ -31,6 +33,20 @@ export const BASE_TEST_CONSTANTS: {
 	 */
 	TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
+	/**
+	 * testing application version
+	 */
+	TESTING_APPLICATION_VERSION: process.env.TESTING_APPLICATION_VERSION || '3.8',
+
+	/**
+	 * is "https://access.redhat.com/documentation/en-us/red_hat_openshift_dev_spaces/{TESTING_APPLICATION_VERSION}/" available online
+	 * false by default
+	 */
+	IS_PRODUCT_DOCUMENTATION_RELEASED: process.env.IS_PRODUCT_DOCUMENTATION_RELEASED === 'true',
+
+	/**
+	 * is cluster disconnected of online
+	 */
 	IS_CLUSTER_DISCONNECTED: (): boolean => BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('airgap'),
 
 	/**

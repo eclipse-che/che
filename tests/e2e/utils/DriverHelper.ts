@@ -215,7 +215,7 @@ export class DriverHelper {
 		);
 	}
 
-	async waitAllVisibility(locators: Array<By>, timeout: number): Promise<void> {
+	async waitAllVisibility(locators: Array<By>, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		Logger.trace(`${locators}`);
 
 		for (const elementLocator of locators) {

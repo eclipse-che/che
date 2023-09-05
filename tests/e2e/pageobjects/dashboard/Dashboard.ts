@@ -26,12 +26,22 @@ export class Dashboard {
 	private static readonly LOADER_ALERT: By = By.xpath('//*[@data-testid="loader-alert"]');
 	private static readonly LOGOUT_BUTTON: By = By.xpath('//button[text()="Logout"]');
 	private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=""]//parent::button');
+	private static readonly INFO_DROPDOWN_BUTTON: By = By.xpath('//button[@aria-label="About Menu"]');
+	private static readonly ABOUT_DIALOG_WINDOW_CLOSE_BUTTON: By = By.xpath('//button[@aria-label="Close Dialog"]');
 	private static readonly EXISTING_WORKSPACE_FOUND_ALERT: By = By.xpath('//h4[text()="Existing workspace found"]');
 	private static readonly CREATE_NEW_WORKSPACE_LINK: By = By.xpath('//button[text()="Create a new workspace"]');
+	private static readonly ABOUT_DIALOG_ITEM_DATA_TEST_IDS: any = {
+		serverVersion: 'server-version',
+		dashboardVersion: 'dashboard-version',
+		browserName: 'browser-name',
+		browserOs: 'browser-os',
+		browserVersion: 'browser-version',
+		username: 'username'
+	};
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper,
+		readonly driverHelper: DriverHelper,
 		@inject(CLASSES.Workspaces) private readonly workspaces: Workspaces
 	) {}
 
@@ -69,6 +79,44 @@ export class Dashboard {
 
 		await this.driverHelper.navigateToUrl(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 		await this.waitPage();
+	}
+
+	async openAboutMenu(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(Dashboard.INFO_DROPDOWN_BUTTON);
+	}
+
+	async selectAboutMenuItem(text: string): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(this.getAboutMenuItemButtonLocator(text));
+	}
+
+	async waitAboutDialogWindowMenuElements(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+		Logger.debug();
+
+		for (const testId of Object.values(Dashboard.ABOUT_DIALOG_ITEM_DATA_TEST_IDS)) {
+			const workspaceDetailsTabLocator: By = this.getAboutDialogWindowItemLocator(<string>testId);
+
+			await this.driverHelper.waitVisibility(workspaceDetailsTabLocator, timeout);
+		}
+	}
+
+	async getApplicationVersionFromAboutDialogWindow(): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetText(
+			this.getAboutDialogWindowItemLocator(Dashboard.ABOUT_DIALOG_ITEM_DATA_TEST_IDS.serverVersion)
+		);
+	}
+
+	async getUsernameFromAboutDialogWindow(): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetText(
+			this.getAboutDialogWindowItemLocator(Dashboard.ABOUT_DIALOG_ITEM_DATA_TEST_IDS.username)
+		);
 	}
 
 	async waitPage(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT): Promise<void> {
@@ -109,6 +157,12 @@ export class Dashboard {
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 	}
 
+	async closeAboutDialogWindow(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(Dashboard.ABOUT_DIALOG_WINDOW_CLOSE_BUTTON);
+	}
+
 	async waitExistingWorkspaceFoundAlert(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug();
 
@@ -128,5 +182,13 @@ export class Dashboard {
 		await this.driverHelper.waitAndClick(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
 		await this.driverHelper.waitAndClick(Dashboard.LOGOUT_BUTTON, timeout);
 		await this.driverHelper.waitDisappearance(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
+	}
+
+	private getAboutMenuItemButtonLocator(text: string): By {
+		return By.xpath(`//li/button[text()="${text}"]`);
+	}
+
+	private getAboutDialogWindowItemLocator(itemDataTestId: string): By {
+		return By.xpath(`//dd[@data-testid="${itemDataTestId}"]`);
 	}
 }

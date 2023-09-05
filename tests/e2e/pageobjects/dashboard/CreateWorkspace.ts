@@ -58,7 +58,7 @@ export class CreateWorkspace {
 
 		Logger.debug(`sampleName: "${sampleName}"`);
 
-		const sampleLocator: By = this.getSampleLocatorWithSpecificEditor(sampleName);
+		const sampleLocator: By = this.getSampleWithSpecificEditorLocator(sampleName);
 		await this.driverHelper.waitAndClick(sampleLocator, timeout);
 	}
 
@@ -80,7 +80,7 @@ export class CreateWorkspace {
 		return By.xpath(`//div[text()=\'${sampleName}\']//parent::article//button`);
 	}
 
-	private getSampleLocatorWithSpecificEditor(sampleName: string): By {
+	private getSampleWithSpecificEditorLocator(sampleName: string): By {
 		let editor: string = '';
 		switch (process.env.TS_SELENIUM_EDITOR) {
 			case 'che-code':

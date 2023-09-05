@@ -29,6 +29,7 @@ export class Workspaces {
 	);
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="confirmation-checkbox"]');
 	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//div[@aria-label="Delete workspaces confirmation window"]');
+	private static readonly LEARN_MORE_DOC_LINK: By = By.xpath('//div/p/a');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -80,13 +81,13 @@ export class Workspaces {
 		await this.driverHelper.waitVisibility(this.getWorkspaceStatusLocator(workspaceName, WorkspaceStatusUI.Stopped), timeout);
 	}
 
-	async clickWorkspaceListItem(
+	async clickWorkspaceListItemLink(
 		workspaceName: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT
 	): Promise<void> {
 		Logger.debug(`"${workspaceName}"`);
 
-		await this.driverHelper.waitAndClick(this.getWorkspaceListItemLocator(workspaceName), timeout);
+		await this.driverHelper.waitAndClick(this.getOpenWorkspaceDetailsLinkLocator(workspaceName), timeout);
 	}
 
 	async clickActionsButton(workspaceName: string): Promise<void> {
@@ -206,6 +207,12 @@ export class Workspaces {
 		return workspaceNames;
 	}
 
+	async getLearnMoreDocumentationLink(): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetElementAttribute(Workspaces.LEARN_MORE_DOC_LINK, 'href');
+	}
+
 	private getWorkspaceListItemLocator(workspaceName: string): By {
 		return By.xpath(`//tr[td//a[text()='${workspaceName}']]`);
 	}
@@ -234,5 +241,9 @@ export class Workspaces {
 
 	private getOpenButtonLocator(workspaceName: string): By {
 		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[@data-key=5]//a[text()='Open']`);
+	}
+
+	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//a[text()='${workspaceName}']`);
 	}
 }

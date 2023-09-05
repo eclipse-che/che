@@ -93,7 +93,7 @@ module.exports = {
 		'@typescript-eslint/no-unsafe-call': 'off',
 		'@typescript-eslint/restrict-plus-operands': 'off',
 		'@typescript-eslint/no-namespace': 'off',
-		'@typescript-eslint/no-unused-expressions': 'error',
+		'@typescript-eslint/no-unused-expressions': 'off',
 		'@typescript-eslint/no-unused-vars': 'error',
 		'@typescript-eslint/no-use-before-define': 'error',
 		'@typescript-eslint/no-var-requires': 'off',

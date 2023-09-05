@@ -13,6 +13,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { DriverHelper } from './DriverHelper';
 import { Logger } from './Logger';
 import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
+import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class BrowserTabsUtil {
@@ -45,7 +46,10 @@ export class BrowserTabsUtil {
 		await this.driverHelper.navigateToUrl(url);
 	}
 
-	async waitAndSwitchToAnotherWindow(currentWindowHandle: string, timeout: number): Promise<void> {
+	async waitAndSwitchToAnotherWindow(
+		currentWindowHandle: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL
+	): Promise<void> {
 		Logger.debug();
 
 		await this.driverHelper.waitUntilTrue(async (): Promise<boolean> => {

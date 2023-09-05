@@ -25,6 +25,10 @@ export class WorkspaceDetails {
 	private static readonly SAVE_BUTTON: By = By.css('button[name="save-button"]');
 	private static readonly ENABLED_SAVE_BUTTON: By = By.css('button[name="save-button"][aria-disabled="false"]');
 	private static readonly WORKSPACE_DETAILS_LOADER: By = By.css('workspace-details-overview md-progress-linear');
+	private static readonly STORAGE_TYPE_INFO_BUTTON: By = By.xpath('//label[@for="storage-type"]//following-sibling::button');
+	private static readonly CLOSE_STORAGE_TYPE_INFO_BUTTON: By = By.xpath('//button[@aria-label="Close"]');
+	private static readonly STORAGE_TYPE_DOC_LINK: By = By.xpath('//div/p/a');
+	private static readonly DEVFILE_DOC_LINK: By = By.xpath('//a[text()="Devfile Documentation"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -101,20 +105,9 @@ export class WorkspaceDetails {
 	}
 
 	async waitTabsPresence(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-		Logger.debug('WorkspaceDetails.waitTabsPresence');
+		Logger.debug();
 
-		const workspaceDetailsTabs: Array<string> = [
-			'Overview',
-			'Projects',
-			'Containers',
-			'Servers',
-			'Env Variables',
-			'Volumes',
-			'Config',
-			'SSH',
-			'Plugins',
-			'Editors'
-		];
+		const workspaceDetailsTabs: Array<string> = ['Overview', 'Devfile', 'DevWorkspace', 'Logs', 'Events'];
 
 		for (const tabTitle of workspaceDetailsTabs) {
 			const workspaceDetailsTabLocator: By = this.getTabLocator(tabTitle);
@@ -124,22 +117,39 @@ export class WorkspaceDetails {
 	}
 
 	async selectTab(tabTitle: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-		Logger.debug(`WorkspaceDetails.selectTab ${tabTitle}`);
+		Logger.debug(`${tabTitle}`);
 
 		await this.clickOnTab(tabTitle, timeout);
-		await this.waitTabSelected(tabTitle, timeout);
+	}
+
+	async clickStorageTypeInfo(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(WorkspaceDetails.STORAGE_TYPE_INFO_BUTTON);
+	}
+
+	async getOpenStorageTypeDocumentationLink(): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetElementAttribute(WorkspaceDetails.STORAGE_TYPE_DOC_LINK, 'href');
+	}
+
+	async closeStorageTypeInfo(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(WorkspaceDetails.CLOSE_STORAGE_TYPE_INFO_BUTTON);
+	}
+
+	async getDevfileDocumentationLink(): Promise<string> {
+		return await this.driverHelper.waitAndGetElementAttribute(WorkspaceDetails.DEVFILE_DOC_LINK, 'href');
 	}
 
 	private getWorkspaceTitleLocator(workspaceName: string): By {
-		return By.css(`che-row-toolbar[che-title='${workspaceName}']`);
+		return By.xpath(`//h1[text()='${workspaceName}']`);
 	}
 
 	private getTabLocator(tabTitle: string): By {
-		return By.xpath(`//md-tabs-canvas//md-tab-item//span[text()='${tabTitle}']`);
-	}
-
-	private getSelectedTabLocator(tabTitle: string): By {
-		return By.xpath(`//md-tabs-canvas[@role='tablist']//md-tab-item[@aria-selected='true']//span[text()='${tabTitle}']`);
+		return By.xpath(`//button[contains(@id,'${tabTitle}')]`);
 	}
 
 	private async waitSaveButton(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
@@ -164,10 +174,5 @@ export class WorkspaceDetails {
 	private async clickOnTab(tabTitle: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		const workspaceDetailsTabLocator: By = this.getTabLocator(tabTitle);
 		await this.driverHelper.waitAndClick(workspaceDetailsTabLocator, timeout);
-	}
-
-	private async waitTabSelected(tabTitle: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
-		const selectedTabLocator: By = this.getSelectedTabLocator(tabTitle);
-		await this.driverHelper.waitVisibility(selectedTabLocator, timeout);
 	}
 }
