@@ -77,7 +77,7 @@ bump_version () {
   pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
   # update devworkspace generator version
-  jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\" |" package.json > package.json.update
+  jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\"" package.json > package.json.update
   mv package.json.update package.json
   popd  >/dev/null || exit
 
@@ -157,7 +157,7 @@ echo "${VERSION}" > VERSION
 
 pushd tests/e2e >/dev/null || exit
 # update devworkspace generator version
-jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${VERSION}\" |" package.json > package.json.update
+jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${VERSION}\"" package.json > package.json.update
 mv package.json.update package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
 popd >/dev/null || exit
