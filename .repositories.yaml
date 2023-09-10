@@ -31,7 +31,7 @@ repositories:
      - name: dockerfiles
        url: https://github.com/eclipse-che/che-server/tree/HEAD/dockerfiles
        description: >-
-         source code, dockerfiles to build our main docker images. Note that Che-theia related dockerfiles are located in che-theia repo.
+         source code, dockerfiles to build our main docker images. Note that Che-code related dockerfiles are located in che-code repo.
      - name: che-server
        url: https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster
        description: >-
@@ -40,19 +40,6 @@ repositories:
        url: https://github.com/eclipse/che/tree/master/tests
        description: >-
          source code of our integration tests.
-  - url: https://github.com/eclipse-che/che-theia
-    name: che-theia
-    description: >-
-      Theia IDE integrated in Che.
-    devfile: https://github.com/eclipse-che/che-theia/blob/main/devfiles/che-theia-all.devfile.yaml
-    doc: https://github.com/eclipse-che/che-theia/blob/main/CONTRIBUTING.md
-    useCheReleaseLifecycle: true
-    components:
-     - name: generator
-       url: https://github.com/eclipse-che/che-theia/tree/main/generator
-       description: >-
-         `che:theia init` CLI to prepare and build che-theia
-       doc: https://github.com/eclipse-che/che-theia/blob/main/generator/CONTRIBUTING.md
   - url: https://github.com/che-incubator/chectl
     name: chectl
     description: >-
