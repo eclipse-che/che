@@ -13,7 +13,7 @@ repositories:
     description: >-
       (this repository) the main project repository
     devfile: https://github.com/eclipse/che/blob/main/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/main/CONTRIBUTING.md#che-server-aka-ws-master
+    doc: https://github.com/eclipse/che/blob/main/CONTRIBUTING.md
     useCheReleaseLifecycle: true
     components:
       - name: tests
@@ -25,7 +25,7 @@ repositories:
     description: >-
       Che server project repository
     devfile: https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml
-    doc: https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master
+    doc: https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md
     useCheReleaseLifecycle: true
     components:
      - name: dockerfiles
@@ -37,15 +37,15 @@ repositories:
        description: >-
          orchestrates the Che workspaces with devfiles on Kubernetes
      - name: tests
-       url: https://github.com/eclipse/che/tree/master/tests
+       url: https://github.com/eclipse/che/tree/main/tests
        description: >-
          source code of our integration tests.
   - url: https://github.com/che-incubator/chectl
     name: chectl
     description: >-
       The CLI to install Che, create and start workspaces and devfiles
-    devfile: https://github.com/che-incubator/chectl/blob/master/devfile.yaml
-    doc: https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/che-incubator/chectl/blob/main/devfile.yaml
+    doc: https://github.com/che-incubator/chectl/blob/main/CONTRIBUTING.md
     useCheReleaseLifecycle: true
   - url: https://github.com/che-incubator/che-code
     name: che-code
@@ -77,22 +77,15 @@ repositories:
     name: machine-exec
     description: >-
       Interface to execute tasks and terminals on other containers within a workspace.
-    devfile: https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml
-    doc: https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md
+    devfile: https://github.com/eclipse-che/che-machine-exec/blob/main/devfile.yaml
+    doc: https://github.com/eclipse-che/che-machine-exec/blob/main/CONTRIBUTING.md
     useCheReleaseLifecycle: true
   - url: https://github.com/eclipse-che/che-operator
     name: operator
     description: >-
       Che operator to deploy, update and manage K8S/OpenShift resources of Che.
-    devfile: https://github.com/eclipse-che/che-operator/blob/master/devfile.yaml
+    devfile: https://github.com/eclipse-che/che-operator/blob/main/devfile.yaml
     useCheReleaseLifecycle: true
-  - url: https://github.com/eclipse-che/che-plugin-broker
-    name: plugin-broker
-    description: >-
-      The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile.
-    devfile: https://github.com/eclipse-che/che-plugin-broker/blob/master/devfile.yaml
-    doc: https://github.com/eclipse-che/che-plugin-broker/blob/master/CONTRIBUTING.md
-    useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-plugin-registry
     name: plugin-registry
     description: >-
@@ -219,11 +212,6 @@ repositories:
     name: dash-licenses
     description: >-
       A container wrapper for The Eclipse Dash License Tool.
-    useCheReleaseLifecycle: false
-  - url: https://github.com/che-incubator/devfile-api
-    name: devfile-api
-    description: >-
-      Devfile API library
     useCheReleaseLifecycle: false
   - url: https://github.com/che-incubator/devfile-api
     name: devfile-api
