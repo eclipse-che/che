@@ -74,7 +74,7 @@ export class WorkspaceHandlingTests {
 	}
 
 	async createAndOpenWorkspaceWithExistedWorkspaceName(stack: string): Promise<void> {
-		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
+		Logger.debug('create and open workspace with existed workspace name.');
 		await this.createAndOpenWorkspace(stack);
 		await this.dashboard.waitExistingWorkspaceFoundAlert();
 		await this.dashboard.clickOnCreateNewWorkspaceButton();
