@@ -27,7 +27,7 @@ export class Dashboard {
 	private static readonly LOGOUT_BUTTON: By = By.xpath('//button[text()="Logout"]');
 	private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=""]//parent::button');
 	private static readonly EXISTING_WORKSPACE_FOUND_ALERT: By = By.xpath('//h4[text()="Existing workspace found"]');
-	private static readonly CREATE_NEW_WORKSPACE_BUTTON: By = By.xpath('//button[text()="Create a new workspace"]');
+	private static readonly CREATE_NEW_WORKSPACE_LINK: By = By.xpath('//button[text()="Create a new workspace"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -118,7 +118,7 @@ export class Dashboard {
 	async clickOnCreateNewWorkspaceButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(Dashboard.CREATE_NEW_WORKSPACE_BUTTON, timeout);
+		await this.driverHelper.waitAndClick(Dashboard.CREATE_NEW_WORKSPACE_LINK, timeout);
 	}
 
 	async logout(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
