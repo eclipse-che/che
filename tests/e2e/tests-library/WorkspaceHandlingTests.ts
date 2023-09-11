@@ -73,6 +73,13 @@ export class WorkspaceHandlingTests {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
+	async createAndOpenWorkspaceWithExistedWorkspaceName(stack: string): Promise<void> {
+		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
+		await this.createAndOpenWorkspace(stack);
+		await this.dashboard.waitExistingWorkspaceFoundAlert();
+		await this.dashboard.clickOnCreateNewWorkspaceButton();
+	}
+
 	async obtainWorkspaceNameFromStartingPage(): Promise<void> {
 		const timeout: number = TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT;
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;

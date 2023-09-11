@@ -22,6 +22,7 @@ export const BASE_TEST_CONSTANTS: {
 	TS_LOAD_TESTS: string;
 	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
 	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: string;
+	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: string;
 	TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: string;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 } = {
@@ -47,6 +48,11 @@ export const BASE_TEST_CONSTANTS: {
 	 * file name to check if project was imported
 	 */
 	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: process.env.TS_SELENIUM_PROJECT_ROOT_FILE_NAME || 'devfile.yaml',
+
+	/**
+	 * sample name from Dashboard to start
+	 */
+	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: process.env.TS_SELENIUM_SAMPLE_NAME || 'Python',
 
 	/**
 	 * name of workspace created for 'Happy Path' scenario validation.
