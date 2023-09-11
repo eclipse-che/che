@@ -52,7 +52,7 @@ export const BASE_TEST_CONSTANTS: {
 	/**
 	 * sample name from Dashboard to start
 	 */
-	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: process.env.TS_SELENIUM_SAMPLE_NAME || 'Python',
+	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: process.env.TS_SELENIUM_DASHBOARD_SAMPLE_NAME || 'Python',
 
 	/**
 	 * name of workspace created for 'Happy Path' scenario validation.
