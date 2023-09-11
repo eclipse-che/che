@@ -16,20 +16,19 @@ If creating a new repo under the [eclipse-che](https://github.com/eclipse-che) o
 <!-- begin repository list -->
 Repository | Component | Description | Devfile | Documentation
 --- | --- | ---  | --- | ---
-[che](https://github.com/eclipse/che) | | (this repository) the main project repository | [devfile](https://github.com/eclipse/che/blob/main/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/main/CONTRIBUTING.md#che-server-aka-ws-master)
+[che](https://github.com/eclipse/che) | | (this repository) the main project repository | [devfile](https://github.com/eclipse/che/blob/main/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/main/CONTRIBUTING.md)
 ---| [tests](https://github.com/eclipse/che/tree/main/tests) | source code of our integration tests. | | |
-[che-server](https://github.com/eclipse-che/che-server/) | | Che server project repository | [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md#che-server-aka-ws-master)
+[che-server](https://github.com/eclipse-che/che-server/) | | Che server project repository | [devfile](https://github.com/eclipse-che/che-server/blob/HEAD/devfile.yaml) | [doc](https://github.com/eclipse/che/blob/HEAD/CONTRIBUTING.md)
 ---| [dockerfiles](https://github.com/eclipse-che/che-server/tree/HEAD/dockerfiles) | source code, dockerfiles to build our main docker images. Note that Che-code related dockerfiles are located in che-code repo. | | |
 ---| [che-server](https://github.com/eclipse-che/che-server/tree/HEAD/wsmaster) | orchestrates the Che workspaces with devfiles on Kubernetes | | |
----| [tests](https://github.com/eclipse/che/tree/master/tests) | source code of our integration tests. | | |
-[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/master/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/master/CONTRIBUTING.md)
+---| [tests](https://github.com/eclipse/che/tree/main/tests) | source code of our integration tests. | | |
+[chectl](https://github.com/che-incubator/chectl) | | The CLI to install Che, create and start workspaces and devfiles | [devfile](https://github.com/che-incubator/chectl/blob/main/devfile.yaml) | [doc](https://github.com/che-incubator/chectl/blob/main/CONTRIBUTING.md)
 [che-code](https://github.com/che-incubator/che-code) | | Fork of "Code - OSS" to work with Eclipse Che | [devfile](https://github.com/che-incubator/che-code/blob/main/devfile.yaml) | [doc](https://github.com/che-incubator/che-code/blob/main/README.md)
 [dashboard](https://github.com/eclipse-che/che-dashboard) | | UI to manage workspaces, devfiles, etc. | [devfile](https://github.com/eclipse-che/che-dashboard/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-dashboard/blob/main/README.md#eclipse-che-dashboard)
 [devfile-registry](https://github.com/eclipse-che/che-devfile-registry) | | The default set of devfiles that would be made available on the Che dashboard stacks. |  | 
 [docs](https://github.com/eclipse-che/che-docs) | | Eclipse Che documentation https://github.com/eclipse-che/che-docs source code. | [devfile](https://github.com/eclipse-che/che-docs/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-docs/blob/main/CONTRIBUTING.adoc)
-[machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/master/CONTRIBUTING.md)
-[operator](https://github.com/eclipse-che/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | [devfile](https://github.com/eclipse-che/che-operator/blob/master/devfile.yaml) | 
-[plugin-broker](https://github.com/eclipse-che/che-plugin-broker) | | The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile. | [devfile](https://github.com/eclipse-che/che-plugin-broker/blob/master/devfile.yaml) | [doc](https://github.com/eclipse-che/che-plugin-broker/blob/master/CONTRIBUTING.md)
+[machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/main/CONTRIBUTING.md)
+[operator](https://github.com/eclipse-che/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | [devfile](https://github.com/eclipse-che/che-operator/blob/main/devfile.yaml) | 
 [plugin-registry](https://github.com/eclipse-che/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. |  | 
 [website](https://github.com/eclipse-che/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml) | 
 [workspace-client](https://github.com/eclipse-che/che-workspace-client) | | JS library to interact with a che-server. |  | 
@@ -55,12 +54,7 @@ Repository | Component | Description | Devfile | Documentation
 [setup-minikube-action](https://github.com/che-incubator/setup-minikube-action) | | Github action for starting Minikube to be able to Install/Run Eclipse Che |  | 
 [dependencies-license-action](https://github.com/che-incubator/dependencies-license-action) | | Github action to check file with list golang runtime dependencies and license information. |  | 
 [dash-licenses](https://github.com/che-incubator/dash-licenses) | | A container wrapper for The Eclipse Dash License Tool. |  | 
-[devfile-api](https://github.com/che-incubator/devfile-api
-https://github.com/che-incubator/devfile-api) | | Devfile API library
-Devfile API library |  | 
-[devfile-api](https://github.com/che-incubator/devfile-api
-https://github.com/che-incubator/devfile-api) | | Devfile API library
-Devfile API library |  | 
+[devfile-api](https://github.com/che-incubator/devfile-api) | | Devfile API library |  | 
 <!-- end repository list -->
 
 ## Devfile to contribute
