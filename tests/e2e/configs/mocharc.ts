@@ -10,25 +10,29 @@
 
 'use strict';
 
-import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
+import { MOCHA_CONSTANTS } from '../constants/MOCHA_CONSTANTS';
+
+/**
+ * full available options list https://mochajs.org/api/mocha
+ */
 
 module.exports = {
-	timeout: 1200000,
+	timeout: MOCHA_CONSTANTS.MOCHA_DEFAULT_TIMEOUT,
 	reporter: 'dist/utils/CheReporter.js',
 	ui: 'tdd',
 	require: ['dist/specs/MochaHooks.js', 'ts-node/register'],
-	bail: true,
+	bail: MOCHA_CONSTANTS.MOCHA_BAIL,
 	'full-trace': true,
 	spec:
 		// variable MOCHA_DIRECTORY uses in command "test-all-devfiles" and sets up automatically.
 		// you can set it up to run files from specific directory with export environmental variable.
-		process.env.MOCHA_DIRECTORY
+		MOCHA_CONSTANTS.MOCHA_DIRECTORY
 			? // to run one file (name without extension). uses in "test", "test-all-devfiles".
-			  process.env.USERSTORY
-				? `dist/specs/${process.env.MOCHA_DIRECTORY}/${process.env.USERSTORY}.spec.js`
-				: `dist/specs/${process.env.MOCHA_DIRECTORY}/**.spec.js`
-			: process.env.USERSTORY
-			? [`dist/specs/**/${process.env.USERSTORY}.spec.js`, `dist/specs/${process.env.USERSTORY}.spec.js`]
+			  MOCHA_CONSTANTS.MOCHA_USERSTORY
+				? `dist/specs/${MOCHA_CONSTANTS.MOCHA_DIRECTORY}/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`
+				: `dist/specs/${MOCHA_CONSTANTS.MOCHA_DIRECTORY}/**.spec.js`
+			: MOCHA_CONSTANTS.MOCHA_USERSTORY
+			? [`dist/specs/**/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`, `dist/specs/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`]
 			: ['dist/specs/**/**.spec.js', 'dist/specs/**.spec.js'],
-	retries: TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS
+	retries: MOCHA_CONSTANTS.MOCHA_RETRIES
 };
