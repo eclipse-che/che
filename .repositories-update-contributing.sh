@@ -14,7 +14,7 @@
 set -e
 set -u
 
-YQ_IMAGE="mikefarah/yq:3.3.2"
+YQ_IMAGE="docker.io/mikefarah/yq:3.3.2"
 
 DIR=$(cd "$(dirname "$0")"; pwd)
 
