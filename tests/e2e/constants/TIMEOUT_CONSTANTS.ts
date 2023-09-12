@@ -94,7 +94,7 @@ export const TIMEOUT_CONSTANTS: {
 	/**
 	 * timeout for workspace stopped status, "30 000" by default
 	 */
-	TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: Number(process.env.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) || 30_000,
+	TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: Number(process.env.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) || 60_000,
 
 	// -------------------------------------------- PROJECT TREE --------------------------------------------
 
