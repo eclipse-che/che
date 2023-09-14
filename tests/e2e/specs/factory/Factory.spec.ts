@@ -16,7 +16,6 @@ import {
 	ContextMenu,
 	EditorView,
 	Locators,
-	ModalDialog,
 	NewScmView,
 	SideBarView,
 	SingleScmProvider,
@@ -104,11 +103,7 @@ suite(
 		});
 
 		test('Accept the project as a trusted one', async function (): Promise<void> {
-			const buttonYesITrustTheAuthors: string = 'Yes, I trust the authors';
-			const trustedProjectDialog: ModalDialog = new ModalDialog();
-			await driverHelper.waitVisibility(webCheCodeLocators.WelcomeContent.button);
-			Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
-			await trustedProjectDialog.pushButton(buttonYesITrustTheAuthors);
+			await projectAndFileTests.performTrustAuthorDialog();
 		});
 
 		test('Make changes to the file', async function (): Promise<void> {

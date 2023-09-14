@@ -1,6 +1,6 @@
 {
 	"name": "@eclipse-che/che-e2e",
-	"version": "7.75.0-next",
+	"version": "7.75.0-SNAPSHOT",
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
@@ -9,6 +9,7 @@
 		"tsc": "rm -rf ./dist && ./configs/sh-scripts/generateIndex.sh && tsc -p .",
 		"test": "./configs/sh-scripts/initDefaultValues.sh npm run lint && npm run tsc && export USERSTORY=$USERSTORY && mocha --config dist/configs/mocharc.js",
 		"driver-less-test": "export TS_USE_WEB_DRIVER_FOR_TEST=false && npm run test",
+		"open-allure-dasboard": "allure generate .allure-results --clean -o .allure-report && allure open .allure-report",
 		"cleanup-docker": "if [ $(docker ps -a | grep -c selenium-e2e) -gt 0 ]; then docker rm -f $(docker ps --filter \"name=selenium-e2e\" -aq); fi;",
 		"test-docker": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
 		"test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
@@ -19,6 +20,12 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@eclipse-che/che-devworkspace-generator": "next",
+		"allure-decorators": "^2.4.0",
+		"allure-js-commons": "^2.4.0",
+		"allure-mocha": "^2.4.0",
+		"mocha-multi-reporters": "^1.5.1",
+		"allure-commandline": "^2.22.1",
+		"mocha-allure-reporter": "^1.4.0",
 		"@types/chai": "^4.3.4",
 		"@types/clone-deep": "^4.0.1",
 		"@types/mocha": "5.2.6",

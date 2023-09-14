@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 export const TIMEOUT_CONSTANTS: {
+	TS_FIND_EXTENSION_TEST_TIMEOUT: number;
 	TS_SELENIUM_WORKSPACE_STATUS_POLLING: number;
 	TS_COMMON_DASHBOARD_WAIT_TIMEOUT: number;
 	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: number;
@@ -106,7 +107,7 @@ export const TIMEOUT_CONSTANTS: {
 	// -------------------------------------------- EDITOR --------------------------------------------
 
 	/**
-	 * timeout for inetractions with editor tab - wait, click, select, "8 000" by default.
+	 * timeout for interactions with editor tab - wait, click, select, "8 000" by default.
 	 */
 	TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 8_000,
 
@@ -127,5 +128,10 @@ export const TIMEOUT_CONSTANTS: {
 	/**
 	 * common timeout for plugins.
 	 */
-	TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 30_000
+	TS_COMMON_PLUGIN_TEST_TIMEOUT: Number(process.env.TS_COMMON_PLUGIN_TEST_TIMEOUT) || 30_000,
+
+	/**
+	 * timeout for searching extension in marketplace.
+	 */
+	TS_FIND_EXTENSION_TEST_TIMEOUT: Number(process.env.TS_FIND_EXTENSION_TEST_TIMEOUT) || 15_000
 };
