@@ -18,15 +18,17 @@ import { e2eContainer } from '../configs/inversify.config';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 import { Logger } from '../utils/Logger';
+import { allure } from 'allure-mocha/runtime';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
-import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { MONACO_CONSTANTS } from '../constants/MONACO_CONSTANTS';
+import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
 
 export function registerRunningWorkspace(workspaceName: string): void {
-	Logger.debug(`with workspaceName:${workspaceName}`);
+	workspaceName !== '' ? Logger.debug(`with workspaceName:${workspaceName}`) : Logger.debug('delete workspace name');
+
 	latestWorkspace = workspaceName;
 }
 
@@ -63,6 +65,16 @@ exports.mochaHooks = {
 		}
 	],
 	afterEach: [
+		async function (this: Mocha.Context): Promise<void> {
+			if (this.currentTest?.state === 'failed') {
+				try {
+					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
+					allure.attachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
+				} catch (e) {
+					allure.attachment('No screenshot', 'Could not take a screenshot', 'text/plain');
+				}
+			}
+		},
 		// stop and remove running workspace
 		function deleteWorkspaceOnFailedTest(this: Mocha.Context): void {
 			if (this.currentTest?.state === 'failed') {
@@ -75,6 +87,7 @@ exports.mochaHooks = {
 		}
 	],
 	afterAll: [
+		// stop and remove running workspace
 		async function stopTheDriver(): Promise<void> {
 			if (!BASE_TEST_CONSTANTS.TS_DEBUG_MODE && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
 				// ensure that fired events done

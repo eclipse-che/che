@@ -81,7 +81,7 @@ export class WorkspaceHandlingTests {
 	}
 
 	async obtainWorkspaceNameFromStartingPage(): Promise<void> {
-		const timeout: number = TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT;
+		const timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT;
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
 

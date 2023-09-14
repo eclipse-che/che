@@ -11,5 +11,7 @@ export const PLUGIN_TEST_CONSTANTS: { TS_SAMPLE_LIST: string } = {
 	/**
 	 * dashboard samples to check in RecommendedExtensions.spec.ts
 	 */
-	TS_SAMPLE_LIST: process.env.TS_SAMPLE_LIST || 'Node.js MongoDB,Node.js Express'
+	TS_SAMPLE_LIST:
+		process.env.TS_SAMPLE_LIST ||
+		'Node.js MongoDB,Node.js Express,Java 11 with Lombok,Java 11 with Quarkus,Python,.NET,C/C++,Go,PHP,Ansible'
 };

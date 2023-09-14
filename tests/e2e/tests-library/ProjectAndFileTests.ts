@@ -10,30 +10,29 @@
 
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { By, until } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
-import { Locators, ModalDialog } from 'monaco-page-objects';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-
-const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
 
 @injectable()
 export class ProjectAndFileTests {
 	constructor(
 		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper
+		private readonly driverHelper: DriverHelper,
+		@inject(CLASSES.CheCodeLocatorLoader)
+		private readonly cheCodeLocatorLoader: CheCodeLocatorLoader
 	) {}
 
 	async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
 		Logger.debug('waiting for editor.');
 		try {
 			const start: number = new Date().getTime();
-			await this.driverHelper
-				.getDriver()
-				.wait(until.elementLocated(By.className('monaco-workbench')), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+			await this.driverHelper.waitVisibility(
+				this.cheCodeLocatorLoader.webCheCodeLocators.Workbench.constructor,
+				TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+			);
 			const end: number = new Date().getTime();
 			Logger.debug(`editor was opened in ${end - start} seconds.`);
 		} catch (err) {
@@ -43,17 +42,20 @@ export class ProjectAndFileTests {
 	}
 
 	async performTrustAuthorDialog(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(
+			this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
+			TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+		);
+
 		try {
-			const buttonYesITrustTheAuthors: string = 'Yes, I trust the authors';
-			await this.driverHelper.waitVisibility(
-				webCheCodeLocators.WelcomeContent.button,
+			await this.driverHelper.waitAndClick(
+				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
 			);
-			const trustedProjectDialog: ModalDialog = new ModalDialog();
-			Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
-			await trustedProjectDialog.pushButton(buttonYesITrustTheAuthors);
 		} catch (e) {
-			Logger.debug(`Welcome modal dialog was not shown: ${e}`);
+			Logger.info('Second welcome content dialog box was not shown');
 		}
 	}
 }

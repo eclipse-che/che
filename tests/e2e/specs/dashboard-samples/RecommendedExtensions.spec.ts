@@ -16,10 +16,8 @@ import {
 	ExtensionsViewItem,
 	ExtensionsViewSection,
 	Locators,
-	ModalDialog,
 	SideBarView,
 	TextEditor,
-	ViewItem,
 	ViewSection
 } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
@@ -35,36 +33,36 @@ import { expect } from 'chai';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PLUGIN_TEST_CONSTANTS } from '../../constants/PLUGIN_TEST_CONSTANTS';
-import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
 
-suite(`Check if recommended extensions installed for ${samples}`, function (): void {
-	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
-	const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+for (const sample of samples) {
+	suite(`Check if recommended extensions installed for ${sample}`, function (): void {
+		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 
-	let projectSection: ViewSection;
-	let extensionsView: SideBarView | undefined;
-	let extensionSection: ExtensionsViewSection;
+		let projectSection: ViewSection;
+		let extensionSection: ExtensionsViewSection;
+		let extensionsView: SideBarView | undefined;
 
-	const extensionsListFileName: string = 'extensions.json';
-	let recommendedExtensions: any = {
-		recommendations: []
-	};
+		const [pathToExtensionsListFileName, extensionsListFileName]: string[] = ['.vscode', 'extensions.json'];
+		let recommendedExtensions: any = {
+			recommendations: []
+		};
 
-	loginTests.loginIntoChe();
+		loginTests.loginIntoChe();
 
-	for (const sample of samples) {
 		test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspace(sample);
 		});
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+			expect(WorkspaceHandlingTests.getWorkspaceName(), 'Workspace name was not fetched from the loading page').not.undefined;
 		});
 
 		test('Registering the running workspace', function (): void {
@@ -75,31 +73,20 @@ suite(`Check if recommended extensions installed for ${samples}`, function (): v
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		});
 
-		test('Wait until the project will be imported and accept it as trusted one', async function (): Promise<void> {
-			[projectSection] = await new SideBarView().getContent().getSections();
-			const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
-			Logger.debug(`projectSection.findItem: find ${label}`);
-			const isFileImported: ViewItem | undefined = await projectSection.findItem(label);
-			expect(isFileImported).not.eqls(undefined);
-			try {
-				const buttonYesITrustTheAuthors: string = 'Yes, I trust the authors';
-				await driverHelper.waitVisibility(
-					webCheCodeLocators.WelcomeContent.button,
-					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-				);
-				const trustedProjectDialog: ModalDialog = new ModalDialog();
-				Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
-				await trustedProjectDialog.pushButton(buttonYesITrustTheAuthors);
-			} catch (e) {
-				Logger.debug(`Welcome modal dialog was not shown: ${e}`);
-			}
+		test('Check the project files were imported', async function (): Promise<void> {
+			const [projectSection]: ViewSection[] = await new SideBarView().getContent().getSections();
+			expect(await projectSection.findItem(pathToExtensionsListFileName), 'Files not imported').not.undefined;
+		});
+
+		test('Accept the project as a trusted one', async function (): Promise<void> {
+			await projectAndFileTests.performTrustAuthorDialog();
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
 			Logger.debug('projectSection.findItem(item))?.select(): expand .vscode folder and open extensions.json.');
-			await (await projectSection.findItem('.vscode'))?.select();
-			// time to expand project tree
-			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+			[projectSection] = await new SideBarView().getContent().getSections();
+			await (await projectSection.findItem(pathToExtensionsListFileName))?.select();
+			await driverHelper.waitVisibility(webCheCodeLocators.DefaultTreeItem.ctor(extensionsListFileName));
 			await (await projectSection.findItem(extensionsListFileName))?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
 			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
@@ -113,69 +100,77 @@ suite(`Check if recommended extensions installed for ${samples}`, function (): v
 					return { publisher, name };
 				}
 			);
-			Logger.info(`Recommended extension for this workspace:\n${JSON.stringify(recommendedExtensions.recommendations)}.`);
+			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(recommendedExtensions.recommendations)}.`);
+			expect(recommendedExtensions.recommendations, 'Recommendations not found').not.empty;
 		});
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
 
 		test('Let extensions complete installation', async function (): Promise<void> {
-			Logger.info(
+			this.test?.retries(0);
+			Logger.debug(
 				`Time for extensions installation TimeoutConstants.TS_COMMON_PLUGIN_TEST_TIMEOUT=${TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT}`
 			);
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT);
 		});
 
 		test('Check if extensions are installed and enabled', async function (): Promise<void> {
-			this.retries(10);
+			// timeout 15 seconds per extensions
+			this.timeout(TIMEOUT_CONSTANTS.TS_FIND_EXTENSION_TEST_TIMEOUT * recommendedExtensions.recommendations.length);
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 
 			Logger.debug('extensionsView?.getContent().getSections(): get current section.');
 			[extensionSection] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
-			await driverHelper.waitAllPresence(
+			expect(extensionSection, 'Can`t find Extension section').not.undefined;
+			await driverHelper.waitVisibility(
 				webCheCodeLocators.ExtensionsViewSection.itemTitle,
 				TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
 			);
 
 			for (const extension of recommendedExtensions.recommendations) {
-				Logger.info(`Check if ${JSON.stringify(extension)} are installed.`);
-
 				Logger.debug(`extensionSection.findItem(${extension.name}).`);
 				await extensionSection.findItem(extension.name);
 
-				// check if extension require reload the page
-				if (await driverHelper.isVisible((webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton)) {
-					Logger.debug('Extension require reload the editor. Refreshing the page..');
+				const isReloadRequired: boolean = await driverHelper.isVisible(
+					(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
+				);
+				Logger.debug(`Is extensions require reload the editor: ${isReloadRequired}`);
+
+				if (isReloadRequired) {
+					Logger.debug('Refreshing the page..');
 					await browserTabsUtil.refreshPage();
 					await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-					Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
+					await driverHelper.waitVisibility(
+						webCheCodeLocators.ActivityBar.viewContainer,
+						TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
+					);
+					Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): reopen Extensions view.');
 					extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
-					Logger.debug('extensionsView?.getContent().getSections(): get current section.');
-					[extensionSection] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
-					await driverHelper.waitAllPresence(
+					await driverHelper.waitVisibility(
 						webCheCodeLocators.ExtensionsViewSection.itemTitle,
 						TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
 					);
+					expect(extensionsView, 'Can`t find Extension View section').not.undefined;
+					[extensionSection] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
+					expect(extensionSection, 'Can`t find Extension section').not.undefined;
 					Logger.debug(`extensionSection.findItem(${extension.name}).`);
 					await extensionSection.findItem(extension.name);
 				}
 
-				Logger.debug('extensionsView?.getContent().getSections(): switch to marketplace section.');
+				Logger.debug('extensionsView.getContent().getSections(): switch to marketplace section.');
 				const [marketplaceSection]: ExtensionsViewSection[] = (await extensionsView
 					?.getContent()
 					.getSections()) as ExtensionsViewSection[];
-				await driverHelper.waitVisibility(
-					webCheCodeLocators.ExtensionsViewSection.items,
-					TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
-				);
 
-				Logger.debug('marketplaceSection.getVisibleItems(): get all found items.');
+				Logger.debug('marketplaceSection.getVisibleItems()');
 				const allFinedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
-
-				let itemWithRightNameAndPublisher: ExtensionsViewItem | undefined;
+				expect(allFinedItems, 'Extensions not found').not.empty;
+				let itemWithRightNameAndPublisher: ExtensionsViewItem | undefined = undefined;
 				for (const item of allFinedItems) {
 					Logger.debug(`Try to find extension published by ${extension.publisher}.`);
 					if ((await item.getAuthor()) === extension.publisher) {
@@ -183,16 +178,14 @@ suite(`Check if recommended extensions installed for ${samples}`, function (): v
 						Logger.debug(`Extension was found: ${await itemWithRightNameAndPublisher?.getTitle()}`);
 						break;
 					}
-					if (itemWithRightNameAndPublisher === undefined) {
-						Logger.error(`Extension with publisher as ${extension.publisher} was not found.`);
-					}
+					expect(itemWithRightNameAndPublisher, `Extension ${extension.name} not found`).not.undefined;
 				}
 
 				Logger.debug('itemWithRightNameAndPublisher?.isInstalled()');
 				const isInstalled: boolean = (await itemWithRightNameAndPublisher?.isInstalled()) as boolean;
 
 				Logger.debug(`itemWithRightNameAndPublisher?.isInstalled(): ${isInstalled}.`);
-				expect(isInstalled).eqls(true);
+				expect(isInstalled, `Extension ${extension.name} not installed`).is.true;
 
 				Logger.debug('itemWithRightNameAndPublisher.manage(): get context menu.');
 				const extensionManageMenu: ContextMenu = await (itemWithRightNameAndPublisher as ExtensionsViewItem).manage();
@@ -200,13 +193,13 @@ suite(`Check if recommended extensions installed for ${samples}`, function (): v
 				Logger.debug('extensionManageMenu.getItems(): get menu items.');
 				const extensionMenuItems: ContextMenuItem[] = await extensionManageMenu.getItems();
 				let extensionMenuItemLabels: string = '';
+				Logger.trace('extensionMenuItems -> item.getLabel(): get menu items names.');
 				for (const item of extensionMenuItems) {
-					Logger.trace('extensionMenuItems -> item.getLabel(): get menu items names.');
 					extensionMenuItemLabels += (await item.getLabel()) + ' ';
 				}
 
 				Logger.debug(`extensionMenuItemLabels: ${extensionMenuItemLabels}.`);
-				expect(extensionMenuItemLabels).contains('Disable').and.not.contains('Enable');
+				expect(extensionMenuItemLabels, `Extension ${extension.name} not enabled`).contains('Disable').and.not.contains('Enable');
 			}
 		});
 
@@ -218,7 +211,7 @@ suite(`Check if recommended extensions installed for ${samples}`, function (): v
 		test('Delete the workspace', async function (): Promise<void> {
 			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		});
-	}
 
-	loginTests.logoutFromChe();
-});
+		loginTests.logoutFromChe();
+	});
+}

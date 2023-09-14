@@ -1,12 +1,12 @@
 {
 	"compilerOptions": {
 		"skipLibCheck": true,
-		"target": "es2017",
+		"target": "es2021",
 		"module": "commonjs",
 		"strict": true,
 		"esModuleInterop": true,
 		"outDir": "dist",
-		"lib": ["es2017", "dom"],
+		"lib": ["es2021", "dom"],
 		"types": ["reflect-metadata", "@types/mocha", "@types/node"],
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,

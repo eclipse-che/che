@@ -37,6 +37,7 @@ Note: If there is any modifications in package.json, manually execute the `npm i
     npm run test
     ```
     Also, environmental variables can be set in files in "constants" folder.
+-   Local test results can be represented with Allure reporter `npm run open-allure-dasboard`
 
 ## Docker launch
 

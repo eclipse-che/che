@@ -18,7 +18,8 @@ import { MOCHA_CONSTANTS } from '../constants/MOCHA_CONSTANTS';
 
 module.exports = {
 	timeout: MOCHA_CONSTANTS.MOCHA_DEFAULT_TIMEOUT,
-	reporter: 'dist/utils/CheReporter.js',
+	reporter: 'mocha-multi-reporters',
+	reporterOptions: 'configFile=configs/reporters-config.json',
 	ui: 'tdd',
 	require: ['dist/specs/MochaHooks.js', 'ts-node/register'],
 	bail: MOCHA_CONSTANTS.MOCHA_BAIL,

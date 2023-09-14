@@ -14,7 +14,6 @@ import {
 	ActivityBar,
 	ContextMenu,
 	EditorView,
-	error,
 	InputBox,
 	Locators,
 	ModalDialog,
@@ -37,13 +36,11 @@ import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
-import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import WebDriverError = error.WebDriverError;
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without OAuth setup`,
@@ -124,29 +121,7 @@ suite(
 			});
 
 			test('Accept the project as a trusted one', async function (): Promise<void> {
-				// click somewhere to trigger "Welcome Content" dialog
-				try {
-					await driverHelper.waitAndClick(webCheCodeLocators.Workbench.notificationItem);
-				} catch (e) {
-					Logger.info(`Click on ${webCheCodeLocators.Workbench.notificationItem} to get "Welcome Content" dialog ${e as string}`);
-				}
-				// "Welcome Content" dialog can be shown before of after dialog with an error for private repo
-				try {
-					const buttonYesITrustTheAuthors: string = 'Yes, I trust the authors';
-					await driverHelper.waitVisibility(
-						webCheCodeLocators.WelcomeContent.text,
-						TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
-					);
-					const welcomeContentDialog: ModalDialog = new ModalDialog();
-					Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
-					await welcomeContentDialog.pushButton(buttonYesITrustTheAuthors);
-					await driverHelper.waitDisappearance(webCheCodeLocators.WelcomeContent.text);
-				} catch (e) {
-					Logger.info(`"Accept the project as a trusted one" dialog was not shown firstly for "${isPrivateRepo}"`);
-					if (!FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
-						throw new WebDriverError(e as string);
-					}
-				}
+				await projectAndFileTests.performTrustAuthorDialog();
 			});
 
 			test('Check if the project files were imported', async function (): Promise<void> {
