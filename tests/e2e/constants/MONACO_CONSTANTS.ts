@@ -21,5 +21,5 @@ export const MONACO_CONSTANTS: {
 	 * https://github.com/redhat-developer/vscode-extension-tester/tree/master/locators/lib ,
 	 * "1.73.0" by default.
 	 */
-	TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION: process.env.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION || '1.73.0'
+	TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION: process.env.TS_SELENIUM_MONACO_PAGE_OBJECTS_USE_VERSION || '1.76.0'
 };
