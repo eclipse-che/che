@@ -15,6 +15,10 @@ import { DriverHelper } from '../utils/DriverHelper';
 import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
+import { Locators, ModalDialog } from 'monaco-page-objects';
+import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
+
+const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
 
 @injectable()
 export class ProjectAndFileTests {
@@ -35,6 +39,21 @@ export class ProjectAndFileTests {
 		} catch (err) {
 			Logger.error(`waiting for workspace readiness failed: ${err}`);
 			throw err;
+		}
+	}
+
+	async performTrustAuthorDialog(): Promise<void> {
+		try {
+			const buttonYesITrustTheAuthors: string = 'Yes, I trust the authors';
+			await this.driverHelper.waitVisibility(
+				webCheCodeLocators.WelcomeContent.button,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+			const trustedProjectDialog: ModalDialog = new ModalDialog();
+			Logger.debug(`trustedProjectDialog.pushButton: "${buttonYesITrustTheAuthors}"`);
+			await trustedProjectDialog.pushButton(buttonYesITrustTheAuthors);
+		} catch (e) {
+			Logger.debug(`Welcome modal dialog was not shown: ${e}`);
 		}
 	}
 }
