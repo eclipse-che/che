@@ -51,7 +51,7 @@ suite(`"Start workspace with existed workspace name" test`, function (): void {
 		existedWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		await workspaceHandlingTests.stopWorkspace(existedWorkspaceName);
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-	});	
+	});
 
 	test(`Create new workspace from the same ${stackName} stack`, async function (): Promise<void> {
 		existedWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();

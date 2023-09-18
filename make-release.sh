@@ -81,6 +81,7 @@ bump_version () {
     jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\"" package.json > package.json.update
     mv package.json.update package.json
   fi
+  npm run prettier
   popd  >/dev/null || exit
 
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
@@ -162,6 +163,7 @@ pushd tests/e2e >/dev/null || exit
 jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${VERSION}\"" package.json > package.json.update
 mv package.json.update package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
+npm run prettier
 popd >/dev/null || exit
 
 docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
