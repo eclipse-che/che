@@ -206,7 +206,7 @@ export class Workspaces {
     }
 
     private getActionsPopupButtonLocator(workspaceName: string, buttonText: string): By {
-        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//li[@role='menuitem']//button[text()='${buttonText}']`);
+        return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName)}//button[text()='${buttonText}']`);
     }
 
     private getOpenButtonLocator(workspaceName: string): By {
