@@ -26,6 +26,8 @@ import { PLUGIN_TEST_CONSTANTS } from '../constants/PLUGIN_TEST_CONSTANTS';
 import { injectable } from 'inversify';
 import getDecorators from 'inversify-inject-decorators';
 import { e2eContainer } from '../configs/inversify.config';
+// @ts-ignore: No module declaration file
+import * as chromeHar from 'chrome-har';
 
 const { lazyInject } = getDecorators(e2eContainer);
 
@@ -135,6 +137,7 @@ class CheReporter extends mocha.reporters.Spec {
 			const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
 			const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
 			const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
+			const harFileName: string = `${testReportDirPath}/har-${testTitle}.har`;
 
 			// create reporter dir if not exist
 			const reportDirExists: boolean = fs.existsSync(REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER);
@@ -171,6 +174,15 @@ class CheReporter extends mocha.reporters.Spec {
 			const browserLogsStream: WriteStream = fs.createWriteStream(browserLogsFileName);
 			browserLogsStream.write(Buffer.from(browserLogs), (): void => {
 				browserLogsStream.end();
+			});
+
+			// take networking logs and write to file
+			const networkLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('performance');
+			const events = networkLogsEntries.map(entry => JSON.parse(entry.message).message)
+			const har = chromeHar.harFromMessages(events, {includeTextFromResponseBody: true});
+			const networkLogsStream: WriteStream = fs.createWriteStream(harFileName);
+			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
+				networkLogsStream.end();
 			});
 		});
 	}
