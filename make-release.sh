@@ -39,7 +39,7 @@ update_issue_template() {
   local -r templateFile=$2
 
   # take only two first digits of the version that we will release
-  # will get 7.35 from input 7.35.0-SNAPSHOT
+  # will get 7.74 from input 7.74.0-next
   local -r versionXY=$(echo "${currentReleaseVersion}" | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
 
   # now extract the current latest version specified in the issue template
@@ -76,9 +76,12 @@ bump_version () {
 
   pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
-  # update devworkspace generator version
-  jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\"" package.json > package.json.update
-  mv package.json.update package.json
+  # update devworkspace generator version only for bugfix releases
+  if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
+    jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\"" package.json > package.json.update
+    mv package.json.update package.json
+  fi
+  npm run prettier
   popd  >/dev/null || exit
 
   COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
@@ -160,6 +163,7 @@ pushd tests/e2e >/dev/null || exit
 jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${VERSION}\"" package.json > package.json.update
 mv package.json.update package.json
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
+npm run prettier
 popd >/dev/null || exit
 
 docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
@@ -177,9 +181,7 @@ git commit -asm "${COMMIT_MSG}"
 git tag "${VERSION}"
 git push origin "${VERSION}"
 
-
-
-# now update ${BASEBRANCH} to the new snapshot version
+# now update ${BASEBRANCH} to the new next version
 git checkout "${BASEBRANCH}"
 
 # update template in the branch
@@ -189,12 +191,12 @@ update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
   # bump the y digit, if it is a major release
   [[ $BRANCH =~ ^([0-9]+)\.([0-9]+)\.x ]] && BASE=${BASH_REMATCH[1]}; NEXT=${BASH_REMATCH[2]}; (( NEXT=NEXT+1 )) # for BRANCH=0.1.x, get BASE=0, NEXT=2
-  NEXT_VERSION_Y="${BASE}.${NEXT}.0-SNAPSHOT"
+  NEXT_VERSION_Y="${BASE}.${NEXT}.0-next"
   bump_version "${NEXT_VERSION_Y}" "${BASEBRANCH}"
 fi
 # bump the z digit
 [[ ${VERSION#v} =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"; NEXT="${BASH_REMATCH[3]}"; (( NEXT=NEXT+1 )) # for VERSION=0.1.2, get BASE=0.1, NEXT=3
-NEXT_VERSION_Z="${BASE}.${NEXT}-SNAPSHOT"
+NEXT_VERSION_Z="${BASE}.${NEXT}-next"
 bump_version "${NEXT_VERSION_Z}" "${BRANCH}"
 
 # cleanup tmp dir
