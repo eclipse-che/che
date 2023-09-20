@@ -10,6 +10,7 @@
 
 import { injectable } from 'inversify';
 import { Logger } from './Logger';
+import { KubernetesCommandLineToolsExecutor } from './KubernetesCommandLineToolsExecutor';
 
 @injectable()
 export class StringUtil {
