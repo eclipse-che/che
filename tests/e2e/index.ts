@@ -47,6 +47,7 @@ export * from './constants/API_TEST_CONSTANTS';
 export * from './constants/BASE_TEST_CONSTANTS';
 export * from './constants/CHROME_DRIVER_CONSTANTS';
 export * from './constants/FACTORY_TEST_CONSTANTS';
+export * from './constants/MOCHA_CONSTANTS';
 export * from './constants/MONACO_CONSTANTS';
 export * from './constants/OAUTH_CONSTANTS';
 export * from './constants/PLUGIN_TEST_CONSTANTS';
