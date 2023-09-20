@@ -23,21 +23,22 @@ import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../constants/OAUTH_CONSTANTS';
 import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
 import { PLUGIN_TEST_CONSTANTS } from '../constants/PLUGIN_TEST_CONSTANTS';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
+import getDecorators from 'inversify-inject-decorators';
+import { e2eContainer } from '../configs/inversify.config';
+
+const { lazyInject } = getDecorators(e2eContainer);
 
 @injectable()
 class CheReporter extends mocha.reporters.Spec {
 	private static methodIndex: number = 0;
 	private static deleteScreencast: boolean = true;
+	@lazyInject(CLASSES.DriverHelper)
+	private readonly driverHelper!: DriverHelper;
+	@lazyInject(CLASSES.ScreenCatcher)
+	private readonly screenCatcher!: ScreenCatcher;
 
-	constructor(
-		runner: mocha.Runner,
-		options: mocha.MochaOptions,
-		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper,
-		@inject(CLASSES.ScreenCatcher)
-		private readonly screenCatcher: ScreenCatcher
-	) {
+	constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
 		super(runner, options);
 
 		runner.on('start', (): void => {
@@ -111,13 +112,7 @@ class CheReporter extends mocha.reporters.Spec {
 			}
 		});
 
-		runner.on('end', async (): Promise<void> => {
-			// ensure that fired events done
-			await this.driverHelper.wait(5000);
-
-			// close driver
-			await this.driverHelper.getDriver().quit();
-
+		runner.on('end', (): void => {
 			// delete screencast folder if conditions matched
 			if (CheReporter.deleteScreencast && REPORTER_CONSTANTS.DELETE_SCREENCAST_IF_TEST_PASS) {
 				rm.sync(REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER);
@@ -158,14 +153,12 @@ class CheReporter extends mocha.reporters.Spec {
 			// take screenshot and write to file
 			const screenshot: string = await this.driverHelper.getDriver().takeScreenshot();
 			const screenshotStream: WriteStream = fs.createWriteStream(screenshotFileName);
-			screenshotStream.write(Buffer.from(screenshot, 'base64'));
-			screenshotStream.end();
+			screenshotStream.write(Buffer.from(screenshot, 'base64'), (): void => screenshotStream.end());
 
 			// take page source and write to file
 			const pageSource: string = await this.driverHelper.getDriver().getPageSource();
 			const pageSourceStream: WriteStream = fs.createWriteStream(pageSourceFileName);
-			pageSourceStream.write(Buffer.from(pageSource));
-			pageSourceStream.end();
+			pageSourceStream.write(Buffer.from(pageSource), (): void => pageSourceStream.end());
 
 			// take browser console logs and write to file
 			const browserLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('browser');
@@ -176,8 +169,9 @@ class CheReporter extends mocha.reporters.Spec {
 			});
 
 			const browserLogsStream: WriteStream = fs.createWriteStream(browserLogsFileName);
-			browserLogsStream.write(Buffer.from(browserLogs));
-			browserLogsStream.end();
+			browserLogsStream.write(Buffer.from(browserLogs), (): void => {
+				browserLogsStream.end();
+			});
 		});
 	}
 }

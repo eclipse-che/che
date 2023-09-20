@@ -38,6 +38,7 @@
 		"eslint-plugin-header": "^3.1.1",
 		"eslint-plugin-jsdoc": "^46.5.0",
 		"eslint-plugin-prettier": "^5.0.0",
+		"inversify-inject-decorators": "^3.1.0",
 		"husky": "^8.0.3",
 		"mocha": "^9.1.3",
 		"monaco-page-objects": "3.9.1",
