@@ -38,22 +38,24 @@ suite('Check links to documentation page in Dashboard.', function (): void {
 	const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-
 	const testingVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION;
 	let parentGUID: string = '';
-
-	// get links from product version github branch
-	const { docs, links, productVersion }: any = JSON.parse(
-		shellExecutor.curl(
-			`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${testingVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
-		)
-	);
-	const { webSocketTroubleshooting, workspace, devfile, general, storageTypes } = docs;
+	let docs: any, links: any, productVersion: any;
+	let webSocketTroubleshooting: any, workspace: any, devfile: any, general: any, storageTypes: any;
 
 	suiteSetup('Login into OC client and apply default DevFile', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 		kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsFile(pathToSampleFile);
 		shellExecutor.wait(5);
+	});
+
+	suiteSetup('Get links from product version github branch', function (): void {
+		({ docs, links, productVersion } = JSON.parse(
+			shellExecutor.curl(
+				`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${testingVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
+			)
+		));
+		({ webSocketTroubleshooting, workspace, devfile, general, storageTypes } = docs);
 	});
 
 	suiteTeardown('Delete default DevWorkspace', function (): void {
