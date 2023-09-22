@@ -10,6 +10,7 @@
 import { exec, ShellString } from 'shelljs';
 import { Logger } from './Logger';
 import { injectable } from 'inversify';
+import { assert } from 'chai';
 
 @injectable()
 export class ShellExecutor {
@@ -24,5 +25,13 @@ export class ShellExecutor {
 	executeCommand(command: string): ShellString {
 		Logger.debug(command);
 		return exec(command);
+	}
+	executeArbitraryShellScript(command: string): string {
+		Logger.debug(command);
+		const output: ShellString = this.executeCommand(command);
+		if (output.stderr.length > 0) {
+			assert.fail(output.stderr);
+		}
+		return output.stdout;
 	}
 }

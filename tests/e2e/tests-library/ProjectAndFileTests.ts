@@ -15,6 +15,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
+import { Workbench } from 'monaco-page-objects';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -43,7 +44,8 @@ export class ProjectAndFileTests {
 
 	async performTrustAuthorDialog(): Promise<void> {
 		Logger.debug();
-
+		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
+		await new Workbench().click();
 		await this.driverHelper.waitAndClick(
 			this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 			TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
