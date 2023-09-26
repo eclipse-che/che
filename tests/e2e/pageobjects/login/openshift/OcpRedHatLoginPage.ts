@@ -40,6 +40,12 @@ export class OcpRedHatLoginPage implements ICheLoginPage {
 		);
 		await this.ocpLogin.waitAndClickOnLoginProviderTitle();
 		await this.redHatLogin.waitRedHatLoginWelcomePage();
+		try {
+			await this.redHatLogin.waitAndConfirmCookiePolicy();
+		} catch (err) {
+			Logger.warn('Cookie confirmation dialog not present, continuing...');
+			Logger.warn(`${err}`);
+		}
 		await this.redHatLogin.enterUserNameRedHat();
 		await this.redHatLogin.clickNextButton();
 		await this.redHatLogin.enterPasswordRedHat();
