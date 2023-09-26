@@ -22,6 +22,8 @@ export class RedHatLoginPage {
 	private static readonly PASSWORD_INPUT: By = By.id('password');
 	private static readonly NEXT_BUTTON: By = By.id('login-show-step2');
 	private static readonly LOGIN_BUTTON: By = By.id('rh-password-verification-submit-button');
+	private static readonly COOKIE_DIALOG_IFRAME: By = By.xpath('//div[@class="truste_box_overlay"]//iframe[@class="truste_popframe"]');
+	private static readonly COOKIE_DIALOG_BUTTON: By = By.xpath('//div[@class="pdynamicbutton"]//a[@class="call"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -32,6 +34,18 @@ export class RedHatLoginPage {
 		Logger.debug();
 
 		await this.driverHelper.waitVisibility(RedHatLoginPage.USERNAME_INPUT, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+	}
+
+	async waitAndConfirmCookiePolicy(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(RedHatLoginPage.COOKIE_DIALOG_IFRAME, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper
+			.getDriver()
+			.switchTo()
+			.frame(await this.driverHelper.getDriver().findElement(RedHatLoginPage.COOKIE_DIALOG_IFRAME));
+		await this.driverHelper.waitAndClick(RedHatLoginPage.COOKIE_DIALOG_BUTTON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.refreshPage();
 	}
 
 	async enterPasswordRedHat(): Promise<void> {
