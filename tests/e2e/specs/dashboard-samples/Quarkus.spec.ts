@@ -8,16 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { SideBarView, ViewSection } from 'monaco-page-objects';
+import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
-import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { expect } from 'chai';
 
 const stackName: string = 'Java 11 with Quarkus';
 
@@ -28,7 +28,6 @@ suite(`The ${stackName} userstory`, function (): void {
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 	let projectSection: ViewSection;
-
 	const projectName: string = 'quarkus-quickstarts';
 
 	loginTests.loginIntoChe();
@@ -50,13 +49,19 @@ suite(`The ${stackName} userstory`, function (): void {
 	});
 
 	test('Check a project folder has been created', async function (): Promise<void> {
-		projectSection = await new SideBarView().getContent().getSection(projectName);
-		Logger.debug(`new SideBarView().getContent().getSection: get ${projectName}`);
+		projectSection = await projectAndFileTests.getProjectViewSession();
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not.undefined;
+	});
+
+	test('Accept the project as a trusted one', async function (): Promise<void> {
+		await projectAndFileTests.performTrustAuthorDialog();
 	});
 
 	test('Check the project files was imported', async function (): Promise<void> {
-		await projectSection.findItem(BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-		Logger.debug(`projectSection.findItem: find ${BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME}`);
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME, 2),
+			'Project files were not imported'
+		).not.undefined;
 	});
 
 	test('Stop the workspace', async function (): Promise<void> {
@@ -67,5 +72,6 @@ suite(`The ${stackName} userstory`, function (): void {
 	test('Delete the workspace', async function (): Promise<void> {
 		await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 	});
+
 	loginTests.logoutFromChe();
 });

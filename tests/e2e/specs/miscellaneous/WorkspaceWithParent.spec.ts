@@ -9,7 +9,7 @@
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
 import { ShellExecutor } from '../../utils/ShellExecutor';
-import { InputBox, QuickOpenBox, QuickPickItem, SideBarView, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { InputBox, QuickOpenBox, QuickPickItem, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 import { CLASSES } from '../../configs/inversify.types';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -32,9 +32,14 @@ suite('Workspace using a parent test suite', function (): void {
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+
 	let podName: string = '';
+
+	suiteSetup(function (): void {
+		kubernetesCommandLineToolsExecutor.loginToOcp();
+	});
+
 	loginTests.loginIntoChe();
-	kubernetesCommandLineToolsExecutor.loginToOcp();
 
 	test('Create a workspace using a parent', async function (): Promise<void> {
 		const factoryUrl: string = `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/dashboard/#https://github.com/testsfactory/parentDevfile`;
@@ -47,12 +52,12 @@ suite('Workspace using a parent test suite', function (): void {
 	});
 
 	test('Check cloning of the test project', async function (): Promise<void> {
-		const expectedProjectItems: string[] = ['.devfile.yaml', 'parent.yaml', 'README.md'];
-		const visibleContent: ViewSection = await new SideBarView().getContent().getSection('parentdevfile');
+		const expectedProjectItems: string[] = ['.devfile.yaml', 'parent.yaml', 'README.md', 'parentdevfile'];
+		const visibleContent: ViewSection = await projectAndFileTests.getProjectViewSession();
 
 		for (const expectedProjectItem of expectedProjectItems) {
-			const visibleItem: ViewItem | undefined = await visibleContent.findItem(expectedProjectItem);
-			expect(visibleItem).not.equal(undefined);
+			const visibleItem: ViewItem | undefined = await projectAndFileTests.getProjectTreeItem(visibleContent, expectedProjectItem);
+			expect(visibleItem).not.undefined;
 		}
 	});
 
@@ -76,20 +81,20 @@ suite('Workspace using a parent test suite', function (): void {
 		const containerNames: string = shellExecutor.executeArbitraryShellScript(
 			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} --output jsonpath=\'{.spec.containers[*].name}\'`
 		);
-		expect(containerNames).contain('tools');
-		expect(containerNames).contains('che-gateway');
+		expect(containerNames).contains('tools').and.contains('che-gateway');
 
 		const initContainerName: string = shellExecutor.executeArbitraryShellScript(
 			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} --output jsonpath=\'{.spec.initContainers[].name}\'`
 		);
-		expect(initContainerName).contain('che-code-injector');
+		expect(initContainerName).contains('che-code-injector');
 	});
 
 	test('Check expected environment variables', function (): void {
 		const envList: string = shellExecutor.executeArbitraryShellScript(
 			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} exec -i ${podName} -c tools -- sh -c env`
 		);
-		expect(envList).contain('DEVFILE_ENV_VAR=true').and.contain('PARENT_ENV_VAR=true');
+		expect(envList).contains('DEVFILE_ENV_VAR=true').and.contains('PARENT_ENV_VAR=true');
 	});
+
 	loginTests.logoutFromChe();
 });

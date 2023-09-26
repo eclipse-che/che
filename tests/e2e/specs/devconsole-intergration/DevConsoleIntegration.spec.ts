@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { SideBarView, ViewItem, ViewSection } from 'monaco-page-objects';
+import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
@@ -88,9 +88,15 @@ suite('DevConsole Integration', function (): void {
 
 	test('Check if project and files imported', async function (): Promise<void> {
 		const applicationSourceProjectName: string = StringUtil.getProjectNameFromGitUrl(gitImportRepo);
-		const projectSection: ViewSection = await new SideBarView().getContent().getSection(applicationSourceProjectName);
-		const isFileImported: ViewItem | undefined = await projectSection.findItem(BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-		expect(isFileImported).not.eqls(undefined);
+		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, applicationSourceProjectName),
+			'Project folder was not imported'
+		).not.undefined;
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+			'Project files were not imported'
+		).not.undefined;
 	});
 
 	test('Stop and delete the workspace by API', async function (): Promise<void> {

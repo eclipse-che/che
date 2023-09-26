@@ -74,8 +74,9 @@ for (const sample of samples) {
 		});
 
 		test('Check the project files were imported', async function (): Promise<void> {
-			const [projectSection]: ViewSection[] = await new SideBarView().getContent().getSections();
-			expect(await projectSection.findItem(pathToExtensionsListFileName), 'Files not imported').not.undefined;
+			projectSection = await projectAndFileTests.getProjectViewSession();
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName), 'Files not imported').not
+				.undefined;
 		});
 
 		test('Accept the project as a trusted one', async function (): Promise<void> {
@@ -83,11 +84,8 @@ for (const sample of samples) {
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
-			Logger.debug('projectSection.findItem(item))?.select(): expand .vscode folder and open extensions.json.');
-			[projectSection] = await new SideBarView().getContent().getSections();
-			await (await projectSection.findItem(pathToExtensionsListFileName))?.select();
-			await driverHelper.waitVisibility(webCheCodeLocators.DefaultTreeItem.ctor(extensionsListFileName));
-			await (await projectSection.findItem(extensionsListFileName))?.select();
+			await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+			await (await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, 3))?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
 			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
@@ -185,7 +183,7 @@ for (const sample of samples) {
 				const isInstalled: boolean = (await itemWithRightNameAndPublisher?.isInstalled()) as boolean;
 
 				Logger.debug(`itemWithRightNameAndPublisher?.isInstalled(): ${isInstalled}.`);
-				expect(isInstalled, `Extension ${extension.name} not installed`).is.true;
+				expect(isInstalled, `Extension ${extension.name} not installed`).to.be.true;
 
 				Logger.debug('itemWithRightNameAndPublisher.manage(): get context menu.');
 				const extensionManageMenu: ContextMenu = await (itemWithRightNameAndPublisher as ExtensionsViewItem).manage();

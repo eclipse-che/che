@@ -15,7 +15,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-import { Workbench } from 'monaco-page-objects';
+import { SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -45,13 +45,16 @@ export class ProjectAndFileTests {
 	async performTrustAuthorDialog(): Promise<void> {
 		Logger.debug();
 		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
-		await new Workbench().click();
+		const workbench: Workbench = new Workbench();
+		await workbench.click();
+
 		await this.driverHelper.waitAndClick(
 			this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 			TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
 		);
 
 		try {
+			await workbench.click();
 			await this.driverHelper.waitAndClick(
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
@@ -59,5 +62,44 @@ export class ProjectAndFileTests {
 		} catch (e) {
 			Logger.info('Second welcome content dialog box was not shown');
 		}
+	}
+
+	async getProjectViewSession(): Promise<ViewSection> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(
+			this.cheCodeLocatorLoader.webCheCodeLocators.DefaultTreeSection.itemRow,
+			TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT
+		);
+
+		const viewContent: ViewContent = new SideBarView().getContent();
+		const [projectSection]: ViewSection[] = await viewContent.getSections();
+		return projectSection;
+	}
+
+	async getProjectTreeItem(projectSection: ViewSection, item: string, itemLevel: number = 2): Promise<ViewItem | undefined> {
+		Logger.debug(`${item}`);
+
+		let projectTreeItem: ViewItem | undefined;
+		await this.driverHelper.waitVisibility(
+			this.cheCodeLocatorLoader.webCheCodeLocators.ScmView.itemLevel(itemLevel),
+			TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT
+		);
+
+		try {
+			projectTreeItem = await projectSection.findItem(item, itemLevel);
+			if (!projectTreeItem) {
+				try {
+					await projectSection.collapse();
+					projectTreeItem = await projectSection.findItem(item, itemLevel);
+				} catch (e) {
+					Logger.warn(JSON.stringify(e));
+				}
+			}
+		} catch (e) {
+			Logger.warn(JSON.stringify(e));
+		}
+
+		return projectTreeItem;
 	}
 }
