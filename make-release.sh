@@ -162,6 +162,7 @@ pushd tests/e2e >/dev/null || exit
 # update devworkspace generator version
 jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${VERSION}\"" package.json > package.json.update
 mv package.json.update package.json
+npm install
 npm --no-git-tag-version version --allow-same-version "${VERSION}"
 npm run prettier
 popd >/dev/null || exit
