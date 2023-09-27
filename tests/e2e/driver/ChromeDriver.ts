@@ -21,7 +21,7 @@ export class ChromeDriver implements IDriver {
 
 	constructor() {
 		const options: Options = this.getDriverOptions();
-		options.setLoggingPrefs({performance: 'ALL'})
+		options.setLoggingPrefs({ performance: 'ALL' });
 		if (CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
 			this.driver = this.getDriverBuilder(options).build();
 		}
