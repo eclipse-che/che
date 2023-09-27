@@ -178,8 +178,8 @@ class CheReporter extends mocha.reporters.Spec {
 
 			// take networking logs and write to file
 			const networkLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('performance');
-			const events = networkLogsEntries.map(entry => JSON.parse(entry.message).message)
-			const har = chromeHar.harFromMessages(events, {includeTextFromResponseBody: true});
+			const events = networkLogsEntries.map((entry) => JSON.parse(entry.message).message);
+			const har = chromeHar.harFromMessages(events, { includeTextFromResponseBody: true });
 			const networkLogsStream: WriteStream = fs.createWriteStream(harFileName);
 			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
 				networkLogsStream.end();
