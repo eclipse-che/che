@@ -103,7 +103,7 @@ suite(
 		} else {
 			test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 				await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-			});git statusbar
+			});
 
 			test('Registering the running workspace', function (): void {
 				registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
