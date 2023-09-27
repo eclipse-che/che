@@ -76,9 +76,9 @@ bump_version () {
 
   pushd tests/e2e >/dev/null || exit
   npm --no-git-tag-version version --allow-same-version "${NEXT_VERSION}"
-  # update devworkspace generator version only for bugfix releases
-  if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
-    jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"${NEXT_VERSION}\"" package.json > package.json.update
+  # update devworkspace generator version only for bugfix releases (e.g. for 7.74.x branch, version would be next-7.74.x)
+  if [[ "${BASEBRANCH}" == "${BRANCH}" ]]; then
+    jq ".\"dependencies\".\"@eclipse-che/che-devworkspace-generator\" = \"next-${BRANCH}\"" package.json > package.json.update
     mv package.json.update package.json
   fi
   npm run prettier
