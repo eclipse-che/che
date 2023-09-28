@@ -86,10 +86,7 @@ suite(
 			test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
 				await dashboard.waitLoader();
 				const loaderAlert: string = await dashboard.getLoaderAlert();
-				expect(loaderAlert).contains.oneOf([
-					'Cause: Unsupported OAuth provider',
-					'Cause: No PersonalAccessTokenFetcher configured'
-				]);
+				expect(loaderAlert).to.contain('Cause: Could not reach devfile at');
 			});
 
 			test('Check that workspace was not created', async function (): Promise<void> {
