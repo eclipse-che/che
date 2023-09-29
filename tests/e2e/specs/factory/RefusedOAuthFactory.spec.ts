@@ -18,11 +18,9 @@ import {
 	Locators,
 	ModalDialog,
 	NewScmView,
-	SideBarView,
 	SingleScmProvider,
 	TextEditor,
 	ViewControl,
-	ViewItem,
 	ViewSection
 } from 'monaco-page-objects';
 import { expect } from 'chai';
@@ -99,8 +97,9 @@ suite(
 
 		test('Check if a project folder has been created', async function (): Promise<void> {
 			testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
-			Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
-			projectSection = await new SideBarView().getContent().getSection(testRepoProjectName);
+			projectSection = await projectAndFileTests.getProjectViewSession();
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, testRepoProjectName), 'Project folder was not imported').not
+				.undefined;
 		});
 
 		test('Accept the project as a trusted one', async function (): Promise<void> {
@@ -116,15 +115,12 @@ suite(
 			});
 
 			test('Check that project files were not imported', async function (): Promise<void> {
-				const isFileImported: ViewItem | undefined = await projectSection.findItem(label);
-				expect(isFileImported).eqls(undefined);
+				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were found').to.be.undefined;
 			});
 		} else {
 			test('Check if the project files were imported', async function (): Promise<void> {
-				Logger.debug(`projectSection.findItem: find ${label}`);
-				const isFileImported: ViewItem | undefined = await projectSection.findItem(label);
-				// projectSection.findItem(label) can return undefined but test will goes on
-				expect(isFileImported).not.eqls(undefined);
+				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not
+					.undefined;
 			});
 
 			test('Make changes to the file', async function (): Promise<void> {
@@ -231,7 +227,7 @@ suite(
 					webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel),
 					'aria-disabled'
 				);
-				expect(isCommitButtonDisabled).eql('true');
+				expect(isCommitButtonDisabled).to.be.true;
 			});
 		}
 

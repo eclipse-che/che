@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
-import { ViewSection, SideBarView, ViewItem } from 'monaco-page-objects';
+import { ViewSection } from 'monaco-page-objects';
 import { CLASSES } from '../../configs/inversify.types';
 import { expect } from 'chai';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
@@ -42,9 +42,12 @@ suite('"Start workspace with existed workspace name" test', function (): void {
 
 	test('Wait workspace readiness and project folder has been created', async function (): Promise<void> {
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-		projectSection = await new SideBarView().getContent().getSection(projectName);
-		const isFileImported: ViewItem | undefined = await projectSection.findItem(BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-		expect(isFileImported).not.eqls(undefined);
+		projectSection = await projectAndFileTests.getProjectViewSession();
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not.undefined;
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+			'Project files were not imported'
+		).not.undefined;
 	});
 
 	test('Stop created workspace', async function (): Promise<void> {
@@ -65,9 +68,12 @@ suite('"Start workspace with existed workspace name" test', function (): void {
 
 	test('Wait the second workspace readiness and project folder has been created', async function (): Promise<void> {
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-		projectSection = await new SideBarView().getContent().getSection(projectName);
-		const isFileImported: ViewItem | undefined = await projectSection.findItem(BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME);
-		expect(isFileImported).not.eqls(undefined);
+		projectSection = await projectAndFileTests.getProjectViewSession();
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not.undefined;
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+			'Project files were not imported'
+		).not.undefined;
 	});
 
 	test(`Stop all created ${stackName} workspaces`, async function (): Promise<void> {

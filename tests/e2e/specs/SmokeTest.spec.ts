@@ -7,13 +7,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { SideBarView, ViewItem, ViewSection } from 'monaco-page-objects';
+import { ViewSection } from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../tests-library/ProjectAndFileTests';
 import { CLASSES } from '../configs/inversify.types';
 import { e2eContainer } from '../configs/inversify.config';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 import { registerRunningWorkspace } from './MochaHooks';
-import { Logger } from '../utils/Logger';
 import { LoginTests } from '../tests-library/LoginTests';
 import { StringUtil } from '../utils/StringUtil';
 import { FACTORY_TEST_CONSTANTS } from '../constants/FACTORY_TEST_CONSTANTS';
@@ -45,15 +44,15 @@ suite('The SmokeTest userstory', function (): void {
 		});
 		test('Check a project folder has been created', async function (): Promise<void> {
 			const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || StringUtil.getProjectNameFromGitUrl(factoryUrl);
-			projectSection = (await new SideBarView().getContent().getSections())[0]; // get the (WORKSPACE) section from the sidebar - contains project content
-			expect(await projectSection.findItem(projectName)).not.eqls(undefined);
+			projectSection = await projectAndFileTests.getProjectViewSession();
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not
+				.undefined;
 		});
 		test('Check the project files was imported', async function (): Promise<void> {
-			Logger.debug(`projectSection.findItem: find ${BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME}`);
-			const isFileImported: ViewItem | undefined = await projectSection.findItem(
-				BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME
-			);
-			expect(isFileImported).not.eqls(undefined);
+			expect(
+				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+				'Project files were not imported'
+			).not.undefined;
 		});
 		test('Stop the workspace', async function (): Promise<void> {
 			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());

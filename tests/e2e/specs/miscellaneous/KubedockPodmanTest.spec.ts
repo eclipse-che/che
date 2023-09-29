@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import { SideBarView, ViewSection } from 'monaco-page-objects';
+import { ViewSection } from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { CLASSES } from '../../configs/inversify.types';
 import { e2eContainer } from '../../configs/inversify.config';
@@ -66,8 +66,8 @@ suite('Check possibility to manage containers within a workspace with kubedock a
 	});
 
 	test('Check the project files were imported', async function (): Promise<void> {
-		const [projectSection]: ViewSection[] = await new SideBarView().getContent().getSections();
-		expect(await projectSection.findItem('Dockerfile'), 'Files not imported').not.undefined;
+		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile'), 'Files not imported').not.undefined;
 	});
 
 	test('Create and check container runs using kubedock and podman', function (): void {

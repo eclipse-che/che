@@ -163,7 +163,7 @@ export class Dashboard {
 		await this.driverHelper.waitAndClick(Dashboard.ABOUT_DIALOG_WINDOW_CLOSE_BUTTON);
 	}
 
-	async waitExistingWorkspaceFoundAlert(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+	async waitExistingWorkspaceFoundAlert(timeout: number = TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT): Promise<void> {
 		Logger.debug();
 
 		await this.driverHelper.waitVisibility(Dashboard.EXISTING_WORKSPACE_FOUND_ALERT, timeout);
