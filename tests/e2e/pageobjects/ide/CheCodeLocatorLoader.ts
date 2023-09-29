@@ -40,6 +40,9 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				WelcomeContent: {
 					text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
 					button: By.xpath('//div[@class="monaco-dialog-box"]//a[@class="monaco-button monaco-text-button"]')
+				},
+				Dialog: {
+					message: By.xpath('//*[@class="dialog-message-detail"]'),
 				}
 			},
 			extras: {
