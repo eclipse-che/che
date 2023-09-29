@@ -64,6 +64,11 @@ export class ProjectAndFileTests {
 		}
 	}
 
+	/**
+	 * find an ViewSection with project tree.
+	 * @returns Promise resolving to ViewSection object
+	 */
+
 	async getProjectViewSession(): Promise<ViewSection> {
 		Logger.debug();
 
@@ -77,8 +82,17 @@ export class ProjectAndFileTests {
 		return projectSection;
 	}
 
-	async getProjectTreeItem(projectSection: ViewSection, item: string, itemLevel: number = 2): Promise<ViewItem | undefined> {
-		Logger.debug(`${item}`);
+	/**
+	 * find an item in this view section by label. Does not perform recursive search through the whole tree.
+	 * Does however scroll through all the expanded content. Will find items beyond the current scroll range.
+	 * @param projectSection ViewSection with project tree files.
+	 * @param label Label of the item to search for.
+	 * @param itemLevel Shows how deep the algorithm should look into expanded folders to find item,
+	 * default - 2 means first level is project directory and files inside it is the second level, unlimited 0
+	 * @returns Promise resolving to ViewItem object is such item exists, undefined otherwise
+	 */
+	async getProjectTreeItem(projectSection: ViewSection, label: string, itemLevel: number = 2): Promise<ViewItem | undefined> {
+		Logger.debug(`${label}`);
 
 		let projectTreeItem: ViewItem | undefined;
 		await this.driverHelper.waitVisibility(
@@ -87,11 +101,11 @@ export class ProjectAndFileTests {
 		);
 
 		try {
-			projectTreeItem = await projectSection.findItem(item, itemLevel);
+			projectTreeItem = await projectSection.findItem(label, itemLevel);
 			if (!projectTreeItem) {
 				try {
 					await projectSection.collapse();
-					projectTreeItem = await projectSection.findItem(item, itemLevel);
+					projectTreeItem = await projectSection.findItem(label, itemLevel);
 				} catch (e) {
 					Logger.warn(JSON.stringify(e));
 				}
