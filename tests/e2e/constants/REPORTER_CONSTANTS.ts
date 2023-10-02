@@ -25,11 +25,12 @@ export const REPORTER_CONSTANTS: {
 	SAVE_ALLURE_REPORT_DATA: boolean;
 	SAVE_RP_REPORT_DATA: boolean;
 	TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: number;
+	TS_SELENIUM_REPORT_FOLDER: string;
 	TS_SELENIUM_EXECUTION_SCREENCAST: boolean;
+	TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: string | boolean;
 	TS_SELENIUM_LOAD_TEST_REPORT_FOLDER: string;
 	TS_SELENIUM_LOG_LEVEL: string;
-	TS_SELENIUM_PRINT_TIMEOUT_VARIABLES: string | boolean;
-	TS_SELENIUM_REPORT_FOLDER: string;
+	TEST_RUN_URL: string;
 } = {
 	/**
 	 * path to folder with load tests execution report.
@@ -142,5 +143,7 @@ export const REPORTER_CONSTANTS: {
 			? `${REPORTER_CONSTANTS.RP_USER}_personal`
 			: BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();
 		return process.env.RP_PROJECT || project;
-	}
+	},
+
+	TEST_RUN_URL: process.env.TEST_RUN_URL || 'Test run url not set'
 };

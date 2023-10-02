@@ -40,6 +40,9 @@ module.exports = {
 			{
 				key: 'url',
 				value: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL
+			},
+			{
+				value: REPORTER_CONSTANTS.TEST_RUN_URL
 			}
 		],
 		rerun: REPORTER_CONSTANTS.RP_RERUN(),
