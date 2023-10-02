@@ -71,10 +71,6 @@ suite('Empty workspace API test', function (): void {
 				BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME
 			);
 		});
-
-		suiteTeardown('Delete cloned project', function (): void {
-			containerTerminal.removeFolder(`${clonedProjectName}`);
-		});
 	});
 
 	suiteTeardown('Delete workspace', function (): void {

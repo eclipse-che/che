@@ -8,25 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 export const TIMEOUT_CONSTANTS: {
-	TS_FIND_EXTENSION_TEST_TIMEOUT: number;
-	TS_SELENIUM_WORKSPACE_STATUS_POLLING: number;
+	TS_CLICK_DASHBOARD_ITEM_TIMEOUT: number;
 	TS_COMMON_DASHBOARD_WAIT_TIMEOUT: number;
-	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: number;
-	TS_DIALOG_WINDOW_DEFAULT_TIMEOUT: number;
+	TS_COMMON_PLUGIN_TEST_TIMEOUT: number;
 	TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: number;
+	TS_DIALOG_WINDOW_DEFAULT_TIMEOUT: number;
+	TS_EDITOR_TAB_INTERACTION_TIMEOUT: number;
+	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: number;
+	TS_FIND_EXTENSION_TEST_TIMEOUT: number;
+	TS_IDE_LOAD_TIMEOUT: number;
 	TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: number;
 	TS_SELENIUM_DEFAULT_ATTEMPTS: number;
-	TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: number;
-	TS_SELENIUM_WAIT_FOR_URL: number;
 	TS_SELENIUM_DEFAULT_POLLING: number;
-	TS_IDE_LOAD_TIMEOUT: number;
+	TS_SELENIUM_LOAD_PAGE_TIMEOUT: number;
+	TS_SELENIUM_START_WORKSPACE_TIMEOUT: number;
+	TS_SELENIUM_WAIT_FOR_URL: number;
 	TS_WAIT_LOADER_ABSENCE_TIMEOUT: number;
 	TS_WAIT_LOADER_PRESENCE_TIMEOUT: number;
-	TS_SELENIUM_START_WORKSPACE_TIMEOUT: number;
-	TS_SELENIUM_LOAD_PAGE_TIMEOUT: number;
-	TS_CLICK_DASHBOARD_ITEM_TIMEOUT: number;
-	TS_COMMON_PLUGIN_TEST_TIMEOUT: number;
-	TS_EDITOR_TAB_INTERACTION_TIMEOUT: number;
 } = {
 	/**
 	 * default amount of tries, "5" by default.
@@ -44,16 +42,6 @@ export const TIMEOUT_CONSTANTS: {
 	 * timeout waiting for url, "10 000" by default
 	 */
 	TS_SELENIUM_WAIT_FOR_URL: Number(process.env.TS_SELENIUM_WAIT_FOR_URL) || 10_000,
-
-	/**
-	 * amount of tries for checking workspace status.
-	 */
-	TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS) || 90,
-
-	/**
-	 * delay in milliseconds between checking workspace status tries.
-	 */
-	TS_SELENIUM_WORKSPACE_STATUS_POLLING: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING) || 10000,
 
 	/**
 	 * wait between workspace started and IDE ready to be used, "20 000" by default.

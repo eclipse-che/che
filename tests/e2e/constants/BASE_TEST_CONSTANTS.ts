@@ -30,6 +30,7 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: string;
 	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
 	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
+	TESTING_APPLICATION_NAME: () => string;
 } = {
 	/**
 	 * base URL of the application which should be checked
@@ -50,6 +51,17 @@ export const BASE_TEST_CONSTANTS: {
 	 * test environment (used as prefix in suite name)
 	 */
 	TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT || '',
+
+	/**
+	 * application name (DevSpaces or Che)
+	 */
+	TESTING_APPLICATION_NAME: (): string => {
+		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
+			? 'devspaces'
+			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
+			? 'che'
+			: 'default';
+	},
 
 	/**
 	 * testing application version

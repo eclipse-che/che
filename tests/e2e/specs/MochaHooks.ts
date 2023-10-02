@@ -25,6 +25,7 @@ import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { decorate, injectable, unmanaged } from 'inversify';
 import { Main } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
+import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
@@ -69,15 +70,15 @@ exports.mochaHooks = {
 			if (BASE_TEST_CONSTANTS.TS_DEBUG_MODE) {
 				for (const [timeout, seconds] of Object.entries(TIMEOUT_CONSTANTS)) {
 					Object.defineProperty(TIMEOUT_CONSTANTS, timeout, {
-						value: seconds * 100
+						value: seconds * 2
 					});
 				}
 			}
 		}
 	],
 	afterEach: [
-		async function (this: Mocha.Context): Promise<void> {
-			if (this.currentTest?.state === 'failed') {
+		async function saveAllureAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_ALLURE_REPORT_DATA && this.currentTest?.state === 'failed') {
 				try {
 					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
 					allure.attachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
