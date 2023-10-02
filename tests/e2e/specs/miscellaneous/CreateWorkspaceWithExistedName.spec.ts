@@ -23,7 +23,7 @@ import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 const stackName: string = BASE_TEST_CONSTANTS.TS_SELENIUM_DASHBOARD_SAMPLE_NAME || 'Python';
 const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || 'python-hello-world';
 
-suite('"Start workspace with existed workspace name" test', function (): void {
+suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);

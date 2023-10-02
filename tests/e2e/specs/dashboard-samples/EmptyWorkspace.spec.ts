@@ -16,10 +16,11 @@ import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 const stackName: string = 'Empty Workspace';
 
-suite(`${stackName} test`, function (): void {
+suite(`${stackName} test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);

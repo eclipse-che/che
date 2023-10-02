@@ -7,8 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { BASE_TEST_CONSTANTS } from './BASE_TEST_CONSTANTS';
 
 export const MOCHA_CONSTANTS: {
+	MOCHA_SUITE: string | undefined;
+	MOCHA_DELAYED_SUITE: boolean;
 	MOCHA_DEFAULT_TIMEOUT: string | number;
 	MOCHA_DIRECTORY: string | undefined;
 	MOCHA_USERSTORY: undefined | string;
@@ -21,7 +24,11 @@ export const MOCHA_CONSTANTS: {
 
 	MOCHA_BAIL: process.env.MOCHA_BAIL !== 'false',
 
-	MOCHA_DEFAULT_TIMEOUT: process.env.MOCHA_DEFAULT_TIMEOUT || 1200000,
+	MOCHA_DELAYED_SUITE: process.env.MOCHA_DELAYED_SUITE === 'true',
 
-	MOCHA_RETRIES: process.env.MOCHA_RETRIES || 3
+	MOCHA_DEFAULT_TIMEOUT: process.env.MOCHA_DEFAULT_TIMEOUT || 420000,
+
+	MOCHA_RETRIES: process.env.MOCHA_RETRIES || BASE_TEST_CONSTANTS.TEST_ENVIRONMENT === '' ? 0 : 2,
+
+	MOCHA_SUITE: process.env.MOCHA_SUITE || undefined
 };

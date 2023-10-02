@@ -19,12 +19,16 @@ import { injectable } from 'inversify';
 import { IContextParams } from './IContextParams';
 import { e2eContainer } from '../configs/inversify.config';
 import { CLASSES, EXTERNAL_CLASSES } from '../configs/inversify.types';
+import getDecorators from 'inversify-inject-decorators';
+
+const { lazyInject } = getDecorators(e2eContainer);
 
 @injectable()
 export class DevWorkspaceConfigurationHelper {
-	private generator: Generator = e2eContainer.get(EXTERNAL_CLASSES.Generator);
-	private shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
-
+	@lazyInject(EXTERNAL_CLASSES.Generator)
+	private readonly generator!: Generator;
+	@lazyInject(CLASSES.ShellExecutor)
+	private readonly shellExecutor!: ShellExecutor;
 	private readonly params: IContextParams;
 
 	constructor(params: IContextParams) {
@@ -73,5 +77,31 @@ export class DevWorkspaceConfigurationHelper {
 		allContentArray.push(YAML.stringify(context.devWorkspace));
 
 		return allContentArray.join('---\n');
+	}
+
+	getDevWorkspaceConfigurationsAsYaml(allContentString: string): string {
+		Logger.debug(`${this.constructor.name}.${this.getDevWorkspaceConfigurationsAsYaml.name}`);
+		const content: any = {};
+		const contentArray: string[] = allContentString.split('---\n');
+		contentArray.forEach((e: any): void => {
+			e = YAML.parse(e);
+			e.kind === 'DevWorkspace'
+				? (content.DevWorkspace = e)
+				: e.kind === 'DevWorkspaceTemplate'
+				? (content.DevWorkspaceTemplate = e)
+				: Logger.error(
+						'Problems with configuration parsing, string should be in format "DevWorkspace\\n---\\nDevWorkspaceTemplate"'
+				  );
+		});
+
+		return content;
+	}
+	patchDevWorkspaceConfigWithBuildContainerAttribute(devfileContextDevWorkspace: any): void {
+		devfileContextDevWorkspace.spec.template.attributes = YAML.parse(`
+                    controller.devfile.io/devworkspace-config:
+                      name: devworkspace-config
+                      namespace: openshift-devspaces
+                    controller.devfile.io/scc: container-build
+                    controller.devfile.io/storage-type: per-user`);
 	}
 }

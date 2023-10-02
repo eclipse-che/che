@@ -12,13 +12,17 @@ import { Logger } from './Logger';
 import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
 import { injectable } from 'inversify';
+import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 
 @injectable()
 export class DevfilesRegistryHelper {
-	async getInbuiltDevfilesRegistryContent(): Promise<AxiosResponse> {
+	async getInbuiltDevfilesRegistryContent(sampleNamePatterns?: string[]): Promise<any[]> {
 		Logger.trace();
 
-		return await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL());
+		return this.filterSamples(
+			sampleNamePatterns,
+			await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL())
+		);
 	}
 
 	async getGitHubCheDevfileRegistryContent(): Promise<AxiosResponse> {
@@ -27,13 +31,13 @@ export class DevfilesRegistryHelper {
 		return await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL);
 	}
 
-	async collectPathsToDevfilesFromRegistry(): Promise<object[]> {
+	async collectPathsToDevfilesFromRegistry(isInbuilt: boolean = true, sampleNamePatterns?: string[]): Promise<object[]> {
 		Logger.debug();
 
 		const devfileSamples: object[] = [];
 		const sampleNames: string[] = [];
-		switch (API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
-			case SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL:
+		switch (isInbuilt) {
+			case false:
 				{
 					const content: any[any] = await this.getGitHubCheDevfileRegistryContent();
 					content.forEach((e: any): void => {
@@ -55,14 +59,17 @@ export class DevfilesRegistryHelper {
 					Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
 				}
 				break;
-			case SUPPORTED_DEVFILE_REGISTRIES.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL():
+			case true:
 				{
-					const content: any[any] = await this.getInbuiltDevfilesRegistryContent();
-
+					const content: any[any] = await this.getInbuiltDevfilesRegistryContent(sampleNamePatterns);
 					for (const sample of content) {
+						const linkToDevWorkspaceYaml: any =
+							BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL +
+							'/devfile-registry' +
+							sample.links.devWorkspaces['che-incubator/che-code/latest'];
 						devfileSamples.push({
 							name: sample.displayName,
-							link: sample.links.v2
+							devWorkspaceConfigurationString: await this.getContent(linkToDevWorkspaceYaml)
 						});
 					}
 					Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
@@ -74,6 +81,18 @@ export class DevfilesRegistryHelper {
 			}
 		}
 		return devfileSamples;
+	}
+
+	async getEditorContent(entry: string): Promise<any> {
+		return await this.getContent(`${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/${entry}`);
+	}
+
+	private filterSamples(sampleNamePatterns: string[] | undefined, content: any): Promise<any[]> {
+		if (sampleNamePatterns) {
+			const commonSampleNamePattern: RegExp = new RegExp(sampleNamePatterns.join('|'), 'i');
+			content = content.filter((e: any): boolean => commonSampleNamePattern.test(e.displayName));
+		}
+		return content;
 	}
 
 	private async getContent(url: string, headers?: object): Promise<AxiosResponse> {

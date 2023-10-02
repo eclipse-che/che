@@ -25,7 +25,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
-suite('DevConsole Integration', function (): void {
+suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
 	let ocpApplicationPage: OcpApplicationPage;
 

@@ -11,8 +11,9 @@ import { CLASSES } from '../../configs/inversify.types';
 import { e2eContainer } from '../../configs/inversify.config';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { OcpMainPage } from '../../pageobjects/openshift/OcpMainPage';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
-suite('Login to Openshift console and start WebTerminal', function (): void {
+suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
 

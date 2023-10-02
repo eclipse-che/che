@@ -9,7 +9,7 @@
  **********************************************************************/
 
 import 'reflect-metadata';
-import { Container, decorate, injectable, unmanaged } from 'inversify';
+import { Container } from 'inversify';
 import { IDriver } from '../driver/IDriver';
 import { ChromeDriver } from '../driver/ChromeDriver';
 import { CLASSES, EXTERNAL_CLASSES, TYPES } from './inversify.types';
@@ -51,12 +51,6 @@ import { DevfilesRegistryHelper } from '../utils/DevfilesRegistryHelper';
 import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../utils/ShellExecutor';
-
-decorate(injectable(), Generator);
-decorate(injectable(), LocatorLoader);
-decorate(unmanaged(), LocatorLoader, 0);
-decorate(unmanaged(), LocatorLoader, 1);
-decorate(unmanaged(), LocatorLoader, 2);
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 

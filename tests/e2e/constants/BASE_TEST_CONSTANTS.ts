@@ -13,25 +13,44 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
-	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
-	TESTING_APPLICATION_VERSION: string;
-	TS_DEBUG_MODE: boolean;
-	TS_PLATFORM: string;
-	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
-	TS_SELENIUM_BASE_URL: string;
+	ARCH_VERSION: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
-	TS_SELENIUM_EDITOR: string;
-	TS_LOAD_TESTS: string;
-	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
-	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: string;
-	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: string;
-	TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: string;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
+	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
+	OCP_TYPE(): string;
+	OCP_VERSION: string;
+	TESTING_APPLICATION_VERSION: string;
+	TEST_ENVIRONMENT: string;
+	TS_DEBUG_MODE: boolean;
+	TS_LOAD_TESTS: string;
+	TS_PLATFORM: string;
+	TS_SELENIUM_BASE_URL: string;
+	TS_SELENIUM_DASHBOARD_SAMPLE_NAME: string;
+	TS_SELENIUM_EDITOR: string;
+	TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: string;
+	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: string;
+	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
+	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
 } = {
 	/**
 	 * base URL of the application which should be checked
 	 */
 	TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
+
+	/**
+	 * system arch type
+	 */
+	ARCH_VERSION: process.env.ARCH_VERSION || '',
+
+	/**
+	 * openShift version
+	 */
+	OCP_VERSION: process.env.OCP_VERSION || '',
+
+	/**
+	 * test environment (used as prefix in suite name)
+	 */
+	TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT || '',
 
 	/**
 	 * testing application version
@@ -48,6 +67,9 @@ export const BASE_TEST_CONSTANTS: {
 	 * is cluster disconnected of online
 	 */
 	IS_CLUSTER_DISCONNECTED: (): boolean => BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('airgap'),
+	OCP_TYPE: (): string => {
+		return process.env.OCP_TYPE || (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED() ? 'disconnected-ocp' : 'online-ocp');
+	},
 
 	/**
 	 * choose the platform where "che" application deployed, "openshift" by default.
