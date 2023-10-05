@@ -7,6 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import * as chromeHar from 'chrome-har';
 import * as mocha from 'mocha';
 import { CLASSES } from '../configs/inversify.types';
 import * as fs from 'fs';
@@ -26,8 +29,6 @@ import { PLUGIN_TEST_CONSTANTS } from '../constants/PLUGIN_TEST_CONSTANTS';
 import { injectable } from 'inversify';
 import getDecorators from 'inversify-inject-decorators';
 import { e2eContainer } from '../configs/inversify.config';
-// @ts-ignore: No module declaration file
-import * as chromeHar from 'chrome-har';
 
 const { lazyInject } = getDecorators(e2eContainer);
 
@@ -67,7 +68,7 @@ class CheReporter extends mocha.reporters.Spec {
 
       TS_SAMPLE_LIST: ${PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST}
 
-      ${process.env.MOCHA_DIRECTORY ? 'MOCHA_DIRECTORY: ' + process.env.MOCHA_DIRECTORY : 'MOCHA_DRIRECTORY is not set'}
+      ${process.env.MOCHA_DIRECTORY ? 'MOCHA_DIRECTORY: ' + process.env.MOCHA_DIRECTORY : 'MOCHA_DIRECTORY is not set'}
       ${process.env.USERSTORY ? 'USERSTORY: ' + process.env.USERSTORY : 'USERSTORY is not set'}
 `;
 
@@ -178,8 +179,8 @@ class CheReporter extends mocha.reporters.Spec {
 
 			// take networking logs and write to file
 			const networkLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('performance');
-			const events = networkLogsEntries.map((entry) => JSON.parse(entry.message).message);
-			const har = chromeHar.harFromMessages(events, { includeTextFromResponseBody: true });
+			const events: any[] = networkLogsEntries.map((entry): any[] => JSON.parse(entry.message).message);
+			const har: any = chromeHar.harFromMessages(events, { includeTextFromResponseBody: true });
 			const networkLogsStream: WriteStream = fs.createWriteStream(harFileName);
 			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
 				networkLogsStream.end();
