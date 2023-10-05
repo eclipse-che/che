@@ -23,9 +23,11 @@ import { WorkspaceDetails } from '../../pageobjects/dashboard/workspace-details/
 import axios from 'axios';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
+import { Logger } from '../../utils/Logger';
 
 // suit works for DevSpaces
-suite('Check links to documentation page in Dashboard.', function (): void {
+suite.only('Check links to documentation page in Dashboard', function (): void {
+	this.timeout(180000);
 	const pathToSampleFile: string = path.resolve('resources/default-devfile.yaml');
 	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
@@ -50,21 +52,22 @@ suite('Check links to documentation page in Dashboard.', function (): void {
 	});
 
 	suiteSetup('Get links from product version github branch', function (): void {
-		({ docs, links, productVersion } = JSON.parse(
-			shellExecutor.curl(
-				`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${testingVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
-			)
-		));
+		try {
+			({ docs, links, productVersion } = JSON.parse(
+				shellExecutor.curl(
+					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${testingVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
+				)
+			));
+		} catch (e) {
+			Logger.error('Cannot fetch documentation links');
+			throw e;
+		}
 		({ webSocketTroubleshooting, workspace, devfile, general, storageTypes } = docs);
-	});
-
-	suiteTeardown('Delete default DevWorkspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
 	});
 
 	test('Check if product.json config contains correct application version', function (): void {
 		[productVersion, links[1].href, devfile, workspace, general, storageTypes, webSocketTroubleshooting].forEach((e): void => {
-			expect(e).contains(testingVersion);
+			expect(e, 'Fetched links not matches with tested product version').contains(testingVersion);
 		});
 	});
 
@@ -80,7 +83,7 @@ suite('Check links to documentation page in Dashboard.', function (): void {
 			await dashboard.selectAboutMenuItem(link.text);
 			await browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID);
 			const currentUrl: string = await browserTabsUtil.getCurrentUrl();
-			expect(link.href).oneOf([currentUrl, currentUrl + '/']);
+			expect(link.href, `${link.href} not includes ${currentUrl}`).oneOf([currentUrl, currentUrl + '/']);
 			await browserTabsUtil.switchToWindow(parentGUID);
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		}
@@ -89,28 +92,28 @@ suite('Check links to documentation page in Dashboard.', function (): void {
 	test('Check if "About" dialog menu contains correct application version and username', async function (): Promise<void> {
 		await dashboard.selectAboutMenuItem('About');
 		await dashboard.waitAboutDialogWindowMenuElements();
-		expect(await dashboard.getApplicationVersionFromAboutDialogWindow()).eqls(productVersion);
-		expect(await dashboard.getUsernameFromAboutDialogWindow()).eqls(OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME);
+		expect(await dashboard.getApplicationVersionFromAboutDialogWindow(), 'Wrong product version').eqls(productVersion);
+		expect(await dashboard.getUsernameFromAboutDialogWindow(), 'Wrong username').eqls(OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME);
 		await dashboard.closeAboutDialogWindow();
 	});
 
 	test('Check if Workspaces page contains "Learn More" documentation link', async function (): Promise<void> {
 		await dashboard.clickWorkspacesButton();
 		await workspaces.waitPage();
-		expect(await workspaces.getLearnMoreDocumentationLink()).eqls(workspace);
+		expect(await workspaces.getLearnMoreDocumentationLink(), '"Learn More" doc link is broken').eqls(workspace);
 	});
 
 	test('Check if Workspace Details page contains "Storage types" documentation link', async function (): Promise<void> {
 		await workspaces.clickWorkspaceListItemLink(workspaceName);
 		await workspaceDetails.waitWorkspaceTitle(workspaceName);
 		await workspaceDetails.clickStorageTypeInfo();
-		expect(await workspaceDetails.getOpenStorageTypeDocumentationLink()).eqls(storageTypes);
+		expect(await workspaceDetails.getOpenStorageTypeDocumentationLink(), '"Storage types" doc link is broken').eqls(storageTypes);
 	});
 
 	test('Check if Workspace Details page contains "Devfile" documentation link', async function (): Promise<void> {
 		await workspaceDetails.closeStorageTypeInfo();
 		await workspaceDetails.selectTab('Devfile');
-		expect(await workspaceDetails.getDevfileDocumentationLink()).eqls(devfile);
+		expect(await workspaceDetails.getDevfileDocumentationLink(), '"Devfile" doc link is broken').eqls(devfile);
 	});
 
 	if (BASE_TEST_CONSTANTS.IS_PRODUCT_DOCUMENTATION_RELEASED) {
@@ -126,11 +129,15 @@ suite('Check links to documentation page in Dashboard.', function (): void {
 				} catch (e) {
 					responseData = e;
 				} finally {
-					expect(responseData.status).eqls(200);
+					expect(responseData.status, `Wrong status code ${responseData.status}`).eqls(200);
 				}
 			}
 		});
 	}
 
-	loginTests.loginIntoChe();
+	loginTests.logoutFromChe();
+
+	suiteTeardown('Delete default DevWorkspace', function (): void {
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+	});
 });
