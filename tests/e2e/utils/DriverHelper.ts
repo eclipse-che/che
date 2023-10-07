@@ -742,4 +742,10 @@ export class DriverHelper {
 
 		await this.getDriver().navigate().to(url);
 	}
+
+	async quit(): Promise<void> {
+		Logger.trace();
+
+		await this.getDriver().quit();
+	}
 }
