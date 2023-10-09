@@ -125,7 +125,7 @@ suite(
 
 			test('Make changes to the file', async function (): Promise<void> {
 				Logger.debug(`projectSection.openItem: "${fileToChange}"`);
-				await projectSection.openItem(fileToChange);
+				await projectSection.openItem(testRepoProjectName, fileToChange);
 				const editor: TextEditor = (await new EditorView().openEditor(fileToChange)) as TextEditor;
 				await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
 				Logger.debug('editor.clearText');
