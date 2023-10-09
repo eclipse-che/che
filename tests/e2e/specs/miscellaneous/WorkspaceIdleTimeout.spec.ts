@@ -21,6 +21,14 @@ import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader
 import { Locators, ModalDialog } from 'monaco-page-objects';
 import { expect } from 'chai';
 
+/** Test scenario for workspace idle timeout test-case:
+ *  1. Preset spec.devEnvironments.secondsOfInactivityBeforeIdling:180 in CheCluster
+ *  2. Start workspace using VS Code Editor
+ *  3. Wait for Dialog with `Your workspace has stopped due to inactivity.` message.
+ *  4. Click on `Return to Dashboard` button.
+ *  5. Make sure test workspace status is Stopped in Dashboard.
+ */
+
 const stackName: string = 'Empty Workspace';
 
 suite('"Check workspace idle timeout" test', function (): void {
