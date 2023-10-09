@@ -49,7 +49,7 @@ suite('"Check workspace idle timeout" test', function (): void {
 	test('Wait idle timeout dialog and click on "Return to Dashboard" button', async function (): Promise<void> {
 		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 		const dialog: ModalDialog = new ModalDialog();
-		expect(await dialog.getMessage()).includes('Your workspace has stopped due to inactivity.');
+		expect(await dialog.getDetails()).includes('Your workspace has stopped due to inactivity.');
 		await dialog.pushButton('Return to dashboard');
 	});
 
