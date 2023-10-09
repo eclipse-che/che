@@ -185,7 +185,7 @@ suite(
 				webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel),
 				'aria-disabled'
 			);
-			expect(isCommitButtonDisabled).to.be.true;
+			expect(isCommitButtonDisabled).to.equal('true');
 		});
 
 		test('Stop the workspace', async function (): Promise<void> {
