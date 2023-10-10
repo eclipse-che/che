@@ -20,16 +20,8 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { Locators, ModalDialog } from 'monaco-page-objects';
 import { expect } from 'chai';
-
-/** Test scenario for workspace idle timeout test-case:
- *  1. Preset spec.devEnvironments.secondsOfInactivityBeforeIdling:180 in CheCluster
- *  2. Start workspace using VS Code Editor
- *  3. Wait for Dialog with `Your workspace has stopped due to inactivity.` message.
- *  4. Click on `Return to Dashboard` button.
- *  5. Make sure test workspace status is Stopped in Dashboard.
- */
-
-const stackName: string = 'Empty Workspace';
+import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import { ShellExecutor } from '../../utils/ShellExecutor';
 
 suite('"Check workspace idle timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -40,6 +32,38 @@ suite('"Check workspace idle timeout" test', function (): void {
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 	const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
 	const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
+		CLASSES.KubernetesCommandLineToolsExecutor
+	);
+	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+
+	const stackName: string = 'Empty Workspace';
+	const cheClusterName: string = 'devspaces';
+	let stopWorkspaceTimeout: number = 0;
+
+	suiteSetup(function (): void {
+		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		shellExecutor.executeCommand('oc project openshift-devspaces');
+
+		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
+		stopWorkspaceTimeout = Number(
+			shellExecutor.executeCommand(
+				`oc get checluster/${cheClusterName} -o "jsonpath={.spec.devEnvironments.secondsOfInactivityBeforeIdling}"`
+			)
+		);
+		
+		// set spec.devEnvironments.secondsOfInactivityBeforeIdling to 60
+		shellExecutor.executeCommand(
+			`oc patch checluster ${cheClusterName} --type=merge -p '{"spec":{"devEnvironments":{"secondsOfInactivityBeforeIdling": 60}}}'`
+		);
+	});
+
+	suiteTeardown(function (): void {
+		// restore spec.devEnvironments.secondsOfInactivityBeforeIdling to original value
+		shellExecutor.executeCommand(
+			`oc patch checluster ${cheClusterName} --type=merge -p '{"spec":{"devEnvironments":{"secondsOfInactivityBeforeIdling": ${stopWorkspaceTimeout}}}}'`
+		);
+	});
 
 	loginTests.loginIntoChe();
 
