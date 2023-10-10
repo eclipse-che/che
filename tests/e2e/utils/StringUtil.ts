@@ -59,4 +59,32 @@ export class StringUtil {
 
 		return command.replace(/[{}]/g, '').replace(/(?<!")\${?[a-zA-Z0-9_+\-\s]+\b}?/gm, '"$&"');
 	}
+
+	/**
+	 * replaces the cookie value of the specified cookie
+	 * @param cookie cookie names and values, seperated with ;
+	 * @param name name of cookie to replace its value for
+	 * @param replaceStr the new value of the cookie
+	 * @return updated cookie string with the cookie value replaced
+	 */
+	static updateCookieValue(cookie: string, name: string, replaceStr: string): string {
+		Logger.trace();
+
+		const regex: RegExp = new RegExp(`(${name})=[^;]+`, 'g');
+		return cookie.replace(regex, `$1=${replaceStr}`);
+	}
+
+	/**
+	 * replaces the query value of the specified query
+	 * @param queryString query string (ie. query=value&query2=value2)
+	 * @param name name of the query to replace
+	 * @param replaceStr new query value
+	 * @returns updated queryString with the query value replaced
+	 */
+	static updateUrlQueryValue(queryString: string, name: string, replaceStr: string): string {
+		Logger.trace();
+
+		const regex: RegExp = new RegExp(`(${name})=[^&]+`, 'g');
+		return queryString.replace(regex, `$1=${replaceStr}`);
+	}
 }
