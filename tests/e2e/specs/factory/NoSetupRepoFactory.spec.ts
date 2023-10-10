@@ -46,7 +46,8 @@ suite(
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-		const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);

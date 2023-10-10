@@ -46,7 +46,8 @@ suite(
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-		const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
 
 		let projectSection: ViewSection;
