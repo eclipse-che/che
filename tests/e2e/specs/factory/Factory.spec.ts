@@ -25,6 +25,7 @@ import {
 import { expect } from 'chai';
 import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
 import { StringUtil } from '../../utils/StringUtil';
+import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
@@ -45,7 +46,8 @@ suite(
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-		const webCheCodeLocators: Locators = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
 
 		let projectSection: ViewSection;
@@ -106,7 +108,7 @@ suite(
 
 		test('Make changes to the file', async function (): Promise<void> {
 			Logger.debug(`projectSection.openItem: "${fileToChange}"`);
-			await projectSection.openItem(fileToChange);
+			await projectSection.openItem(testRepoProjectName, fileToChange);
 			const editor: TextEditor = (await new EditorView().openEditor(fileToChange)) as TextEditor;
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
 			Logger.debug('editor.clearText');
@@ -184,7 +186,7 @@ suite(
 				webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel),
 				'aria-disabled'
 			);
-			expect(isCommitButtonDisabled).to.be.true;
+			expect(isCommitButtonDisabled).to.equal('true');
 		});
 
 		test('Stop the workspace', async function (): Promise<void> {

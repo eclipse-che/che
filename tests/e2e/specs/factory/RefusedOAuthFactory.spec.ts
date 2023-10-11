@@ -45,7 +45,8 @@ suite(
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
-		const webCheCodeLocators: Locators = new CheCodeLocatorLoader().webCheCodeLocators;
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
@@ -125,7 +126,7 @@ suite(
 
 			test('Make changes to the file', async function (): Promise<void> {
 				Logger.debug(`projectSection.openItem: "${fileToChange}"`);
-				await projectSection.openItem(fileToChange);
+				await projectSection.openItem(testRepoProjectName, fileToChange);
 				const editor: TextEditor = (await new EditorView().openEditor(fileToChange)) as TextEditor;
 				await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
 				Logger.debug('editor.clearText');
