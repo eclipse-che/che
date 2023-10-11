@@ -181,7 +181,7 @@ class CheReporter extends mocha.reporters.Spec {
 			const networkLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('performance');
 			const events: any[] = networkLogsEntries.map((entry): any[] => JSON.parse(entry.message).message);
 			const har: any = chromeHar.harFromMessages(events, { includeTextFromResponseBody: true });
-			this.maskHarContent(har);
+			this.redactHarContent(har);
 
 			const networkLogsStream: WriteStream = fs.createWriteStream(harFileName);
 			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
@@ -190,7 +190,7 @@ class CheReporter extends mocha.reporters.Spec {
 		});
 	}
 
-	maskHarContent(har: any): void {
+	redactHarContent(har: any): void {
 		har.log?.entries?.forEach((entry: any): void => {
 			let text: string | undefined = entry.request?.postData?.text;
 			if (text) {
