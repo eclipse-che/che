@@ -181,10 +181,42 @@ class CheReporter extends mocha.reporters.Spec {
 			const networkLogsEntries: logging.Entry[] = await this.driverHelper.getDriver().manage().logs().get('performance');
 			const events: any[] = networkLogsEntries.map((entry): any[] => JSON.parse(entry.message).message);
 			const har: any = chromeHar.harFromMessages(events, { includeTextFromResponseBody: true });
+			this.redactHarContent(har);
+
 			const networkLogsStream: WriteStream = fs.createWriteStream(harFileName);
 			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
 				networkLogsStream.end();
 			});
+		});
+	}
+
+	redactHarContent(har: any): void {
+		har.log?.entries?.forEach((entry: any): void => {
+			let text: string | undefined = entry.request?.postData?.text;
+			if (text) {
+				text = StringUtil.updateUrlQueryValue(text, 'csrf', '<REDACTED>');
+				text = StringUtil.updateUrlQueryValue(text, 'username', '<REDACTED>');
+				entry.request.postData.text = StringUtil.updateUrlQueryValue(text, 'password', '<REDACTED>');
+			}
+
+			const cookies: any = entry.request?.cookies;
+			if (cookies) {
+				cookies.forEach((cookie: any): void => {
+					if (cookie.name?.startsWith('_oauth_proxy')) {
+						cookie.value = '<REDACTED>';
+					}
+				});
+			}
+
+			const headers: any = entry.request?.headers;
+			if (headers) {
+				headers.forEach((header: any): void => {
+					if (header.name?.toLowerCase() === 'cookie') {
+						header.value = StringUtil.updateCookieValue(header.value, '_oauth_proxy', '<REDACTED>');
+						header.value = StringUtil.updateCookieValue(header.value, '_oauth_proxy_csrf', '<REDACTED>');
+					}
+				});
+			}
 		});
 	}
 }
