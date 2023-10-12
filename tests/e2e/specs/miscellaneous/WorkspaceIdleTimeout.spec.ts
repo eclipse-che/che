@@ -51,7 +51,7 @@ suite('"Check workspace idle timeout" test', function (): void {
 				`oc get checluster/${cheClusterName} -o "jsonpath={.spec.devEnvironments.secondsOfInactivityBeforeIdling}"`
 			)
 		);
-		
+
 		// set spec.devEnvironments.secondsOfInactivityBeforeIdling to 60
 		shellExecutor.executeCommand(
 			`oc patch checluster ${cheClusterName} --type=merge -p '{"spec":{"devEnvironments":{"secondsOfInactivityBeforeIdling": 60}}}'`
