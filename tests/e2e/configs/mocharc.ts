@@ -28,7 +28,7 @@ module.exports = {
 	'full-trace': true,
 	spec:
 		BASE_TEST_CONSTANTS.TEST_ENVIRONMENT !== ''
-			? `dist/suites/${BASE_TEST_CONSTANTS.OCP_TYPE()}/${MOCHA_CONSTANTS.MOCHA_SUITE}.suite.js`
+			? `dist/suites/${MOCHA_CONSTANTS.MOCHA_DIRECTORY}/${MOCHA_CONSTANTS.MOCHA_SUITE}.suite.js`
 			: // variable MOCHA_DIRECTORY uses in command "test-all-devfiles" and sets up automatically.
 			// you can set it up to run files from specific directory with export environmental variable.
 			MOCHA_CONSTANTS.MOCHA_DIRECTORY

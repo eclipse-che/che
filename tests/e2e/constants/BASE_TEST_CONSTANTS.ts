@@ -17,7 +17,6 @@ export const BASE_TEST_CONSTANTS: {
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
-	OCP_TYPE(): string;
 	OCP_VERSION: string;
 	TESTING_APPLICATION_VERSION: string;
 	TEST_ENVIRONMENT: string;
@@ -67,9 +66,6 @@ export const BASE_TEST_CONSTANTS: {
 	 * is cluster disconnected of online
 	 */
 	IS_CLUSTER_DISCONNECTED: (): boolean => BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('airgap'),
-	OCP_TYPE: (): string => {
-		return process.env.OCP_TYPE || (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED() ? 'disconnected-ocp' : 'online-ocp');
-	},
 
 	/**
 	 * choose the platform where "che" application deployed, "openshift" by default.
