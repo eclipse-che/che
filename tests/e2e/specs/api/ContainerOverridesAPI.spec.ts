@@ -15,8 +15,9 @@ import { expect } from 'chai';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
-suite('Test defining container overrides via attribute.', function (): void {
+suite(`Test defining container overrides via attribute ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const pathToSampleFile: string = path.resolve('resources/container-overrides.yaml');
 	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(

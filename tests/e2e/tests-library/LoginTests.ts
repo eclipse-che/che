@@ -15,6 +15,7 @@ import { inject, injectable } from 'inversify';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
+import { registerRunningWorkspace } from '../specs/MochaHooks';
 
 @injectable()
 export class LoginTests {
@@ -50,6 +51,7 @@ export class LoginTests {
 	logoutFromChe(): void {
 		test('Logout', async (): Promise<void> => {
 			await this.dashboard.logout();
+			registerRunningWorkspace('');
 		});
 	}
 }

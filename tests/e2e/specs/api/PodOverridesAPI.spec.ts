@@ -17,7 +17,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 
-suite('Test defining pod overrides via attribute.', function (): void {
+suite(`Test defining pod overrides via attribute ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const pathToSampleFile: string = path.resolve(
 		`resources/pod-overrides${BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED() ? '-airgap' : ''}.yaml`
 	);

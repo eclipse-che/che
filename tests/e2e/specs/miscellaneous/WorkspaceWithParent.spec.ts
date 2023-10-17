@@ -10,7 +10,7 @@
 import { e2eContainer } from '../../configs/inversify.config';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { InputBox, QuickOpenBox, QuickPickItem, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
@@ -21,13 +21,15 @@ import { API_TEST_CONSTANTS } from '../../constants/API_TEST_CONSTANTS';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
-suite('Workspace using a parent test suite', function (): void {
+suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
@@ -94,6 +96,11 @@ suite('Workspace using a parent test suite', function (): void {
 			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} exec -i ${podName} -c tools -- sh -c env`
 		);
 		expect(envList).contains('DEVFILE_ENV_VAR=true').and.contains('PARENT_ENV_VAR=true');
+	});
+
+	test('Stop and delete the workspace by API', async function (): Promise<void> {
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	loginTests.logoutFromChe();

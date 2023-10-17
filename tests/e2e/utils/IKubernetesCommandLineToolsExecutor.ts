@@ -20,7 +20,7 @@ export interface IKubernetesCommandLineToolsExecutor {
 
 	applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString;
 
-	executeCommand(commandToExecute: string, container: string): ShellString;
+	execInContainerCommand(commandToExecute: string, container: string): ShellString;
 
 	applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString;
 

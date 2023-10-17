@@ -22,6 +22,9 @@ import { allure } from 'allure-mocha/runtime';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 import { MONACO_CONSTANTS } from '../constants/MONACO_CONSTANTS';
 import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
+import { decorate, injectable, unmanaged } from 'inversify';
+import { Main } from '@eclipse-che/che-devworkspace-generator/lib/main';
+import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
@@ -34,6 +37,14 @@ export function registerRunningWorkspace(workspaceName: string): void {
 
 exports.mochaHooks = {
 	beforeAll: [
+		function decorateExternalClasses(): void {
+			decorate(injectable(), Main);
+			decorate(injectable(), LocatorLoader);
+			decorate(unmanaged(), LocatorLoader, 0);
+			decorate(unmanaged(), LocatorLoader, 1);
+			decorate(unmanaged(), LocatorLoader, 2);
+		},
+
 		function enableRequestInterceptor(): void {
 			if (BASE_TEST_CONSTANTS.TS_SELENIUM_REQUEST_INTERCEPTOR) {
 				CheApiRequestHandler.enableRequestInterceptor();

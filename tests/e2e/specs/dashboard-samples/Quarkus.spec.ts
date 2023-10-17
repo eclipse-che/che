@@ -21,7 +21,7 @@ import { expect } from 'chai';
 
 const stackName: string = 'Java 11 with Quarkus';
 
-suite(`The ${stackName} userstory`, function (): void {
+suite(`The ${stackName} userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
