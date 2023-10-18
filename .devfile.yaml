@@ -73,3 +73,8 @@ commands:
       cd tests/e2e &&
       npm run tsc
     component: devtools
+- id: tests-happy-path-remote
+  exec:
+    commandLine: >-
+      echo "TODO: Start pod in dogfooding user namespace and collect logs"
+    component: devtools
