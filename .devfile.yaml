@@ -17,11 +17,10 @@ projects:
   - name: che
     git:
       remotes:
-        origin: 'https://github.com/ScrewTSW/che.git'
-        upstream: 'https://github.com/eclipse/che.git'
+        origin: 'https://github.com/eclipse/che.git'
       checkoutFrom:
         remote: origin
-        revision: devtools-week-che-dogfooding-test-development
+        revision: main
 components:
 - name: devtools
   container:
@@ -32,6 +31,9 @@ components:
     cpuRequest: 30m
     mountSources: true
     sourceMapping: /projects
+    env:
+      - name: KUBEDOCK_ENABLED
+        value: 'true'
 commands:
 - id: update-contributing
   exec:
@@ -45,15 +47,29 @@ commands:
   exec:
     commandLine: >-
       cd tests/e2e &&
+      echo "Installing/Updating nvm" &&
+      curl -so- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash &&
+      export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+      nvm --version &&
+      echo "Updating nodejs" &&
+      nvm install lts/hydrogen && nvm alias default lts/hydrogen && nvm use default &&
       echo "Updating npm" &&
       npm install -g npm &&
-      echo "Updating nodejs" &&
-      nvm install Gallium &&
-      echo "Installing typescript" &&
-      npm install -g typescript &&
       echo "Installing test dependencies" &&
       rm -rf package-lock.json &&
       npm install &&
       npm uninstall chromedriver && npm install chromedriver --save-dev &&
       cd ../../
+    component: devtools
+- id: tests-lint-project
+  exec:
+    commandLine: >-
+      cd tests/e2e &&
+      npm run lint
+    component: devtools
+- id: tests-build-tests
+  exec:
+    commandLine: >-
+      cd tests/e2e &&
+      npm run tsc
     component: devtools
