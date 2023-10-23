@@ -114,7 +114,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		return this.waitDevWorkspace();
 	}
 
-	executeCommand(commandToExecute: string, container: string = KubernetesCommandLineToolsExecutor.container): ShellString {
+	execInContainerCommand(commandToExecute: string, container: string = KubernetesCommandLineToolsExecutor.container): ShellString {
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
 		return this.shellExecutor.executeCommand(
@@ -217,22 +217,22 @@ export class ContainerTerminal extends KubernetesCommandLineToolsExecutor {
 	}
 
 	ls(path: string = ''): ShellString {
-		return this.shellExecutor.executeCommand('ls ' + path);
+		return this.execInContainerCommand('ls ' + path);
 	}
 
 	pwd(): ShellString {
-		return this.shellExecutor.executeCommand('pwd');
+		return this.execInContainerCommand('pwd');
 	}
 
 	cd(path: string): ShellString {
-		return this.shellExecutor.executeCommand('cd ' + path);
+		return this.execInContainerCommand('cd ' + path);
 	}
 
 	gitClone(repository: string): ShellString {
-		return this.shellExecutor.executeCommand('git clone ' + repository);
+		return this.execInContainerCommand('git clone ' + repository);
 	}
 
 	removeFolder(path: string): ShellString {
-		return this.shellExecutor.executeCommand('rm -rf ' + path);
+		return this.execInContainerCommand('rm -rf ' + path);
 	}
 }

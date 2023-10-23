@@ -16,21 +16,23 @@ import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
+import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
+import { MOCHA_CONSTANTS } from '../../constants/MOCHA_CONSTANTS';
+import { API_TEST_CONSTANTS } from '../../constants/API_TEST_CONSTANTS';
 
 /**
  * dynamically generating tests
  * info: https://mochajs.org/#delayed-root-suite
  */
-// todo: skipped while don`t use to avoid sending useless requests
-// eslint-disable-next-line @typescript-eslint/require-await
 void (async function (): Promise<void> {
-	// const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
+	const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 
-	const devfileSamples: any = [];
-	// devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry();
-
+	let devfileSamples: any = [];
+	if (MOCHA_CONSTANTS.MOCHA_DELAYED_SUITE && API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
+		devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry(false);
+	}
 	for (const devfileSample of devfileSamples) {
-		suite.skip(`Devfile acceptance test suite for ${devfileSample.name}`, function (): void {
+		suite(`Devfile acceptance test suite for ${devfileSample.name}`, function (): void {
 			this.bail(false);
 			this.timeout(1500000); // 25 minutes because build of Quarkus sample takes 20+ minutes
 			let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
@@ -105,7 +107,7 @@ void (async function (): Promise<void> {
 						);
 						Logger.info(`Full build command to be executed: ${commandString}`);
 
-						const output: ShellString = containerTerminal.executeCommand(commandString, command.exec.component);
+						const output: ShellString = containerTerminal.execInContainerCommand(commandString, command.exec.component);
 						expect(output.code).eqls(0);
 					});
 				}

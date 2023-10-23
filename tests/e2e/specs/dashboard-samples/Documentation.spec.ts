@@ -26,7 +26,7 @@ import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { Logger } from '../../utils/Logger';
 
 // suit works for DevSpaces
-suite('Check links to documentation page in Dashboard', function (): void {
+suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	this.timeout(180000);
 	const pathToSampleFile: string = path.resolve('resources/default-devfile.yaml');
 	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;

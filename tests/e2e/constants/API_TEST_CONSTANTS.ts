@@ -23,6 +23,7 @@ export const SUPPORTED_DEVFILE_REGISTRIES: {
 	GIT_HUB_CHE_DEVFILE_REGISTRY_URL: 'https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/'
 };
 export const API_TEST_CONSTANTS: {
+	TS_API_TEST_DEV_WORKSPACE_LIST: string | undefined;
 	TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL: string;
 	TS_API_TEST_PLUGIN_REGISTRY_URL: string | undefined;
 	TS_API_TEST_CHE_CODE_EDITOR_DEVFILE_URI: string | undefined;
@@ -62,6 +63,8 @@ export const API_TEST_CONSTANTS: {
 	 * to run all devfile from registry. used in DevfileAcceptanceTestAPI.suite.ts
 	 */
 	TS_API_ACCEPTANCE_TEST_REGISTRY_URL(): string {
-		return process.env.TS_API_ACCEPTANCE_TEST_REGISTRY_URL || SUPPORTED_DEVFILE_REGISTRIES.INBUILT_APPLICATION_DEVFILE_REGISTRY_URL();
-	}
+		return process.env.TS_API_ACCEPTANCE_TEST_REGISTRY_URL || '';
+	},
+
+	TS_API_TEST_DEV_WORKSPACE_LIST: process.env.TS_API_TEST_DEV_WORKSPACE_LIST || undefined
 };

@@ -31,7 +31,7 @@ suite('Empty workspace API test', function (): void {
 
 	const gitRepository: string = 'https://github.com/crw-qe/web-nodejs-sample';
 
-	suiteSetup('Create empty workspace with OC client', async function (): Promise<void> {
+	suiteSetup(`Create empty workspace with OC client ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, async function (): Promise<void> {
 		const workspaceName: string = 'empty-' + Math.floor(Math.random() * 1000);
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
 
@@ -54,7 +54,7 @@ suite('Empty workspace API test', function (): void {
 		expect(output.stdout).contains('condition met');
 	});
 
-	suite('Clone public repo without previous setup', function (): void {
+	suite(`Clone public repo without previous setup ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		test('Check if public repo can be cloned', function (): void {
 			containerWorkDir = containerTerminal.pwd().stdout.replace('\n', '');
 			const cloneOutput: ShellString = containerTerminal.gitClone(gitRepository);

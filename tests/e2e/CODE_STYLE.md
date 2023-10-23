@@ -117,7 +117,7 @@ Full set of rules can be found:
 
 2. Mocha framework
 
-    - ✔ TDD framework (`suit()`, `test()`)
+    - ✔ TDD framework (`suite()`, `test()`)
     - ✔ Inject class instances, declare all test data inside test `suit()` function to avoid unnecessary code execution if test suit will not be run
 
     ```
