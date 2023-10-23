@@ -16,7 +16,7 @@
 		"test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
 		"test-all-devfiles": " ./configs/sh-scripts/initDefaultValues.sh && ./configs/sh-scripts/initDevfileTests.sh",
 		"functional-test-suite": "configs/sh-scripts/runFunctionalTests.sh",
-		"devfile-acceptance-test-suite": "./configs/sh-scripts/initDefaultValues.sh npm run lint && npm run tsc && export TS_USE_WEB_DRIVER_FOR_TEST=false && mocha 'dist/specs/api/*.js' --config dist/configs/mocharc.js --delay --grep 'Devfile acceptance test suite'"
+		"devfile-acceptance-test-suite": "configs/sh-scripts/runDevfileAcceptanceTests.sh"
 	},
 	"author": "Ihor Okhrimenko (iokhrime@redhat.com)",
 	"license": "ISC",
