@@ -12,7 +12,9 @@ import { BASE_TEST_CONSTANTS } from './BASE_TEST_CONSTANTS';
 export enum GitProviderType {
 	GITHUB = 'github',
 	GITLAB = 'gitlab',
-	BITBUCKET = 'bitbucket',
+	BITBUCKET_SERVER_OAUTH1 = 'bb-server-oauth1',
+	BITBUCKET_SERVER_OAUTH2 = 'bb-server-oauth2',
+	BITBUCKET_CLOUD_OAUTH2 = 'bb-cloud-oauth2',
 	AZURE_DEVOPS = 'azure-devops'
 }
 
