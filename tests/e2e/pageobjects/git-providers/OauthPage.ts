@@ -30,13 +30,31 @@ export class OauthPage {
 		private readonly driverHelper: DriverHelper
 	) {
 		switch (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER) {
-			case GitProviderType.BITBUCKET:
+			case GitProviderType.BITBUCKET_SERVER_OAUTH1:
 				{
 					OauthPage.LOGIN_FORM = By.id('j_username');
 					OauthPage.PASSWORD_FORM = By.id('j_password');
 					OauthPage.APPROVE_BUTTON = By.id('approve');
 					OauthPage.SUBMIT_BUTTON = By.id('submit');
 					OauthPage.DENY_ACCESS_BUTTON = By.id('deny');
+				}
+				break;
+			case GitProviderType.BITBUCKET_SERVER_OAUTH2:
+				{
+					OauthPage.LOGIN_FORM = By.id('j_username');
+					OauthPage.PASSWORD_FORM = By.id('j_password');
+					OauthPage.APPROVE_BUTTON = By.xpath('//span[text()="Allow"]');
+					OauthPage.SUBMIT_BUTTON = By.id('submit');
+					OauthPage.DENY_ACCESS_BUTTON = By.xpath('//span[text()="Deny"]');
+				}
+				break;
+			case GitProviderType.BITBUCKET_CLOUD_OAUTH2:
+				{
+					OauthPage.LOGIN_FORM = By.id('username');
+					OauthPage.PASSWORD_FORM = By.id('password');
+					OauthPage.SUBMIT_BUTTON = By.id('login-submit');
+					OauthPage.APPROVE_BUTTON = By.xpath('//button[@value="approve"]');
+					OauthPage.DENY_ACCESS_BUTTON = By.xpath('//button[@value="deny"]');
 				}
 				break;
 			case GitProviderType.GITLAB:
@@ -69,7 +87,7 @@ export class OauthPage {
 				break;
 			default: {
 				throw new Error(
-					`Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB}, ${GitProviderType.AZURE_DEVOPS} or ${GitProviderType.BITBUCKET}`
+					`Invalid git provider. The value should be ${GitProviderType.GITHUB}, ${GitProviderType.GITLAB}, ${GitProviderType.AZURE_DEVOPS}, ${GitProviderType.BITBUCKET_SERVER_OAUTH1}, ${GitProviderType.BITBUCKET_SERVER_OAUTH2} or ${GitProviderType.BITBUCKET_CLOUD_OAUTH2}`
 				);
 			}
 		}
@@ -140,7 +158,10 @@ export class OauthPage {
 
 		await this.waitLoginPage();
 		await this.enterUserName(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE_DEVOPS) {
+		if (
+			FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.AZURE_DEVOPS ||
+			FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.BITBUCKET_CLOUD_OAUTH2
+		) {
 			await this.clickOnSubmitButton();
 		}
 		await this.enterPassword(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
