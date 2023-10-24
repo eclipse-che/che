@@ -42,14 +42,6 @@ export class WorkspaceHandlingTests {
 		return WorkspaceHandlingTests.workspaceName;
 	}
 
-	setWindowHandle(guid: string): void {
-		WorkspaceHandlingTests.parentGUID = guid;
-	}
-
-	getWindowHandle(): string {
-		return WorkspaceHandlingTests.parentGUID;
-	}
-
 	async createAndOpenWorkspace(stack: string): Promise<void> {
 		await this.dashboard.clickWorkspacesButton();
 		await this.dashboard.waitPage();

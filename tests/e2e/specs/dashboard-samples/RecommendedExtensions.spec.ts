@@ -23,7 +23,7 @@ import {
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { Logger } from '../../utils/Logger';
@@ -34,6 +34,8 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { PLUGIN_TEST_CONSTANTS } from '../../constants/PLUGIN_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
 
@@ -46,6 +48,8 @@ for (const sample of samples) {
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
 		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 		let projectSection: ViewSection;
 		let extensionSection: ExtensionsViewSection;
@@ -56,7 +60,9 @@ for (const sample of samples) {
 			recommendations: []
 		};
 
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 
 		test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspace(sample);
@@ -202,15 +208,17 @@ for (const sample of samples) {
 			}
 		});
 
-		test('Stop the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
 
-		test('Delete the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Stop and delete the workspace by API', function (): void {
+			testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 
-		loginTests.logoutFromChe();
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	});
 }

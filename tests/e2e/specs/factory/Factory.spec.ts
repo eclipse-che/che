@@ -29,7 +29,7 @@ import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { Logger } from '../../utils/Logger';
@@ -37,6 +37,8 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -49,6 +51,8 @@ suite(
 		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
 		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
+		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -64,7 +68,9 @@ suite(
 		const pushItemLabel: string = 'Push';
 		let testRepoProjectName: string;
 
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 		test('Navigate to the factory URL', async function (): Promise<void> {
 			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
 		});
@@ -189,15 +195,17 @@ suite(
 			expect(isCommitButtonDisabled).to.equal('true');
 		});
 
-		test('Stop the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
 
-		test('Delete the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Stop and delete the workspace by API', function (): void {
+			testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 
-		loginTests.logoutFromChe();
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	}
 );

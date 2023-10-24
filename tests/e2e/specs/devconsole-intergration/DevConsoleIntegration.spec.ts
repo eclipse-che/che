@@ -24,12 +24,14 @@ import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPa
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
 	let ocpApplicationPage: OcpApplicationPage;
 
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
@@ -72,7 +74,9 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		await ocpApplicationPage.waitAndOpenEditSourceCodeIcon();
 	});
 
-	loginTests.loginIntoChe();
+	test('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
 
 	test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -99,12 +103,18 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		).not.undefined;
 	});
 
-	test('Stop and delete the workspace by API', async function (): Promise<void> {
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
+	});
+
+	suiteTeardown('Stop and delete the workspace by API', function (): void {
 		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 
 	suiteTeardown('Delete project using ocp', function (): void {
 		kubernetesCommandLineToolsExecutor.deleteProject(projectName);

@@ -76,7 +76,14 @@ export class BrowserTabsUtil {
 	async getCurrentUrl(): Promise<string> {
 		Logger.trace();
 
-		return await this.driverHelper.getDriver().getCurrentUrl();
+		let currentUrl: string = '';
+		try {
+			currentUrl = await this.driverHelper.getDriver().getCurrentUrl();
+		} catch (e) {
+			Logger.trace('cannot get current url');
+		}
+
+		return currentUrl;
 	}
 
 	async waitURL(expectedUrl: string, timeout: number): Promise<void> {

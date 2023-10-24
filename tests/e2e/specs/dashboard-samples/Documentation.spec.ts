@@ -65,13 +65,15 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		({ webSocketTroubleshooting, workspace, devfile, general, storageTypes } = docs);
 	});
 
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
+
 	test('Check if product.json config contains correct application version', function (): void {
 		[productVersion, links[1].href, devfile, workspace, general, storageTypes, webSocketTroubleshooting].forEach((e): void => {
 			expect(e, 'Fetched links not matches with tested product version').contains(testingVersion);
 		});
 	});
-
-	loginTests.loginIntoChe();
 
 	test('Check if documentation section "About" present on Dashboard', async function (): Promise<void> {
 		await dashboard.openAboutMenu();
@@ -135,7 +137,10 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		});
 	}
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+	});
 
 	suiteTeardown('Delete default DevWorkspace', function (): void {
 		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();

@@ -62,7 +62,9 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		}
 	});
 
-	loginTests.loginIntoChe('user');
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe('user');
+	});
 	// create the Empty workspace using CHE Dashboard
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName);
@@ -81,5 +83,7 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		expect(ocDevWorkspaceOutput).includes(workspaceName);
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 });

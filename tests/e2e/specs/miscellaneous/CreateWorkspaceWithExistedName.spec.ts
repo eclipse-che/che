@@ -9,7 +9,7 @@
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
 import { ViewSection } from 'monaco-page-objects';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { expect } from 'chai';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
@@ -19,6 +19,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 const stackName: string = BASE_TEST_CONSTANTS.TS_SELENIUM_DASHBOARD_SAMPLE_NAME || 'Python';
 const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || 'python-hello-world';
@@ -29,10 +30,14 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+
 	let projectSection: ViewSection;
 	let existedWorkspaceName: string;
 
-	loginTests.loginIntoChe();
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
 
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName);
@@ -76,15 +81,17 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		).not.undefined;
 	});
 
-	test(`Stop all created ${stackName} workspaces`, async function (): Promise<void> {
-		await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	test(`Delete all created ${stackName} workspaces`, async function (): Promise<void> {
-		await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-		await workspaceHandlingTests.removeWorkspace(existedWorkspaceName);
+	suiteTeardown(`Stop and delete all created ${stackName} workspaces by API`, function (): void {
+		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		testWorkspaceUtil.stopAndDeleteWorkspaceByName(existedWorkspaceName);
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 });
