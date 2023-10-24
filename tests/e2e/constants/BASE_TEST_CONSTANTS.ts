@@ -13,7 +13,7 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
-	ARCH_VERSION: string;
+	OCP_INFRA: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
@@ -38,9 +38,9 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
 	/**
-	 * system arch type
+	 * ocp infra type, possible values "PSI", "AWS", "IBM Z", "IBM Power"
 	 */
-	ARCH_VERSION: process.env.ARCH_VERSION || '',
+	OCP_INFRA: process.env.OCP_INFRA || '',
 
 	/**
 	 * openShift version
