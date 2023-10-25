@@ -26,6 +26,15 @@ module.exports = {
 				value: `${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`
 			},
 			{
+				key: 'ocp version',
+				value: `${BASE_TEST_CONSTANTS.OCP_VERSION}`
+			},
+			{
+				key: 'ocp infra',
+				value: `${BASE_TEST_CONSTANTS.OCP_INFRA}`
+			},
+			{
+				key: 'application',
 				value: BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()
 			},
 			{

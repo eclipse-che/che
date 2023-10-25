@@ -8,6 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { BASE_TEST_CONSTANTS } from './BASE_TEST_CONSTANTS';
+import { MOCHA_CONSTANTS } from './MOCHA_CONSTANTS';
 
 export const REPORTER_CONSTANTS: {
 	DELETE_SCREENCAST_IF_TEST_PASS: boolean;
@@ -97,12 +98,12 @@ export const REPORTER_CONSTANTS: {
 	/**
 	 * user name on ReportPortal
 	 */
-	RP_USER: process.env.RP_USER || process.env.USER || 'superadmin',
+	RP_USER: process.env.RP_USER || process.env.USER || process.env.BUILD_USER_ID || '',
 
 	/**
 	 * launch name to save report
 	 */
-	RP_LAUNCH_NAME: process.env.RP_LAUNCH_NAME || 'Test run',
+	RP_LAUNCH_NAME: process.env.RP_LAUNCH_NAME || `Test run ${MOCHA_CONSTANTS.MOCHA_USERSTORY}`,
 
 	/**
 	 * launch name to save report
@@ -137,10 +138,9 @@ export const REPORTER_CONSTANTS: {
 	 * project name to save launch
 	 */
 	RP_PROJECT: (): string => {
-		const project: string =
-			BASE_TEST_CONSTANTS.TEST_ENVIRONMENT !== '' || REPORTER_CONSTANTS.RP_USE_PERSONAL
-				? `${REPORTER_CONSTANTS.RP_USER}_personal`
-				: BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();
+		const project: string = REPORTER_CONSTANTS.RP_USE_PERSONAL
+			? `${REPORTER_CONSTANTS.RP_USER}_personal`
+			: BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();
 		return process.env.RP_PROJECT || project;
 	}
 };

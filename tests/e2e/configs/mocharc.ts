@@ -40,5 +40,6 @@ module.exports = {
 			: MOCHA_CONSTANTS.MOCHA_USERSTORY
 			? [`dist/specs/**/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`, `dist/specs/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`]
 			: ['dist/specs/**/**.spec.js', 'dist/specs/**.spec.js'],
-	retries: MOCHA_CONSTANTS.MOCHA_RETRIES
+	retries: MOCHA_CONSTANTS.MOCHA_RETRIES,
+	grep: MOCHA_CONSTANTS.MOCHA_GREP
 };

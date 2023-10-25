@@ -17,14 +17,14 @@ validateParameters(){
 launchAPITests() {
   export MOCHA_SUITE="APITest"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
-  export RP_LAUNCH_NAME="API tests suite"
+  export RP_LAUNCH_NAME="API tests suite $TEST_ENVIRONMENT"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run driver-less-test
 }
 
 launchDynamicallyGeneratingAPITests() {
   export MOCHA_SUITE="DynamicallyGeneratingAPITest"
-  export RP_LAUNCH_NAME="Application inbuilt DevWorkspaces API tests suite"
+  export RP_LAUNCH_NAME="Application inbuilt DevWorkspaces API tests suite $TEST_ENVIRONMENT"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run delayed-test
@@ -32,7 +32,7 @@ launchDynamicallyGeneratingAPITests() {
 
 launchUITests() {
   export MOCHA_SUITE="UITest"
-  export RP_LAUNCH_NAME="UI tests suite"
+  export RP_LAUNCH_NAME="UI tests suite $TEST_ENVIRONMENT"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run test
