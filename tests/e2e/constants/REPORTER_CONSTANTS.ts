@@ -145,5 +145,5 @@ export const REPORTER_CONSTANTS: {
 		return process.env.RP_PROJECT || project;
 	},
 
-	TEST_RUN_URL: process.env.TEST_RUN_URL || ''
+	TEST_RUN_URL: process.env.TEST_RUN_URL || 'Test run url not set'
 };
