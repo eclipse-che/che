@@ -19,6 +19,7 @@ import { CLASSES } from '../../configs/inversify.types';
 import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
 import { MOCHA_CONSTANTS } from '../../constants/MOCHA_CONSTANTS';
 import { API_TEST_CONSTANTS } from '../../constants/API_TEST_CONSTANTS';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 /**
  * dynamically generating tests
@@ -28,7 +29,10 @@ void (async function (): Promise<void> {
 	const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 
 	let devfileSamples: any = [];
-	if (MOCHA_CONSTANTS.MOCHA_DELAYED_SUITE && API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()) {
+	if (
+		MOCHA_CONSTANTS.MOCHA_DELAYED_SUITE &&
+		!API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL().includes(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL)
+	) {
 		devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry(false);
 	}
 	for (const devfileSample of devfileSamples) {
