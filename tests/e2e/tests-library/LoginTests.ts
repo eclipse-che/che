@@ -41,7 +41,10 @@ export class LoginTests {
 
 	loginIntoOcpConsole(): void {
 		test('Login into ocp console', async (): Promise<void> => {
-			const openshiftConsoleUrl: string = BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces', 'console-openshift-console');
+			const openshiftConsoleUrl: string = BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace(
+				BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME(),
+				'console-openshift-console'
+			);
 			await this.browserTabsUtil.navigateTo(openshiftConsoleUrl);
 			await this.ocpLoginPage.login();
 			await this.browserTabsUtil.maximize();

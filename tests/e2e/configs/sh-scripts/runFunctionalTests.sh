@@ -3,8 +3,8 @@
 
 validateParameters(){
 # Validate required parameters
-  if [ -z "$OCP_VERSION" ] || [ -z "$ARCH_VERSION" ] || [ -z "$TS_SELENIUM_BASE_URL" ]; then
-      echo "The ARCH_VERSION, OCP_VERSION or TS_SELENIUM_BASE_URL is not set!";
+  if [ -z "$OCP_VERSION" ] || [ -z "$OCP_INFRA" ] || [ -z "$TS_SELENIUM_BASE_URL" ]; then
+      echo "The OCP_INFRA, OCP_VERSION or TS_SELENIUM_BASE_URL is not set!";
       echo "Please, set all required environment variable parameters"
       exit 1
   fi
@@ -17,14 +17,14 @@ validateParameters(){
 launchAPITests() {
   export MOCHA_SUITE="APITest"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
-  export RP_LAUNCH_NAME="API tests suite"
+  export RP_LAUNCH_NAME="API tests suite $TEST_ENVIRONMENT"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run driver-less-test
 }
 
 launchDynamicallyGeneratingAPITests() {
   export MOCHA_SUITE="DynamicallyGeneratingAPITest"
-  export RP_LAUNCH_NAME="Application inbuilt DevWorkspaces API tests suite"
+  export RP_LAUNCH_NAME="Application inbuilt DevWorkspaces API tests suite $TEST_ENVIRONMENT"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run delayed-test
@@ -32,7 +32,7 @@ launchDynamicallyGeneratingAPITests() {
 
 launchUITests() {
   export MOCHA_SUITE="UITest"
-  export RP_LAUNCH_NAME="UI tests suite"
+  export RP_LAUNCH_NAME="UI tests suite $TEST_ENVIRONMENT"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run test
@@ -59,7 +59,7 @@ initTestValues() {
      export MOCHA_DIRECTORY="online-ocp"
   fi
 
-  export TEST_ENVIRONMENT="$ARCH_VERSION $MOCHA_DIRECTORY $OCP_VERSION"
+  export TEST_ENVIRONMENT="$OCP_INFRA $MOCHA_DIRECTORY $OCP_VERSION"
   export DELETE_WORKSPACE_ON_FAILED_TEST=${DELETE_WORKSPACE_ON_FAILED_TEST:-'false'}
   export DELETE_SCREENCAST_IF_TEST_PASS=${DELETE_SCREENCAST_IF_TEST_PASS:-'true'}
   export NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED:-'0'}

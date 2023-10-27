@@ -13,5 +13,5 @@
 		"noImplicitReturns": false,
 		"sourceMap": true
 	},
-	"include": [".eslintrc.js", "**/*.ts", "**/**/*.ts"]
+	"include": [".eslintrc.js", "**/*.ts", "**/**/*.ts", "**/reporters.config.js"]
 }
