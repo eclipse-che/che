@@ -29,6 +29,7 @@ import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
+export let rpApi: any = undefined;
 
 export function registerRunningWorkspace(workspaceName: string): void {
 	workspaceName !== '' ? Logger.debug(`with workspaceName:${workspaceName}`) : Logger.debug('delete workspace name');
@@ -38,6 +39,10 @@ export function registerRunningWorkspace(workspaceName: string): void {
 
 exports.mochaHooks = {
 	beforeAll: [
+		function initRPApi(): any {
+			rpApi = require('@reportportal/agent-js-mocha/lib/publicReportingAPI.js');
+		},
+
 		function decorateExternalClasses(): void {
 			decorate(injectable(), Main);
 			decorate(injectable(), LocatorLoader);
@@ -87,6 +92,21 @@ exports.mochaHooks = {
 				}
 			}
 		},
+		async function saveReportportalAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && this.currentTest?.state === 'failed') {
+				try {
+					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
+					const attachment: { name: string; type: string; content: string } = {
+						name: 'screenshot.png',
+						type: 'image/png',
+						content: screenshot
+					};
+					rpApi.error('Screenshot on fail: ', attachment);
+				} catch (e) {
+					rpApi.error('Could not attach the screenshot');
+				}
+			}
+		},
 		// stop and remove running workspace
 		function deleteWorkspaceOnFailedTest(this: Mocha.Context): void {
 			if (this.currentTest?.state === 'failed') {
@@ -104,8 +124,7 @@ exports.mochaHooks = {
 			if (!BASE_TEST_CONSTANTS.TS_DEBUG_MODE && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
 				// ensure that fired events done
 				await driverHelper.wait(5000);
-				await driverHelper.getDriver().quit();
-				Logger.info('Chrome driver session stopped.');
+				await driverHelper.quit();
 			}
 		}
 	]
