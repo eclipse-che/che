@@ -11,7 +11,7 @@
 import { WorkspaceStatus } from './WorkspaceStatus';
 
 export interface ITestWorkspaceUtil {
-	waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): void;
+	waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): void;
 
 	stopWorkspaceByName(workspaceName: string): void;
 
@@ -28,16 +28,16 @@ export interface ITestWorkspaceUtil {
 	/**
 	 * stop all run workspaces in the namespace
 	 */
-	stopAllRunningWorkspaces(namespace: string): void;
+	stopAllRunningWorkspaces(): void;
 
 	/**
 	 * stop all run workspaces, check statused and remove the workspaces
 	 */
-	stopAndDeleteAllRunningWorkspaces(namespace: string): void;
+	stopAndDeleteAllRunningWorkspaces(): void;
 
 	/**
 	 * stop all run workspaces without stopping and waiting for of 'Stopped' phase
 	 * Similar with 'force' deleting
 	 */
-	deleteAllWorkspaces(namespace: string): void;
+	deleteAllWorkspaces(): void;
 }

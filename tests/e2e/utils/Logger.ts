@@ -150,7 +150,7 @@ export class Logger {
 
 	private static isRootCaller(traceLevel: number = 6): boolean {
 		return this.getCallStackArray()
-			.slice(traceLevel, traceLevel + 2)
+			.slice(traceLevel, traceLevel + 3)
 			.reduce((acc, e): boolean => {
 				return acc || /MochaHooks|CheReporter/.test(e);
 			}, false);

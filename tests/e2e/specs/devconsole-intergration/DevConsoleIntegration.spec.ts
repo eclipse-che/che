@@ -24,6 +24,7 @@ import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPa
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
@@ -73,7 +74,11 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	});
 
 	test('Login', async function (): Promise<void> {
-		await loginTests.loginIntoChe();
+		try {
+			await dashboard.waitLoader(TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+		} catch (e) {
+			await loginTests.loginIntoChe();
+		}
 	});
 
 	test('Obtain workspace name from workspace loader page', async function (): Promise<void> {

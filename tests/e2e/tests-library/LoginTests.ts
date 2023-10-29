@@ -29,13 +29,17 @@ export class LoginTests {
 		@inject(CLASSES.Dashboard) private readonly dashboard: Dashboard
 	) {}
 
-	async loginIntoChe(userName?: string, password?: string): Promise<void> {
+	async loginIntoChe(
+		userName?: string,
+		password?: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
 		Logger.debug();
 		try {
 			if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL)) {
 				await this.browserTabsUtil.navigateTo(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 			}
-			await this.dashboard.waitPage(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
+			await this.dashboard.waitPage(timeout);
 			Logger.debug('user already logged in');
 		} catch (e) {
 			Logger.debug('try to login into application');
@@ -57,9 +61,7 @@ export class LoginTests {
 		});
 	}
 
-	logoutFromChe(): void {
-		test('Logout', async (): Promise<void> => {
-			await this.dashboard.logout();
-		});
+	async logoutFromChe(): Promise<void> {
+		await this.dashboard.logout();
 	}
 }

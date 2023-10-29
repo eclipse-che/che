@@ -17,6 +17,7 @@ import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 
 suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const predefinedNamespaceName: string = 'predefined-ns';
@@ -63,7 +64,12 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	});
 
 	suiteSetup('Login', async function (): Promise<void> {
-		await loginTests.loginIntoChe('user');
+		const userName: string = 'user';
+		await loginTests.loginIntoChe(userName);
+		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME !== userName) {
+			await loginTests.logoutFromChe();
+			await loginTests.loginIntoChe(userName);
+		}
 	});
 	// create the Empty workspace using CHE Dashboard
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
