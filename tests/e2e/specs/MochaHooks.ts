@@ -26,13 +26,19 @@ import { decorate, injectable, unmanaged } from 'inversify';
 import { Main } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
 import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
+import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
 export let rpApi: any = undefined;
 
 export function registerRunningWorkspace(workspaceName: string): void {
-	workspaceName !== '' ? Logger.debug(`with workspaceName:${workspaceName}`) : Logger.debug('delete workspace name');
+	workspaceName !== ''
+		? Logger.debug(`with workspaceName:${workspaceName}`)
+		: ((): void => {
+				Logger.debug('delete workspace name');
+				WorkspaceHandlingTests.clearWorkspaceName();
+		  })();
 
 	latestWorkspace = workspaceName;
 }

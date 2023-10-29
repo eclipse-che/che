@@ -42,6 +42,10 @@ export class WorkspaceHandlingTests {
 		return WorkspaceHandlingTests.workspaceName;
 	}
 
+	static clearWorkspaceName(): void {
+		WorkspaceHandlingTests.workspaceName = 'undefined';
+	}
+
 	async createAndOpenWorkspace(stack: string): Promise<void> {
 		await this.dashboard.clickWorkspacesButton();
 		await this.dashboard.waitPage();
