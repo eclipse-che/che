@@ -12,7 +12,7 @@ import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES, TYPES } from '../../configs/inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { expect } from 'chai';
@@ -22,7 +22,6 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { StringUtil } from '../../utils/StringUtil';
 import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPage';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
@@ -36,7 +35,6 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
-	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
@@ -108,15 +106,14 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	suiteTeardown('Stop and delete the workspace by API', function (): void {
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Delete project using ocp', function (): void {
+		kubernetesCommandLineToolsExecutor.workspaceName =
+			WorkspaceHandlingTests.getWorkspaceName() !== '' ? WorkspaceHandlingTests.getWorkspaceName() : 'spring-music';
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+		kubernetesCommandLineToolsExecutor.deleteProject(projectName);
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {
 		registerRunningWorkspace('');
-	});
-
-	suiteTeardown('Delete project using ocp', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteProject(projectName);
 	});
 });

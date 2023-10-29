@@ -56,11 +56,11 @@ suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, functio
 				'Project files were not imported'
 			).not.undefined;
 		});
-		test('Stop the workspace', async function (): Promise<void> {
+		test('Stop the workspace by UI', async function (): Promise<void> {
 			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
-		test('Delete the workspace', async function (): Promise<void> {
+		test('Delete the workspace by UI', async function (): Promise<void> {
 			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		});
 		suiteTeardown('Unregister running workspace', function (): void {
