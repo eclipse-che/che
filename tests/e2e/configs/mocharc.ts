@@ -21,8 +21,9 @@ module.exports = {
 	timeout: MOCHA_CONSTANTS.MOCHA_DEFAULT_TIMEOUT,
 	slow: 60000,
 	reporter: 'mocha-multi-reporters',
-	reporterOptions: 'configFile=configs/reporters-config.json',
+	reporterOptions: 'configFile=configs/reporters.config.js',
 	ui: 'tdd',
+	extension: ['js', 'cjs', 'mjs'],
 	require: ['dist/specs/MochaHooks.js', 'ts-node/register'],
 	bail: MOCHA_CONSTANTS.MOCHA_BAIL,
 	'full-trace': true,
@@ -39,5 +40,6 @@ module.exports = {
 			: MOCHA_CONSTANTS.MOCHA_USERSTORY
 			? [`dist/specs/**/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`, `dist/specs/${MOCHA_CONSTANTS.MOCHA_USERSTORY}.spec.js`]
 			: ['dist/specs/**/**.spec.js', 'dist/specs/**.spec.js'],
-	retries: MOCHA_CONSTANTS.MOCHA_RETRIES
+	retries: MOCHA_CONSTANTS.MOCHA_RETRIES,
+	grep: MOCHA_CONSTANTS.MOCHA_GREP
 };

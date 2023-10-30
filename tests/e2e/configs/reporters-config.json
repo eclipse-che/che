@@ -1,6 +1,0 @@
-{
-	"reporterEnabled": "allure-mocha,dist/utils/CheReporter.js",
-	"allureMochaReporterOptions": {
-		"resultsDir": ".allure-results"
-	}
-}

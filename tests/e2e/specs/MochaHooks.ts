@@ -25,9 +25,11 @@ import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { decorate, injectable, unmanaged } from 'inversify';
 import { Main } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
+import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
+export let rpApi: any = undefined;
 
 export function registerRunningWorkspace(workspaceName: string): void {
 	workspaceName !== '' ? Logger.debug(`with workspaceName:${workspaceName}`) : Logger.debug('delete workspace name');
@@ -37,6 +39,10 @@ export function registerRunningWorkspace(workspaceName: string): void {
 
 exports.mochaHooks = {
 	beforeAll: [
+		function initRPApi(): any {
+			rpApi = require('@reportportal/agent-js-mocha/lib/publicReportingAPI.js');
+		},
+
 		function decorateExternalClasses(): void {
 			decorate(injectable(), Main);
 			decorate(injectable(), LocatorLoader);
@@ -69,20 +75,35 @@ exports.mochaHooks = {
 			if (BASE_TEST_CONSTANTS.TS_DEBUG_MODE) {
 				for (const [timeout, seconds] of Object.entries(TIMEOUT_CONSTANTS)) {
 					Object.defineProperty(TIMEOUT_CONSTANTS, timeout, {
-						value: seconds * 100
+						value: seconds * 2
 					});
 				}
 			}
 		}
 	],
 	afterEach: [
-		async function (this: Mocha.Context): Promise<void> {
-			if (this.currentTest?.state === 'failed') {
+		async function saveAllureAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_ALLURE_REPORT_DATA && this.currentTest?.state === 'failed') {
 				try {
 					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
 					allure.attachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
 				} catch (e) {
 					allure.attachment('No screenshot', 'Could not take a screenshot', 'text/plain');
+				}
+			}
+		},
+		async function saveReportportalAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && this.currentTest?.state === 'failed') {
+				try {
+					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
+					const attachment: { name: string; type: string; content: string } = {
+						name: 'screenshot.png',
+						type: 'image/png',
+						content: screenshot
+					};
+					rpApi.error('Screenshot on fail: ', attachment);
+				} catch (e) {
+					rpApi.error('Could not attach the screenshot');
 				}
 			}
 		},
@@ -103,8 +124,7 @@ exports.mochaHooks = {
 			if (!BASE_TEST_CONSTANTS.TS_DEBUG_MODE && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
 				// ensure that fired events done
 				await driverHelper.wait(5000);
-				await driverHelper.getDriver().quit();
-				Logger.info('Chrome driver session stopped.');
+				await driverHelper.quit();
 			}
 		}
 	]

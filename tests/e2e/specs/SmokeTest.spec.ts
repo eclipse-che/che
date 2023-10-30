@@ -20,7 +20,7 @@ import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { expect } from 'chai';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 
-suite('The SmokeTest userstory', function (): void {
+suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
