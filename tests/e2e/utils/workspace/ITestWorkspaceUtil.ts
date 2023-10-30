@@ -11,33 +11,33 @@
 import { WorkspaceStatus } from './WorkspaceStatus';
 
 export interface ITestWorkspaceUtil {
-	waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): void;
+	waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void>;
 
-	stopWorkspaceByName(workspaceName: string): void;
+	stopWorkspaceByName(workspaceName: string): Promise<void>;
 
 	/**
 	 * delete a workspace without stopping phase (similar with force deleting)
 	 */
-	deleteWorkspaceByName(workspaceName: string): void;
+	deleteWorkspaceByName(workspaceName: string): Promise<void>;
 
 	/**
 	 * stop workspace before deleting with checking stopping phase
 	 */
-	stopAndDeleteWorkspaceByName(workspaceName: string): void;
+	stopAndDeleteWorkspaceByName(workspaceName: string): Promise<void>;
 
 	/**
 	 * stop all run workspaces in the namespace
 	 */
-	stopAllRunningWorkspaces(): void;
+	stopAllRunningWorkspaces(): Promise<void>;
 
 	/**
 	 * stop all run workspaces, check statused and remove the workspaces
 	 */
-	stopAndDeleteAllRunningWorkspaces(): void;
+	stopAndDeleteAllRunningWorkspaces(): Promise<void>;
 
 	/**
 	 * stop all run workspaces without stopping and waiting for of 'Stopped' phase
 	 * Similar with 'force' deleting
 	 */
-	deleteAllWorkspaces(): void;
+	deleteAllWorkspaces(): Promise<void>;
 }

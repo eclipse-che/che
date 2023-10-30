@@ -101,8 +101,8 @@ suite('"Check workspace idle timeout" test', function (): void {
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	suiteTeardown('Stop and delete the workspace by API', function (): void {
-		testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+		await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {

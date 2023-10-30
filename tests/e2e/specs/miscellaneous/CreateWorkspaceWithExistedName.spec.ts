@@ -86,9 +86,9 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	suiteTeardown(`Stop and delete all created ${stackName} workspaces by API`, function (): void {
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(existedWorkspaceName);
+	suiteTeardown(`Stop and delete all created ${stackName} workspaces by API`, async function (): Promise<void> {
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(existedWorkspaceName);
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {

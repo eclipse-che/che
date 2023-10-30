@@ -103,7 +103,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {

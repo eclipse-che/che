@@ -94,8 +94,8 @@ suite(
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
 
-		suiteTeardown('Stop and delete the workspace by API', function (): void {
-			testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 
 		suiteTeardown('Unregister running workspace', function (): void {
