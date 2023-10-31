@@ -12,12 +12,14 @@ import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { expect } from 'chai';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const stackName: string = 'Java 11 with Quarkus';
 
@@ -26,11 +28,15 @@ suite(`The ${stackName} userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, func
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 	let projectSection: ViewSection;
 	const projectName: string = 'quarkus-quickstarts';
 
-	loginTests.loginIntoChe();
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
 
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName);
@@ -64,14 +70,16 @@ suite(`The ${stackName} userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, func
 		).not.undefined;
 	});
 
-	test('Stop the workspace', async function (): Promise<void> {
-		await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	test('Delete the workspace', async function (): Promise<void> {
-		await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 });

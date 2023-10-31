@@ -101,7 +101,7 @@ export class WorkspaceDetails {
 
 		await this.clickOnOpenButton(timeout);
 		await this.testProjectAndFileCheCode.waitWorkspaceReadinessForCheCodeEditor();
-		this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
+		await this.testWorkspaceUtil.waitWorkspaceStatus(workspaceName, WorkspaceStatus.STARTING);
 	}
 
 	async waitTabsPresence(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
