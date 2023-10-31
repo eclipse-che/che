@@ -117,7 +117,9 @@ exports.mochaHooks = {
 		async function deleteWorkspaceOnFailedTest(this: Mocha.Context): Promise<void> {
 			if (this.currentTest?.state === 'failed') {
 				if (BASE_TEST_CONSTANTS.DELETE_WORKSPACE_ON_FAILED_TEST && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
-					Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
+					Logger.trace(
+						'Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.'
+					);
 					const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 					await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
 				}
@@ -129,7 +131,7 @@ exports.mochaHooks = {
 		async function deleteAllWorkspacesOnFinish(): Promise<void> {
 			try {
 				if (BASE_TEST_CONSTANTS.DELETE_ALL_WORKSPACES_ON_RUN_FINISH && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
-					Logger.info(
+					Logger.trace(
 						'Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete all running workspace after test run with API.'
 					);
 					const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);

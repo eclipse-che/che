@@ -9,7 +9,7 @@
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
 import { expect } from 'chai';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -17,26 +17,33 @@ import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const predefinedNamespaceName: string = 'predefined-ns';
 	const stackName: string = 'Empty Workspace';
+	const userName: string = 'user';
 
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
 	suiteSetup(function (): void {
 		// create a predefined namespace for user using shell script and login into user dashboard
-		Logger.info('Test prerequisites:');
-		Logger.info(
+		Logger.debug('Test prerequisites:');
+		Logger.debug(
 			' (1) there is OCP user with username and user password that have been set in the TS_SELENIUM_OCP_USERNAME and TS_SELENIUM_OCP_PASSWORD variables'
 		);
-		Logger.info(' (2) "oc" client installed and logged into test OCP cluster with admin rights.');
+		Logger.debug(' (2) "oc" client installed and logged into test OCP cluster with admin rights.');
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
 		const predefinedProjectConfiguration: string =
 			'kind: Namespace\n' +
@@ -53,21 +60,15 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		shellExecutor.executeCommand(setEditRightsForUser);
 	});
 
-	suiteTeardown(function (): void {
-		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
-		try {
-			kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
-			kubernetesCommandLineToolsExecutor.deleteProject(predefinedNamespaceName);
-		} catch (e) {
-			Logger.error(`Cannot remove the predefined project: ${workspaceName}, please fix it manually: ${e}`);
-		}
-	});
-
 	suiteSetup('Login', async function (): Promise<void> {
-		const userName: string = 'user';
-		await loginTests.loginIntoChe(userName);
-		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME !== userName) {
-			await loginTests.logoutFromChe();
+		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME === userName) {
+			await loginTests.loginIntoChe();
+		} else {
+			try {
+				await loginTests.logoutFromChe();
+			} catch (e) {
+				Logger.trace('user was not logged in.');
+			}
 			await loginTests.loginIntoChe(userName);
 		}
 	});
@@ -87,6 +88,32 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
 		const ocDevWorkspaceOutput: string = kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration();
 		expect(ocDevWorkspaceOutput).includes(workspaceName);
+	});
+
+	suiteTeardown(function (): void {
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+		try {
+			kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+			kubernetesCommandLineToolsExecutor.deleteProject(predefinedNamespaceName);
+		} catch (e) {
+			Logger.error(`Cannot remove the predefined project: ${workspaceName}, please fix it manually: ${e}`);
+		}
+	});
+
+	suiteTeardown('Re-login with test user', async function (): Promise<void> {
+		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME !== userName) {
+			await loginTests.logoutFromChe();
+			await loginTests.loginIntoChe();
+		}
+	});
+
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+	});
+
+	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {
