@@ -15,7 +15,8 @@ import { inject, injectable } from 'inversify';
 import { Dashboard } from '../pageobjects/dashboard/Dashboard';
 import { IOcpLoginPage } from '../pageobjects/login/interfaces/IOcpLoginPage';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
-import { registerRunningWorkspace } from '../specs/MochaHooks';
+import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
+import { Logger } from '../utils/Logger';
 
 @injectable()
 export class LoginTests {
@@ -28,19 +29,28 @@ export class LoginTests {
 		@inject(CLASSES.Dashboard) private readonly dashboard: Dashboard
 	) {}
 
-	loginIntoChe(userName?: string, password?: string): void {
-		test('Login', async (): Promise<void> => {
+	async loginIntoChe(
+		userName?: string,
+		password?: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
+		Logger.debug();
+		try {
 			if (!(await this.browserTabsUtil.getCurrentUrl()).includes(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL)) {
 				await this.browserTabsUtil.navigateTo(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 			}
+			await this.dashboard.waitPage(timeout);
+			Logger.debug('user already logged in');
+		} catch (e) {
+			Logger.debug('try to login into application');
 			await this.productLoginPage.login(userName, password);
 			await this.browserTabsUtil.maximize();
 			await this.dashboard.waitStartingPageLoaderDisappearance();
-		});
+		}
 	}
 
 	loginIntoOcpConsole(): void {
-		test('Login into ocp console', async (): Promise<void> => {
+		suiteSetup('Login into ocp console', async (): Promise<void> => {
 			const openshiftConsoleUrl: string = BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace(
 				BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME(),
 				'console-openshift-console'
@@ -51,10 +61,7 @@ export class LoginTests {
 		});
 	}
 
-	logoutFromChe(): void {
-		test('Logout', async (): Promise<void> => {
-			await this.dashboard.logout();
-			registerRunningWorkspace('');
-		});
+	async logoutFromChe(): Promise<void> {
+		await this.dashboard.logout();
 	}
 }

@@ -12,7 +12,7 @@ import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES, TYPES } from '../../configs/inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { expect } from 'chai';
@@ -22,19 +22,20 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { StringUtil } from '../../utils/StringUtil';
 import { OcpApplicationPage } from '../../pageobjects/openshift/OcpApplicationPage';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
 	let ocpApplicationPage: OcpApplicationPage;
 
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
-	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
@@ -72,7 +73,13 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		await ocpApplicationPage.waitAndOpenEditSourceCodeIcon();
 	});
 
-	loginTests.loginIntoChe();
+	test('Login', async function (): Promise<void> {
+		try {
+			await dashboard.waitLoader(TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+		} catch (e) {
+			await loginTests.loginIntoChe();
+		}
+	});
 
 	test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -99,14 +106,19 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		).not.undefined;
 	});
 
-	test('Stop and delete the workspace by API', async function (): Promise<void> {
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
-	loginTests.logoutFromChe();
-
 	suiteTeardown('Delete project using ocp', function (): void {
+		kubernetesCommandLineToolsExecutor.workspaceName =
+			WorkspaceHandlingTests.getWorkspaceName() !== '' ? WorkspaceHandlingTests.getWorkspaceName() : 'spring-music';
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
 		kubernetesCommandLineToolsExecutor.deleteProject(projectName);
+	});
+
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
 	});
 });

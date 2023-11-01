@@ -9,7 +9,7 @@
  **********************************************************************/
 import { ViewSection } from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { e2eContainer } from '../../configs/inversify.config';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { registerRunningWorkspace } from '../MochaHooks';
@@ -19,6 +19,8 @@ import { expect } from 'chai';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellString } from 'shelljs';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 suite(
 	`Check possibility to manage containers within a workspace with kubedock and podman ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -27,6 +29,9 @@ suite(
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+
 		let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
 		let workspaceName: string = '';
 
@@ -48,7 +53,9 @@ suite(
 
 		const factoryUrl: string = 'https://github.com/l0rd/dockerfile-hello-world';
 
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 
 		test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
@@ -82,15 +89,17 @@ suite(
 			expect(output, 'Podman test script failed').contains('Hello from Kubedock!');
 		});
 
-		test('Stop the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(workspaceName);
+		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
 
-		test('Delete the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(workspaceName);
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 
-		loginTests.logoutFromChe();
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	}
 );

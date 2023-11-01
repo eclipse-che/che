@@ -28,7 +28,7 @@ import { StringUtil } from '../../utils/StringUtil';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { DriverHelper } from '../../utils/DriverHelper';
@@ -39,6 +39,7 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without PAT/OAuth setup ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -52,6 +53,7 @@ suite(
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -69,7 +71,9 @@ suite(
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 
 		test('Get number of previously created workspaces', async function (): Promise<void> {
 			await dashboard.clickWorkspacesButton();
@@ -95,8 +99,6 @@ suite(
 				const allCreatedWorkspacesNames: string[] = await workspaces.getAllCreatedWorkspacesNames();
 				expect(allCreatedWorkspacesNames).has.length(numberOfCreatedWorkspaces);
 			});
-
-			loginTests.logoutFromChe();
 		} else {
 			test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 				await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -241,16 +243,18 @@ suite(
 				expect(isCommitButtonDisabled).to.be.true;
 			});
 
-			test('Stop the workspace', async function (): Promise<void> {
-				await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+			suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+				await dashboard.openDashboard();
 				await browserTabsUtil.closeAllTabsExceptCurrent();
 			});
 
-			test('Delete the workspace', async function (): Promise<void> {
-				await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+			suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+				await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 			});
-
-			loginTests.logoutFromChe();
 		}
+
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	}
 );

@@ -41,7 +41,9 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
 
-	loginTests.loginIntoChe();
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
 
 	test('Create a workspace using a parent', async function (): Promise<void> {
 		const factoryUrl: string = `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/dashboard/#https://github.com/testsfactory/parentDevfile`;
@@ -98,10 +100,13 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		expect(envList).contains('DEVFILE_ENV_VAR=true').and.contains('PARENT_ENV_VAR=true');
 	});
 
-	test('Stop and delete the workspace by API', async function (): Promise<void> {
+	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-		testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 });
