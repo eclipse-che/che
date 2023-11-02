@@ -42,12 +42,15 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 					button: By.xpath('//div[@class="monaco-dialog-box"]//a[@class="monaco-button monaco-text-button"]')
 				},
 				ScmView: {
-					actionConstructor: (title: string): By => By.xpath(`.//a[@title="${title}"]`)
+					actionConstructor: (title: string): By => By.xpath(`.//a[@title='${title}']`)
 				}
 			},
 			extras: {
 				ExtensionsViewSection: {
 					requireReloadButton: By.xpath('//a[text()="Reload Required"]')
+				},
+				TreeItem: {
+					projectFolderItem: By.xpath('.//div[contains(@class, "rootfolder-icon projects-name-dir")]')
 				}
 			}
 		};

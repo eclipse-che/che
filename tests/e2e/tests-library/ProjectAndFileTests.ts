@@ -46,12 +46,6 @@ export class ProjectAndFileTests {
 		Logger.debug();
 		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
 		const workbench: Workbench = new Workbench();
-		await workbench.click();
-
-		await this.driverHelper.waitAndClick(
-			this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
-			TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-		);
 
 		try {
 			await workbench.click();

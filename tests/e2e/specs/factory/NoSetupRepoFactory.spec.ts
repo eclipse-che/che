@@ -86,7 +86,7 @@ suite(
 		});
 
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
-			test(`Check that workspace cannot be created without OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
+			test(`Check that workspace cannot be created without PAT/OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
 				await dashboard.waitLoader();
 				const loaderAlert: string = await dashboard.getLoaderAlert();
 				expect(loaderAlert).to.contain('Cause: Could not reach devfile at');
