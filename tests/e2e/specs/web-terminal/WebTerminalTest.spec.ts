@@ -36,17 +36,21 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		await ocpMainPage.openWebTerminal();
 	});
 
-	test('Check username is correct', async function (): Promise<void> {
-		const userUid = shellExecutor.executeCommand('oc get user $(oc whoami) -o jsonpath={.metadata.uid}').replace(/\n/g, '');
+	test('Check username is correct', function (): void {
+		const userUid: string = shellExecutor.executeCommand('oc get user $(oc whoami) -o jsonpath={.metadata.uid}').replace(/\n/g, '');
 
 		// label selector for Web Terminal workspaces owned by the currently-logged in user
-		const labelSelector = 'console.openshift.io/terminal=true,controller.devfile.io/creator=' + userUid;
+		const labelSelector: string = 'console.openshift.io/terminal=true,controller.devfile.io/creator=' + userUid;
 		// namespace of this users web terminal
-		const namespace = shellExecutor.executeCommand(`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].metadata.namespace}'`);
+		const namespace: string = shellExecutor.executeCommand(
+			`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].metadata.namespace}'`
+		);
 		// devWorkspace ID for this users web terminal
-		const termDwId = shellExecutor.executeCommand(`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].status.devworkspaceId}'`);
+		const termDwId: string = shellExecutor.executeCommand(
+			`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].status.devworkspaceId}'`
+		);
 		// use oc exec to run oc whoami inside this user's terminal
-		const user = shellExecutor
+		const user: string = shellExecutor
 			.executeCommand(`oc exec -n ${namespace} deploy/${termDwId} -c web-terminal-tooling -- oc whoami`)
 			.replace(/\n/g, '');
 		// above should output current user's username:
