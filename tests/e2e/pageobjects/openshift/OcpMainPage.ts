@@ -89,7 +89,7 @@ export class OcpMainPage {
 
 		await this.waitOpenMainPage();
 		await this.driverHelper.waitAndClick(OcpMainPage.WEB_TERMINAL_BUTTON);
-		await this.driverHelper.waitPresence(OcpMainPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+		await this.driverHelper.waitPresence(OcpMainPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_ABSENCE_TIMEOUT);
 	}
 
 	async typeToWebTerminal(text: string): Promise<void> {
