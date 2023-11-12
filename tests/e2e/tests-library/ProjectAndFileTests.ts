@@ -15,7 +15,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-import { SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { SideBarView, SingleScmProvider, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -55,6 +55,26 @@ export class ProjectAndFileTests {
 			);
 		} catch (e) {
 			Logger.info('Second welcome content dialog box was not shown');
+		}
+	}
+
+	async manageWorkspaceTrust(scmProvider: SingleScmProvider): Promise<void> {
+		Logger.debug();
+
+		if (JSON.stringify(scmProvider) === 'undefined') {
+			try {
+				await this.driverHelper.waitAndClick(
+					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
+					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				);
+				await this.driverHelper.waitAndClick(
+					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				);
+			} catch (err) {
+				Logger.error(`Workspace trust dialog box was not shown: ${err}`);
+				throw err;
+			}
 		}
 	}
 
