@@ -61,7 +61,7 @@ export class ProjectAndFileTests {
 	async manageWorkspaceTrust(scmProvider: SingleScmProvider): Promise<void> {
 		Logger.debug();
 
-		if (JSON.stringify(scmProvider) === 'undefined') {
+		if (JSON.stringify(scmProvider) === 'undefined, ') {
 			try {
 				await this.driverHelper.waitAndClick(
 					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
