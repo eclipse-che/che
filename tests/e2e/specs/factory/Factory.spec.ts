@@ -128,11 +128,11 @@ suite(
 			const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
 			Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
 			await sourceControl.openView();
-			await projectAndFileTests.performTrustAuthorDialog();
 			const scmView: NewScmView = new NewScmView();
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
 			[scmProvider, ...rest] = await scmView.getProviders();
 			await projectAndFileTests.manageWorkspaceTrust(scmProvider);
+			[scmProvider, ...rest] = await scmView.getProviders();
 			Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 		});
 
