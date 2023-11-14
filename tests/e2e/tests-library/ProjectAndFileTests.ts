@@ -60,8 +60,7 @@ export class ProjectAndFileTests {
 
 	async manageWorkspaceTrust(scmProvider: SingleScmProvider): Promise<void> {
 		Logger.debug();
-
-		if (JSON.stringify(scmProvider) === 'undefined, ') {
+		if (scmProvider === undefined) {
 			try {
 				await this.driverHelper.waitAndClick(
 					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
@@ -69,6 +68,10 @@ export class ProjectAndFileTests {
 				);
 				await this.driverHelper.waitAndClick(
 					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				);
+				await this.driverHelper.waitAndClick(
+					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).modifiedFile,
 					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
 				);
 			} catch (err) {
