@@ -58,6 +58,10 @@ export class ProjectAndFileTests {
 		}
 	}
 
+	/**
+	 * manage to 'Trusted' Workspace Mode, when the trust dialog does not appear
+	 * @param scmProvider SingleScmProvider object
+	 */
 	async manageWorkspaceTrust(scmProvider: SingleScmProvider): Promise<void> {
 		Logger.debug();
 		if (scmProvider === undefined) {
@@ -75,7 +79,7 @@ export class ProjectAndFileTests {
 					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
 				);
 			} catch (err) {
-				Logger.error(`Workspace trust dialog box was not shown: ${err}`);
+				Logger.error(`Manage Workspace Trust box was not shown: ${err}`);
 				throw err;
 			}
 		}
