@@ -51,6 +51,13 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				TreeItem: {
 					projectFolderItem: By.xpath('.//div[contains(@class, "rootfolder-icon projects-name-dir")]')
+				},
+				ScmView: {
+					manageWorkspaceTrust: By.xpath('.//a[@class="monaco-button monaco-text-button"]'),
+					modifiedFile: By.xpath('//div[@class="monaco-list-row" and contains(@aria-label, "Modified")]')
+				},
+				Workbench: {
+					workspaceTrustButton: By.xpath('//a[@role="button" and text()="Trust"]')
 				}
 			}
 		};
