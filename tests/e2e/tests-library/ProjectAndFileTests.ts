@@ -15,7 +15,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-import { SideBarView, SingleScmProvider, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -59,29 +59,28 @@ export class ProjectAndFileTests {
 	}
 
 	/**
-	 * manage to 'Trusted' Workspace Mode, when the trust dialog does not appear
-	 * @param scmProvider SingleScmProvider object
+	 * manage to 'Trusted' Workspace Mode, when the trust author dialog does not appear
+	 * the "Manage Workspace Trust" box is appeared in Source Control View
 	 */
-	async manageWorkspaceTrust(scmProvider: SingleScmProvider): Promise<void> {
+	async performManageWorkspaceTrustBox(): Promise<void> {
 		Logger.debug();
-		if (scmProvider === undefined) {
-			try {
-				await this.driverHelper.waitAndClick(
-					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
-					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-				);
-				await this.driverHelper.waitAndClick(
-					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
-					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-				);
-				await this.driverHelper.waitAndClick(
-					(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).modifiedFile,
-					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-				);
-			} catch (err) {
-				Logger.error(`Manage Workspace Trust box was not shown: ${err}`);
-				throw err;
-			}
+
+		try {
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).modifiedFile,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+		} catch (err) {
+			Logger.error(`Manage Workspace Trust box was not shown: ${err}`);
+			throw err;
 		}
 	}
 
