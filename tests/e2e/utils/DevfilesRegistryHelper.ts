@@ -12,7 +12,7 @@ import { Logger } from './Logger';
 import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
 import { injectable } from 'inversify';
-import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
+import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
 
 @injectable()
 export class DevfilesRegistryHelper {
@@ -64,11 +64,12 @@ export class DevfilesRegistryHelper {
 		} else if (isInbuilt) {
 			{
 				const content: any[any] = await this.getInbuiltDevfilesRegistryContent(sampleNamePatterns);
+				const devfileRegistryPrefix: string =
+					BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT
+						? BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/devfile-registry'
+						: '';
 				for (const sample of content) {
-					const linkToDevWorkspaceYaml: any =
-						BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL +
-						'/devfile-registry' +
-						sample.links.devWorkspaces['che-incubator/che-code/latest'];
+					const linkToDevWorkspaceYaml: any = `${devfileRegistryPrefix}${sample.links.devWorkspaces['che-incubator/che-code/latest']}`;
 					devfileSamples.push({
 						name: sample.displayName,
 						devWorkspaceConfigurationString: await this.getContent(linkToDevWorkspaceYaml)
@@ -97,9 +98,19 @@ export class DevfilesRegistryHelper {
 		return content;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async getContent(url: string, headers?: object): Promise<AxiosResponse> {
 		Logger.trace(`${url}`);
-
+		if (SUPPORTED_DEVFILE_REGISTRIES.TS_GIT_API_AUTH_TOKEN.length !== 0) {
+			/**
+			 * if we use - https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/ URL
+			 * for generating devfiles we can get a problem with rate limits to GitHub API,
+			 * but we can pass auth. token for increase the limit and avoiding problems
+			 */
+			headers = {
+				headers: { Authorization: SUPPORTED_DEVFILE_REGISTRIES.TS_GIT_API_AUTH_TOKEN }
+			};
+		}
 		let response: AxiosResponse | undefined;
 		try {
 			response = await axios.get(url, headers);
