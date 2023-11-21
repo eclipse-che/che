@@ -63,13 +63,15 @@ export const BASE_TEST_CONSTANTS: {
 	 * application name (DevSpaces or Che)
 	 */
 	TESTING_APPLICATION_NAME: (): string => {
-		return BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0
-			? BASE_TEST_CONSTANTS.TEST_NAMESPACE
-			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
-			? 'admin-devspaces'
-			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
-			? 'che'
-			: 'admin-che';
+		if (BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
+			return BASE_TEST_CONSTANTS.TEST_NAMESPACE;
+		} else if (BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')) {
+			return 'admin-devspaces';
+		} else if (BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')) {
+			return 'che';
+		} else {
+			return 'admin-che';
+		}
 	},
 
 	/**
