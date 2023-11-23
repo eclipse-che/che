@@ -18,9 +18,14 @@ export enum KubernetesCommandLineTool {
 export const SUPPORTED_DEVFILE_REGISTRIES: {
 	INBUILT_APPLICATION_DEVFILE_REGISTRY_URL: () => string;
 	GIT_HUB_CHE_DEVFILE_REGISTRY_URL: string;
+	TS_GIT_API_AUTH_TOKEN: string;
 } = {
 	INBUILT_APPLICATION_DEVFILE_REGISTRY_URL: (): string => `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/devfile-registry/devfiles/`,
-	GIT_HUB_CHE_DEVFILE_REGISTRY_URL: 'https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/'
+	GIT_HUB_CHE_DEVFILE_REGISTRY_URL: 'https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/',
+	/**
+	 * gitHub has a rate limit for unauthorized requests to GitHub API. We can prevent this problems using authorization token
+	 */
+	TS_GIT_API_AUTH_TOKEN: process.env.TS_GIT_API_AUTH_TOKEN || ''
 };
 export const API_TEST_CONSTANTS: {
 	TS_API_TEST_DEV_WORKSPACE_LIST: string | undefined;

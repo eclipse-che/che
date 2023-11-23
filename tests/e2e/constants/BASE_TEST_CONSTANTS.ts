@@ -32,6 +32,7 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
 	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
 	TESTING_APPLICATION_NAME: () => string;
+	TEST_NAMESPACE: string;
 } = {
 	/**
 	 * base URL of the application which should be checked
@@ -54,14 +55,23 @@ export const BASE_TEST_CONSTANTS: {
 	TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT || '',
 
 	/**
+	 * openshift project or k8s namespace which is used by test
+	 */
+	TEST_NAMESPACE: process.env.TEST_NAMESPACE || '',
+
+	/**
 	 * application name (DevSpaces or Che)
 	 */
 	TESTING_APPLICATION_NAME: (): string => {
-		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
-			? 'devspaces'
-			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
-			? 'che'
-			: 'default';
+		if (BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
+			return BASE_TEST_CONSTANTS.TEST_NAMESPACE;
+		} else if (BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')) {
+			return 'admin-devspaces';
+		} else if (BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')) {
+			return 'che';
+		} else {
+			return 'admin-che';
+		}
 	},
 
 	/**

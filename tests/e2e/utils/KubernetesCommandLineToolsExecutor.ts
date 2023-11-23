@@ -51,7 +51,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 			if (applicationName === 'default') {
 				this._namespace = applicationName;
 			} else {
-				this._namespace = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-' + applicationName;
+				this._namespace = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + applicationName;
 			}
 		}
 		return this._namespace;
