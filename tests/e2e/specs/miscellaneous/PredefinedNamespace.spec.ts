@@ -9,33 +9,25 @@
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
 import { expect } from 'chai';
-import { CLASSES, TYPES } from '../../configs/inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { Logger } from '../../utils/Logger';
-import { LoginTests } from '../../tests-library/LoginTests';
-import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
+import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
 
 suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const predefinedNamespaceName: string = 'predefined-ns';
-	const stackName: string = 'Empty Workspace';
+	const workspaceName: string = 'empty-ws';
+	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const userName: string = 'user';
-
-	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
+	let devfileContext: DevfileContext;
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
-	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
 	suiteSetup(function (): void {
 		// create a predefined namespace for user using shell script and login into user dashboard
@@ -59,33 +51,36 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		const setEditRightsForUser: string = `oc adm policy add-role-to-user edit user -n ${predefinedNamespaceName}`;
 		shellExecutor.executeCommand(setEditRightsForUser);
 	});
-
+	// generate empty workspace DevFile and create it through oc client under a regular user
 	suiteSetup('Login', async function (): Promise<void> {
-		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME === userName) {
-			await loginTests.loginIntoChe();
-		} else {
-			try {
-				await loginTests.logoutFromChe();
-			} catch (e) {
-				Logger.trace('user was not logged in.');
-			}
-			await loginTests.loginIntoChe(userName);
-		}
+		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
+		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
+		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
+			devfileContent
+		});
+		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
+		const devWorkspaceConfigurationYamlString: string =
+			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
+		kubernetesCommandLineToolsExecutor.applyWithoutNamespace(devWorkspaceConfigurationYamlString);
 	});
-	// create the Empty workspace using CHE Dashboard
-	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
-		await workspaceHandlingTests.createAndOpenWorkspace(stackName);
+
+	// verify that just created workspace is available for the dedicated user
+	test('Validate the created workspace is present in predefined namespace', function (): void {
+		const expectedProject: string = shellExecutor.executeArbitraryShellScript('oc get projects');
+		expect(expectedProject).contains(predefinedNamespaceName);
 	});
-	test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
-		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+
+	// make sure that the generated devspace has been created in the predefined namespace
+	test('Validate the created workspace is present in predefined namespace', function (): void {
+		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
+		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
+		// relogin under the admin user (because regular user does not have permissions for getting pod states)
+		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
 	});
 
 	// verify that just created workspace with unique name is present in the predefined namespace
 	test('Validate the created workspace is present in predefined namespace', function (): void {
-		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
-		registerRunningWorkspace(workspaceName);
-		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
-		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
 		const ocDevWorkspaceOutput: string = kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration();
 		expect(ocDevWorkspaceOutput).includes(workspaceName);
 	});
@@ -93,30 +88,12 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	suiteTeardown(function (): void {
 		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
 		try {
+			// the test can failed under the regular user. Need login as admin for removing test namespace and DevSpaces.
+			kubernetesCommandLineToolsExecutor.loginToOcp('admin');
 			kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
 			kubernetesCommandLineToolsExecutor.deleteProject(predefinedNamespaceName);
 		} catch (e) {
 			Logger.error(`Cannot remove the predefined project: ${workspaceName}, please fix it manually: ${e}`);
 		}
-	});
-
-	suiteTeardown('Re-login with test user', async function (): Promise<void> {
-		if (OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME !== userName) {
-			await loginTests.logoutFromChe();
-			await loginTests.loginIntoChe();
-		}
-	});
-
-	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
-		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();
-	});
-
-	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
-		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
-	});
-
-	suiteTeardown('Unregister running workspace', function (): void {
-		registerRunningWorkspace('');
 	});
 });
