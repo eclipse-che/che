@@ -46,12 +46,14 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	}
 
 	get namespace(): string | undefined {
-		if (!this._namespace) {
+		if (BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
+			this._namespace = BASE_TEST_CONSTANTS.TEST_NAMESPACE;
+		} else if (!this._namespace) {
 			const applicationName: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();
 			if (applicationName === 'default') {
 				this._namespace = applicationName;
 			} else {
-				this._namespace = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + applicationName;
+				this._namespace = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-' + applicationName;
 			}
 		}
 		return this._namespace;
