@@ -66,8 +66,8 @@ export const BASE_TEST_CONSTANTS: {
 		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
 			? 'devspaces'
 			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
-			? 'che'
-			: 'default';
+			  ? 'che'
+			  : 'default';
 	},
 	/**
 	 * testing application version
