@@ -28,6 +28,7 @@ export class OcpMainPage {
 	private static readonly SKIP_TOUR_BUTTON: By = By.xpath('//*[text()="Skip tour"]');
 	private static readonly WEB_TERMINAL_BUTTON: By = By.xpath('//button[@data-quickstart-id="qs-masthead-cloudshell"]');
 	private static readonly WEB_TERMINAL_PAGE: By = By.xpath('//*[@class="xterm-helper-textarea"]');
+	private static readonly START_WT_COMMAND_LINE_TERMINAL_BUTTON: By = By.xpath('//*[@data-test-id="submit-button"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -89,6 +90,7 @@ export class OcpMainPage {
 
 		await this.waitOpenMainPage();
 		await this.driverHelper.waitAndClick(OcpMainPage.WEB_TERMINAL_BUTTON);
+		await this.driverHelper.waitAndClick(OcpMainPage.START_WT_COMMAND_LINE_TERMINAL_BUTTON);
 		await this.driverHelper.waitPresence(OcpMainPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_ABSENCE_TIMEOUT);
 	}
 
