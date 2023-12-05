@@ -34,7 +34,6 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-
 	let podName: string = '';
 
 	suiteSetup(function (): void {
@@ -58,7 +57,6 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	test('Check cloning of the test project', async function (): Promise<void> {
 		const expectedProjectItems: string[] = ['.devfile.yaml', 'parent.yaml', 'README.md', 'parentdevfile'];
 		const visibleContent: ViewSection = await projectAndFileTests.getProjectViewSession();
-
 		for (const expectedProjectItem of expectedProjectItems) {
 			const visibleItem: ViewItem | undefined = await projectAndFileTests.getProjectTreeItem(visibleContent, expectedProjectItem);
 			expect(visibleItem).not.undefined;
@@ -79,23 +77,23 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	});
 
 	test('Check expected containers in the parent POD', function (): void {
-		const getPodNameCommand: string = `${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pods --selector=controller.devfile.io/devworkspace_name=sample-using-parent --output jsonpath=\'{.items[0].metadata.name}\'`;
+		const getPodNameCommand: string = `${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pods -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --selector=controller.devfile.io/devworkspace_name=sample-using-parent --output jsonpath=\'{.items[0].metadata.name}\'`;
 
 		podName = shellExecutor.executeArbitraryShellScript(getPodNameCommand);
 		const containerNames: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} --output jsonpath=\'{.spec.containers[*].name}\'`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --output jsonpath=\'{.spec.containers[*].name}\'`
 		);
 		expect(containerNames).contains('tools').and.contains('che-gateway');
 
 		const initContainerName: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} --output jsonpath=\'{.spec.initContainers[].name}\'`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --output jsonpath=\'{.spec.initContainers[].name}\'`
 		);
 		expect(initContainerName).contains('che-code-injector');
 	});
 
 	test('Check expected environment variables', function (): void {
 		const envList: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} exec -i ${podName} -c tools -- sh -c env`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} -n admin-devspaces exec -i ${podName} -c tools -- sh -c env`
 		);
 		expect(envList).contains('DEVFILE_ENV_VAR=true').and.contains('PARENT_ENV_VAR=true');
 	});
