@@ -127,7 +127,7 @@ export const REPORTER_CONSTANTS: {
 	RP_ENDPOINT: (): string => {
 		return process.env.RP_ENDPOINT || REPORTER_CONSTANTS.RP_IS_LOCAL_SERVER
 			? 'http://localhost:8080/api/v1'
-			: 'https://reportportal-crw.apps.ocp-c1.prod.psi.redhat.com/api/v1';
+			: 'https://reportportal-wto.apps.ocp-c1.prod.psi.redhat.com/api/v1';
 	},
 
 	/**

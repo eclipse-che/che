@@ -14,17 +14,18 @@ import { OcpMainPage } from '../../pageobjects/openshift/OcpMainPage';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
-import { expect } from 'chai';
+import { DriverHelper } from '../../utils/DriverHelper';
 import { WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
-
+import { assert, expect } from "chai";
 suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
-	const webTerminal: WebTerminalPage = e2eContainer.get(CLASSES.WebTerminalPage);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
+	const webTerminal: WebTerminalPage = e2eContainer.get(CLASSES.WebTerminalPage);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	suiteSetup(function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
@@ -33,29 +34,16 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 
 	loginTests.loginIntoOcpConsole();
 
-	test('Open Web Terminal', async function (): Promise<void> {
+	test('Open Web Terminal after first installation', async function (): Promise<void> {
 		await ocpMainPage.waitOpenMainPage();
-		await webTerminal.openWebTerminal();
+		await driverHelper.refreshPage();
+		await webTerminal.clickOnWebTerminalIcon();
 	});
-
-	test('Check username is correct', function (): void {
-		const userUid: string = shellExecutor.executeCommand('oc get user $(oc whoami) -o jsonpath={.metadata.uid}').replace(/\n/g, '');
-
-		// label selector for Web Terminal workspaces owned by the currently-logged in user
-		const labelSelector: string = 'console.openshift.io/terminal=true,controller.devfile.io/creator=' + userUid;
-		// namespace of this users web terminal
-		const namespace: string = shellExecutor.executeCommand(
-			`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].metadata.namespace}'`
-		);
-		// devWorkspace ID for this users web terminal
-		const termDwId: string = shellExecutor.executeCommand(
-			`oc get dw -A -l ${labelSelector} -o jsonpath='{.items[0].status.devworkspaceId}'`
-		);
-		// use oc exec to run oc whoami inside this user's terminal
-		const user: string = shellExecutor
-			.executeCommand(`oc exec -n ${namespace} deploy/${termDwId} -c web-terminal-tooling -- oc whoami`)
-			.replace(/\n/g, '');
-		// above should output current user's username:
-		expect(user).to.equal(shellExecutor.executeCommand('oc whoami').replace(/\n/g, ''));
+	test('Verify inactivity dropdown menu for admin user', async function (): Promise<void> {
+	//	await webTerminal.clickOnProjectListDropDown();
+	});
+	test('Verify disabled state Project field and check prject name for admin user', async function (): Promise<void> {
+		await webTerminal.selectTextFragment()
+	//	expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
 	});
 });

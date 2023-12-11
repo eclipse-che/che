@@ -51,6 +51,7 @@ import { DevfilesRegistryHelper } from '../utils/DevfilesRegistryHelper';
 import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../utils/ShellExecutor';
+import { WebTerminalPage } from "../pageobjects/webterminal/WebTerminalPage";
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -84,7 +85,7 @@ e2eContainer.bind<DevfilesRegistryHelper>(CLASSES.DevfilesRegistryHelper).to(Dev
 e2eContainer.bind<KubernetesCommandLineToolsExecutor>(CLASSES.KubernetesCommandLineToolsExecutor).to(KubernetesCommandLineToolsExecutor);
 e2eContainer.bind<ShellExecutor>(CLASSES.ShellExecutor).to(ShellExecutor);
 e2eContainer.bind<ContainerTerminal>(CLASSES.ContainerTerminal).to(ContainerTerminal);
-
+e2eContainer.bind<WebTerminalPage>(CLASSES.WebTerminalPage).to(WebTerminalPage);
 e2eContainer.bind<Generator>(EXTERNAL_CLASSES.Generator).to(Generator);
 e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
 

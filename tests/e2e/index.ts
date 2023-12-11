@@ -40,6 +40,7 @@ export * from './pageobjects/login/openshift/RegularUserOcpCheLoginPage';
 export * from './pageobjects/openshift/OcpApplicationPage';
 export * from './pageobjects/openshift/OcpImportFromGitPage';
 export * from './pageobjects/openshift/OcpMainPage';
+export * from './pageobjects/webterminal/WebTerminalPage';
 export * from './tests-library/LoginTests';
 export * from './tests-library/ProjectAndFileTests';
 export * from './tests-library/WorkspaceHandlingTests';

@@ -26,9 +26,6 @@ export class OcpMainPage {
 	private static readonly SELECT_PROJECT_DROPDOWN: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
 	private static readonly PROJECT_FILTER_INPUT: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
 	private static readonly SKIP_TOUR_BUTTON: By = By.xpath('//*[text()="Skip tour"]');
-	private static readonly WEB_TERMINAL_BUTTON: By = By.xpath('//button[@data-quickstart-id="qs-masthead-cloudshell"]');
-	private static readonly WEB_TERMINAL_PAGE: By = By.xpath('//*[@class="xterm-helper-textarea"]');
-	private static readonly START_WT_COMMAND_LINE_TERMINAL_BUTTON: By = By.xpath('//*[@data-test-id="submit-button"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -83,22 +80,6 @@ export class OcpMainPage {
 		await this.driverHelper.waitAndClick(OcpMainPage.SELECT_PROJECT_DROPDOWN);
 		await this.driverHelper.enterValue(OcpMainPage.PROJECT_FILTER_INPUT, projectName);
 		await this.driverHelper.waitAndClick(this.getProjectDropdownItemLocator(projectName));
-	}
-
-	async openWebTerminal(): Promise<void> {
-		Logger.debug();
-
-		await this.waitOpenMainPage();
-		await this.driverHelper.waitAndClick(OcpMainPage.WEB_TERMINAL_BUTTON);
-		await this.driverHelper.waitAndClick(OcpMainPage.START_WT_COMMAND_LINE_TERMINAL_BUTTON);
-		await this.driverHelper.waitPresence(OcpMainPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_ABSENCE_TIMEOUT);
-	}
-
-	async typeToWebTerminal(text: string): Promise<void> {
-		Logger.debug();
-
-		await this.driverHelper.waitPresence(OcpMainPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
-		await this.driverHelper.typeToInvisible(OcpMainPage.WEB_TERMINAL_PAGE, text);
 	}
 
 	private getRoleLocator(role: string): By {
