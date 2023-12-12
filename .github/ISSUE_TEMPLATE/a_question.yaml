@@ -13,11 +13,11 @@ body:
         
         Useful Links:
         
-          - 📄  Documentation: https://www.eclipse.org/che/docs
+          - 📄  Documentation: https://eclipse.dev/che/docs
           - 📝  Contributing: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md
       
         💬  Eclipse Che has public chat on:
-          - Mattermost: https://mattermost.eclipse.org/eclipse/channels/eclipse-che
+          - Eclipse Cloud Dev Tools Slack: https://communityinviter.com/apps/ecd-tools/join-the-community
 
   - type: textarea
     id: summary
