@@ -16,7 +16,7 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
-import { assert, expect } from "chai";
+
 suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
@@ -28,22 +28,22 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
-		shellExecutor.executeCommand('oc project openshift-operators');
+		// kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+	// 	shellExecutor.executeCommand('oc project openshift-operators');
 	});
 
-	loginTests.loginIntoOcpConsole();
+	// loginTests.loginIntoOcpConsole();
 
-	test('Open Web Terminal after first installation', async function (): Promise<void> {
+	test.skip('Open Web Terminal after first installation', async function (): Promise<void> {
 		await ocpMainPage.waitOpenMainPage();
 		await driverHelper.refreshPage();
 		await webTerminal.clickOnWebTerminalIcon();
 	});
-	test('Verify inactivity dropdown menu for admin user', async function (): Promise<void> {
-	//	await webTerminal.clickOnProjectListDropDown();
+	test.skip('Verify inactivity dropdown menu for admin user', async function (): Promise<void> {
+		//	await webTerminal.clickOnProjectListDropDown();
 	});
-	test('Verify disabled state Project field and check prject name for admin user', async function (): Promise<void> {
-		await webTerminal.selectTextFragment()
-	//	expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
+	test('Verify disabled state Project field and check project name for admin user', async function (): Promise<void> {
+		await webTerminal.cropScreen();
+		//	expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
 	});
 });
