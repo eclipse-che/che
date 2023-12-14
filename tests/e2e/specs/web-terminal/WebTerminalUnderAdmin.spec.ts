@@ -40,10 +40,17 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		await webTerminal.clickOnWebTerminalIcon();
 	});
 	test('Verify inactivity dropdown menu for admin user', async function (): Promise<void> {
-	//	await webTerminal.clickOnProjectListDropDown();
+		await webTerminal.clickOnProjectListDropDown();
 	});
-	test('Verify disabled state Project field and check prject name for admin user', async function (): Promise<void> {
-		await webTerminal.selectTextFragment()
-	//	expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
+	test('Verify first started WTO widget and disabled state Project field under admin user', async function (): Promise<void> {
+		await webTerminal.waitTerminalWidget();
+		expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
+	});
+	test('Check starting Web Terminal under admin', async function (): Promise<void> {
+		const fileForVerificationTerminalCommands: string = 'result.txt';
+		await webTerminal.clickOnStartWebTerminalIcon();
+		await webTerminal.waitTerminalIsStarted();
+		await webTerminal.typeAndEnterIntoWebTerminal(`oc whoami > ${fileForVerificationTerminalCommands}`);
+
 	});
 });
