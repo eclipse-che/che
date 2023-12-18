@@ -16,24 +16,27 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
-import { assert, expect } from "chai";
+import { expect } from 'chai';
+import YAML from 'yaml';
+
 suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
 	const webTerminal: WebTerminalPage = e2eContainer.get(CLASSES.WebTerminalPage);
+	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
-	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const webterminalToolConatinerName: string = 'web-terminal-tooling';
+	const fileForVerificationTerminalCommands: string = 'result.txt';
 	suiteSetup(function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
-		shellExecutor.executeCommand('oc project openshift-operators');
+
 	});
 
 	loginTests.loginIntoOcpConsole();
-
 	test('Open Web Terminal after first installation', async function (): Promise<void> {
 		await ocpMainPage.waitOpenMainPage();
 		await driverHelper.refreshPage();
@@ -47,10 +50,43 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal('openshift-terminal');
 	});
 	test('Check starting Web Terminal under admin', async function (): Promise<void> {
-		const fileForVerificationTerminalCommands: string = 'result.txt';
+		kubernetesCommandLineToolsExecutor.namespace = await webTerminal.getAdminProjectName();
 		await webTerminal.clickOnStartWebTerminalIcon();
 		await webTerminal.waitTerminalIsStarted();
 		await webTerminal.typeAndEnterIntoWebTerminal(`oc whoami > ${fileForVerificationTerminalCommands}`);
+		const devWorkspaceYaml: string = shellExecutor.executeArbitraryShellScript(
+			`oc get dw -n ${kubernetesCommandLineToolsExecutor.namespace} -o yaml`
+		);
+		kubernetesCommandLineToolsExecutor.workspaceName = YAML.parse(devWorkspaceYaml).items[0].metadata.name;
+		kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
+		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
+			`cat /home/user/${fileForVerificationTerminalCommands}`,
+			webterminalToolConatinerName
+		);
+		expect(commandResult).contains('admin');
+	});
+	test('Verify help command under admin user', async function (): Promise<void> {
+		const helpCommandExpectedResult: string =
+			'oc         4.13.0          OpenShift CLI\n' +
+			'kubectl    1.26.1          Kubernetes CLI\n' +
+			'kustomize  4.5.7           Kustomize CLI (built-in to kubectl)\n' +
+			'helm       3.11.1          Helm CLI\n' +
+			'kn         1.9.2           KNative CLI\n' +
+			'tkn        0.30.1          Tekton CLI\n' +
+			'subctl     0.14.6          Submariner CLI\n' +
+			'odo        3.15.0          Red Hat OpenShift Developer CLI\n' +
+			'virtctl    0.59.2          KubeVirt CLI\n' +
+			'jq         1.6             jq';
+		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
+		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
+			`cat /home/user/${fileForVerificationTerminalCommands}`,
+			webterminalToolConatinerName
+		);
+		expect(commandResult).contains(helpCommandExpectedResult);
+	});
 
+	test('Verify help command under admin user', async function (): Promise<void> {
+		await webTerminal.typeAndEnterIntoWebTerminal('wtoctl set timeout 30s');
+		await webTerminal.waitTerminalInactivity();
 	});
 });

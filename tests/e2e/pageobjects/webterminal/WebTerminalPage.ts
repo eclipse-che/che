@@ -24,6 +24,8 @@ export class WebTerminalPage {
 	private static readonly START_WT_COMMAND_LINE_TERMINAL_BUTTON: By = By.css('button[data-test-id="submit-button"]');
 	private static readonly WEB_TERMINAL_PROJECT_SELECTION_DROPDOWN: By = By.css('input#form-input-namespace-field');
 	private static readonly WEB_TERMINAL_PROJECT_CANCEL_BUTTON: By = By.css('button[data-test-id="reset-button"]');
+	private static readonly TERMINAL_INACTIVITY_MESS: By = By.xpath('//div[text()="The terminal connection has closed."]');
+	private static readonly RESTART_BUTTON: By = By.xpath('//button[text()="Restart terminal"]');
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper
@@ -40,6 +42,13 @@ export class WebTerminalPage {
 	async clickOnStartWebTerminalIcon(): Promise<void> {
 		Logger.debug();
 		await this.driverHelper.waitAndClick(WebTerminalPage.START_WT_COMMAND_LINE_TERMINAL_BUTTON);
+	}
+	async getAdminProjectName(): Promise<string> {
+		Logger.debug();
+		return await this.driverHelper.waitAndGetValue(
+			By.css('input#form-input-namespace-field'),
+			TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL
+		);
 	}
 	async openWebTerminal(): Promise<void> {
 		Logger.debug();
@@ -99,5 +108,9 @@ export class WebTerminalPage {
 		await this.waitCancelButton();
 		await this.waitTimeoutButton();
 		await this.waitImageButton();
+	}
+	async waitTerminalInactivity(): Promise<void> {
+		await this.driverHelper.waitPresence(WebTerminalPage.TERMINAL_INACTIVITY_MESS, TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT);
+		await this.driverHelper.waitPresence(WebTerminalPage.RESTART_BUTTON);
 	}
 }
