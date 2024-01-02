@@ -24,6 +24,7 @@ export * from './utils/workspace/TestWorkspaceUtil';
 export * from './utils/workspace/WorkspaceStatus';
 export * from './pageobjects/dashboard/CreateWorkspace';
 export * from './pageobjects/dashboard/Dashboard';
+export * from './pageobjects/dashboard/UserPreferences';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetails';
 export * from './pageobjects/dashboard/Workspaces';
 export * from './pageobjects/git-providers/OauthPage';

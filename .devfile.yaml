@@ -6,18 +6,16 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
   name: che
-attributes:
-  controller.devfile.io/storage-type: ephemeral
 components:
 - name: devtools
   container:
     image: quay.io/mloriedo/universal-developer-image:ubi8-latest
     memoryLimit: 4G
     memoryRequest: 256Mi
-    cpuLimit: 500m
+    cpuLimit: '2'
     cpuRequest: 30m
 commands:
 - id: update-contributing

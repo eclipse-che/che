@@ -13,11 +13,11 @@ body:
         
         Useful Links:
         
-          - 📄  Documentation: https://www.eclipse.org/che/docs
+          - 📄  Documentation: https://eclipse.dev/che/docs
           - 📝  Contributing: https://github.com/eclipse/che/blob/master/CONTRIBUTING.md
       
         💬  Eclipse Che has public chat on:
-          - Mattermost: https://mattermost.eclipse.org/eclipse/channels/eclipse-che
+          - Eclipse Cloud Dev Tools Slack: https://communityinviter.com/apps/ecd-tools/join-the-community
 
   - type: textarea
     id: describe-bug
@@ -156,7 +156,7 @@ body:
         Please copy and paste any relevant log output.
         
         This will be automatically formatted into code, so no need for backticks
-      description: "How to collect logs: https://www.eclipse.org/che/docs/che-7/collecting-logs-using-chectl"
+      description: "How to collect logs: https://eclipse.dev/che/docs/stable/administration-guide/collecting-logs-using-chectl/"
       render: shell
 
   - type: textarea
