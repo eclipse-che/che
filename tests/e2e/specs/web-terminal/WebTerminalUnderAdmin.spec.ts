@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2023 Red Hat, Inc.
+ * copyright (c) 2024 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,11 +29,10 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 	);
 
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	const webterminalToolConatinerName: string = 'web-terminal-tooling';
+	const webTerminalToolContainerName: string = 'web-terminal-tooling';
 	const fileForVerificationTerminalCommands: string = 'result.txt';
 	suiteSetup(function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
-
 	});
 
 	loginTests.loginIntoOcpConsole();
@@ -61,7 +60,7 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
 		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
-			webterminalToolConatinerName
+			webTerminalToolContainerName
 		);
 		expect(commandResult).contains('admin');
 	});
@@ -80,7 +79,7 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
 		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
-			webterminalToolConatinerName
+			webTerminalToolContainerName
 		);
 		expect(commandResult).contains(helpCommandExpectedResult);
 	});
