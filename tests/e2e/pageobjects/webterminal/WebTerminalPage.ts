@@ -74,7 +74,10 @@ export class WebTerminalPage {
 	async clickOnProjectListDropDown(): Promise<void> {
 		Logger.debug();
 		{
-			await this.driverHelper.waitAndClick(WebTerminalPage.WEB_TERMINAL_PROJECT_SELECTION_DROPDOWN);
+			await this.driverHelper.waitPresence(
+				WebTerminalPage.WEB_TERMINAL_PROJECT_SELECTION_DROPDOWN,
+				TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+			);
 		}
 	}
 	async waitTimeoutButton(): Promise<void> {

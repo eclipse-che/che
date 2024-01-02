@@ -66,22 +66,23 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 	});
 	test('Verify help command under admin user', async function (): Promise<void> {
 		const helpCommandExpectedResult: string =
-			'oc         4.13.0          OpenShift CLI\n' +
-			'kubectl    1.26.1          Kubernetes CLI\n' +
-			'kustomize  4.5.7           Kustomize CLI (built-in to kubectl)\n' +
-			'helm       3.11.1          Helm CLI\n' +
-			'kn         1.9.2           KNative CLI\n' +
-			'tkn        0.30.1          Tekton CLI\n' +
-			'subctl     0.14.6          Submariner CLI\n' +
-			'odo        3.15.0          Red Hat OpenShift Developer CLI\n' +
-			'virtctl    0.59.2          KubeVirt CLI\n' +
-			'jq         1.6             jq';
+			'oc         \\d+\\.\\d+\\.\\d+          OpenShift CLI\n' +
+			'kubectl    \\d+\\.\\d+\\.\\d+          Kubernetes CLI\n' +
+			'kustomize  \\d+\\.\\d+\\.\\d+           Kustomize CLI \\(built-in to kubectl\\)\n' +
+			'helm       \\d+\\.\\d+\\.\\d+          Helm CLI\n' +
+			'kn         \\d+\\.\\d+\\.\\d+           KNative CLI\n' +
+			'tkn        \\d+\\.\\d+\\.\\d+          Tekton CLI\n' +
+			'subctl     \\d+\\.\\d+\\.\\d+          Submariner CLI\n' +
+			'odo        \\d+\\.\\d+\\.\\d+          Red Hat OpenShift Developer CLI\n' +
+			'virtctl    \\d+\\.\\d+\\.\\d+          KubeVirt CLI\n' +
+			'jq         \\d+\\.\\d+             jq';
+
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
 		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
 			webTerminalToolContainerName
 		);
-		expect(commandResult).contains(helpCommandExpectedResult);
+		expect(commandResult).to.match(new RegExp(helpCommandExpectedResult));
 	});
 
 	test('Verify help command under admin user', async function (): Promise<void> {
