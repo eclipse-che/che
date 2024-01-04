@@ -48,7 +48,8 @@ const CLASSES: any = {
 	KubernetesCommandLineToolsExecutor: 'KubernetesCommandLineToolsExecutor',
 	ShellExecutor: 'ShellExecutor',
 	ContainerTerminal: 'ContainerTerminal',
-	UserPreferences: 'UserPreferences'
+	UserPreferences: 'UserPreferences',
+	WebTerminalPage: 'WebTerminalPage'
 };
 
 const EXTERNAL_CLASSES: any = {

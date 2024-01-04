@@ -12,7 +12,7 @@ import { MOCHA_CONSTANTS } from './MOCHA_CONSTANTS';
 
 export const REPORTER_CONSTANTS: {
 	DELETE_SCREENCAST_IF_TEST_PASS: boolean;
-	RP_ENDPOINT(): string;
+	RP_ENDPOINT(): string | undefined;
 	RP_IS_LOCAL_SERVER: boolean;
 	REPORTERS_ENABLED(): string;
 	RP_API_KEY: string;
@@ -124,14 +124,18 @@ export const REPORTER_CONSTANTS: {
 	/**
 	 * url with endpoints where ReportPortal is
 	 */
-	RP_ENDPOINT: (): string => {
-		return process.env.RP_ENDPOINT || REPORTER_CONSTANTS.RP_IS_LOCAL_SERVER
-			? 'http://localhost:8080/api/v1'
-			: 'https://reportportal-crw.apps.ocp-c1.prod.psi.redhat.com/api/v1';
+	RP_ENDPOINT: (): string | undefined => {
+		if (process.env.RP_ENDPOINTRP_IS_LOCAL_SERVER) {
+			return 'http://localhost:8080/api/v1';
+		}
+		if (process.env.RP_ENDPOINT !== '') {
+			return process.env.RP_ENDPOINT;
+		}
+		return 'https://reportportal-crw.apps.ocp-c1.prod.psi.redhat.com/api/v1';
 	},
 
 	/**
-	 * use personal project to save launch, if false launch will be send to devspaces or che project, true by default
+	 * use personal project to save launch, if false launch will be sent to devspaces or che project, true by default
 	 */
 	RP_USE_PERSONAL: process.env.RP_USE_PERSONAL !== 'false',
 

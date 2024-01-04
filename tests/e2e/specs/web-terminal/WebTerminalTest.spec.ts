@@ -15,9 +15,11 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { expect } from 'chai';
+import { WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
 
 suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const webTerminal: WebTerminalPage = e2eContainer.get(CLASSES.WebTerminalPage);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
@@ -33,7 +35,7 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 
 	test('Open Web Terminal', async function (): Promise<void> {
 		await ocpMainPage.waitOpenMainPage();
-		await ocpMainPage.openWebTerminal();
+		await webTerminal.openWebTerminal();
 	});
 
 	test('Check username is correct', function (): void {
