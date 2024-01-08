@@ -1,12 +1,12 @@
-FROM selenium/standalone-chrome:114.0
+FROM selenium/standalone-chrome:120.0
 
 ENV DISPLAY=':20'
 
 USER root
 
 RUN apt-get update && apt-get install && \
-    apt-get install -y ftp x11vnc ffmpeg libvpx6 && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && \
+    apt-get install -y ftp x11vnc ffmpeg libvpx7 && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
     apt-get install -y nodejs && \
     npm install -g typescript && \
     node -v
