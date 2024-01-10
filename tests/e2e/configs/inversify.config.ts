@@ -52,7 +52,7 @@ import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/m
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../utils/ShellExecutor';
 import { UserPreferences } from '../pageobjects/dashboard/UserPreferences';
-import { WebTerminalPage } from "../pageobjects/webterminal/WebTerminalPage";
+import { WebTerminalPage } from '../pageobjects/webterminal/WebTerminalPage';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
