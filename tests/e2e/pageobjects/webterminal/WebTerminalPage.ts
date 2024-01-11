@@ -15,6 +15,11 @@ import { By, Key } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
+export enum TimeUnits {
+	Seconds = 'Seconds',
+	Minutes = 'Minutes',
+	Hours = 'Hours'
+}
 @injectable()
 export class WebTerminalPage {
 	private static readonly TIMEOUT_BUTTON: By = By.xpath('//button[(text()="Timeout")]');
@@ -24,8 +29,18 @@ export class WebTerminalPage {
 	private static readonly START_WT_COMMAND_LINE_TERMINAL_BUTTON: By = By.css('button[data-test-id="submit-button"]');
 	private static readonly WEB_TERMINAL_PROJECT_SELECTION_DROPDOWN: By = By.css('input#form-input-namespace-field');
 	private static readonly WEB_TERMINAL_PROJECT_CANCEL_BUTTON: By = By.css('button[data-test-id="reset-button"]');
-	private static readonly TERMINAL_INACTIVITY_MESS: By = By.xpath('//div[text()="The terminal connection has closed."]');
+	private static readonly TERMINAL_INACTIVITY_MESS: By = By.xpath('//div[contains(text(),"The terminal connection has closed")]');
 	private static readonly RESTART_BUTTON: By = By.xpath('//button[text()="Restart terminal"]');
+	private static readonly PROJECT_NAMESPACE_DROP_DAWN: By = By.css('button#form-ns-dropdown-namespace-field');
+	private static readonly PROJECT_SELECTION_FIELD: By = By.css('input[data-test-id="dropdown-text-filter"]');
+	private static readonly PROJECT_NAME_FIELD: By = By.css('input#form-input-newNamespace-field');
+	private static readonly TIMEOUT_INPUT: By = By.css(
+		'input[aria-describedby="form-resource-limit-advancedOptions-timeout-limit-field-helper"]'
+	);
+	private static readonly INCREMENT_TIMEOUT_BTN: By = By.css('button[data-test-id="Decrement"]');
+	private static readonly DECREMENT_TIMEOUT_BTN: By = By.css('button[data-test-id="Increment');
+	private static readonly TIME_UNIT_DROP_DAWN: By = By.css('div.request-size-input__unit button');
+
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper
@@ -39,7 +54,7 @@ export class WebTerminalPage {
 		Logger.debug();
 		await this.driverHelper.waitPresence(WebTerminalPage.WEB_TERMINAL_PAGE, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_ABSENCE_TIMEOUT);
 	}
-	async clickOnStartWebTerminalIcon(): Promise<void> {
+	async clickOnStartWebTerminalButton(): Promise<void> {
 		Logger.debug();
 		await this.driverHelper.waitAndClick(WebTerminalPage.START_WT_COMMAND_LINE_TERMINAL_BUTTON);
 	}
@@ -53,7 +68,7 @@ export class WebTerminalPage {
 	async openWebTerminal(): Promise<void> {
 		Logger.debug();
 		await this.clickOnWebTerminalIcon();
-		await this.clickOnStartWebTerminalIcon();
+		await this.clickOnStartWebTerminalButton();
 		await this.waitTerminalIsStarted();
 	}
 	async waitDisabledProjectFieldAndGetProjectName(): Promise<string> {
@@ -112,8 +127,55 @@ export class WebTerminalPage {
 		await this.waitTimeoutButton();
 		await this.waitImageButton();
 	}
-	async waitTerminalInactivity(): Promise<void> {
-		await this.driverHelper.waitPresence(WebTerminalPage.TERMINAL_INACTIVITY_MESS, TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT);
-		await this.driverHelper.waitPresence(WebTerminalPage.RESTART_BUTTON);
+	async waitTerminalInactivity(customTimeout?: number): Promise<void> {
+		await this.driverHelper.waitVisibility(
+			WebTerminalPage.TERMINAL_INACTIVITY_MESS,
+			TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT || customTimeout
+		);
+
+		await this.driverHelper.waitVisibility(WebTerminalPage.RESTART_BUTTON);
+	}
+	async waitWebTerminalProjectNameField(): Promise<void> {
+		await this.driverHelper.waitPresence(WebTerminalPage.PROJECT_NAMESPACE_DROP_DAWN);
+	}
+	async typeProjectName(projectName: string): Promise<void> {
+		await this.waitWebTerminalProjectNameField();
+		await this.driverHelper.type(WebTerminalPage.PROJECT_NAME_FIELD, projectName, TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+	}
+	async openProjectDropDawn(): Promise<void> {
+		await this.driverHelper.waitAndClick(WebTerminalPage.PROJECT_NAMESPACE_DROP_DAWN);
+	}
+	async typeProjectNameForSelecting(projectName: string): Promise<void> {
+		await this.driverHelper.type(WebTerminalPage.PROJECT_SELECTION_FIELD, projectName);
+	}
+
+	async selectProjectFromDropDawnList(projectName: string): Promise<void> {
+		await this.driverHelper.waitAndClick(By.xpath(`//span[@class="pf-c-menu__item-text" and text()="${projectName}"]`));
+	}
+
+	async findAndSelectProject(projectName: string): Promise<void> {
+		await this.openProjectDropDawn();
+		await this.typeProjectNameForSelecting(projectName);
+		await this.selectProjectFromDropDawnList(projectName);
+	}
+	async clickOnTimeoutButton(): Promise<void> {
+		await this.driverHelper.waitAndClick(WebTerminalPage.TIMEOUT_BUTTON);
+	}
+	async setTimeoutByEntering(timeValue: number): Promise<void> {
+		await this.driverHelper.type(WebTerminalPage.TIMEOUT_INPUT, timeValue.toString());
+	}
+	async clickOnPlusBtn(): Promise<void> {
+		await this.driverHelper.waitAndClick(WebTerminalPage.INCREMENT_TIMEOUT_BTN);
+	}
+
+	async clickOnMinutesBtn(): Promise<void> {
+		await this.driverHelper.waitAndClick(WebTerminalPage.DECREMENT_TIMEOUT_BTN);
+	}
+
+	async clickOnTimeUnitDropDown(): Promise<void> {
+		await this.driverHelper.waitAndClick(WebTerminalPage.TIME_UNIT_DROP_DAWN);
+	}
+	async selectTimeUnit(timeUnits: TimeUnits): Promise<void> {
+		await this.driverHelper.waitAndClick(By.xpath(`//button[@data-test-id='dropdown-menu' and text()='${timeUnits}']`));
 	}
 }
