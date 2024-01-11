@@ -21,7 +21,9 @@ export class UserPreferences {
 	private static readonly USER_PREFERENCES_PAGE: By = By.xpath('//h1[text()="User Preferences"]');
 
 	private static readonly CONTAINER_REGISTRIES_TAB: By = By.xpath('//button[text()="Container Registries"]');
+
 	private static readonly GIT_SERVICES_TAB: By = By.xpath('//button[text()="Git Services"]');
+	private static readonly GIT_SERVICES_REVOKE_BUTTON: By = By.xpath('//button[text()="Revoke"]');
 
 	private static readonly PAT_TAB: By = By.xpath('//button[text()="Personal Access Tokens"]');
 	private static readonly ADD_NEW_PAT_BUTTON: By = By.xpath('//button[text()="Add Personal Access Token"]');
@@ -30,6 +32,10 @@ export class UserPreferences {
 
 	private static readonly SSH_KEY_TAB: By = By.xpath('//button[text()="SSH Keys"]');
 	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Add SSH Key"]');
+
+	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Services"]');
+	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="warning-info-checkbox"]');
+	private static readonly DELETE_ITEM_BUTTON_ENABLED: By = By.xpath('//button[@data-testid="revoke-button" and not(@disabled)]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -67,6 +73,24 @@ export class UserPreferences {
 		await this.driverHelper.waitAndClick(UserPreferences.GIT_SERVICES_TAB);
 	}
 
+	async revokeGitService(servicesName: string): Promise<void> {
+		Logger.debug();
+
+		await this.selectListItem(servicesName);
+		await this.driverHelper.waitAndClick(UserPreferences.GIT_SERVICES_REVOKE_BUTTON);
+
+		await this.driverHelper.waitVisibility(UserPreferences.CONFIRMATION_WINDOW);
+		await this.driverHelper.waitAndClick(UserPreferences.DELETE_CONFIRMATION_CHECKBOX);
+		await this.driverHelper.waitAndClick(UserPreferences.DELETE_ITEM_BUTTON_ENABLED);
+		await this.driverHelper.waitDisappearance(this.getServicesListItemLocator(servicesName));
+	}
+
+	async selectListItem(servicesName: string): Promise<void> {
+		Logger.debug(`of the '${servicesName}' list item`);
+
+		await this.driverHelper.waitAndClick(this.getServicesListItemLocator(servicesName));
+	}
+
 	async openPatTab(): Promise<void> {
 		Logger.debug();
 
@@ -85,5 +109,9 @@ export class UserPreferences {
 
 		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
+	}
+
+	private getServicesListItemLocator(servicesName: string): By {
+		return By.xpath(`//tr[td[text()='${servicesName}']]//input`);
 	}
 }

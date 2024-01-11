@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2020-2023 Red Hat, Inc.
+ * copyright (c) 2020-2024 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,5 +24,8 @@ suite(`"Check User Preferences page" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT
 	test('Check user preferences page', async function (): Promise<void> {
 		await userPreferences.openUserPreferencesPage();
 		await userPreferences.checkTabsAvailability();
+
+		await userPreferences.openGitServicesTab();
+		await userPreferences.revokeGitService('GitHub');
 	});
 });

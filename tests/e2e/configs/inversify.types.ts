@@ -49,7 +49,8 @@ const CLASSES: any = {
 	ShellExecutor: 'ShellExecutor',
 	ContainerTerminal: 'ContainerTerminal',
 	UserPreferences: 'UserPreferences',
-	WebTerminalPage: 'WebTerminalPage'
+	WebTerminalPage: 'WebTerminalPage',
+	RevokeOauthPage: 'RevokeOauthPage'
 };
 
 const EXTERNAL_CLASSES: any = {
