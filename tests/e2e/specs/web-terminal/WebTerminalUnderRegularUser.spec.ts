@@ -61,6 +61,7 @@ suite(`Login to Openshift console and check WebTerminal ${BASE_TEST_CONSTANTS.TE
 
 	test('Check WebTerminal with creating new Openshift Project', async function (): Promise<void> {
 		kubernetesCommandLineToolsExecutor.namespace = testProjectName;
+		await webTerminal.typeProjectName(testProjectName);
 		await webTerminal.clickOnStartWebTerminalButton();
 		await webTerminal.waitTerminalIsStarted();
 		await webTerminal.typeAndEnterIntoWebTerminal(`oc whoami > ${fileForVerificationTerminalCommands}`);
