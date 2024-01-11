@@ -21,7 +21,7 @@ import { expect } from 'chai';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
-const stackName: string = 'Java 11 with Quarkus';
+const stackName: string = 'Quarkus REST API';
 
 suite(`The ${stackName} userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);

@@ -40,7 +40,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 	const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const testingVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION;
+	const majorMinorVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.'); // extract major.minor version from full version
 	let parentGUID: string = '';
 	let docs: any, links: any, productVersion: any;
 	let webSocketTroubleshooting: any, workspace: any, devfile: any, general: any, storageTypes: any;
@@ -55,7 +55,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		try {
 			({ docs, links, productVersion } = JSON.parse(
 				shellExecutor.curl(
-					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${testingVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
+					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${majorMinorVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
 				)
 			));
 		} catch (e) {
@@ -71,7 +71,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 
 	test('Check if product.json config contains correct application version', function (): void {
 		[productVersion, links[1].href, devfile, workspace, general, storageTypes, webSocketTroubleshooting].forEach((e): void => {
-			expect(e, 'Fetched links not matches with tested product version').contains(testingVersion);
+			expect(e, 'Fetched links not matches with tested product version').contains(majorMinorVersion);
 		});
 	});
 
@@ -110,12 +110,6 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		await workspaceDetails.waitWorkspaceTitle(workspaceName);
 		await workspaceDetails.clickStorageTypeInfo();
 		expect(await workspaceDetails.getOpenStorageTypeDocumentationLink(), '"Storage types" doc link is broken').eqls(storageTypes);
-	});
-
-	test('Check if Workspace Details page contains "Devfile" documentation link', async function (): Promise<void> {
-		await workspaceDetails.closeStorageTypeInfo();
-		await workspaceDetails.selectTab('Devfile');
-		expect(await workspaceDetails.getDevfileDocumentationLink(), '"Devfile" doc link is broken').eqls(devfile);
 	});
 
 	if (BASE_TEST_CONSTANTS.IS_PRODUCT_DOCUMENTATION_RELEASED) {

@@ -13,5 +13,5 @@ export const PLUGIN_TEST_CONSTANTS: { TS_SAMPLE_LIST: string } = {
 	 */
 	TS_SAMPLE_LIST:
 		process.env.TS_SAMPLE_LIST ||
-		'Node.js MongoDB,Node.js Express,Java 11 with Lombok,Java 11 with Quarkus,Python,.NET,C/C++,Go,PHP,Ansible'
+		'Node.js MongoDB,Node.js Express,Java Lombok,Quarkus REST API,Python,.NET,C/C++,Go,PHP,Ansible'
 };
