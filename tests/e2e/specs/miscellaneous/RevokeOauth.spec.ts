@@ -10,10 +10,9 @@
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 import { LoginTests } from '../../tests-library/LoginTests';
-import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 
-suite(`"Check User Preferences page" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+suite(`"Revoke OAuth" test`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
 
