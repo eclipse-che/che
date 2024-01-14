@@ -15,11 +15,16 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
+import { TimeUnits, WebTerminalPage } from '../../pageobjects/webterminal/WebTerminalPage';
 import { expect } from 'chai';
 import YAML from 'yaml';
+import { afterEach } from 'mocha';
+import { By } from 'selenium-webdriver';
 
-suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+suite(`Login to Openshift console and check WebTerminal ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+	const webTerminalToolContainerName: string = 'web-terminal-tooling';
+	const testProjectName: string = 'wto-under-regular-user-test';
+	const fileForVerificationTerminalCommands: string = 'result.txt';
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
 	const webTerminal: WebTerminalPage = e2eContainer.get(CLASSES.WebTerminalPage);
@@ -27,30 +32,36 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const defaultWTOProjectNameForAdmin: string = 'openshift-terminal';
+
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	const webTerminalToolContainerName: string = 'web-terminal-tooling';
-	const fileForVerificationTerminalCommands: string = 'result.txt';
 
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
 
 	suiteTeardown(function (): void {
-		shellExecutor.executeArbitraryShellScript(`oc delete dw --all -n ${defaultWTOProjectNameForAdmin}`);
+		kubernetesCommandLineToolsExecutor.deleteProject(testProjectName);
 	});
+
+	afterEach(function (): void {
+		try {
+			shellExecutor.executeArbitraryShellScript(`oc delete dw --all -n ${testProjectName}`);
+		} catch (e) {
+			console.log(`cannot delete the  ${testProjectName} under regular user:`, e);
+		}
+	});
+
 	loginTests.loginIntoOcpConsole();
-	test('Open Web Terminal after first installation', async function (): Promise<void> {
+
+	test('Open WebTerminal after first installation', async function (): Promise<void> {
 		await ocpMainPage.waitOpenMainPage();
 		await driverHelper.refreshPage();
 		await webTerminal.clickOnWebTerminalIcon();
 	});
-	test('Verify first started WTO widget and disabled state Project field under admin user', async function (): Promise<void> {
-		await webTerminal.waitTerminalWidget();
-		expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal(defaultWTOProjectNameForAdmin);
-	});
-	test('Check starting Web Terminal under admin', async function (): Promise<void> {
-		kubernetesCommandLineToolsExecutor.namespace = await webTerminal.getAdminProjectName();
+
+	test('Check WebTerminal with creating new Openshift Project', async function (): Promise<void> {
+		kubernetesCommandLineToolsExecutor.namespace = testProjectName;
+		await webTerminal.typeProjectName(testProjectName);
 		await webTerminal.clickOnStartWebTerminalButton();
 		await webTerminal.waitTerminalIsStarted();
 		await webTerminal.typeAndEnterIntoWebTerminal(`oc whoami > ${fileForVerificationTerminalCommands}`);
@@ -63,31 +74,18 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
 			webTerminalToolContainerName
 		);
-		expect(commandResult).contains('admin');
-	});
-	test('Verify help command under admin user', async function (): Promise<void> {
-		const helpCommandExpectedResult: string =
-			'oc         \\d+\\.\\d+\\.\\d+          OpenShift CLI\n' +
-			'kubectl    \\d+\\.\\d+\\.\\d+          Kubernetes CLI\n' +
-			'kustomize  \\d+\\.\\d+\\.\\d+           Kustomize CLI \\(built-in to kubectl\\)\n' +
-			'helm       \\d+\\.\\d+\\.\\d+          Helm CLI\n' +
-			'kn         \\d+\\.\\d+\\.\\d+           KNative CLI\n' +
-			'tkn        \\d+\\.\\d+\\.\\d+          Tekton CLI\n' +
-			'subctl     \\d+\\.\\d+\\.\\d+          Submariner CLI\n' +
-			'odo        \\d+\\.\\d+\\.\\d+          Red Hat OpenShift Developer CLI\n' +
-			'virtctl    \\d+\\.\\d+\\.\\d+          KubeVirt CLI\n' +
-			'jq         \\d+\\.\\d+             jq';
-
-		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
-		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
-			`cat /home/user/${fileForVerificationTerminalCommands}`,
-			webTerminalToolContainerName
-		);
-		expect(commandResult).to.match(new RegExp(helpCommandExpectedResult));
+		const currentUserName: string = await driverHelper.waitAndGetText(By.css('span[data-test="username"]'));
+		expect(commandResult).contains(currentUserName);
 	});
 
-	test('Verify help command under admin user', async function (): Promise<void> {
-		await webTerminal.typeAndEnterIntoWebTerminal('wtoctl set timeout 30s');
+	test('Check running WebTerminal in the existed Project with custom timeout', async function (): Promise<void> {
+		await webTerminal.findAndSelectProject(testProjectName);
+		await webTerminal.clickOnTimeoutButton();
+		await webTerminal.clickOnTimeUnitDropDown();
+		await webTerminal.selectTimeUnit(TimeUnits.Seconds);
+		await webTerminal.setTimeoutByEntering(20);
+		await webTerminal.clickOnStartWebTerminalButton();
+		await webTerminal.waitTerminalIsStarted();
 		await webTerminal.waitTerminalInactivity();
 	});
 });
