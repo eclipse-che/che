@@ -14,13 +14,14 @@ import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
 
-enum GitService {
-	github = 'github',
-	gitlab='gitlab',
-	'azure-devops'='azure-devops',
-	'bitbucket-server-oauth1'='bitbucket-server-oauth1',
-	'bitbucket-server-oauth2'='bitbucket-server-oauth2'
-  }
+enum GitServices {
+	GITHUB = 'github',
+	GITLAB = 'gitlab',
+	BITBUCKET_SERVER_OAUTH1 = 'bitbucket-server-oauth1',
+	BITBUCKET_SERVER_OAUTH2 = 'bitbucket-server-oauth2',
+	BITBUCKET_CLOUD_OAUTH2 = 'bitbucket-org',
+	AZURE_DEVOPS = 'azure-devops'
+}
 
 @injectable()
 export class UserPreferences {
@@ -119,15 +120,16 @@ export class UserPreferences {
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
 	}
 
-    async getServiceConfig(service: string): Promise<string> {
-    	const gitService: { [key: string]: string } = {
-			[GitService.github]: 'GitHub',
-			[GitService.gitlab]: 'GitLab',
-			[GitService['azure-devops']]: 'Microsoft Azure DevOps',
-			[GitService['bitbucket-server-oauth1']]: 'Bitbucket Server',
-			[GitService['bitbucket-server-oauth2']]: 'Bitbucket Server'
+	getServiceConfig(service: string): string {
+		const gitService: { [key: string]: string } = {
+			[GitServices.GITHUB]: 'GitHub',
+			[GitServices.GITLAB]: 'GitLab',
+			[GitServices.AZURE_DEVOPS]: 'Microsoft Azure DevOps',
+			[GitServices.BITBUCKET_CLOUD_OAUTH2]: 'Bitbucket Cloud',
+			[GitServices.BITBUCKET_SERVER_OAUTH1]: 'Bitbucket Server',
+			[GitServices.BITBUCKET_SERVER_OAUTH2]: 'Bitbucket Server'
 		};
-	  
+
 		return gitService[service];
 	}
 

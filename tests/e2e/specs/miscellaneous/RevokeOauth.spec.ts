@@ -13,7 +13,7 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 
-suite(`"Revoke OAuth" test`, function (): void {
+suite('"Revoke OAuth" test', function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
 	const gitService: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER || 'github';
@@ -27,8 +27,8 @@ suite(`"Revoke OAuth" test`, function (): void {
 		await userPreferences.checkTabsAvailability();
 
 		await userPreferences.openGitServicesTab();
-		
-		const selectedService: string = await userPreferences.getServiceConfig(gitService);
+
+		const selectedService: string = userPreferences.getServiceConfig(gitService);
 		await userPreferences.revokeGitService(selectedService);
 	});
 });
