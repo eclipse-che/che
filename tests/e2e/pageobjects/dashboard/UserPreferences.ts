@@ -14,6 +14,14 @@ import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
 
+enum GitService {
+	github = 'github',
+	gitlab='gitlab',
+	'azure-devops'='azure-devops',
+	'bitbucket-server-oauth1'='bitbucket-server-oauth1',
+	'bitbucket-server-oauth2'='bitbucket-server-oauth2'
+  }
+
 @injectable()
 export class UserPreferences {
 	private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=""]//parent::button');
@@ -109,6 +117,18 @@ export class UserPreferences {
 
 		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
+	}
+
+    async getServiceConfig(service: string): Promise<string> {
+    	const gitService: { [key: string]: string } = {
+			[GitService.github]: 'GitHub',
+			[GitService.gitlab]: 'GitLab',
+			[GitService['azure-devops']]: 'Microsoft Azure DevOps',
+			[GitService['bitbucket-server-oauth1']]: 'Bitbucket Server',
+			[GitService['bitbucket-server-oauth2']]: 'Bitbucket Server'
+		};
+	  
+		return gitService[service];
 	}
 
 	private getServicesListItemLocator(servicesName: string): By {
