@@ -24,8 +24,6 @@ suite('"Revoke OAuth" test', function (): void {
 
 	test('Revoke OAuth test', async function (): Promise<void> {
 		await userPreferences.openUserPreferencesPage();
-		await userPreferences.checkTabsAvailability();
-
 		await userPreferences.openGitServicesTab();
 
 		const selectedService: string = userPreferences.getServiceConfig(gitService);
