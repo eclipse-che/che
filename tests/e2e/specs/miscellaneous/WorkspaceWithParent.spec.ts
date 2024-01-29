@@ -55,6 +55,8 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+		// add 10 sec timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
+		// using 10 sec easier than performing of finishing animation a all elements
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
@@ -73,9 +75,11 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await input.setText('>Tasks: Run Task');
 		const runTaskItem: QuickPickItem | undefined = await input.findQuickPick('Tasks: Run Task');
 		await runTaskItem?.click();
+		// pause for avoiding StaleElement exception. It is easier solution than try/catch or writing separate function for this
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const devFileTask: QuickPickItem | undefined = await input.findQuickPick('devfile');
 		await devFileTask?.click();
+		// pause for avoiding StaleElement exception. It is easier solution than try/catch or writing separate function for this
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const firstExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('1. This command from the devfile');
 		const secondExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('2. This command from the parent');
