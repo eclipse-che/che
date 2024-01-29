@@ -22,6 +22,8 @@ import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTes
 import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -34,6 +36,8 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+
 	let podName: string = '';
 
 	suiteSetup(function (): void {
@@ -51,6 +55,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
 
@@ -68,8 +73,10 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await input.setText('>Tasks: Run Task');
 		const runTaskItem: QuickPickItem | undefined = await input.findQuickPick('Tasks: Run Task');
 		await runTaskItem?.click();
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const devFileTask: QuickPickItem | undefined = await input.findQuickPick('devfile');
 		await devFileTask?.click();
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const firstExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('1. This command from the devfile');
 		const secondExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('2. This command from the parent');
 		expect(firstExpectedQuickPick).not.undefined;
