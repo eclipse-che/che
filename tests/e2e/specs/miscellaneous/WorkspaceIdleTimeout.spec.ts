@@ -24,6 +24,7 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 
 suite('"Check workspace idle timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -46,7 +47,7 @@ suite('"Check workspace idle timeout" test', function (): void {
 	let stopWorkspaceTimeout: number = 0;
 
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		kubernetesCommandLineToolsExecutor.loginToOcp(OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME, OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD);
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
 		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
