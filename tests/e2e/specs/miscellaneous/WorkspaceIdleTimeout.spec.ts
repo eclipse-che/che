@@ -47,7 +47,7 @@ suite('"Check workspace idle timeout" test', function (): void {
 	let stopWorkspaceTimeout: number = 0;
 
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp(OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME, OAUTH_CONSTANTS.TS_SELENIUM_OCP_PASSWORD);
+		kubernetesCommandLineToolsExecutor.loginToOcp();
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
 		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
