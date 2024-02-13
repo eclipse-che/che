@@ -24,7 +24,6 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 
 suite('"Check workspace idle timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
