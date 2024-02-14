@@ -90,7 +90,7 @@ done
 
 print "==================== Test results ===================="
 print "Average workspace starting time for $succeeded workspaces from $COMPLETITIONS_COUNT started: $((total_time / succeeded)) seconds"
-print "$((COMPLETITIONS_COUNT - succeeded)) workspaces failed. See logs for details."
+print "$((COMPLETITIONS_COUNT - succeeded)) workspaces failed. See failed workspace pod logs in the current folder for details."
 
 trap cleanup ERR EXIT
 
