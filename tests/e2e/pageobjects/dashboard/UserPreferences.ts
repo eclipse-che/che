@@ -14,6 +14,7 @@ import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
 import { GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class UserPreferences {
@@ -83,7 +84,13 @@ export class UserPreferences {
 		await this.driverHelper.waitVisibility(UserPreferences.CONFIRMATION_WINDOW);
 		await this.driverHelper.waitAndClick(UserPreferences.DELETE_CONFIRMATION_CHECKBOX);
 		await this.driverHelper.waitAndClick(UserPreferences.DELETE_ITEM_BUTTON_ENABLED);
-		await this.driverHelper.waitDisappearance(this.getServicesListItemLocator(servicesName));
+
+		await this.driverHelper.waitAttributeValue(
+			this.getServicesListItemLocator(servicesName),
+			'disabled',
+			'true',
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+		);
 	}
 
 	async selectListItem(servicesName: string): Promise<void> {
