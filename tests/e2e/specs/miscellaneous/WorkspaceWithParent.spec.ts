@@ -48,7 +48,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await loginTests.loginIntoChe();
 	});
 
-	test('Create a workspace using a parent', async function (): Promise<void> {
+	test('Create a workspace from child devfile', async function (): Promise<void> {
 		const factoryUrl: string = `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/dashboard/#https://github.com/testsfactory/parentDevfile`;
 		await dashboard.waitPage();
 		await browserTabsUtil.navigateTo(factoryUrl);
