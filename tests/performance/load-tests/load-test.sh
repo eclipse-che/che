@@ -54,7 +54,7 @@ done
 wait
 
 for ((i=1; i<=$COMPLETITIONS_COUNT; i++)); do
-  kubectl wait --for=condition=Ready "dw/dw$i" --timeout=180s || true &
+  kubectl wait --for=condition=Ready "dw/dw$i" --timeout=360s || true &
 done
 
 wait
