@@ -12,7 +12,7 @@ metadata:
 components:
 - name: devtools
   container:
-    image: quay.io/mloriedo/universal-developer-image:ubi8-latest
+    image: quay.io/devfile/universal-developer-image:ubi8-latest
     memoryLimit: 4G
     memoryRequest: 256Mi
     cpuLimit: '2'
