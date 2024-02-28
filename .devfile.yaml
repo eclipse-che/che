@@ -10,10 +10,10 @@ schemaVersion: 2.2.0
 metadata:
   name: che
 components:
-- name: devtools
+- name: tools
   container:
     image: quay.io/devfile/universal-developer-image:ubi8-latest
-    memoryLimit: 4G
+    memoryLimit: 12G
     memoryRequest: 256Mi
     cpuLimit: '2'
     cpuRequest: 30m
