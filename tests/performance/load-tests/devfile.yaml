@@ -5,21 +5,10 @@ metadata:
 spec:
   started: true
   template:
-    projects:
-      - name: web-nodejs-sample
-        git:
-          remotes:
-            origin: "https://github.com/che-samples/web-nodejs-sample.git"
     components:
       - name: dev
         container:
           image: quay.io/devfile/universal-developer-image:latest
-    commands:
-      - id: say-hello
-        exec:
-          component: dev
-          commandLine: echo "Hello from $(pwd)"
-          workingDir: ${PROJECT_SOURCE}/app
   contributions:
     - name: che-code
       uri: https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml

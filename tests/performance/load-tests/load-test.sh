@@ -46,6 +46,7 @@ cleanup
 # Delete logs
 rm dw* || true  > /dev/null
 
+
 for ((i=1; i<=$COMPLETITIONS_COUNT; i++)); do
   cat devfile.yaml | sed "0,/name: code-latest/s//name: dw$i/" | kubectl apply -f -  &
 done
@@ -53,7 +54,7 @@ done
 wait
 
 for ((i=1; i<=$COMPLETITIONS_COUNT; i++)); do
-  kubectl wait --for=condition=Ready "dw/dw$i" --timeout=120s || true &
+  kubectl wait --for=condition=Ready "dw/dw$i" --timeout=180s || true &
 done
 
 wait
