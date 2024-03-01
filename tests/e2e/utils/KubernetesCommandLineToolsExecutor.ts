@@ -46,14 +46,16 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	}
 
 	get namespace(): string | undefined {
-		this._namespace =
-			this._namespace !== undefined
-				? this._namespace
-				: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
-				? OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-devspaces'
-				: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
-				? OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-che'
-				: 'default';
+		if (BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
+			this._namespace = BASE_TEST_CONSTANTS.TEST_NAMESPACE;
+		} else if (!this._namespace) {
+			const applicationName: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();
+			if (applicationName === 'default') {
+				this._namespace = applicationName;
+			} else {
+				this._namespace = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-' + applicationName;
+			}
+		}
 		return this._namespace;
 	}
 

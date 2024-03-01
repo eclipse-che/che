@@ -16,8 +16,8 @@ import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 export enum WorkspaceStatusUI {
-	Running = 'green',
-	Stopped = 'grey'
+	Running = 'Workspace status is Running',
+	Stopped = 'Workspace status is Stopped'
 }
 
 @injectable()
@@ -221,7 +221,7 @@ export class Workspaces {
 		return By.xpath(
 			`${
 				this.getWorkspaceListItemLocator(workspaceName).value
-			}//span[@data-testid='workspace-status-indicator']//*[local-name()='svg' and @fill='${workspaceStatus}']`
+			}//span[@data-testid='workspace-status-indicator' and @aria-label='${workspaceStatus}']`
 		);
 	}
 

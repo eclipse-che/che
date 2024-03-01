@@ -3,8 +3,8 @@
 
 validateParameters(){
 # Validate required parameters
-  if [ -z "$OCP_VERSION" ] || [ -z "$OCP_INFRA" ] || [ -z "$TS_SELENIUM_BASE_URL" ]; then
-      echo "The OCP_INFRA, OCP_VERSION or TS_SELENIUM_BASE_URL is not set!";
+  if [ -z "$TS_API_ACCEPTANCE_TEST_REGISTRY_URL" ] || [ -z "$TS_SELENIUM_BASE_URL" ]; then
+      echo "The TS_API_ACCEPTANCE_TEST_REGISTRY_URL or TS_SELENIUM_BASE_URL is not set!";
       echo "Please, set all required environment variable parameters"
       exit 1
   fi
@@ -14,54 +14,25 @@ validateParameters(){
 ############# Methods ##################
 ########################################
 
-launchAPITests() {
-  export MOCHA_SUITE="APITest"
-  echo "MOCHA_SUITE = ${MOCHA_SUITE}"
-  export RP_LAUNCH_NAME="API tests suite $TEST_ENVIRONMENT"
-  echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
-  npm run driver-less-test
-}
-
 launchDynamicallyGeneratingAPITests() {
   export MOCHA_SUITE="DynamicallyGeneratingAPITest"
-  export RP_LAUNCH_NAME="Application inbuilt DevWorkspaces API tests suite $TEST_ENVIRONMENT"
+  export RP_LAUNCH_NAME="Devfile Acceptance tests suite"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run delayed-test
 }
 
-launchUITests() {
-  export MOCHA_SUITE="UITest"
-  export RP_LAUNCH_NAME="UI tests suite $TEST_ENVIRONMENT"
-  echo "MOCHA_SUITE = ${MOCHA_SUITE}"
-  echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
-  npm run test
-}
-
-launchAllTests() {
-  validateParameters
-  initTestValues
-  echo ""
-  echo "Launching all tests for $TEST_ENVIRONMENT"
-  echo ""
-  launchDynamicallyGeneratingAPITests
-  launchAPITests
-  launchUITests
-}
-
 initTestValues() {
-  if [[ "$TS_SELENIUM_BASE_URL" =~ "airgap" || (-n "$IS_CLUSTER_DISCONNECTED" && "$IS_CLUSTER_DISCONNECTED" == "true") ]]
+export MOCHA_DIRECTORY="devfile-acceptance-test-suite"
+if [[ "$TS_SELENIUM_BASE_URL" =~ "airgap" || (-n "$IS_CLUSTER_DISCONNECTED" && "$IS_CLUSTER_DISCONNECTED" == "true") ]]
   then
      echo "Disconnected environment"
-     export MOCHA_DIRECTORY="disconnected-ocp"
   else
      echo "Online environment"
-     export MOCHA_DIRECTORY="online-ocp"
   fi
 
   export TEST_ENVIRONMENT="$OCP_INFRA $MOCHA_DIRECTORY $OCP_VERSION"
   export DELETE_WORKSPACE_ON_FAILED_TEST=${DELETE_WORKSPACE_ON_FAILED_TEST:-'false'}
-  export DELETE_ALL_WORKSPACES_ON_RUN_FINISH=${DELETE_ALL_WORKSPACES_ON_RUN_FINISH:-'true'}
   export DELETE_SCREENCAST_IF_TEST_PASS=${DELETE_SCREENCAST_IF_TEST_PASS:-'true'}
   export NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED:-'0'}
   export TS_OCP_LOGIN_PAGE_PROVIDER_TITLE=${TS_OCP_LOGIN_PAGE_PROVIDER_TITLE:-'htpasswd'}
@@ -78,11 +49,9 @@ initTestValues() {
   export MOCHA_BAIL=${MOCHA_BAIL:-'false'}
   export MOCHA_RETRIES=${MOCHA_RETRIES:-'1'}
 
-
   echo "TS_SELENIUM_BASE_URL=${TS_SELENIUM_BASE_URL}"
   echo "TEST_ENVIRONMENT=${TEST_ENVIRONMENT}"
   echo "DELETE_WORKSPACE_ON_FAILED_TEST=${DELETE_WORKSPACE_ON_FAILED_TEST}"
-  echo "DELETE_ALL_WORKSPACES_ON_RUN_FINISH=${DELETE_ALL_WORKSPACES_ON_RUN_FINISH}"
   echo "DELETE_SCREENCAST_IF_TEST_PASS=${DELETE_SCREENCAST_IF_TEST_PASS}"
   echo "NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED}"
   echo "TS_OCP_LOGIN_PAGE_PROVIDER_TITLE=${TS_OCP_LOGIN_PAGE_PROVIDER_TITLE}"
@@ -103,5 +72,10 @@ initTestValues() {
 ############# Launching ################
 ########################################
 
-launchAllTests
+validateParameters
+  initTestValues
+  echo ""
+  echo "Launching devfile acceptance test suite for $TEST_ENVIRONMENT and registry $TS_API_ACCEPTANCE_TEST_REGISTRY_URL"
+  echo ""
+  launchDynamicallyGeneratingAPITests
 

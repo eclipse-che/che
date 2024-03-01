@@ -8,17 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
+import { rpApi } from '../specs/MochaHooks';
 
-export abstract class Logger {
+export class Logger {
 	/**
 	 * uses for logging of fatal errors.
 	 * @param text log text
 	 * @param indentLevel log level
 	 */
+
 	static error(text: string = '', indentLevel: number = 1): void {
 		const callerInfo: string = this.getCallerInfo();
 		const logLevelSymbol: string = '[ERROR] ';
-		this.logText(indentLevel, logLevelSymbol, `${this.getFullMessage(callerInfo, text)}`);
+		const message: string = this.getFullMessage(callerInfo, text);
+		this.logText(indentLevel, logLevelSymbol, message);
+		if (this.sendLogMessageIntoReportPortal()) {
+			rpApi.error(message);
+		}
 	}
 
 	/**
@@ -32,7 +38,11 @@ export abstract class Logger {
 		}
 		const callerInfo: string = this.getCallerInfo();
 		const logLevelSymbol: string = '[WARN] ';
-		this.logText(indentLevel, logLevelSymbol, `${this.getFullMessage(callerInfo, text)}`);
+		const message: string = this.getFullMessage(callerInfo, text);
+		this.logText(indentLevel, logLevelSymbol, message);
+		if (this.sendLogMessageIntoReportPortal()) {
+			rpApi.warn(message);
+		}
 	}
 
 	/**
@@ -46,7 +56,11 @@ export abstract class Logger {
 		}
 		const callerInfo: string = this.getCallerInfo();
 		const logLevelSymbol: string = '• ';
-		this.logText(indentLevel, logLevelSymbol, `${this.getFullMessage(callerInfo, text)}`);
+		const message: string = this.getFullMessage(callerInfo, text);
+		this.logText(indentLevel, logLevelSymbol, message);
+		if (this.sendLogMessageIntoReportPortal()) {
+			rpApi.info(message);
+		}
 	}
 
 	/**
@@ -64,7 +78,11 @@ export abstract class Logger {
 		}
 		const callerInfo: string = this.getCallerInfo();
 		const logLevelSymbol: string = '▼ ';
-		this.logText(indentLevel, logLevelSymbol, `${this.getFullMessage(callerInfo, text)}`);
+		const message: string = this.getFullMessage(callerInfo, text);
+		this.logText(indentLevel, logLevelSymbol, message);
+		if (this.sendLogMessageIntoReportPortal()) {
+			rpApi.debug(message);
+		}
 	}
 
 	/**
@@ -84,11 +102,19 @@ export abstract class Logger {
 		}
 		const callerInfo: string = this.getCallerInfo();
 		const logLevelSymbol: string = '‣ ';
-		this.logText(indentLevel, logLevelSymbol, `${this.getFullMessage(callerInfo, text)}`);
+		const message: string = this.getFullMessage(callerInfo, text);
+		this.logText(indentLevel, logLevelSymbol, message);
+		if (this.sendLogMessageIntoReportPortal()) {
+			rpApi.trace(message);
+		}
 	}
 
 	private static getFullMessage(callerInfo: string, text: string): string {
 		return `${callerInfo}${this.separator(text, callerInfo)}${text}`;
+	}
+
+	private static separator(text: string, caller: string): string {
+		return text ? (caller ? ' - ' : '') : '';
 	}
 
 	private static logText(messageIndentationLevel: number, logLevelSymbol: string, text: string): void {
@@ -107,14 +133,26 @@ export abstract class Logger {
 		}
 	}
 
-	private static getCallerInfo(): string {
-		const e: Error = new Error();
-		const stack: string[] = e.stack ? e.stack.split('\n') : [];
+	private static getCallerInfo(i: number = 4): string {
+		const stack: string[] = this.getCallStackArray();
 		// " at functionName ( ..." => "functionName"
-		return stack[3].includes('.<anonymous') ? '' : stack[3].replace(/^\s+at\s+(.+?)\s.+/g, '$1');
+		return stack[i].includes('.<anonymous') ? '' : stack[i].replace(/^\s+at\s+(.+?)\s.+/g, '$1');
 	}
 
-	private static separator(text: string, caller: string): string {
-		return text ? (caller ? ' - ' : '') : '';
+	private static getCallStackArray(): string[] {
+		const e: Error = new Error();
+		return e.stack ? e.stack.split('\n') : [];
+	}
+
+	private static sendLogMessageIntoReportPortal(): boolean {
+		return REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && !this.isRootCaller();
+	}
+
+	private static isRootCaller(traceLevel: number = 6): boolean {
+		return this.getCallStackArray()
+			.slice(traceLevel, traceLevel + 4)
+			.reduce((acc, e): boolean => {
+				return acc || /MochaHooks|CheReporter/.test(e);
+			}, false);
 	}
 }

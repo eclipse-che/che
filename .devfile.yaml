@@ -6,7 +6,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
   name: che
   language: typescript
@@ -25,9 +25,9 @@ components:
 - name: devtools
   container:
     image: quay.io/devfile/universal-developer-image:ubi8-latest
-    memoryLimit: 4G
+    memoryLimit: 12G
     memoryRequest: 256Mi
-    cpuLimit: 500m
+    cpuLimit: '2'
     cpuRequest: 30m
     mountSources: true
     sourceMapping: /projects

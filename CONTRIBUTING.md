@@ -30,7 +30,7 @@ Repository | Component | Description | Devfile | Documentation
 [machine-exec](https://github.com/eclipse-che/che-machine-exec) | | Interface to execute tasks and terminals on other containers within a workspace. | [devfile](https://github.com/eclipse-che/che-machine-exec/blob/main/devfile.yaml) | [doc](https://github.com/eclipse-che/che-machine-exec/blob/main/CONTRIBUTING.md)
 [operator](https://github.com/eclipse-che/che-operator) | | Che operator to deploy, update and manage K8S/OpenShift resources of Che. | [devfile](https://github.com/eclipse-che/che-operator/blob/main/devfile.yaml) | 
 [plugin-registry](https://github.com/eclipse-che/che-plugin-registry) | | The default set of Che plugins (vscode extension + containers) or editors that could be installed on any Che workspaces. |  | 
-[website](https://github.com/eclipse-che/che-website) | | https://eclipse.org/che website source code. | [devfile](https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml) | 
+[website](https://github.com/eclipse-che/che-website) | | https://eclipse.dev/che website source code. | [devfile](https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml) | 
 [workspace-client](https://github.com/eclipse-che/che-workspace-client) | | JS library to interact with a che-server. |  | 
 [configbump](https://github.com/che-incubator/configbump) | | Simple Kubernetes controller that is able to quickly synchronize a set of config maps |  | 
 [workspace-data-sync](https://github.com/che-incubator/workspace-data-sync) | | Provides the ability to increase I/O performance for a developer workspaces |  | 

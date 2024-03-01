@@ -12,7 +12,7 @@ import { Logger } from './Logger';
 import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
 import { injectable } from 'inversify';
-import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
+import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
 
 @injectable()
 export class DevfilesRegistryHelper {
@@ -28,54 +28,57 @@ export class DevfilesRegistryHelper {
 	async getGitHubCheDevfileRegistryContent(): Promise<AxiosResponse> {
 		Logger.trace();
 
-		return await this.getContent(SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL);
+		const url: string =
+			API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL() === ''
+				? SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL
+				: API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL();
+		return await this.getContent(url);
 	}
 
-	async collectPathsToDevfilesFromRegistry(isInbuilt: boolean = true, sampleNamePatterns?: string[]): Promise<object[]> {
+	async collectPathsToDevfilesFromRegistry(isInbuilt: boolean, sampleNamePatterns?: string[]): Promise<object[]> {
 		Logger.debug();
 
 		const devfileSamples: object[] = [];
 		const sampleNames: string[] = [];
-		switch (isInbuilt) {
-			case false:
-				{
-					const content: any[any] = await this.getGitHubCheDevfileRegistryContent();
-					content.forEach((e: any): void => {
-						if (e.name[0] !== '.') {
-							sampleNames.push(e.name);
-						}
-					});
+		if (!isInbuilt) {
+			{
+				const content: any[any] = await this.getGitHubCheDevfileRegistryContent();
+				content.forEach((e: any): void => {
+					if (e.name[0] !== '.') {
+						sampleNames.push(e.name);
+					}
+				});
 
-					for (const sample of sampleNames) {
-						const sampleEndpoint: string = `${SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL}${sample}/meta.yaml`;
-						const sampleEndpointContent: AxiosResponse = await this.getContent(sampleEndpoint);
-						const decodedFileContent: string = Buffer.from((sampleEndpointContent as any).content, 'base64').toString();
-						const metaYamlContent: any = YAML.parse(decodedFileContent);
-						devfileSamples.push({
-							name: sample,
-							link: metaYamlContent.links.v2
-						});
-					}
-					Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
+				for (const sample of sampleNames) {
+					const sampleEndpoint: string = `${SUPPORTED_DEVFILE_REGISTRIES.GIT_HUB_CHE_DEVFILE_REGISTRY_URL}${sample}/meta.yaml`;
+					const sampleEndpointContent: AxiosResponse = await this.getContent(sampleEndpoint);
+					const decodedFileContent: string = Buffer.from((sampleEndpointContent as any).content, 'base64').toString();
+					const metaYamlContent: any = YAML.parse(decodedFileContent);
+					devfileSamples.push({
+						name: sample,
+						link: metaYamlContent.links.v2
+					});
 				}
-				break;
-			case true:
-				{
-					const content: any[any] = await this.getInbuiltDevfilesRegistryContent(sampleNamePatterns);
-					for (const sample of content) {
-						const linkToDevWorkspaceYaml: any =
-							BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL +
-							'/devfile-registry' +
-							sample.links.devWorkspaces['che-incubator/che-code/latest'];
-						devfileSamples.push({
-							name: sample.displayName,
-							devWorkspaceConfigurationString: await this.getContent(linkToDevWorkspaceYaml)
-						});
-					}
-					Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
+				Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
+			}
+		} else if (isInbuilt) {
+			{
+				const content: any[any] = await this.getInbuiltDevfilesRegistryContent(sampleNamePatterns);
+				const devfileRegistryPrefix: string =
+					BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT
+						? BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/devfile-registry'
+						: '';
+				for (const sample of content) {
+					const linkToDevWorkspaceYaml: any = `${devfileRegistryPrefix}${sample.links.devWorkspaces['che-incubator/che-code/latest']}`;
+					devfileSamples.push({
+						name: sample.displayName,
+						devWorkspaceConfigurationString: await this.getContent(linkToDevWorkspaceYaml)
+					});
 				}
-				break;
-			default: {
+				Logger.debug(`samples list: ${JSON.stringify(devfileSamples)}`);
+			}
+		} else {
+			{
 				Logger.error(`unsupported registry url - ${API_TEST_CONSTANTS.TS_API_ACCEPTANCE_TEST_REGISTRY_URL()}\n
                 supported registries: ${JSON.stringify(SUPPORTED_DEVFILE_REGISTRIES)}`);
 			}
@@ -95,9 +98,19 @@ export class DevfilesRegistryHelper {
 		return content;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async getContent(url: string, headers?: object): Promise<AxiosResponse> {
 		Logger.trace(`${url}`);
-
+		if (SUPPORTED_DEVFILE_REGISTRIES.TS_GIT_API_AUTH_TOKEN.length !== 0) {
+			/**
+			 * if we use - https://api.github.com/repos/eclipse-che/che-devfile-registry/contents/devfiles/ URL
+			 * for generating devfiles we can get a problem with rate limits to GitHub API,
+			 * but we can pass auth. token for increase the limit and avoiding problems
+			 */
+			headers = {
+				headers: { Authorization: SUPPORTED_DEVFILE_REGISTRIES.TS_GIT_API_AUTH_TOKEN }
+			};
+		}
 		let response: AxiosResponse | undefined;
 		try {
 			response = await axios.get(url, headers);

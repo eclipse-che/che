@@ -13,7 +13,8 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
-	ARCH_VERSION: string;
+	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: boolean;
+	OCP_INFRA: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
@@ -30,6 +31,8 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_PROJECT_ROOT_FILE_NAME: string;
 	TS_SELENIUM_REQUEST_INTERCEPTOR: boolean;
 	TS_SELENIUM_RESPONSE_INTERCEPTOR: boolean;
+	TESTING_APPLICATION_NAME: () => string;
+	TEST_NAMESPACE: string;
 } = {
 	/**
 	 * base URL of the application which should be checked
@@ -37,9 +40,9 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
 	/**
-	 * system arch type
+	 * ocp infra type, possible values "PSI", "AWS", "IBM Z", "IBM Power"
 	 */
-	ARCH_VERSION: process.env.ARCH_VERSION || '',
+	OCP_INFRA: process.env.OCP_INFRA || '',
 
 	/**
 	 * openShift version
@@ -51,6 +54,21 @@ export const BASE_TEST_CONSTANTS: {
 	 */
 	TEST_ENVIRONMENT: process.env.TEST_ENVIRONMENT || '',
 
+	/**
+	 * openshift project or k8s namespace which is used by test
+	 */
+	TEST_NAMESPACE: process.env.TEST_NAMESPACE || '',
+
+	/**
+	 * application name (DevSpaces or Che)
+	 */
+	TESTING_APPLICATION_NAME: (): string => {
+		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
+			? 'devspaces'
+			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
+				? 'che'
+				: 'default';
+	},
 	/**
 	 * testing application version
 	 */
@@ -112,6 +130,11 @@ export const BASE_TEST_CONSTANTS: {
 	 * stop and remove workspace if a test fails.
 	 */
 	DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
+
+	/**
+	 * stop and remove all workspaces on test run finish
+	 */
+	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.

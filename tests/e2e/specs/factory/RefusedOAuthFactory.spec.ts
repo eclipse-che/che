@@ -16,7 +16,6 @@ import {
 	EditorView,
 	InputBox,
 	Locators,
-	ModalDialog,
 	NewScmView,
 	SingleScmProvider,
 	TextEditor,
@@ -26,7 +25,7 @@ import {
 import { expect } from 'chai';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
@@ -38,6 +37,8 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -50,9 +51,12 @@ suite(
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
+		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
+		let rest: SingleScmProvider[];
 		let scmContextMenu: ContextMenu;
 
 		// test specific data
@@ -66,19 +70,19 @@ suite(
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
 			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
 		});
 
-		if (OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_OAUTH) {
-			test(`Authorize with a ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} OAuth and deny access`, async function (): Promise<void> {
-				await oauthPage.login();
-				await oauthPage.waitOauthPage();
-				await oauthPage.denyAccess();
-			});
-		}
+		test(`Authorize with a ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} OAuth and deny access`, async function (): Promise<void> {
+			await oauthPage.login();
+			await oauthPage.waitOauthPage();
+			await oauthPage.denyAccess();
+		});
 
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -96,29 +100,31 @@ suite(
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		});
 
-		test('Check if a project folder has been created', async function (): Promise<void> {
-			testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
-			projectSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, testRepoProjectName), 'Project folder was not imported').not
-				.undefined;
-		});
-
-		test('Accept the project as a trusted one', async function (): Promise<void> {
-			await projectAndFileTests.performTrustAuthorDialog();
-		});
-
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
-			test('Check that project can not be cloned', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.Dialog.message);
-				const workspaceDoesNotExistDialog: ModalDialog = new ModalDialog();
-				const message: string = await workspaceDoesNotExistDialog.getMessage();
-				expect(message).contains('space does not exist');
-			});
-
-			test('Check that project files were not imported', async function (): Promise<void> {
-				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were found').to.be.undefined;
+			test('Check that a project folder has not been cloned', async function (): Promise<void> {
+				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.multiProviderItem);
+				await projectAndFileTests.performTrustAuthorDialog();
+				const isProjectFolderUnable: string = await driverHelper.waitAndGetElementAttribute(
+					(webCheCodeLocators.TreeItem as any).projectFolderItem,
+					'aria-label'
+				);
+				expect(isProjectFolderUnable).to.contain(
+					'/projects/' + testRepoProjectName + ' • Unable to resolve workspace folder (Unable to resolve nonexistent file'
+				);
 			});
 		} else {
+			test('Check if a project folder has been created', async function (): Promise<void> {
+				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+				projectSection = await projectAndFileTests.getProjectViewSession();
+				expect(await projectAndFileTests.getProjectTreeItem(projectSection, testRepoProjectName), 'Project folder was not imported')
+					.not.undefined;
+			});
+
+			test('Accept the project as a trusted one', async function (): Promise<void> {
+				await projectAndFileTests.performTrustAuthorDialog();
+			});
+
 			test('Check if the project files were imported', async function (): Promise<void> {
 				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not
 					.undefined;
@@ -142,8 +148,11 @@ suite(
 				await sourceControl.openView();
 				const scmView: NewScmView = new NewScmView();
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
-				let rest: SingleScmProvider[];
 				[scmProvider, ...rest] = await scmView.getProviders();
+				if (scmProvider === undefined) {
+					await projectAndFileTests.performManageWorkspaceTrustBox();
+					[scmProvider, ...rest] = await scmView.getProviders();
+				}
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 			});
 
@@ -232,15 +241,17 @@ suite(
 			});
 		}
 
-		test('Stop the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
 
-		test('Delete the workspace', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 
-		loginTests.logoutFromChe();
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	}
 );

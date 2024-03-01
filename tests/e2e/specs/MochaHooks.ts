@@ -25,18 +25,30 @@ import { CHROME_DRIVER_CONSTANTS } from '../constants/CHROME_DRIVER_CONSTANTS';
 import { decorate, injectable, unmanaged } from 'inversify';
 import { Main } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
+import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
+import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
+export let rpApi: any = undefined;
 
 export function registerRunningWorkspace(workspaceName: string): void {
-	workspaceName !== '' ? Logger.debug(`with workspaceName:${workspaceName}`) : Logger.debug('delete workspace name');
+	workspaceName !== ''
+		? Logger.debug(`with workspaceName:${workspaceName}`)
+		: ((): void => {
+				Logger.debug('delete workspace name');
+				WorkspaceHandlingTests.clearWorkspaceName();
+			})();
 
 	latestWorkspace = workspaceName;
 }
 
 exports.mochaHooks = {
 	beforeAll: [
+		function initRPApi(): any {
+			rpApi = require('@reportportal/agent-js-mocha/lib/publicReportingAPI.js');
+		},
+
 		function decorateExternalClasses(): void {
 			decorate(injectable(), Main);
 			decorate(injectable(), LocatorLoader);
@@ -69,15 +81,15 @@ exports.mochaHooks = {
 			if (BASE_TEST_CONSTANTS.TS_DEBUG_MODE) {
 				for (const [timeout, seconds] of Object.entries(TIMEOUT_CONSTANTS)) {
 					Object.defineProperty(TIMEOUT_CONSTANTS, timeout, {
-						value: seconds * 100
+						value: seconds * 2
 					});
 				}
 			}
 		}
 	],
 	afterEach: [
-		async function (this: Mocha.Context): Promise<void> {
-			if (this.currentTest?.state === 'failed') {
+		async function saveAllureAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_ALLURE_REPORT_DATA && this.currentTest?.state === 'failed') {
 				try {
 					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
 					allure.attachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
@@ -86,25 +98,54 @@ exports.mochaHooks = {
 				}
 			}
 		},
+		async function saveReportportalAttachments(this: Mocha.Context): Promise<void> {
+			if (REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && this.currentTest?.state === 'failed') {
+				try {
+					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
+					const attachment: { name: string; type: string; content: string } = {
+						name: 'screenshot.png',
+						type: 'image/png',
+						content: screenshot
+					};
+					rpApi.error('Screenshot on fail: ', attachment);
+				} catch (e) {
+					rpApi.error('Could not attach the screenshot');
+				}
+			}
+		},
 		// stop and remove running workspace
-		function deleteWorkspaceOnFailedTest(this: Mocha.Context): void {
+		async function deleteWorkspaceOnFailedTest(this: Mocha.Context): Promise<void> {
 			if (this.currentTest?.state === 'failed') {
-				if (BASE_TEST_CONSTANTS.DELETE_WORKSPACE_ON_FAILED_TEST) {
-					Logger.info('Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.');
+				if (BASE_TEST_CONSTANTS.DELETE_WORKSPACE_ON_FAILED_TEST && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
+					Logger.trace(
+						'Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete running workspace with API.'
+					);
 					const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-					testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
+					await testWorkspaceUtil.stopAndDeleteWorkspaceByName(latestWorkspace);
 				}
 			}
 		}
 	],
 	afterAll: [
 		// stop and remove running workspace
+		async function deleteAllWorkspacesOnFinish(): Promise<void> {
+			try {
+				if (BASE_TEST_CONSTANTS.DELETE_ALL_WORKSPACES_ON_RUN_FINISH && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
+					Logger.trace(
+						'Property DELETE_WORKSPACE_ON_FAILED_TEST is true - trying to stop and delete all running workspace after test run with API.'
+					);
+					const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+					await testWorkspaceUtil.stopAndDeleteAllRunningWorkspaces();
+				}
+			} catch (e) {
+				Logger.trace('Running workspaces not found');
+			}
+		},
 		async function stopTheDriver(): Promise<void> {
 			if (!BASE_TEST_CONSTANTS.TS_DEBUG_MODE && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
 				// ensure that fired events done
 				await driverHelper.wait(5000);
-				await driverHelper.getDriver().quit();
-				Logger.info('Chrome driver session stopped.');
+				await driverHelper.quit();
 			}
 		}
 	]

@@ -20,7 +20,7 @@ import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { expect } from 'chai';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 
-suite('The SmokeTest userstory', function (): void {
+suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -29,7 +29,9 @@ suite('The SmokeTest userstory', function (): void {
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
 	let projectSection: ViewSection;
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
-		loginTests.loginIntoChe();
+		suiteSetup('Login', async function (): Promise<void> {
+			await loginTests.loginIntoChe();
+		});
 		test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
 		});
@@ -54,13 +56,15 @@ suite('The SmokeTest userstory', function (): void {
 				'Project files were not imported'
 			).not.undefined;
 		});
-		test('Stop the workspace', async function (): Promise<void> {
+		test('Stop the workspace by UI', async function (): Promise<void> {
 			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
-		test('Delete the workspace', async function (): Promise<void> {
+		test('Delete the workspace by UI', async function (): Promise<void> {
 			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		});
-		loginTests.logoutFromChe();
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
 	});
 });

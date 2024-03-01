@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -22,6 +22,8 @@ import { Locators, ModalDialog } from 'monaco-page-objects';
 import { expect } from 'chai';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 suite('"Check workspace idle timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -36,13 +38,15 @@ suite('"Check workspace idle timeout" test', function (): void {
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 	const stackName: string = 'Empty Workspace';
 	const cheClusterName: string = 'devspaces';
 	let stopWorkspaceTimeout: number = 0;
 
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		kubernetesCommandLineToolsExecutor.loginToOcp();
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
 		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
@@ -65,7 +69,9 @@ suite('"Check workspace idle timeout" test', function (): void {
 		);
 	});
 
-	loginTests.loginIntoChe();
+	suiteSetup('Login', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
 
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName);
@@ -85,14 +91,21 @@ suite('"Check workspace idle timeout" test', function (): void {
 		await dialog.pushButton('Return to dashboard');
 	});
 
-	test('Check that the workskpace has Stopped state', async function (): Promise<void> {
+	test('Check that the workspace has Stopped state', async function (): Promise<void> {
 		await dashboard.waitPage();
 		await workspaces.waitWorkspaceWithStoppedStatus(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
-	test('Delete the workspace', async function (): Promise<void> {
-		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	loginTests.logoutFromChe();
+	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+		await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+	});
+
+	suiteTeardown('Unregister running workspace', function (): void {
+		registerRunningWorkspace('');
+	});
 });

@@ -47,7 +47,10 @@ const CLASSES: any = {
 	DevfilesRegistryHelper: 'DevfilesRegistryHelper',
 	KubernetesCommandLineToolsExecutor: 'KubernetesCommandLineToolsExecutor',
 	ShellExecutor: 'ShellExecutor',
-	ContainerTerminal: 'ContainerTerminal'
+	ContainerTerminal: 'ContainerTerminal',
+	UserPreferences: 'UserPreferences',
+	WebTerminalPage: 'WebTerminalPage',
+	RevokeOauthPage: 'RevokeOauthPage'
 };
 
 const EXTERNAL_CLASSES: any = {

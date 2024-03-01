@@ -1,5 +1,5 @@
+[![Contribute](https://www.eclipse.org/che/contribute.svg)](https://workspaces.openshift.com#https://github.com/eclipse/che)
 [![Dev](https://img.shields.io/static/v1?label=Open%20in&message=Che%20dogfooding%20server%20(with%20VS%20Code)&logo=eclipseche&color=FDB940&labelColor=525C86)](https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com/#https://github.com/eclipse/che?che-editor=che-incubator/che-code/insiders)
-[![Dev](https://img.shields.io/static/v1?label=Open%20in&message=Che%20dogfooding%20server%20(with%20Theia)&logo=eclipseche&color=FDB940&labelColor=525C86)](https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com/#https://github.com/eclipse/che?che-editor=eclipse/che-theia/next)
 
 ### Eclipse Che Server has moved!
 
@@ -11,7 +11,7 @@ https://github.com/eclipse-che/che-server
 <div id="header" align="center">
 
 [![Eclipse Che - Eclipse Next-Generation IDE](https://raw.githubusercontent.com/eclipse/che/assets/eclipseche.png)](
-https://www.eclipse.org/che/)
+https://eclipse.dev/che/)
 
 **Next-generation container development platform, developer workspace server and cloud IDE**
 
@@ -20,7 +20,7 @@ https://www.eclipse.org/che/)
 <img src="https://sonarcloud.io/images/project_badges/sonarcloud-black.svg" width="94" height="20" href="" />
 </a>
 
-*Che is Kubernetes-native and places everything the developer needs into containers in Kube pods including dependencies, embedded containerized runtimes, a web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere Kubernetes runs ... [Read More](https://www.eclipse.org/che/features/)*
+*Che is Kubernetes-native and places everything the developer needs into containers in Kube pods including dependencies, embedded containerized runtimes, a web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere Kubernetes runs ... [Read More](https://eclipse.dev/che/features/)*
 
 </div>
 
@@ -28,7 +28,7 @@ https://www.eclipse.org/che/)
 
 ---
 
-**Visit website at: https://www.eclipse.org/che/** and documentation at: https://www.eclipse.org/che/docs
+**Visit website at: https://eclipse.dev/che/** and documentation at: https://eclipse.dev/che/docs
 
 - [**Getting Started**](#getting-started)
 - [**Using Eclipse Che**](#using-eclipse-che)
@@ -41,22 +41,23 @@ https://www.eclipse.org/che/)
 
 ### Getting Started
 Here you can find links on how to get started with Eclipse Che:
-- [Use Eclipse Che online](https://www.eclipse.org/che/getting-started/cloud/)
-- [Run Eclipse Che on your own K8S cluster](https://www.eclipse.org/che/docs/che-7/che-quick-starts)
+- [Use Eclipse Che online](https://eclipse.dev/che/getting-started/cloud/)
+- [Run Eclipse Che on your own Kubernetes cluster](https://eclipse.dev/che/docs/stable/administration-guide/preparing-the-installation/)
 
 
 ### Using Eclipse Che
 Here you can find references to useful documentation and hands-on guides to learn how to get the most of Eclipse Che:
-- [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/configuring-a-workspace-using-a-devfile/)
-- [Run VSCode Extensions in Che workspaces](https://www.eclipse.org/che/docs/che-7/end-user-guide/adding-a-vs-code-extension-to-a-workspace/)
-- [Creating and configuring a new Che 7 workspace](https://www.eclipse.org/che/docs/che-7/end-user-guide/creating-and-configuring-a-new-workspace/)
-- [Making a workspace portable using a devfile](https://www.eclipse.org/che/docs/che-7/end-user-guide/making-a-workspace-portable-using-a-devfile/)
-
+- [Customize Che workspaces for your projects](https://eclipse.dev/che/docs/stable/end-user-guide/customizing-workspace-components/)
+- [Automatically run VSCode Extensions in Che workspaces](https://eclipse.dev/che/docs/stable/end-user-guide/microsoft-visual-studio-code-open-source-ide/#automating-installation-of-microsoft-visual-studio-code-extensions-at-workspace-startup)
+- [Starting a workspace from a Git repository URL](https://eclipse.dev/che/docs/stable/end-user-guide/starting-a-workspace-from-a-git-repository-url/)
+- [Making a workspace portable using a devfile](https://eclipse.dev/che/docs/stable/end-user-guide/devfile-introduction/)
+- [Configure your instance of Che](https://eclipse.dev/che/docs/stable/administration-guide/checluster-custom-resource-fields-reference/) using the [CheCluster Kubernetes Custom Resource](https://doc.crds.dev/github.com/eclipse-che/che-operator)
+- [Use and customize the embedded VSCode extensions registry.](https://eclipse.dev/che/docs/stable/administration-guide/extensions-for-microsoft-visual-studio-code-open-source/#adding-or-removing-extensions-in-the-embedded-open-vsx-registry-instance)
 
 ### Feedback and Community
 We love to hear from users and developers. Here are the various ways to get in touch with us:
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
-* **Public Chat:** Join the public [eclipse-che](https://mattermost.eclipse.org/eclipse/channels/eclipse-che) Mattermost channel to discuss with community and contributors.
+* **Public Chat:** Join the public [eclipse-che](https://communityinviter.com/apps/ecd-tools/join-the-community) Mattermost channel to discuss with community and contributors.
 * **Twitter:** [@eclipse_che](https://twitter.com/eclipse_che)
 * **Mailing List:** [che-dev@eclipse.org](https://accounts.eclipse.org/mailing-list/che-dev)
 * **Weekly Meetings:** Join us in our [Che community meeting](https://github.com/eclipse/che/wiki/Che-Dev-Meetings) every second monday.
@@ -67,18 +68,16 @@ If you are interested in fixing issues and contributing directly to the code bas
 - :bug: [Submitting bugs](https://github.com/eclipse/che/issues/new/choose)
 - :page_facing_up: [Contributor license agreement](https://github.com/eclipse/che/wiki/Eclipse-Contributor-Agreement)
 - :checkered_flag: [Development workflows](./CONTRIBUTING.md)
-- :ok_hand: [Review source code changes](https://github.com/eclipse/che/pulls)
-- :pencil: [Improve docs](https://github.com/eclipse/che-docs)
-- :building_construction: [Che architecture](https://www.eclipse.org/che/docs/che-7/administration-guide/che-architecture-overview/)
+- :pencil: [Improve docs](https://github.com/eclipse-che/che-docs)
+- :building_construction: [Che architecture](https://eclipse.dev/che/docs/stable/administration-guide/architecture-overview/)
 - :octocat: [Che repositories](./CONTRIBUTING.md#other-che-repositories)
 - :sparkles: [Good first issue for new contributors](https://github.com/eclipse/che/wiki/Labels#new-contributors)
 
 
 #### Extending Eclipse Che
-- [Add a new language support. (to be provided soon)](https://www.eclipse.org/che/docs/che-7/adding-support-for-a-new-language/)
-- [Package your favorite VSCode extensions and make them available in Che.](https://www.eclipse.org/che/docs/che-7/end-user-guide/publishing-metadata-for-a-vs-code-extension/)
-- [Write your own VSCode extension that runs on a dedicated side car container.](https://www.eclipse.org/che/docs/che-7/what-is-a-che-theia-plug-in/)
-- [Build and package your custom Che-Theia editor with your extensions and plugins.](https://www.eclipse.org/che/docs/che-7/using-alternative-ides-in-che/)
+- [Customize the default dev tooling container (the universal developer image or UDI).](https://github.com/devfile/developer-images/)
+- [Customize the list of getting started samples.](https://eclipse.dev/che/docs/stable/administration-guide/configuring-getting-started-samples/)
+- [Add your own editor definition.](https://github.com/eclipse-che/che-plugin-registry/blob/main/che-editors.yaml)
 
 ### Roadmap
 We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open way. We welcome anyone to ask question and contribute to the roadmap by joining our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings).

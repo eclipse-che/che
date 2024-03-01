@@ -46,12 +46,6 @@ export class ProjectAndFileTests {
 		Logger.debug();
 		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
 		const workbench: Workbench = new Workbench();
-		await workbench.click();
-
-		await this.driverHelper.waitAndClick(
-			this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
-			TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-		);
 
 		try {
 			await workbench.click();
@@ -61,6 +55,32 @@ export class ProjectAndFileTests {
 			);
 		} catch (e) {
 			Logger.info('Second welcome content dialog box was not shown');
+		}
+	}
+
+	/**
+	 * manage to 'Trusted' Workspace Mode, when the trust author dialog does not appear
+	 * the "Manage Workspace Trust" box is appeared in Source Control View
+	 */
+	async performManageWorkspaceTrustBox(): Promise<void> {
+		Logger.debug();
+
+		try {
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+			await this.driverHelper.waitAndClick(
+				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).modifiedFile,
+				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+			);
+		} catch (err) {
+			Logger.error(`Manage Workspace Trust box was not shown: ${err}`);
+			throw err;
 		}
 	}
 
