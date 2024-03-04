@@ -63,7 +63,6 @@ suite(
 		const timeToRefresh: number = 1500;
 		const changesToCommit: string = new Date().getTime().toString();
 		const fileToChange: string = 'Date.txt';
-		/*const commitChangesButtonLabel: string = `Commit Changes on "${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;*/
 		const refreshButtonLabel: string = 'Refresh';
 		const pushItemLabel: string = 'Push';
 		let testRepoProjectName: string;
@@ -141,7 +140,7 @@ suite(
 		test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
-			/* logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);*/
+			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
 			await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 			// wait while changes counter will be refreshed
 			await driverHelper.wait(timeToRefresh);
@@ -164,7 +163,7 @@ suite(
 			await scmProvider.commitChanges('Commit ' + changesToCommit);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
-			/* logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);*/
+			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
 			await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 			// wait while changes counter will be refreshed
 			await driverHelper.wait(timeToRefresh);
@@ -174,11 +173,6 @@ suite(
 		});
 
 		test('Push the changes', async function (): Promise<void> {
-			/* await driverHelper.waitVisibility(
-				webCheCodeLocators.ScmView.actionConstructor(
-					`Push 1 commits to origin/${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`
-				)
-			);*/
 			await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			Logger.debug('scmProvider.openMoreActions');
@@ -191,7 +185,7 @@ suite(
 		test('Check if the changes were pushed', async function (): Promise<void> {
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
-			/* logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);*/
+			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
 			await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 			const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
 				webCheCodeLocators.Notification.action,

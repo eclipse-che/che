@@ -182,7 +182,7 @@ suite(
 				await scmProvider.commitChanges('Commit ' + changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
-				/* logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);*/
+				Logger.debug(`wait and click: "${refreshButtonLabel}"`);
 				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				// wait while changes counter will be refreshed
 				await driverHelper.wait(timeToRefresh);
