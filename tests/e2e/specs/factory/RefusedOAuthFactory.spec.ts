@@ -159,8 +159,8 @@ suite(
 			test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-				await scmProvider.takeAction(refreshButtonLabel);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				// wait while changes counter will be refreshed
 				await driverHelper.wait(timeToRefresh);
 				const changes: number = await scmProvider.getChangeCount();
@@ -182,8 +182,8 @@ suite(
 				await scmProvider.commitChanges('Commit ' + changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-				await scmProvider.takeAction(refreshButtonLabel);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				// wait while changes counter will be refreshed
 				await driverHelper.wait(timeToRefresh);
 				const changes: number = await scmProvider.getChangeCount();

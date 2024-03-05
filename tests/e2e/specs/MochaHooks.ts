@@ -38,7 +38,7 @@ export function registerRunningWorkspace(workspaceName: string): void {
 		: ((): void => {
 				Logger.debug('delete workspace name');
 				WorkspaceHandlingTests.clearWorkspaceName();
-			})();
+		  })();
 
 	latestWorkspace = workspaceName;
 }
