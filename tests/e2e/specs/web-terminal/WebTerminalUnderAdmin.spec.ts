@@ -67,16 +67,16 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 	});
 	test('Verify help command under admin user', async function (): Promise<void> {
 		const helpCommandExpectedResult: string =
-			'oc         \\d+\\.\\d+\\.\\d+          OpenShift CLI\n' +
-			'kubectl    \\d+\\.\\d+\\.\\d+          Kubernetes CLI\n' +
-			'kustomize  \\d+\\.\\d+\\.\\d+           Kustomize CLI \\(built-in to kubectl\\)\n' +
-			'helm       \\d+\\.\\d+\\.\\d+          Helm CLI\n' +
-			'kn         \\d+\\.\\d+\\.\\d+           KNative CLI\n' +
-			'tkn        \\d+\\.\\d+\\.\\d+          Tekton CLI\n' +
-			'subctl     \\d+\\.\\d+\\.\\d+          Submariner CLI\n' +
-			'odo        \\d+\\.\\d+\\.\\d+          Red Hat OpenShift Developer CLI\n' +
-			'virtctl    \\d+\\.\\d+\\.\\d+          KubeVirt CLI\n' +
-			'jq         \\d+\\.\\d+             jq';
+			'oc.*\\d+\\.\\d+\\.\\d+.*OpenShift CLI\n' +
+			'kubectl.*\\d+\\.\\d+\\.\\d+.*Kubernetes CLI\n' +
+			'kustomize.*\\d+\\.\\d+\\.\\d+.*Kustomize CLI \\(built-in to kubectl\\)\n' +
+			'helm.*\\d+\\.\\d+\\.\\d+.*Helm CLI\n' +
+			'kn.*\\d+\\.\\d+\\.\\d+.*KNative CLI\n' +
+			'tkn.*\\d+\\.\\d+\\.\\d+.*Tekton CLI\n' +
+			'subctl.*\\d+\\.\\d+\\.\\d+.*Submariner CLI\n' +
+			'odo.*\\d+\\.\\d+\\.\\d+.*Red Hat OpenShift Developer CLI\n' +
+			'virtctl.*\\d+\\.\\d+\\.\\d+.*KubeVirt CLI\n' +
+			'jq.*\\d+\\.\\d+.*jq';
 
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
 		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
