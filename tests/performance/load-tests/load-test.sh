@@ -96,7 +96,7 @@ function runTest() {
     else
       print_error "Timeout waiting for dw$i to become ready or an error occurred."
       kubectl describe dw dw$i >logs/dw$i-log.log
-      kubectl logs $(oc get dw dw$i --template='{{.status.devworkspaceId}}') >logs/dw$i-pod.log || true
+      kubectl logs $(kubectl get dw dw$i --template='{{.status.devworkspaceId}}') >logs/dw$i-pod.log || true
     fi
   done
 
