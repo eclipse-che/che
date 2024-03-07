@@ -13,7 +13,7 @@ https://github.com/eclipse-che/che-server
 [![Eclipse Che - Eclipse Next-Generation IDE](https://raw.githubusercontent.com/eclipse/che/assets/eclipseche.png)](
 https://eclipse.dev/che/)
 
-**Next-generation container development platform, developer workspace server and cloud IDE**
+**Platform for providing Kubernetes-based Cloud Development Environments for Enterprise Teams**
 
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
 <a href="https://sonarcloud.io/dashboard?id=org.eclipse.che%3Ache-parent%3Amaster">
