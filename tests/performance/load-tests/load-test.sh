@@ -78,6 +78,8 @@ function runTest() {
 
   # Delete logs on file system if it exists
   rm -f logs/dw*
+  # Create logs directory
+  mkdir logs || true
 
   total_time=0
   succeeded=0
