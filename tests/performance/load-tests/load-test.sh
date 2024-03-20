@@ -8,6 +8,8 @@ NC='\033[0m' # No Color
 
 # Do cleanup if the script is interrupted or fails
 trap cleanup ERR SIGINT
+# Detect the operating system
+OS="$(uname)"
 
 function print() {
   echo -e "${GREEN}$1${NC}"
@@ -49,7 +51,6 @@ function setCompletitionsCount() {
   if [ -z $COMPLETITIONS_COUNT ]; then
     echo "Parameter -c wasn't set, setting completitions count to 3."
     export COMPLETITIONS_COUNT=3
-  else
     echo "Parameter -c was set to  $COMPLETITIONS_COUNT ."
   fi
 
@@ -62,10 +63,19 @@ function setCompletitionsCount() {
   fi
 }
 
+function getTimestamp() {
+  if [ "$OS" = "Darwin" ]; then
+    date -j -f "%Y-%m-%dT%H:%M:%S" "$1" "+%s"
+  else
+    [ "$OS" = "Linux" ]
+    date -d $1 +%s
+  fi
+}
+
 function runTest() {
   # start COMPLETITIONS_COUNT workspaces in parallel
   for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
-    cat devworkspace.yaml | sed "0,/name: code-latest/s//name: dw$i/" | kubectl apply -f - &
+    awk '/name:/ && !modif { sub(/name: .*/, "name: '"dw$i"'"); modif=1 } {print}' devworkspace.yaml | kubectl apply -f - &
   done
   wait
 
@@ -88,8 +98,8 @@ function runTest() {
     if [ "$(kubectl get dw dw$i --template='{{.status.phase}}')" == "Running" ]; then
       start_time=$(kubectl get dw dw$i --template='{{range .status.conditions}}{{if eq .type "Started"}}{{.lastTransitionTime}}{{end}}{{end}}')
       end_time=$(kubectl get dw dw$i --template='{{range .status.conditions}}{{if eq .type "Ready"}}{{.lastTransitionTime}}{{end}}{{end}}')
-      start_timestamp=$(date -d $start_time +%s)
-      end_timestamp=$(date -d $end_time +%s)
+      start_timestamp=$(getTimestamp $start_time)
+      end_timestamp=$(getTimestamp $end_time)
       dw_starting_time=$((end_timestamp - start_timestamp))
 
       print "Devworkspace dw$i starting time: $dw_starting_time seconds"
