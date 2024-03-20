@@ -65,7 +65,7 @@ function setCompletitionsCount() {
 function runTest() {
   # start COMPLETITIONS_COUNT workspaces in parallel
   for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
-    cat devworkspace.yaml | sed "0,/name: code-latest/s//name: dw$i/" | kubectl apply -f - &
+    awk '/name:/ && !modif { sub(/name: .*/, "name: '"dw$i"'"); modif=1 } {print}' devworkspace.yaml | kubectl apply -f - &
   done
   wait
 
