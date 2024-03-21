@@ -91,6 +91,7 @@ function runTest() {
   # Create logs directory
   mkdir logs || true
 
+  # Get all events
   kubectl get events --field-selector involvedObject.kind=Pod >logs/events.log
 
   total_time=0
