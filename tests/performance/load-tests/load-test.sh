@@ -109,7 +109,7 @@ function runTest() {
       print_error "Timeout waiting for dw$i to become ready or an error occurred."
       ws_name=$(kubectl get dw dw$i --template='{{.status.devworkspaceId}}')
       kubectl describe dw dw$i >logs/dw$i-log.log
-      kubectl get events | grep $ws_name >logs/dw$i-events.log
+      kubectl get events --field-selector involvedObject.kind=Pod | grep $ws_name >logs/dw$i-events.log
       kubectl logs $ws_name >logs/dw$i-pod.log || true
     fi
   done
