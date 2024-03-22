@@ -110,10 +110,9 @@ function runTest() {
       succeeded=$((succeeded + 1))
     else
       print_error "Timeout waiting for dw$i to become ready or an error occurred."
-      ws_name=$(kubectl get dw dw$i --template='{{.status.devworkspaceId}}')
-      kubectl describe dw dw$i >logs/dw$i-log.log
-      cat logs/events.log | grep $ws_name >logs/dw$i-events.log
-      kubectl logs $ws_name >logs/dw$i-pod.log || true
+      devworkspace_id=$(kubectl get dw dw$i --template='{{.status.devworkspaceId}}')
+      kubectl describe dw dw$i >logs/dw$i-describe.log
+      cat logs/events.log | grep $devworkspace_id >logs/dw$i-$devworkspace_id-events.log
     fi
   done
 
