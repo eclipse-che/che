@@ -26,7 +26,7 @@ function cleanup() {
 }
 
 function parseArguments() {
-  while getopts "t:c:" opt; do
+  while getopts "t:c:l:" opt; do
     case $opt in
     t)
       export WORKSPACE_IDLE_TIMEOUT=$OPTARG
@@ -38,6 +38,9 @@ function parseArguments() {
       fi
       export COMPLETITIONS_COUNT=$OPTARG
       ;;
+    l)
+      export DEVWORKSPACE_LINK=$OPTARG
+      ;;
     \?)
       print_error "Invalid option -c. Try for example something like ./load-test.sh -c 7"
       exit 1
@@ -46,7 +49,7 @@ function parseArguments() {
   done
 }
 
-function setCompletitionsCount() {
+function checkScriptVariables() {
   # Set the number of workspaces to start
   if [ -z $COMPLETITIONS_COUNT ]; then
     echo "Parameter -c wasn't set, setting completitions count to 3."
@@ -60,6 +63,20 @@ function setCompletitionsCount() {
     export WORKSPACE_IDLE_TIMEOUT=120
   else
     echo "Parameter -t was set to $WORKSPACE_IDLE_TIMEOUT second."
+  fi
+
+  # Get devworkspace yaml from link if it is set
+  # https://gist.githubusercontent.com/SkorikSergey/90a9de0d7aa2aa03e2c9977820930264/raw/db3c44ebb631cbf678acc962b6c4e447137503c7/gistfile1.txt
+  if [ -n "$DEVWORKSPACE_LINK" ]; then
+    if curl --fail --insecure "$DEVWORKSPACE_LINK" -o devworkspace.yaml; then
+      echo "Download succeeded, saved to devworkspace.yaml file."
+    else
+      print_error "Download of $DEVWORKSPACE_LINK file failed"
+      exit 1
+    fi
+  else
+    print "Local devworkspace.yaml file will be used."
+    cp -f example.yaml devworkspace.yaml
   fi
 }
 
@@ -130,7 +147,7 @@ function printResults() {
 }
 
 parseArguments "$@"
-setCompletitionsCount
+checkScriptVariables
 cleanup
 runTest
 printResults
