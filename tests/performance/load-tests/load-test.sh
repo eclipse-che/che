@@ -91,6 +91,9 @@ function runTest() {
   # Create logs directory
   mkdir logs || true
 
+  # Get all events
+  kubectl get events --field-selector involvedObject.kind=Pod >logs/events.log
+
   total_time=0
   succeeded=0
   echo "Calculate average workspaces starting time"
@@ -107,8 +110,9 @@ function runTest() {
       succeeded=$((succeeded + 1))
     else
       print_error "Timeout waiting for dw$i to become ready or an error occurred."
-      kubectl describe dw dw$i >logs/dw$i-log.log
-      kubectl logs $(kubectl get dw dw$i --template='{{.status.devworkspaceId}}') >logs/dw$i-pod.log || true
+      devworkspace_id=$(kubectl get dw dw$i --template='{{.status.devworkspaceId}}')
+      kubectl describe dw dw$i >logs/dw$i-describe.log
+      cat logs/events.log | grep $devworkspace_id >logs/dw$i-$devworkspace_id-events.log
     fi
   done
 
