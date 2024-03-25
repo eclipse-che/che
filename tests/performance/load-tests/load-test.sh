@@ -11,6 +11,9 @@ trap cleanup ERR SIGINT
 # Detect the operating system
 OS="$(uname)"
 
+# Capture start time
+start=$(date +%s)
+
 function print() {
   echo -e "${GREEN}$1${NC}"
 }
@@ -21,8 +24,19 @@ function print_error() {
 
 function cleanup() {
   echo "Clean up the environment"
-  kubectl delete dw --all >/dev/null
-  kubectl delete dwt --all >/dev/null
+  kubectl delete dw --all
+  kubectl delete dwt --all
+}
+
+function getDwStartingTime() {
+  start_time=$(kubectl get dw dw$1 --template='{{range .status.conditions}}{{if eq .type "Started"}}{{.lastTransitionTime}}{{end}}{{end}}')
+  end_time=$(kubectl get dw dw$1 --template='{{range .status.conditions}}{{if eq .type "Ready"}}{{.lastTransitionTime}}{{end}}{{end}}')
+  start_timestamp=$(getTimestamp $start_time)
+  end_timestamp=$(getTimestamp $end_time)
+  dw_starting_time=$((end_timestamp - start_timestamp))
+
+  print "Devworkspace dw$1 starting time: $dw_starting_time seconds"
+  echo $dw_starting_time >>logs/sum.log
 }
 
 function parseArguments() {
@@ -110,9 +124,10 @@ function runTest() {
   wait
 
   # Delete logs on file system if it exists
-  rm -f logs/dw*
+  rm -f logs/*
   # Create logs directory
   mkdir logs || true
+  touch logs/sum.log
 
   # Get all events
   kubectl get events --field-selector involvedObject.kind=Pod >logs/events.log
@@ -122,14 +137,7 @@ function runTest() {
   echo "Calculate average workspaces starting time"
   for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
     if [ "$(kubectl get dw dw$i --template='{{.status.phase}}')" == "Running" ]; then
-      start_time=$(kubectl get dw dw$i --template='{{range .status.conditions}}{{if eq .type "Started"}}{{.lastTransitionTime}}{{end}}{{end}}')
-      end_time=$(kubectl get dw dw$i --template='{{range .status.conditions}}{{if eq .type "Ready"}}{{.lastTransitionTime}}{{end}}{{end}}')
-      start_timestamp=$(getTimestamp $start_time)
-      end_timestamp=$(getTimestamp $end_time)
-      dw_starting_time=$((end_timestamp - start_timestamp))
-
-      print "Devworkspace dw$i starting time: $dw_starting_time seconds"
-      total_time=$((total_time + dw_starting_time))
+      getDwStartingTime $i & # >>logs/sum.log &
       succeeded=$((succeeded + 1))
     else
       print_error "Timeout waiting for dw$i to become ready or an error occurred."
@@ -139,9 +147,15 @@ function runTest() {
     fi
   done
 
+  wait
 }
 
 function printResults() {
+  # Calculate average workspace starting time
+  while IFS= read -r line; do
+    ((total_time += line))
+  done <"logs/sum.log"
+
   print "==================== Test results ===================="
   if [ $succeeded -eq 0 ]; then
     print_error "No workspaces started successfully."
@@ -150,6 +164,10 @@ function printResults() {
     print "Average workspace starting time for $succeeded workspaces from $COMPLETITIONS_COUNT started: $((total_time / succeeded)) seconds"
   fi
   print "$((COMPLETITIONS_COUNT - succeeded)) workspaces failed. See failed workspace pod logs in the current folder for details."
+
+  # Calculate and display the elapsed time
+  end=$(date +%s)
+  print "Elapsed time: $((end - start)) seconds"
 }
 
 parseArguments "$@"
