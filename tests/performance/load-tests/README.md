@@ -11,7 +11,8 @@ What do you need to run those tests
 1. Log in to Openshift cluster with Openshift DevSpaces or Eclipse Che deployed from terminal
 2. Start `load-test.sh` script from `test/e2e/performance/load-tests`. Set number of started workspaces by -c parameter(like ./load-test.sh -c 5). Set timeout for waiting workspaces to start by -t parameter in seconds(like ./load-test.sh -t 240). 
 3. This script uses local dewvorspace.yaml to starts workspaces.
-4. As results there are average time of workspace starting and number of failed workspaces.
+4. Also it is possible to get test devworkspace yam file by link using -l option(like `./load-test.sh -l https://gist.githubusercontent.com/SkorikSergey/1856af20514ecce6c0dbb71f44fc0bcb/raw/3f6a38f0f6adf017dcecf6486ffe507ebe6cfc31/load-test-devworkspace.yaml)`.
+5. As results there are average time of workspace starting and number of failed workspaces.
 
 
 ## Results and logs

@@ -26,7 +26,7 @@ function cleanup() {
 }
 
 function parseArguments() {
-  while getopts "t:c:" opt; do
+  while getopts "t:c:l:" opt; do
     case $opt in
     t)
       export WORKSPACE_IDLE_TIMEOUT=$OPTARG
@@ -38,6 +38,9 @@ function parseArguments() {
       fi
       export COMPLETITIONS_COUNT=$OPTARG
       ;;
+    l)
+      export DEVWORKSPACE_LINK=$OPTARG
+      ;;
     \?)
       print_error "Invalid option -c. Try for example something like ./load-test.sh -c 7"
       exit 1
@@ -46,7 +49,7 @@ function parseArguments() {
   done
 }
 
-function setCompletitionsCount() {
+function checkScriptVariables() {
   # Set the number of workspaces to start
   if [ -z $COMPLETITIONS_COUNT ]; then
     echo "Parameter -c wasn't set, setting completitions count to 3."
@@ -60,6 +63,26 @@ function setCompletitionsCount() {
     export WORKSPACE_IDLE_TIMEOUT=120
   else
     echo "Parameter -t was set to $WORKSPACE_IDLE_TIMEOUT second."
+  fi
+
+  # Get devworkspace yaml from link if it is set
+  # example - https://gist.githubusercontent.com/SkorikSergey/1856af20514ecce6c0dbb71f44fc0bcb/raw/3f6a38f0f6adf017dcecf6486ffe507ebe6cfc31/load-test-devworkspace.yaml
+  if [ -n "$DEVWORKSPACE_LINK" ]; then
+    if curl --fail --insecure "$DEVWORKSPACE_LINK" -o devworkspace.yaml; then
+      echo "Download succeeded, saved to devworkspace.yaml file."
+
+      echo "Check the devworkspace.yaml file content correctness."
+      if ! kubectl apply -f devworkspace.yaml --dry-run=server; then
+        print_error "Devworkspace.yaml file is not correct."
+        exit 1
+      fi
+    else
+      print_error "Download of $DEVWORKSPACE_LINK file failed"
+      exit 1
+    fi
+  else
+    print "Local devworkspace.yaml file will be used."
+    cp -f example.yaml devworkspace.yaml
   fi
 }
 
@@ -130,7 +153,7 @@ function printResults() {
 }
 
 parseArguments "$@"
-setCompletitionsCount
+checkScriptVariables
 cleanup
 runTest
 printResults
