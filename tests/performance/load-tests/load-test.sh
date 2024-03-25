@@ -66,10 +66,16 @@ function checkScriptVariables() {
   fi
 
   # Get devworkspace yaml from link if it is set
-  # example - https://gist.githubusercontent.com/SkorikSergey/90a9de0d7aa2aa03e2c9977820930264/raw/db3c44ebb631cbf678acc962b6c4e447137503c7/gistfile1.txt
+  # example - https://gist.githubusercontent.com/SkorikSergey/1856af20514ecce6c0dbb71f44fc0bcb/raw/3f6a38f0f6adf017dcecf6486ffe507ebe6cfc31/load-test-devworkspace.yaml
   if [ -n "$DEVWORKSPACE_LINK" ]; then
     if curl --fail --insecure "$DEVWORKSPACE_LINK" -o devworkspace.yaml; then
       echo "Download succeeded, saved to devworkspace.yaml file."
+
+      echo "Check the devworkspace.yaml file content correctness."
+      if ! kubectl apply -f devworkspace.yaml --dry-run=server; then
+        print_error "Devworkspace.yaml file is not correct."
+        exit 1
+      fi
     else
       print_error "Download of $DEVWORKSPACE_LINK file failed"
       exit 1
