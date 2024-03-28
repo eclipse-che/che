@@ -121,7 +121,7 @@ function checkScriptVariables() {
     fi
   else
     print "Local devworkspace.yaml file will be used."
-    cp -f example.yaml devworkspace.yaml
+    cp -f samples/simple-ephemeral.yaml devworkspace.yaml
   fi
 }
 
