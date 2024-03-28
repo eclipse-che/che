@@ -105,7 +105,7 @@ function checkScriptVariables() {
   fi
 
   # Get devworkspace yaml from link if it is set
-  # example - https://gist.githubusercontent.com/SkorikSergey/1856af20514ecce6c0dbb71f44fc0bcb/raw/3f6a38f0f6adf017dcecf6486ffe507ebe6cfc31/load-test-devworkspace.yaml
+  # example - https://raw.githubusercontent.com/eclipse/che/main/tests/performance/load-tests/samples/simple-ephemeral.yaml
   if [ -n "$DEVWORKSPACE_LINK" ]; then
     if curl --fail --insecure "$DEVWORKSPACE_LINK" -o devworkspace.yaml; then
       echo "Download succeeded, saved to devworkspace.yaml file."
