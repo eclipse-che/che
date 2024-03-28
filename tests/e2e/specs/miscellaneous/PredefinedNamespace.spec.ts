@@ -70,8 +70,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		expect(expectedProject).contains(predefinedNamespaceName);
 	});
 
-	// make sure that the generated devspace has been created in the predefined namespace
-	test('Create test DevSpace and make sure that it has been created in the predefined project', function (): void {
+	// ensure the generated DevSpace is created within the predefined namespace
+	test('Create test DevSpace and verify its creation within the predefined namespace', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
 		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 		// relogin under the admin user (because regular user does not have permissions for getting pod states)
@@ -79,9 +79,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
 	});
 
-	// verify that just created workspace with unique name is present in the predefined namespace. Potentially several users can use the same cluster
-	// and create several DevSpaces in the same OpenShift project. We need to make sure that there was created our test project by uniq name
-	test('Validate that has been created correct DevSpace with unique name)', function (): void {
+	// verify that the newly created workspace, identified by a unique name, exists within the predefined namespace. Given that multiple users may use the same cluster and create multiple DevSpaces within the same OpenShift project, it's essential to confirm that our test project, distinguished by a unique name, has been successfully created.
+	test('Validate the creation of the correct DevSpace with a unique name', function (): void {
 		const ocDevWorkspaceOutput: string = kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration();
 		expect(ocDevWorkspaceOutput).includes(workspaceName);
 	});
