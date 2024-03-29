@@ -16,7 +16,10 @@ start=$(date +%s)
 # Current namespace where the script is running
 current_namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
 start_separately=false
-test_namespace_name=test-dw-
+# Default value for test namespace name
+test_namespace_name=load-test-namespace-
+# Default value for test devworkspace name
+dw_name=load-test-dw-
 
 function print() {
   echo -e "${GREEN}$1${NC}"
@@ -82,10 +85,9 @@ function cleanup() {
 
   if [ $start_separately = true ]; then
     echo "Delete test namespaces"
-    kubectl delete namespace $(kubectl get namespace | grep dw | awk '{print $1}') >/dev/null 2>&1 || true
+    kubectl delete namespace $(kubectl get namespace | grep $test_namespace_name | awk '{print $1}') >/dev/null 2>&1 || true
   else
-    kubectl delete dw -n $current_namespace --all >/dev/null 2>&1
-    kubectl delete dwt -n $current_namespace --all >/dev/null 2>&1
+    kubectl delete dw $(kubectl get dw | grep $dw_name | awk '{print $1}') -n $current_namespace >/dev/null 2>&1 || true
   fi
 }
 
@@ -127,15 +129,15 @@ function checkScriptVariables() {
 }
 
 function getDwStartingTime() {
-  start_time=$(kubectl get dw dw$1 -n $2 --template='{{range .status.conditions}}{{if eq .type "Started"}}{{.lastTransitionTime}}{{end}}{{end}}')
-  end_time=$(kubectl get dw dw$1 -n $2 --template='{{range .status.conditions}}{{if eq .type "Ready"}}{{.lastTransitionTime}}{{end}}{{end}}')
+  start_time=$(kubectl get dw $dw_name$1 -n $2 --template='{{range .status.conditions}}{{if eq .type "Started"}}{{.lastTransitionTime}}{{end}}{{end}}')
+  end_time=$(kubectl get dw $dw_name$1 -n $2 --template='{{range .status.conditions}}{{if eq .type "Ready"}}{{.lastTransitionTime}}{{end}}{{end}}')
   start_timestamp=$(getTimestamp $start_time)
   end_timestamp=$(getTimestamp $end_time)
   dw_starting_time=$((end_timestamp - start_timestamp))
 
-  print "Devworkspace dw$1 in $2 namespace starting time: $dw_starting_time seconds"
+  print "Devworkspace $dw_name$1 in $2 namespace starting time: $dw_starting_time seconds"
   echo $dw_starting_time >>logs/sum.log
-  kubectl delete dw dw$1 -n $1 >/dev/null 2>&1
+  kubectl delete dw $dw_name$1 -n $2 >/dev/null 2>&1
 }
 
 function precreateNamespaces() {
@@ -164,7 +166,7 @@ function runTest() {
     if [ $start_separately = true ]; then
       namespace=$test_namespace_name$i
     fi
-    awk '/name:/ && !modif { sub(/name: .*/, "name: '"dw$i"'"); modif=1 } {print}' devworkspace.yaml | kubectl apply -n $namespace -f - &
+    awk '/name:/ && !modif { sub(/name: .*/, "name: '"$dw_name$i"'"); modif=1 } {print}' devworkspace.yaml | kubectl apply -n $namespace -f - &
   done
   wait
 
@@ -175,7 +177,7 @@ function runTest() {
     if [ $start_separately = true ]; then
       namespace=$test_namespace_name$i
     fi
-    kubectl wait --for=condition=Ready "dw/dw$i" --timeout=${WORKSPACE_IDLE_TIMEOUT}s -n $namespace || true &
+    kubectl wait --for=condition=Ready "dw/$dw_name$i" --timeout=${WORKSPACE_IDLE_TIMEOUT}s -n $namespace || true &
   done
   wait
 
@@ -200,14 +202,14 @@ function runTest() {
     if [ $start_separately = true ]; then
       namespace=$test_namespace_name$i
     fi
-    if [ "$(kubectl get dw dw$i -n $namespace --template='{{.status.phase}}')" == "Running" ]; then
+    if [ "$(kubectl get dw $dw_name$i -n $namespace --template='{{.status.phase}}')" == "Running" ]; then
       getDwStartingTime $i $namespace &
       succeeded=$((succeeded + 1))
     else
-      print_error "Timeout waiting for dw$i to become ready or an error occurred."
-      devworkspace_id=$(kubectl get dw dw$i -n $namespace --template='{{.status.devworkspaceId}}')
-      kubectl describe dw dw$i -n $namespace >logs/dw$i-describe.log
-      cat logs/events.log | grep $devworkspace_id >logs/dw$i-$devworkspace_id-events.log || true
+      print_error "Timeout waiting for $dw_name$i to become ready or an error occurred."
+      devworkspace_id=$(kubectl get dw $dw_name$i -n $namespace --template='{{.status.devworkspaceId}}')
+      kubectl describe dw $dw_name$i -n $namespace >logs/$dw_name$i-describe.log
+      cat logs/events.log | grep $devworkspace_id >logs/$dw_name$i-$devworkspace_id-events.log || true
     fi
   done
 
