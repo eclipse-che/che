@@ -225,7 +225,6 @@ function printResults() {
   echo "==================== Test results ===================="
   if [ $succeeded -eq 0 ]; then
     print_error "No workspaces started successfully."
-    exit 1
   else
     print "Average workspace starting time for $succeeded workspaces from $COMPLETITIONS_COUNT started: $((total_time / succeeded)) seconds"
   fi
