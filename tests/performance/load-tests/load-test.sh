@@ -27,14 +27,14 @@ function print_error() {
 }
 
 # Function to display help information
-display_help() {
+function display_help() {
   echo "Usage: $0 [OPTIONS]"
   echo "Options:"
-  echo "  -t <SECONDS>       Set the timeout in seconds (default: 120)"
-  echo "  -c <COUNT>         Set the number of workspaces to start (default: 3)"
-  echo "  -l                 Set the link to the devworkspace.yaml file"
-  echo "  --start-separately Start workspaces in separate namespaces(one workspace per namespace)"
-  echo "  --help             Display this help message"
+  echo "  -t <SECONDS>                  Set the timeout in seconds (default: 120)"
+  echo "  -c <COUNT>                    Set the number of workspaces to start (default: 3)"
+  echo "  -l                            Set the link to the devworkspace.yaml file"
+  echo "  --one-workspace-per-namespace Start workspaces in separate namespaces(one workspace per namespace)"
+  echo "  --help                        Display this help message"
   exit 0
 }
 
@@ -42,10 +42,10 @@ function parseArguments() {
 
   for arg in "$@"; do
     case $arg in
-    # Check for --start-separately argument
-    --start-separately)
+    # Check for --one-workspace-per-namespace argument
+    --one-workspace-per-namespace)
       export start_separately=true
-      shift # Remove --start-separately from processing
+      shift # Remove --one-workspace-per-namespace from processing
       ;;
       # Check for --help argument
     --help)
