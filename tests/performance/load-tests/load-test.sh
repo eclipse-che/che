@@ -79,12 +79,13 @@ function parseArguments() {
 
 function cleanup() {
   echo "Clean up the environment"
-  kubectl delete dw --all >/dev/null 2>&1
-  kubectl delete dwt --all >/dev/null 2>&1
 
   if [ $start_separately = true ]; then
     echo "Delete test namespaces"
     kubectl delete namespace $(kubectl get namespace | grep dw | awk '{print $1}') >/dev/null 2>&1 || true
+  else
+    kubectl delete dw -n $current_namespace --all >/dev/null 2>&1
+    kubectl delete dwt -n $current_namespace --all >/dev/null 2>&1
   fi
 }
 

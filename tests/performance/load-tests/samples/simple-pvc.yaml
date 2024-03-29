@@ -5,8 +5,6 @@ metadata:
 spec:
   started: true
   template:
-    attributes:
-      controller.devfile.io/storage-type: ephemeral
     components:
       - name: dev
         container:
