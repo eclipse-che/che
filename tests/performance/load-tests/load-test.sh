@@ -162,8 +162,7 @@ function getTimestamp() {
 
 function runTest() {
   # add label to devworkspace.yaml
-  cat devworkspace.yaml | awk -v key="test-type" -v value=" load-tests" '/metadata:/{$0=$0"\n  labels:\n    "key":"value}1' > patched-dw.yaml
-  cat patched-dw.yaml
+  cat devworkspace.yaml | awk -v key="test-type" -v value=" load-tests" '/metadata:/{$0=$0"\n  labels:\n    "key":"value}1' >patched-dw.yaml
 
   # start COMPLETITIONS_COUNT workspaces in parallel
   namespace=$current_namespace
