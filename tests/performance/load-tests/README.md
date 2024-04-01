@@ -13,7 +13,7 @@ Follow these steps to run the load tests:
 2. Start the `load-test.sh` script from `test/e2e/performance/load-tests`. Set the number of workspaces to start using the `-c` parameter (e.g., `./load-test.sh -c 5`). Set the timeout for waiting for workspaces to start using the `-t` parameter in seconds (e.g., `./load-test.sh -t 240`).
 3. This script uses the local `example.yaml` file to start the workspaces.
 4. Alternatively, you can provide a link to the test devworkspace YAML file using the `-l` argument (e.g., `./load-test.sh -l https://gist.githubusercontent.com/SkorikSergey/1856af20514ecce6c0dbb71f44fc0bcb/raw/3f6a38f0f6adf017dcecf6486ffe507ebe6cfc31/load-test-devworkspace.yaml`).
-5. If you want to start workspaces in separate namespaces (one workspace per namespace), use the `--one-workspace-per-namespace` argument (e.g., `./load-test.sh --one-workspace-per-namespace`).
+5. If you want to start workspaces in separate namespaces (one workspace per namespace), use the `-s` as flag option (e.g., `./load-test.sh -s `).
 6. The script will provide the average time for workspace starting and the number of failed workspaces.
 
 ## Results and logs

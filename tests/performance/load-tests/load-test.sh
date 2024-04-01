@@ -33,31 +33,25 @@ function print_error() {
 function display_help() {
   echo "Usage: $0 [OPTIONS]"
   echo "Options:"
-  echo "  -t <SECONDS>                  Set the timeout in seconds (default: 120)"
-  echo "  -c <COUNT>                    Set the number of workspaces to start (default: 3)"
-  echo "  -l                            Set the link to the devworkspace.yaml file"
-  echo "  --one-workspace-per-namespace Start workspaces in separate namespaces(one workspace per namespace)"
-  echo "  --help                        Display this help message"
+  echo "  -t <SECONDS>   Set the timeout in seconds (default: 120)"
+  echo "  -c <COUNT>     Set the number of workspaces to start (default: 3)"
+  echo "  -l             Set the link to the devworkspace.yaml file"
+  echo "  -s             Start workspaces in separate namespaces(one workspace per namespace)"
+  echo "  --help         Display this help message"
   exit 0
 }
 
 function parseArguments() {
-
   for arg in "$@"; do
     case $arg in
-    # Check for --one-workspace-per-namespace argument
-    --one-workspace-per-namespace)
-      export start_separately=true
-      shift # Remove --one-workspace-per-namespace from processing
-      ;;
-      # Check for --help argument
+    # Check for --help argument
     --help)
       display_help
       ;;
     esac
   done
 
-  while getopts "t:c:l:" opt; do
+  while getopts "t:c:l:sh" opt; do
     case $opt in
     t)
       export WORKSPACE_IDLE_TIMEOUT=$OPTARG
@@ -72,6 +66,12 @@ function parseArguments() {
     l)
       export DEVWORKSPACE_LINK=$OPTARG
       ;;
+    s)
+      export start_separately=true
+      ;;
+    h)
+      display_help
+      ;;
     \?)
       print_error "Invalid option -c. Try for example something like ./load-test.sh -c 7"
       exit 1
@@ -85,9 +85,9 @@ function cleanup() {
 
   if [ $start_separately = true ]; then
     echo "Delete test namespaces"
-    kubectl delete namespace $(kubectl get namespace | grep $test_namespace_name | awk '{print $1}') >/dev/null 2>&1 || true
+    kubectl delete namespace --selector=test-type=load-tests >/dev/null 2>&1 || true
   else
-    kubectl delete dw $(kubectl get dw | grep $dw_name | awk '{print $1}') -n $current_namespace >/dev/null 2>&1 || true
+    kubectl delete dw --selector=test-type=load-tests -n $current_namespace >/dev/null 2>&1 || true
   fi
 }
 
@@ -146,6 +146,7 @@ function precreateNamespaces() {
     for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
       namespace=$test_namespace_name$i
       kubectl create namespace $namespace
+      oc label namespace $namespace test-type=load-tests >/dev/null 2>&1
     done
   fi
 }
@@ -160,13 +161,17 @@ function getTimestamp() {
 }
 
 function runTest() {
+  # add label to devworkspace.yaml
+  cat devworkspace.yaml | awk -v key="test-type" -v value=" load-tests" '/metadata:/{$0=$0"\n  labels:\n    "key":"value}1' > patched-dw.yaml
+  cat patched-dw.yaml
+
   # start COMPLETITIONS_COUNT workspaces in parallel
   namespace=$current_namespace
   for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
     if [ $start_separately = true ]; then
       namespace=$test_namespace_name$i
     fi
-    awk '/name:/ && !modif { sub(/name: .*/, "name: '"$dw_name$i"'"); modif=1 } {print}' devworkspace.yaml | kubectl apply -n $namespace -f - &
+    awk '/name:/ && !modif { sub(/name: .*/, "name: '"$dw_name$i"'"); modif=1 } {print}' patched-dw.yaml | kubectl apply -n $namespace -f - &
   done
   wait
 
