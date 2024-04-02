@@ -20,6 +20,9 @@ start_separately=false
 test_namespace_name=load-test-namespace-
 # Default value for test devworkspace name
 dw_name=load-test-dw-
+# default values for label selector
+label_type="test-type"
+label_key="load-test"
 
 function print() {
   echo -e "${GREEN}$1${NC}"
@@ -85,9 +88,9 @@ function cleanup() {
 
   if [ $start_separately = true ]; then
     echo "Delete test namespaces"
-    kubectl delete namespace --selector=test-type=load-tests >/dev/null 2>&1 || true
+    kubectl delete namespace --selector=$label_type=$label_key >/dev/null 2>&1 || true
   else
-    kubectl delete dw --selector=test-type=load-tests -n $current_namespace >/dev/null 2>&1 || true
+    kubectl delete dw --selector=$label_type=$label_key -n $current_namespace >/dev/null 2>&1 || true
   fi
 }
 
@@ -146,7 +149,7 @@ function precreateNamespaces() {
     for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
       namespace=$test_namespace_name$i
       kubectl create namespace $namespace
-      oc label namespace $namespace test-type=load-tests >/dev/null 2>&1
+      oc label namespace $namespace $label_type=$label_key >/dev/null 2>&1
     done
   fi
 }
@@ -162,7 +165,7 @@ function getTimestamp() {
 
 function runTest() {
   # add label to devworkspace.yaml
-  cat devworkspace.yaml | awk -v key="test-type" -v value=" load-tests" '/metadata:/{$0=$0"\n  labels:\n    "key":"value}1' >patched-dw.yaml
+  cat devworkspace.yaml | awk -v key="$label_type" -v value=" $label_key" '/metadata:/{$0=$0"\n  labels:\n    "key":"value}1' >patched-dw.yaml
 
   # start COMPLETITIONS_COUNT workspaces in parallel
   namespace=$current_namespace
