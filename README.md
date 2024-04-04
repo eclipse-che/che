@@ -1,17 +1,9 @@
+<div id="header" align="center">
+
 [![Contribute](https://www.eclipse.org/che/contribute.svg)](https://workspaces.openshift.com#https://github.com/eclipse/che)
 [![Dev](https://img.shields.io/static/v1?label=Open%20in&message=Che%20dogfooding%20server%20(with%20VS%20Code)&logo=eclipseche&color=FDB940&labelColor=525C86)](https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com/#https://github.com/eclipse/che?che-editor=che-incubator/che-code/insiders)
 
-### Eclipse Che Server has moved!
-
-If you're looking for the sources of the Eclipse Che Server, it has been relocated here:
-
-https://github.com/eclipse-che/che-server
-
-
-<div id="header" align="center">
-
-[![Eclipse Che - Eclipse Next-Generation IDE](https://raw.githubusercontent.com/eclipse/che/assets/eclipseche.png)](
-https://eclipse.dev/che/)
+[![Eclipse Che](https://raw.githubusercontent.com/eclipse/che/assets/eclipseche.png)](https://eclipse.dev/che/)
 
 **Platform for providing Kubernetes-based Cloud Development Environments for Enterprise Teams**
 
@@ -83,4 +75,4 @@ If you are interested in fixing issues and contributing directly to the code bas
 We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open way. We welcome anyone to ask question and contribute to the roadmap by joining our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings).
 
 ### License
-Che is open sourced under the Eclipse Public License 2.0.
+Eclipse Public License 2.0.
