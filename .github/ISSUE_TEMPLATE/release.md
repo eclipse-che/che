@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ### List of pending issues / PRs
-* pending issues/PRs are referenced in the respective Slack thread.
+* [ ] description #xxx https://github.com/eclipse/che/issues/xxx
 
 ### Release status
 
