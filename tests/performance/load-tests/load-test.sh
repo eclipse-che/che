@@ -209,6 +209,12 @@ function runTest() {
     if [ $start_separately = true ]; then
       namespace=$test_namespace_name$i
     fi
+
+    if ! kubectl get dw $dw_name$i -n $namespace &>/dev/null; then
+      echo "$dw_name$i devworkspace does not exist. Moving to the next iteration."
+      continue
+    fi
+
     if [ "$(kubectl get dw $dw_name$i -n $namespace --template='{{.status.phase}}')" == "Running" ]; then
       getDwStartingTime $i $namespace &
       succeeded=$((succeeded + 1))
