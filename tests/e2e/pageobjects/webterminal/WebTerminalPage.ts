@@ -150,7 +150,7 @@ export class WebTerminalPage {
 	}
 
 	async selectProjectFromDropDawnList(projectName: string): Promise<void> {
-		await this.driverHelper.waitAndClick(By.xpath(`//span[@class="pf-c-menu__item-text" and text()="${projectName}"]`));
+		await this.driverHelper.waitAndClick(By.xpath(`//span[@class="pf-v5-c-menu__item-text" and text()="${projectName}"]`));
 	}
 
 	async findAndSelectProject(projectName: string): Promise<void> {
