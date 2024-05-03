@@ -80,6 +80,9 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 			'jq.*\\d+\\.\\d+.*jq';
 
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
+
+		// need 5 sec. delay for finishing writing results of help command into txt file. The 5 sec delay is enough for the most cases
+		await driverHelper.wait(5000);
 		const commandResult: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
 			webTerminalToolContainerName
