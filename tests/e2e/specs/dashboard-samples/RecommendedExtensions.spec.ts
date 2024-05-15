@@ -59,7 +59,7 @@ for (const sample of samples) {
 		let recommendedExtensions: any = {
 			recommendations: []
 		};
-
+		let parsedRecommendations: Array<{ name: string; publisher: string }>;
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
 		});
@@ -81,6 +81,9 @@ for (const sample of samples) {
 		});
 
 		test('Check the project files were imported', async function (): Promise<void> {
+			// add 20 sec timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
+			// using 20 sec easier than performing of finishing animation  all elements
+			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			projectSection = await projectAndFileTests.getProjectViewSession();
 			expect(await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName), 'Files not imported').not
 				.undefined;
@@ -91,7 +94,14 @@ for (const sample of samples) {
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
-			await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+			// sometimes the Trust Dialog does not appear as expected - as result we can get opened Trust Box dialog. In this case.
+			// we need to perform this case
+			try {
+				await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+			} catch (err) {
+				await projectAndFileTests.performManageWorkspaceTrustBox();
+				await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+			}
 			await (await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, 3))?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
 			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
@@ -99,19 +109,24 @@ for (const sample of samples) {
 			Logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 			recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
-			recommendedExtensions.recommendations = recommendedExtensions.recommendations.map(
-				(r: { split: (arg: string) => [any, any] }): { name: any; publisher: any } => {
-					const [publisher, name] = r.split('.');
-					return { publisher, name };
-				}
-			);
-			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(recommendedExtensions.recommendations)}.`);
-			expect(recommendedExtensions.recommendations, 'Recommendations not found').not.empty;
+			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
+				const [publisher, name] = rec.split('.');
+				return { publisher, name };
+			});
+			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
+			expect(parsedRecommendations, 'Recommendations not found').not.empty;
 		});
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+			// sometimes the Trust Dialog does not appear as expected - as result we can get opened Trust Box dialog. In this case.
+			// we need to perform this case
+			try {
+				extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+			} catch (err) {
+				await projectAndFileTests.performManageWorkspaceTrustBox();
+				extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
+			}
 			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
 
@@ -125,7 +140,7 @@ for (const sample of samples) {
 
 		test('Check if extensions are installed and enabled', async function (): Promise<void> {
 			// timeout 15 seconds per extensions
-			this.timeout(TIMEOUT_CONSTANTS.TS_FIND_EXTENSION_TEST_TIMEOUT * recommendedExtensions.recommendations.length);
+			this.timeout(TIMEOUT_CONSTANTS.TS_FIND_EXTENSION_TEST_TIMEOUT * parsedRecommendations.length);
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 
@@ -137,7 +152,7 @@ for (const sample of samples) {
 				TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
 			);
 
-			for (const extension of recommendedExtensions.recommendations) {
+			for (const extension of parsedRecommendations) {
 				Logger.debug(`extensionSection.findItem(${extension.name}).`);
 				await extensionSection.findItem(extension.name);
 
@@ -173,13 +188,16 @@ for (const sample of samples) {
 					.getSections()) as ExtensionsViewSection[];
 
 				Logger.debug('marketplaceSection.getVisibleItems()');
-				const allFinedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
-				expect(allFinedItems, 'Extensions not found').not.empty;
+				const allFoundItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+				const allFoundAuthors: string[] = await Promise.all(
+					allFoundItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
+				);
+				expect(allFoundItems, 'Extensions not found').not.empty;
 				let itemWithRightNameAndPublisher: ExtensionsViewItem | undefined = undefined;
-				for (const item of allFinedItems) {
+				for (const foundItem of allFoundItems) {
 					Logger.debug(`Try to find extension published by ${extension.publisher}.`);
-					if ((await item.getAuthor()) === extension.publisher) {
-						itemWithRightNameAndPublisher = item;
+					if (allFoundAuthors.includes(extension.publisher)) {
+						itemWithRightNameAndPublisher = foundItem;
 						Logger.debug(`Extension was found: ${await itemWithRightNameAndPublisher?.getTitle()}`);
 						break;
 					}
