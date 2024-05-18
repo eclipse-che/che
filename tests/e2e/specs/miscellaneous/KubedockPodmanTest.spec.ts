@@ -103,7 +103,7 @@ suite(
 			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(testScript);
 			expect(output, 'Podman test script failed').contains('Successfully tagged');
 			const runOutput: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(runTestScript);
-			expect(runOutput, 'Podman test script failed').contains('Hello from Kubedock!')
+			expect(runOutput, 'Podman test script failed').contains('Hello from Kubedock!');
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
