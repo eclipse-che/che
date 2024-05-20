@@ -732,8 +732,6 @@ export class DriverHelper {
 	}
 
 	getDriver(): ThenableWebDriver {
-		Logger.trace();
-
 		return this.driver;
 	}
 
