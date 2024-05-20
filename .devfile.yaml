@@ -6,7 +6,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-schemaVersion: 2.2.0
+schemaVersion: 2.2.2
 metadata:
   name: che
   language: typescript
