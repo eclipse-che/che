@@ -81,8 +81,8 @@ for (const sample of samples) {
 		});
 
 		test('Check the project files were imported', async function (): Promise<void> {
-			// add 20 sec timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
-			// using 20 sec easier than performing of finishing animation  all elements
+			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
+			// using TS_IDE_LOAD_TIMEOUT easier than performing of finishing animation  all elements
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			projectSection = await projectAndFileTests.getProjectViewSession();
 			expect(await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName), 'Files not imported').not
@@ -94,8 +94,7 @@ for (const sample of samples) {
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
-			// sometimes the Trust Dialog does not appear as expected - as result we can get opened Trust Box dialog. In this case.
-			// we need to perform this case
+			// sometimes the Trust Dialog does not appear as expected - as result we need to execute "projectAndFileTests.performManageWorkspaceTrustBox()" method. In this case.
 			try {
 				await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
 			} catch (err) {
@@ -119,8 +118,7 @@ for (const sample of samples) {
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-			// sometimes the Trust Dialog does not appear as expected - as result we can get opened Trust Box dialog. In this case.
-			// we need to perform this case
+			// sometimes the Trust Dialog does not appear as expected - as result we need to execute "projectAndFileTests.performManageWorkspaceTrustBox()" method. In this case.
 			try {
 				extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			} catch (err) {
@@ -152,10 +150,15 @@ for (const sample of samples) {
 				TIMEOUT_CONSTANTS.TS_EDITOR_TAB_INTERACTION_TIMEOUT
 			);
 
+
 			for (const extension of parsedRecommendations) {
 				Logger.debug(`extensionSection.findItem(${extension.name}).`);
-				await extensionSection.findItem(extension.name);
-
+				try {
+					await extensionSection.findItem('@recommended');
+				} catch (err) {
+					await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+					await extensionSection.findItem('@recommended');
+				}
 				const isReloadRequired: boolean = await driverHelper.isVisible(
 					(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
 				);
