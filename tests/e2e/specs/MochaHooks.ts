@@ -125,14 +125,5 @@ exports.mochaHooks = {
 				}
 			}
 		}
-	],
-	afterAll: [
-		async function stopTheDriver(): Promise<void> {
-			if (!BASE_TEST_CONSTANTS.TS_DEBUG_MODE && CHROME_DRIVER_CONSTANTS.TS_USE_WEB_DRIVER_FOR_TEST) {
-				// ensure that fired events done
-				await driverHelper.wait(5000);
-				await driverHelper.quit();
-			}
-		}
 	]
 };
