@@ -13,7 +13,6 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
-	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: boolean;
 	OCP_INFRA: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
@@ -130,11 +129,6 @@ export const BASE_TEST_CONSTANTS: {
 	 * stop and remove workspace if a test fails.
 	 */
 	DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
-
-	/**
-	 * stop and remove all workspaces on test run finish
-	 */
-	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.
