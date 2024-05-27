@@ -43,6 +43,9 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				ScmView: {
 					actionConstructor: (title: string): By => By.xpath(`.//a[@aria-label='${title}']`)
+				},
+				ContextMenu: {
+					contextView: By.className('monaco-menu-container')
 				}
 			},
 			extras: {
