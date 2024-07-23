@@ -7,7 +7,7 @@
 		"lint": "eslint --fix .",
 		"prettier": "prettier --config .prettierrc.json . --write",
 		"tsc": "rm -rf ./dist && ./configs/sh-scripts/generateIndex.sh && tsc -p .",
-		"test": "./configs/sh-scripts/initDefaultValues.sh npm run lint && npm run tsc && export USERSTORY=$USERSTORY && mocha --config dist/configs/mocharc.js",
+		"test": "./configs/sh-scripts/initDefaultValues.sh && npm run tsc && export USERSTORY=$USERSTORY && mocha --config dist/configs/mocharc.js",
 		"driver-less-test": "export TS_USE_WEB_DRIVER_FOR_TEST=false && npm run test",
 		"delayed-test": "npm run lint && npm run tsc && export TS_USE_WEB_DRIVER_FOR_TEST=false && export MOCHA_DELAYED_SUITE=true && mocha --config dist/configs/mocharc.js --delay",
 		"open-allure-dasboard": "allure generate .allure-results --clean -o .allure-report && allure open .allure-report",
@@ -16,7 +16,11 @@
 		"test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g -p 5920:5920 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
 		"test-all-devfiles": " ./configs/sh-scripts/initDefaultValues.sh && ./configs/sh-scripts/initDevfileTests.sh",
 		"functional-test-suite": "configs/sh-scripts/runFunctionalTests.sh",
-		"devfile-acceptance-test-suite": "configs/sh-scripts/runDevfileAcceptanceTests.sh"
+		"devfile-acceptance-test-suite": "configs/sh-scripts/runDevfileAcceptanceTests.sh",
+
+		"test:sealights": "export NODE_DEBUG=sl && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --buildsessionidfile ~/tmp/sealights/buildsessionidfile --teststage \"EmptyWorkspace E2E Test\" --useslnode2 -- --config dist/configs/mocharc.js",
+
+		"test:sealights-labid": "export NODE_DEBUG=sl && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --teststage \"EmptyWorkspace E2E Test\" --labid sealightspoclab --useslnode2 -- --config dist/configs/mocharc.js"
 	},
 	"author": "Ihor Okhrimenko (iokhrime@redhat.com)",
 	"license": "ISC",
@@ -49,7 +53,7 @@
 		"eslint-plugin-prettier": "^5.0.0",
 		"husky": "^8.0.3",
 		"inversify-inject-decorators": "^3.1.0",
-		"mocha": "^9.1.3",
+		"mocha": "^9.2.2",
 		"mocha-allure-reporter": "^1.4.0",
 		"mocha-multi-reporters": "^1.5.1",
 		"monaco-page-objects": "3.9.1",
@@ -57,8 +61,9 @@
 		"rimraf": "2.6.2",
 		"selenium-webdriver": "4.6.1",
 		"shelljs": "^0.8.5",
+		"slnodejs": "^6.1.853",
 		"ts-node": "^10.9.1",
-		"typescript": "4.9.4",
+		"typescript": "^4.9.4",
 		"vscode-extension-tester-locators": "3.7.1",
 		"yaml": "^2.2.2"
 	},

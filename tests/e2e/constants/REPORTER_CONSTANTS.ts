@@ -81,7 +81,7 @@ export const REPORTER_CONSTANTS: {
 	 * list of enabler reporters
 	 */
 	REPORTERS_ENABLED: (): string => {
-		let reporters: string = 'dist/utils/CheReporter.js';
+		let reporters: string = 'slnodejs/tsOutputs/mocha-reporter/index,dist/utils/CheReporter.js';
 		if (REPORTER_CONSTANTS.SAVE_ALLURE_REPORT_DATA) {
 			reporters += ',allure-mocha';
 		}

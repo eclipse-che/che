@@ -49,6 +49,7 @@ module.exports = {
 		rerunOf: REPORTER_CONSTANTS.RP_RERUN_UUID,
 		restClientConfig: {
 			timeout: 1200000
-		}
+		},
+		"SeaLightsReporterReporterOptions": {},
 	}
 };
