@@ -18,9 +18,8 @@
 		"functional-test-suite": "configs/sh-scripts/runFunctionalTests.sh",
 		"devfile-acceptance-test-suite": "configs/sh-scripts/runDevfileAcceptanceTests.sh",
 
-		"test:sealights": "export NODE_DEBUG=sl && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --buildsessionidfile ~/tmp/sealights/buildsessionidfile --teststage \"EmptyWorkspace E2E Test\" --useslnode2 -- --config dist/configs/mocharc.js",
-
-		"test:sealights-labid": "export NODE_DEBUG=sl && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --teststage \"EmptyWorkspace E2E Test\" --labid sealightspoclab --useslnode2 -- --config dist/configs/mocharc.js"
+		"test:sealights": "./configs/sh-scripts/initDefaultValues.sh && export NODE_DEBUG=sl && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --teststage \"$USERSTORY $MOCHA_SUITE E2E tests\" --labid sealightspoclab --useslnode2 -- --config dist/configs/mocharc.js",
+		"functional-test-suite:sealights": "configs/sh-scripts/runFunctionalTestsSealights.sh"
 	},
 	"author": "Ihor Okhrimenko (iokhrime@redhat.com)",
 	"license": "ISC",
