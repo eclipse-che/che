@@ -15,6 +15,13 @@ module.exports = {
 	allureMochaReporterOptions: {
 		resultsDir: '.allure-results'
 	},
+
+	"SeaLightsReporterReporterOptions": {},
+	"mochaAllureReporterOptions": {
+		"targetDir": ".allure-results"
+	},
+	"mochaJunitReporterReporterOptions": {},
+
 	reportportalAgentJsMochaReporterOptions: {
 		apiKey: REPORTER_CONSTANTS.RP_API_KEY,
 		endpoint: REPORTER_CONSTANTS.RP_ENDPOINT(),
@@ -49,7 +56,6 @@ module.exports = {
 		rerunOf: REPORTER_CONSTANTS.RP_RERUN_UUID,
 		restClientConfig: {
 			timeout: 1200000
-		},
-		"SeaLightsReporterReporterOptions": {},
+		}
 	}
 };
