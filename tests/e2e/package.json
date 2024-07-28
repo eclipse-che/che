@@ -18,7 +18,7 @@
 		"functional-test-suite": "configs/sh-scripts/runFunctionalTests.sh",
 		"devfile-acceptance-test-suite": "configs/sh-scripts/runDevfileAcceptanceTests.sh",
 
-		"test:sealights": "./configs/sh-scripts/initDefaultValues.sh && export NODE_DEBUG=sl && export SL_LOG_LEVEL=debug && slnodejs mocha --tokenfile ~/tmp/sealights/sltoken.txt --teststage \"$TS_SAMPLE_LIST $USERSTORY $MOCHA_SUITE E2E tests\" --labid \"$SEALIGHTS_LAB_ID\" --useslnode2 -- --config dist/configs/mocharc.js",
+		"test:sealights": "./configs/sh-scripts/initDefaultValues.sh && npm run tsc && export USERSTORY=$USERSTORY && export NODE_DEBUG=sl && export SL_LOG_LEVEL=debug && echo $SL_TOKEN > /tmp/sltoken.txt && slnodejs mocha --tokenfile /tmp/sltoken.txt --teststage \"E2E mocha $TS_SAMPLE_LIST $USERSTORY $MOCHA_SUITE\" --labid $SEALIGHTS_LAB_ID --useslnode2 -- --config dist/configs/mocharc.js",
 		"functional-test-suite:sealights": "./configs/sh-scripts/runFunctionalTestsSealights.sh"
 	},
 	"author": "Ihor Okhrimenko (iokhrime@redhat.com)",

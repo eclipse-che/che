@@ -21,6 +21,10 @@ fi
 # Set testing suite
 if [ -z "$TEST_SUITE" ]; then
     TEST_SUITE=test
+
+    if [ "${USE_SEALIGHTS}" == "true" ]; then
+        TEST_SUITE=$TEST_SUITE:sealights
+    fi
 fi
 
 # Launch display mode and VNC server
