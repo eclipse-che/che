@@ -37,10 +37,16 @@ export class ChromeDriver implements IDriver {
 			.addArguments('--disable-web-security')
 			.addArguments('--allow-running-insecure-content')
 			.addArguments('--ignore-certificate-errors');
+
 		// if 'true' run in 'headless' mode
 		if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_HEADLESS) {
 			options = options.addArguments('headless');
 		}
+
+        if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER !== '') {
+			options = options.addArguments('--proxy-server=' + CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER);
+		}
+
 		return options;
 	}
 
