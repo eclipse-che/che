@@ -43,7 +43,7 @@ export class ChromeDriver implements IDriver {
 			options = options.addArguments('headless');
 		}
 
-        if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER !== '') {
+		if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER !== '') {
 			options = options.addArguments('--proxy-server=' + CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER);
 		}
 
