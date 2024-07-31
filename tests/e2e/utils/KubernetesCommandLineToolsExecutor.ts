@@ -203,7 +203,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	getServerUrl(): string {
 		Logger.debug(`${this.kubernetesCommandLineTool} - get server api url.`);
 
-		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':6443';
+		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':443';
 	}
 }
 

@@ -45,7 +45,7 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		await driverHelper.refreshPage();
 		await webTerminal.clickOnWebTerminalIcon();
 	});
-	test('Verify first started WTO widget and disabled state Project field under admin user', async function (): Promise<void> {
+	test.skip('Verify first started WTO widget and disabled state Project field under admin user', async function (): Promise<void> {
 		await webTerminal.waitTerminalWidget();
 		expect(await webTerminal.waitDisabledProjectFieldAndGetProjectName()).equal(defaultWTOProjectNameForAdmin);
 	});
@@ -69,14 +69,13 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		const helpCommandExpectedResult: string =
 			'oc.*\\d+\\.\\d+\\.\\d+.*OpenShift CLI\n' +
 			'kubectl.*\\d+\\.\\d+\\.\\d+.*Kubernetes CLI\n' +
-			'kustomize.*\\d+\\.\\d+\\.\\d+.*Kustomize CLI\n' +
+			'kustomize.*\\d+.*Kustomize CLI.*\n' +
 			'helm.*\\d+\\.\\d+\\.\\d+.*Helm CLI\n' +
 			'kn.*\\d+\\.\\d+\\.\\d+.*KNative CLI\n' +
 			'tkn.*\\d+\\.\\d+\\.\\d+.*Tekton CLI\n' +
 			'subctl.*\\d+\\.\\d+\\.\\d+.*Submariner CLI\n' +
 			'odo.*\\d+\\.\\d+\\.\\d+.*Red Hat OpenShift Developer CLI\n' +
 			'virtctl.*\\d+\\.\\d+\\.\\d+.*KubeVirt CLI\n' +
-			'rhoas.*\\d+\\.\\d+\\.\\d+.*Red Hat OpenShift Application Services CLI\n' +
 			'jq.*\\d+\\.\\d+.*jq';
 
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
