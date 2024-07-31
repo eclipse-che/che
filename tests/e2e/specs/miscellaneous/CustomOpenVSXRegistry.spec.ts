@@ -11,22 +11,17 @@ import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { e2eContainer } from '../../configs/inversify.config';
-import { CLASSES, TYPES } from '../../configs/inversify.types';
+import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { LoginTests } from '../../tests-library/LoginTests';
-import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
-import { ContextMenu, Locators, SingleScmProvider, ViewSection } from 'monaco-page-objects';
-import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
-import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { ViewSection } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
-import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -35,10 +30,12 @@ suite(
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+		const pathToPluginRegistry: string = '/projects/devspaces/dependencies/che-plugin-registry/';
+
 		let projectSection: ViewSection;
 		let testRepoProjectName: string;
 		let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
-		
+		let workspaceName: string = '';
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
 		});
@@ -49,6 +46,8 @@ suite(
 
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+			workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+			expect(workspaceName, 'Workspace name was not fetched from the loading page').not.undefined;
 		});
 
 		test('Registering the running workspace', function (): void {
@@ -59,28 +58,46 @@ suite(
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		});
 
+		test('Accept the project as a trusted one', async function (): Promise<void> {
+			await projectAndFileTests.performTrustAuthorDialog();
+		});
+
 		test('Check if a project folder has been created', async function (): Promise<void> {
-			testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+			testRepoProjectName = 'devspaces';
 			Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
 			projectSection = await projectAndFileTests.getProjectViewSession();
 			expect(await projectAndFileTests.getProjectTreeItem(projectSection, testRepoProjectName), 'Project folder was not imported').not
 				.undefined;
 		});
 
-		test('Accept the project as a trusted one', async function (): Promise<void> {
-			await projectAndFileTests.performTrustAuthorDialog();
-		});
-
-		test('Create and check container runs using kubedock and podman', function (): void {
+		test('Edit VSX plugin list', function (): void {
+			// modify the openvsx-sync.json file with just one item - for speeding up the build an image
 			kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 			kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 			kubernetesCommandLineToolsExecutor.loginToOcp();
 			kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
-			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(testScript);
-			expect(output, 'Podman test script failed').contains('Successfully tagged');
-			const runOutput: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(runTestScript);
-			expect(runOutput, 'Podman test script failed').contains('Hello from Kubedock!');
+			const pathToOpenVSXOriginFile: string = `${pathToPluginRegistry}openvsx-sync.json`;
+			const pathToOpenVSXTmpFile: string = `${pathToPluginRegistry}temp.json`;
+			const editVSCListCommand: string = `jq "[.[] | select(.id == \\"redhat.vscode-xml\\")]" ${pathToOpenVSXOriginFile} > ${pathToOpenVSXTmpFile} && mv ${pathToOpenVSXTmpFile} ${pathToOpenVSXOriginFile}`;
+			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(editVSCListCommand);
+			expect(output.code).to.equals(0);
 		});
-		
+
+		test('Login podman into official registry', function (): void {
+			const commandToAuthenticateInRegistry: string = `podman login -u \"${process.env.REGISTRY_LOGIN}\" -p ${process.env.REGISTRY_PASSWORD} registry.redhat.io`;
+			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToAuthenticateInRegistry);
+			expect(output).contains('Login Succeeded!');
+		});
+
+		test('Build custom image', function (): void {
+			const commandToBuildCustomVSXImage: string = `cd ${pathToPluginRegistry} && yes | ./build.sh`;
+			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToBuildCustomVSXImage);
+
+			expect(output).contains('Login Succeeded!');
+
+			//
+			// const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToBuildCustomVSXImage);
+			// console.log('....................................', output.toString());
+		});
 	}
 );
