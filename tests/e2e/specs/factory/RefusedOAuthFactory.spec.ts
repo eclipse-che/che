@@ -104,14 +104,13 @@ suite(
 			test('Check that a project folder has not been cloned', async function (): Promise<void> {
 				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.multiProviderItem);
+				await driverHelper.waitVisibility(webCheCodeLocators.TitleBar.itemElement);
 				await projectAndFileTests.performTrustAuthorDialog();
 				const isProjectFolderUnable: string = await driverHelper.waitAndGetElementAttribute(
 					(webCheCodeLocators.TreeItem as any).projectFolderItem,
 					'aria-label'
 				);
-				expect(isProjectFolderUnable).to.contain(
-					'/projects/' + testRepoProjectName + ' • Unable to resolve workspace folder (Unable to resolve nonexistent file'
-				);
+				expect(isProjectFolderUnable).to.contain('No Folder Opened Section');
 			});
 		} else {
 			test('Check if a project folder has been created', async function (): Promise<void> {
