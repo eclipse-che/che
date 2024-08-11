@@ -103,7 +103,6 @@ suite(
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
 			test('Check that a project folder has not been cloned', async function (): Promise<void> {
 				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.multiProviderItem);
 				await driverHelper.waitVisibility(webCheCodeLocators.TitleBar.itemElement);
 				await projectAndFileTests.performTrustAuthorDialog();
 				const isProjectFolderUnable: string = await driverHelper.waitAndGetElementAttribute(
