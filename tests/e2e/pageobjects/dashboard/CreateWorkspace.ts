@@ -19,6 +19,10 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 @injectable()
 export class CreateWorkspace {
 	private static readonly FACTORY_URL: By = By.xpath('//input[@id="git-repo-url"]');
+	private static readonly GIT_REPO_OPTIONS: By = By.xpath('//span[text()="Git Repo Options"]');
+	private static readonly GIT_BRANCH_NAME: By = By.xpath('//input[@aria-label="Git Branch"]');
+	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
+	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -62,11 +66,24 @@ export class CreateWorkspace {
 		await this.driverHelper.waitAndClick(sampleLocator, timeout);
 	}
 
-	async importFromGitUsingUI(factoryUrl: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+	async importFromGitUsingUI(
+		factoryUrl: string,
+		branchName?: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT
+	): Promise<void> {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
 
 		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
-		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl, Key.ENTER), timeout);
+		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl), timeout);
+
+		if (branchName) {
+			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_REPO_OPTIONS, timeout);
+
+			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_NAME, timeout);
+			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_NAME, Key.chord(branchName, Key.ENTER), timeout);
+		}
+
+		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout);
 	}
 
 	async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
