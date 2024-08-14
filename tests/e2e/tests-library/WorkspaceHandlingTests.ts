@@ -58,14 +58,14 @@ export class WorkspaceHandlingTests {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
-	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string): Promise<void> {
+	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string, branchName?: string): Promise<void> {
 		await this.dashboard.waitPage();
 		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
 		await this.apiUrlResolver.getWorkspacesApiUrl();
 		await this.dashboard.clickCreateWorkspaceButton();
 		await this.createWorkspace.waitPage();
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
-		await this.createWorkspace.importFromGitUsingUI(factoryUrl);
+		await this.createWorkspace.importFromGitUsingUI(factoryUrl, branchName);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 

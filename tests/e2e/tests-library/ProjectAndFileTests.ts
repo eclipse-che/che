@@ -15,10 +15,12 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-import { SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { By, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 
 @injectable()
 export class ProjectAndFileTests {
+	private static BRANCH_NAME_XPATH: By = By.xpath('//a[contains(@aria-label,"Checkout Branch/Tag...")]');
+
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper,
@@ -135,5 +137,18 @@ export class ProjectAndFileTests {
 		}
 
 		return projectTreeItem;
+	}
+
+	/**
+	 * @returns {string} Branch name of cloned repository
+	 */
+
+	async getBranchName(): Promise<string> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(ProjectAndFileTests.BRANCH_NAME_XPATH, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		const output: string = await this.driverHelper.waitAndGetText(ProjectAndFileTests.BRANCH_NAME_XPATH);
+
+		return output.trimStart();
 	}
 }
