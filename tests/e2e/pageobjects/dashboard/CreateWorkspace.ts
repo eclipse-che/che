@@ -15,6 +15,7 @@ import { By, Key } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { TrustAuthorPopup } from './TrustAuthorPopup';
 
 @injectable()
 export class CreateWorkspace {
@@ -26,7 +27,10 @@ export class CreateWorkspace {
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper
+		private readonly driverHelper: DriverHelper,
+
+		@inject(CLASSES.TrustAuthorPopup)
+		private readonly trustAuthorPopup: TrustAuthorPopup
 	) {}
 
 	async waitTitleContains(expectedText: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
@@ -84,6 +88,8 @@ export class CreateWorkspace {
 		}
 
 		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout);
+
+		await this.performTrustAuthorPopup();
 	}
 
 	async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
@@ -91,6 +97,16 @@ export class CreateWorkspace {
 
 		const editorDropdownListLocator: By = this.getEditorsDropdownListLocator(sampleName);
 		await this.driverHelper.waitAndClick(editorDropdownListLocator, timeout);
+	}
+
+	async performTrustAuthorPopup(): Promise<void> {
+		Logger.debug();
+
+		try {
+			await this.trustAuthorPopup.clickContinue();
+		} catch (e) {
+			Logger.info('"Trust author" popup was not shown');
+		}
 	}
 
 	private getEditorsDropdownListLocator(sampleName: string): By {
