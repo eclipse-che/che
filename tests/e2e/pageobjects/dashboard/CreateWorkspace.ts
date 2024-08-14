@@ -105,7 +105,7 @@ export class CreateWorkspace {
 		try {
 			await this.trustAuthorPopup.clickContinue();
 		} catch (e) {
-			Logger.info('Trust author popup was not shown');
+			Logger.info('"Trust author" popup was not shown');
 		}
 	}
 
