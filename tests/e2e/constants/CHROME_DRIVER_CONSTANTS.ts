@@ -44,5 +44,5 @@ export const CHROME_DRIVER_CONSTANTS: {
 	/**
 	 * run browser with proxy settings
 	 */
-	TS_SELENIUM_PROXY_SERVER: process.env.TS_SELENIUM_PROXY_SERVER || '',
+	TS_SELENIUM_PROXY_SERVER: process.env.TS_SELENIUM_PROXY_SERVER || ''
 };

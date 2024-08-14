@@ -50,7 +50,8 @@ const CLASSES: any = {
 	ContainerTerminal: 'ContainerTerminal',
 	UserPreferences: 'UserPreferences',
 	WebTerminalPage: 'WebTerminalPage',
-	RevokeOauthPage: 'RevokeOauthPage'
+	RevokeOauthPage: 'RevokeOauthPage',
+	TrustAuthorPopup: 'TrustAuthorPopup'
 };
 
 const EXTERNAL_CLASSES: any = {
