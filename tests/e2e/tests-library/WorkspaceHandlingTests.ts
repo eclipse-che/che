@@ -58,14 +58,14 @@ export class WorkspaceHandlingTests {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
-	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string): Promise<void> {
+	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string, branchName?: string): Promise<void> {
 		await this.dashboard.waitPage();
 		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
 		await this.apiUrlResolver.getWorkspacesApiUrl();
 		await this.dashboard.clickCreateWorkspaceButton();
 		await this.createWorkspace.waitPage();
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
-		await this.createWorkspace.importFromGitUsingUI(factoryUrl);
+		await this.createWorkspace.importFromGitUsingUI(factoryUrl, branchName);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
@@ -77,6 +77,8 @@ export class WorkspaceHandlingTests {
 	}
 
 	async obtainWorkspaceNameFromStartingPage(): Promise<void> {
+		await this.createWorkspace.performTrustAuthorPopup();
+
 		const timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT;
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);

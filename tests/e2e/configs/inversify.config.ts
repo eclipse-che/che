@@ -53,6 +53,7 @@ import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/
 import { ShellExecutor } from '../utils/ShellExecutor';
 import { UserPreferences } from '../pageobjects/dashboard/UserPreferences';
 import { WebTerminalPage } from '../pageobjects/webterminal/WebTerminalPage';
+import { TrustAuthorPopup } from '../pageobjects/dashboard/TrustAuthorPopup';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -90,6 +91,8 @@ e2eContainer.bind<WebTerminalPage>(CLASSES.WebTerminalPage).to(WebTerminalPage);
 e2eContainer.bind<UserPreferences>(CLASSES.UserPreferences).to(UserPreferences);
 e2eContainer.bind<Generator>(EXTERNAL_CLASSES.Generator).to(Generator);
 e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
+e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
+e2eContainer.bind<TrustAuthorPopup>(CLASSES.TrustAuthorPopup).to(TrustAuthorPopup);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {
