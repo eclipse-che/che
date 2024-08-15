@@ -245,7 +245,7 @@ suite(
 		});
 
 		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
-			// To avoid a possible creating workspace which is not appeared on Dashboard yet. TODO: implement a better solution.
+			// to avoid a possible creating workspace which is not appeared on Dashboard yet. TODO: implement a better solution.
 			await driverHelper.wait(30000);
 			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
