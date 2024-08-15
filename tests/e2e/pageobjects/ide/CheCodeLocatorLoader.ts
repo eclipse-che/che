@@ -53,7 +53,7 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 					requireReloadButton: By.xpath('//a[text()="Reload Required"]')
 				},
 				TreeItem: {
-					projectFolderItem: By.xpath('.//div[contains(@class, "rootfolder-icon projects-name-dir")]')
+					projectFolderItem: By.className('pane-header expanded')
 				},
 				ScmView: {
 					manageWorkspaceTrust: By.xpath('.//a[@class="monaco-button monaco-text-button"]'),
