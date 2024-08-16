@@ -39,7 +39,9 @@ suite(
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const viewItems: ViewItem[] | undefined = [];
 		const testRepoProjectName: string = 'devspaces';
-		const appVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION?BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.replace(/(\.\d+)$/, ''):'next'
+		const appVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION
+			? BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.')
+			: 'next';
 		let currentNamespace: string | undefined = '';
 		let cheClusterNamespace: string | undefined = '';
 		let cheClusterName: string | undefined = '';
