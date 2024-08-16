@@ -39,6 +39,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -53,6 +54,7 @@ suite(
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -76,6 +78,7 @@ suite(
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
 			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+			await createWorkspace.performTrustAuthorPopup();
 		});
 
 		test(`Authorize with a ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} OAuth and deny access`, async function (): Promise<void> {
