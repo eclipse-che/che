@@ -39,6 +39,7 @@ suite(
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const viewItems: ViewItem[] | undefined = [];
 		const testRepoProjectName: string = 'devspaces';
+		const appVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION?BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.replace(/(\.\d+)$/, ''):'next'
 		let currentNamespace: string | undefined = '';
 		let cheClusterNamespace: string | undefined = '';
 		let cheClusterName: string | undefined = '';
@@ -103,11 +104,11 @@ suite(
 
 		test('Build and push custom image', function (): void {
 			currentNamespace = kubernetesCommandLineToolsExecutor.namespace;
-			const podmanPushCommand: string = `podman push ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
+			const podmanPushCommand: string = `podman push ${internalRegistry}/${currentNamespace}/che-plugin-registry:${appVersion}`;
 			const commandToBuildCustomVSXImage: string = `cd ${pathToPluginRegistry} && yes | ./build.sh`;
 			const commandLoginIntoInternalRegistry: string =
 				'podman login -u $(oc whoami | tr -d :) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000';
-			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel8:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
+			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel8:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${appVersion}`;
 
 			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToBuildCustomVSXImage);
 			expect(output.code).equals(0);
@@ -136,7 +137,7 @@ suite(
 			expect(addSecretOutput).contains('default patched');
 
 			// patch che cluster with custom plugin registry
-			const patchVSXRegistryCommand: string = `cd ${pathToPluginRegistry} && ./patch-cluster.sh  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
+			const patchVSXRegistryCommand: string = `cd ${pathToPluginRegistry} && ./patch-cluster.sh  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${appVersion}`;
 			const patchVSXOutput: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(patchVSXRegistryCommand);
 			expect(patchVSXOutput).contains('Patched CheCluster ');
 
