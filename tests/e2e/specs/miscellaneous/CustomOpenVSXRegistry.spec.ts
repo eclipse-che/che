@@ -27,7 +27,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { error } from 'selenium-webdriver';
 
 suite(
-	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
+	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository`,
 	function (): void {
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -38,7 +38,6 @@ suite(
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const viewItems: ViewItem[] | undefined = [];
-		const imageTag: string = 'next';
 		const testRepoProjectName: string = 'devspaces';
 		let currentNamespace: string | undefined = '';
 		let cheClusterNamespace: string | undefined = '';
@@ -77,7 +76,7 @@ suite(
 		test('Accept the project as a trusted one', async function (): Promise<void> {
 			await projectAndFileTests.performTrustAuthorDialog();
 		});
-		test('Edit VSX plugin list', function (): void {
+		test('Remove VSX plugins and set redhat.vscode-xml', function (): void {
 			// modify the openvsx-sync.json file with just one item - for speeding up the build an image
 			kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 			kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
@@ -104,7 +103,7 @@ suite(
 
 		test('Build and push custom image', function (): void {
 			currentNamespace = kubernetesCommandLineToolsExecutor.namespace;
-			const podmanPushCommand: string = `podman push ${internalRegistry}/${currentNamespace}/che-plugin-registry:${imageTag}`;
+			const podmanPushCommand: string = `podman push ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
 			const commandToBuildCustomVSXImage: string = `cd ${pathToPluginRegistry} && yes | ./build.sh`;
 			const commandLoginIntoInternalRegistry: string =
 				'podman login -u $(oc whoami | tr -d :) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000';
