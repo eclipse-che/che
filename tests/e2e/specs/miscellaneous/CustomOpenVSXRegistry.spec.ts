@@ -27,7 +27,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { error } from 'selenium-webdriver';
 
 suite(
-	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository`,
+	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL} repository`,
 	function (): void {
 		const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -107,7 +107,7 @@ suite(
 			const commandToBuildCustomVSXImage: string = `cd ${pathToPluginRegistry} && yes | ./build.sh`;
 			const commandLoginIntoInternalRegistry: string =
 				'podman login -u $(oc whoami | tr -d :) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000';
-			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel8:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${imageTag}`;
+			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel8:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
 
 			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToBuildCustomVSXImage);
 			expect(output.code).equals(0);
@@ -136,7 +136,7 @@ suite(
 			expect(addSecretOutput).contains('default patched');
 
 			// patch che cluster with custom plugin registry
-			const patchVSXRegistryCommand: string = `cd ${pathToPluginRegistry} && ./patch-cluster.sh  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${imageTag}`;
+			const patchVSXRegistryCommand: string = `cd ${pathToPluginRegistry} && ./patch-cluster.sh  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION}`;
 			const patchVSXOutput: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(patchVSXRegistryCommand);
 			expect(patchVSXOutput).contains('Patched CheCluster ');
 
@@ -188,7 +188,7 @@ suite(
 			expect(await viewItems[0].getText()).contains('XML Language Support by Red Hat');
 		});
 
-		suiteTeardown('Clean up resources and restore default CHE cluster CR', function (): void {
+		suiteTeardown('Clean up resources and restore default CHE cluster CR', async function (): Promise<void> {
 			try {
 				kubernetesCommandLineToolsExecutor.execInContainerCommand(`oc delete secret regcred -n ${cheClusterNamespace}`);
 			} catch (error) {
@@ -210,6 +210,11 @@ suite(
 				kubernetesCommandLineToolsExecutor.execInContainerCommand(restoreOpenVSXRegistry);
 			} catch (error) {
 				Logger.error(`Error during restoring the VSX registry: ${error}`);
+			}
+			try {
+				await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+			} catch (error) {
+				Logger.error(`Cannot delete the workspace by API deleting the workspace: ${error}`);
 			}
 		});
 	}
