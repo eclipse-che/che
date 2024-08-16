@@ -53,7 +53,9 @@ suite(
 		});
 
 		test('Navigate to the factory URL', async function (): Promise<void> {
-			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+			await browserTabsUtil.navigateTo(
+				FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL() || 'https://github.com/redhat-developer/devspaces/'
+			);
 		});
 
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
