@@ -71,7 +71,7 @@ export const BASE_TEST_CONSTANTS: {
 	/**
 	 * testing application version
 	 */
-	TESTING_APPLICATION_VERSION: process.env.TESTING_APPLICATION_VERSION || '3.9',
+	TESTING_APPLICATION_VERSION: process.env.TESTING_APPLICATION_VERSION || 'next',
 
 	/**
 	 * is "https://access.redhat.com/documentation/en-us/red_hat_openshift_dev_spaces/{TESTING_APPLICATION_VERSION}/" available online
