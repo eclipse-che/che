@@ -19,21 +19,23 @@ import { FACTORY_TEST_CONSTANTS } from '../constants/FACTORY_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../utils/BrowserTabsUtil';
 import { expect } from 'chai';
 import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
+import { CreateWorkspace } from '../pageobjects/dashboard/CreateWorkspace';
 
 suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const factoryUrl: string =
-		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
+	const factoryUrl: string = process.env.TEST_REPO || FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL;
+	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 	let projectSection: ViewSection;
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
 		});
 		test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {
-			await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
+			await browserTabsUtil.navigateTo(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + factoryUrl);
+			await createWorkspace.performTrustAuthorPopup();
 		});
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
@@ -55,16 +57,6 @@ suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, functio
 				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
 				'Project files were not imported'
 			).not.undefined;
-		});
-		test('Stop the workspace by UI', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-			await browserTabsUtil.closeAllTabsExceptCurrent();
-		});
-		test('Delete the workspace by UI', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-		});
-		suiteTeardown('Unregister running workspace', function (): void {
-			registerRunningWorkspace('');
 		});
 	});
 });

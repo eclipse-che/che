@@ -42,12 +42,12 @@ export const OAUTH_CONSTANTS: {
 	/**
 	 * regular username used to login in Kubernetes.
 	 */
-	TS_SELENIUM_K8S_USERNAME: process.env.TS_SELENIUM_K8S_USERNAME || '',
+	TS_SELENIUM_K8S_USERNAME: process.env.TS_SELENIUM_K8S_USERNAME || 'che@eclipse.org',
 
 	/**
 	 * password regular user used to login in Kubernetes.
 	 */
-	TS_SELENIUM_K8S_PASSWORD: process.env.TS_SELENIUM_K8S_PASSWORD || '',
+	TS_SELENIUM_K8S_PASSWORD: process.env.TS_SELENIUM_K8S_PASSWORD || 'admin',
 
 	/**
 	 * for login via github for example on https://che-dogfooding.apps.che-dev.x6e0.p1.openshiftapps.com

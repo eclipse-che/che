@@ -87,7 +87,7 @@ export const BASE_TEST_CONSTANTS: {
 	/**
 	 * choose the platform where "che" application deployed, "openshift" by default.
 	 */
-	TS_PLATFORM: process.env.TS_PLATFORM || Platform.OPENSHIFT,
+	TS_PLATFORM: process.env.TS_PLATFORM || Platform.KUBERNETES,
 
 	/**
 	 * editor the tests are running against, "code" by default.
