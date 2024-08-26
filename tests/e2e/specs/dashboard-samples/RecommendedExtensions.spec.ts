@@ -34,6 +34,8 @@ import { PLUGIN_TEST_CONSTANTS } from '../../constants/PLUGIN_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+
 
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
 
@@ -91,6 +93,7 @@ for (const sample of samples) {
 		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		let projectSection: ViewSection;
 		let extensionSection: ExtensionsViewSection;
 		let extensionsView: SideBarView | undefined;
@@ -109,6 +112,7 @@ for (const sample of samples) {
 
 		test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspace(sample);
+			await createWorkspace.performTrustAuthorPopup();
 		});
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
