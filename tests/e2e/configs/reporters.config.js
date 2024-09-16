@@ -17,7 +17,7 @@ module.exports = {
 	},
 
 	reporterOptions: {
-		mochaFile: 'report/junit/test-results.xml'
+		mochaFile: `${REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER}/junit/test-results.xml`
 	},
 
 	reportportalAgentJsMochaReporterOptions: {
