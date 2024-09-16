@@ -15,6 +15,11 @@ module.exports = {
 	allureMochaReporterOptions: {
 		resultsDir: '.allure-results'
 	},
+
+	reporterOptions: {
+		mochaFile: 'report/junit/test-results.xml'
+	},
+
 	reportportalAgentJsMochaReporterOptions: {
 		apiKey: REPORTER_CONSTANTS.RP_API_KEY,
 		endpoint: REPORTER_CONSTANTS.RP_ENDPOINT(),
