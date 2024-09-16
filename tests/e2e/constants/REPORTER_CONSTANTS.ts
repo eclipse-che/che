@@ -24,6 +24,7 @@ export const REPORTER_CONSTANTS: {
 	RP_USE_PERSONAL: boolean;
 	SAVE_ALLURE_REPORT_DATA: boolean;
 	SAVE_RP_REPORT_DATA: boolean;
+	SAVE_JUNIT_DATA: boolean;
 	TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: number;
 	TS_SELENIUM_REPORT_FOLDER: string;
 	TS_SELENIUM_EXECUTION_SCREENCAST: boolean;
@@ -78,10 +79,18 @@ export const REPORTER_CONSTANTS: {
 	SAVE_RP_REPORT_DATA: process.env.SAVE_RP_REPORT_DATA === 'true',
 
 	/**
+	 * use MochaJunit reporter, default to false
+	 */
+	SAVE_JUNIT_DATA: process.env.SAVE_JUNIT_DATA === 'true',
+
+	/**
 	 * list of enabler reporters
 	 */
 	REPORTERS_ENABLED: (): string => {
 		let reporters: string = 'dist/utils/CheReporter.js';
+		if (REPORTER_CONSTANTS.SAVE_JUNIT_DATA) {
+			reporters += ',mocha-junit-reporter';
+		}
 		if (REPORTER_CONSTANTS.SAVE_ALLURE_REPORT_DATA) {
 			reporters += ',allure-mocha';
 		}
