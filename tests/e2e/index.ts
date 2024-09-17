@@ -30,7 +30,7 @@ export * from './pageobjects/dashboard/workspace-details/WorkspaceDetails';
 export * from './pageobjects/dashboard/Workspaces';
 export * from './pageobjects/git-providers/OauthPage';
 export * from './pageobjects/ide/CheCodeLocatorLoader';
-export * from './pageobjects/ide/MoreActionsButton';
+export * from './pageobjects/ide/ViewsMoreActionsButton';
 export * from './pageobjects/login/interfaces/ICheLoginPage';
 export * from './pageobjects/login/interfaces/IOcpLoginPage';
 export * from './pageobjects/login/kubernetes/DexLoginPage';
