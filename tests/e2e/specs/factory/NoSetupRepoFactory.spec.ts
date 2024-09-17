@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2021 Red Hat, Inc.
+ * copyright (c) 2021-2024 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+import { MoreActionsButton } from '../../pageobjects/ide/MoreActionsButton';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without PAT/OAuth setup ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -56,6 +57,7 @@ suite(
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+		const moreActionsButton: MoreActionsButton = e2eContainer.get(CLASSES.MoreActionsButton);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -143,6 +145,8 @@ suite(
 			});
 
 			test('Open a source control manager', async function (): Promise<void> {
+				// sometimes 'TrustDialog' appears in IDE later
+				await projectAndFileTests.performTrustAuthorDialog();
 				const viewSourceControl: string = 'Source Control';
 				const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
 				Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
@@ -172,8 +176,8 @@ suite(
 
 			test('Stage the changes', async function (): Promise<void> {
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				Logger.debug('scmProvider.openMoreActions');
-				scmContextMenu = await scmProvider.openMoreActions();
+				Logger.debug('moreActionsButton.openMoreActions');
+				scmContextMenu = await moreActionsButton.openMoreActions();
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
 				Logger.debug('scmContextMenu.select: "Changes" -> "Stage All Changes"');
 				await scmContextMenu.select('Changes', 'Stage All Changes');
@@ -200,8 +204,8 @@ suite(
 					)
 				);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				Logger.debug('scmProvider.openMoreActions');
-				scmContextMenu = await scmProvider.openMoreActions();
+				Logger.debug('moreActionsButton.openMoreActions');
+				scmContextMenu = await moreActionsButton.openMoreActions();
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
 				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
 				await scmContextMenu.select(pushItemLabel);
