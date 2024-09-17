@@ -40,7 +40,7 @@ import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
-import { MoreActionsButton } from '../../pageobjects/ide/MoreActionsButton';
+import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -56,12 +56,13 @@ suite(
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
-		const moreActionsButton: MoreActionsButton = e2eContainer.get(CLASSES.MoreActionsButton);
+		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
 		let rest: SingleScmProvider[];
 		let scmContextMenu: ContextMenu;
+		let viewsActionsButton: boolean;
 
 		// test specific data
 		const timeToRefresh: number = 1500;
@@ -156,8 +157,12 @@ suite(
 
 		test('Stage the changes', async function (): Promise<void> {
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-			Logger.debug('moreActionsButton.openMoreActions');
-			scmContextMenu = await moreActionsButton.openMoreActions();
+			viewsActionsButton = await viewsMoreActionsButton.viewsAndMoreActionsButtonIsVisible();
+			if (viewsActionsButton) {
+				await viewsMoreActionsButton.closeSourceControlGraph();
+			}
+			Logger.debug('scmProvider.openMoreActions');
+			scmContextMenu = await scmProvider.openMoreActions();
 			await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
 			Logger.debug('scmContextMenu.select: "Changes" -> "Stage All Changes"');
 			await scmContextMenu.select('Changes', 'Stage All Changes');
@@ -180,8 +185,8 @@ suite(
 		test('Push the changes', async function (): Promise<void> {
 			await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-			Logger.debug('moreActionsButton.openMoreActions');
-			scmContextMenu = await moreActionsButton.openMoreActions();
+			Logger.debug('scmProvider.openMoreActions');
+			scmContextMenu = await scmProvider.openMoreActions();
 			await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
 			Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
 			await scmContextMenu.select(pushItemLabel);

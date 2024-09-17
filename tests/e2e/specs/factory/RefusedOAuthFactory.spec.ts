@@ -40,6 +40,7 @@ import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -55,11 +56,13 @@ suite(
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
 		let rest: SingleScmProvider[];
 		let scmContextMenu: ContextMenu;
+		let viewsActionsButton: boolean;
 
 		// test specific data
 		const timeToRefresh: number = 1500;
@@ -171,6 +174,10 @@ suite(
 
 			test('Stage the changes', async function (): Promise<void> {
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				viewsActionsButton = await viewsMoreActionsButton.viewsAndMoreActionsButtonIsVisible();
+				if (viewsActionsButton) {
+					await viewsMoreActionsButton.closeSourceControlGraph();
+				}
 				Logger.debug('scmProvider.openMoreActions');
 				scmContextMenu = await scmProvider.openMoreActions();
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
