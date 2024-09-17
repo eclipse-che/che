@@ -146,8 +146,6 @@ suite(
 			});
 
 			test('Open a source control manager', async function (): Promise<void> {
-				// sometimes 'TrustDialog' appears in IDE later
-				await projectAndFileTests.performTrustAuthorDialog();
 				const viewSourceControl: string = 'Source Control';
 				const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
 				Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
