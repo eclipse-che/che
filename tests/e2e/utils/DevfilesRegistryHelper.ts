@@ -13,9 +13,19 @@ import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
 import { injectable } from 'inversify';
 import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
+import {ShellExecutor} from "./ShellExecutor";
+import {e2eContainer} from "../configs/inversify.config";
+import {CLASSES} from "../configs/inversify.types";
 
 @injectable()
 export class DevfilesRegistryHelper {
+	private getShellExecutor(): ShellExecutor {
+		return e2eContainer.get(CLASSES.ShellExecutor);
+	}
+	/**
+	 * @deprecated applicable only for inbuilt devfiles
+	 * @param sampleNamePatterns
+	 */
 	async getInbuiltDevfilesRegistryContent(sampleNamePatterns?: string[]): Promise<any[]> {
 		Logger.trace();
 
@@ -35,6 +45,12 @@ export class DevfilesRegistryHelper {
 		return await this.getContent(url);
 	}
 
+	/**
+	 *
+	 * @deprecated applicable only for inbuilt devfiles
+	 * @param isInbuilt
+	 * @param sampleNamePatterns
+	 */
 	async collectPathsToDevfilesFromRegistry(isInbuilt: boolean, sampleNamePatterns?: string[]): Promise<object[]> {
 		Logger.debug();
 
@@ -86,9 +102,6 @@ export class DevfilesRegistryHelper {
 		return devfileSamples;
 	}
 
-	async getEditorContent(entry: string): Promise<any> {
-		return await this.getContent(`${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/${entry}`);
-	}
 
 	private filterSamples(sampleNamePatterns: string[] | undefined, content: any): Promise<any[]> {
 		if (sampleNamePatterns) {
@@ -119,5 +132,20 @@ export class DevfilesRegistryHelper {
 			throw error;
 		}
 		return response?.data;
+	}
+
+	public getInternalClusterURLToDevFile(devFileName:string): string {
+		let devfileSampleURIPrefix:string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
+		let serviceClusterIp:string = ''
+		let servicePort:string = ''
+		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} -o=jsonpath='{.spec.clusterIP}'`);
+		servicePort = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} -o=jsonpath='{.spec.ports[*].port}'`);
+		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
+	}
+
+	public obtainDevFileContentUsingPod(podName:string, containerName:string, devFileName:string): string {
+		const clusterURL:string = this.getInternalClusterURLToDevFile(devFileName);
+		this.getShellExecutor().executeCommand(`oc exec -i ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`);
+		return this.getShellExecutor().executeArbitraryShellScript(`oc exec -i ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`).toString();
 	}
 }
