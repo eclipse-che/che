@@ -19,6 +19,7 @@ import {CLASSES} from "../configs/inversify.types";
 
 @injectable()
 export class DevfilesRegistryHelper {
+
 	private getShellExecutor(): ShellExecutor {
 		return e2eContainer.get(CLASSES.ShellExecutor);
 	}
@@ -152,4 +153,12 @@ export class DevfilesRegistryHelper {
 	public obtainCheDevFileEditor(configMapName: string): string {
 		return this.getShellExecutor().executeCommand(`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE}`);
 	}
+
+	public getDevfileContent( devSample: string): string {
+		const podName: string = this.getShellExecutor().executeArbitraryShellScript(`oc get pods -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} | grep dashboard | awk \'{print $1}\'`).trim()
+		const containerName: string =  this.getShellExecutor().executeArbitraryShellScript(`oc get pod -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`)
+		const devfileContent: string = this.obtainDevFileContentUsingPod(podName, containerName, devSample);
+		return devfileContent;
+	}
+
 }
