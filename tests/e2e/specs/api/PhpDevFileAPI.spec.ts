@@ -24,7 +24,7 @@ import {StringUtil} from "../../utils/StringUtil";
 import {string} from "yaml/dist/schema/common/string";
 
 
-suite('Ansible devfile API test', function (): void {
+suite('PHP devfile API test', function (): void {
     const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
     const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
     let containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
@@ -39,7 +39,7 @@ suite('Ansible devfile API test', function (): void {
     test('Create  PHP DevSpace', async function (): Promise<void> {
         kubernetesCommandLineToolsExecutor.namespace = 'admin-devspaces';
         devfileContent = devfilesRegistryHelper.getDevfileContent('php');
-        const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditor('editors-definitions');
+        const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
         kubernetesCommandLineToolsExecutor.workspaceName = YAML.parse(devfileContent).metadata.name;
 
         devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({

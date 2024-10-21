@@ -144,17 +144,31 @@ export class DevfilesRegistryHelper {
 		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
 	}
 
+	/**
+	 * grab devfile content from the Dashboard pod (currently, in the image of dashboard builds with devfile content and we use it for getting devfile description)
+	 * @param podName
+	 * @param containerName
+	 * @param devFileName
+	 */
 	public obtainDevFileContentUsingPod(podName:string, containerName:string, devFileName:string): string {
 		const clusterURL:string = this.getInternalClusterURLToDevFile(devFileName);
 		this.getShellExecutor().executeCommand(`oc exec -i ${podName} -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`);
 		return this.getShellExecutor().executeArbitraryShellScript(`oc exec -i ${podName} -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`).toString();
 	}
 
-	public obtainCheDevFileEditor(configMapName: string): string {
+	/**
+	 *  use internal CHE config map for getting description of CHE editor
+	 * @param configMapName
+	 */
+	public obtainCheDevFileEditorFromCheConfigMap(configMapName: string): string {
 		return this.getShellExecutor().executeCommand(`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE}`);
 	}
 
-	public getDevfileContent( devSample: string): string {
+	/**
+	 * find the Dashboard pod and container name and grab devfile content from it
+	 * @param devSample
+	 */
+	public getDevfileContent(devSample: string): string {
 		const podName: string = this.getShellExecutor().executeArbitraryShellScript(`oc get pods -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} | grep dashboard | awk \'{print $1}\'`).trim()
 		const containerName: string =  this.getShellExecutor().executeArbitraryShellScript(`oc get pod -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`)
 		const devfileContent: string = this.obtainDevFileContentUsingPod(podName, containerName, devSample);
