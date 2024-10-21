@@ -49,7 +49,7 @@ Here you can find references to useful documentation and hands-on guides to lear
 ### Feedback and Community
 We love to hear from users and developers. Here are the various ways to get in touch with us:
 * **Support:** You can ask questions, report bugs, and request features using [GitHub issues](https://github.com/eclipse/che/issues).
-* **Public Chat:** Join the public [eclipse-che](https://communityinviter.com/apps/ecd-tools/join-the-community) Mattermost channel to discuss with community and contributors.
+* **Public Chat:** Join the public [eclipse-che](https://communityinviter.com/apps/ecd-tools/join-the-community) Slack channel to discuss with community and contributors.
 * **Twitter:** [@eclipse_che](https://twitter.com/eclipse_che)
 * **Mailing List:** [che-dev@eclipse.org](https://accounts.eclipse.org/mailing-list/che-dev)
 * **Weekly Meetings:** Join us in our [Che community meeting](https://github.com/eclipse/che/wiki/Che-Dev-Meetings) every second monday.
