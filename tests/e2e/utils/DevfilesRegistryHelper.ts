@@ -139,8 +139,8 @@ export class DevfilesRegistryHelper {
 		let devfileSampleURIPrefix:string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
 		let serviceClusterIp:string = ''
 		let servicePort:string = ''
-		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -o=jsonpath='{.spec.clusterIP}'`);
-		servicePort = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -o=jsonpath='{.spec.ports[*].port}'`);
+		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.clusterIP}'`);
+		servicePort = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.ports[*].port}'`);
 		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
 	}
 
@@ -152,8 +152,8 @@ export class DevfilesRegistryHelper {
 	 */
 	public obtainDevFileContentUsingPod(podName:string, containerName:string, devFileName:string): string {
 		const clusterURL:string = this.getInternalClusterURLToDevFile(devFileName);
-		this.getShellExecutor().executeCommand(`oc exec -i ${podName} -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`);
-		return this.getShellExecutor().executeArbitraryShellScript(`oc exec -i ${podName} -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`).toString();
+		this.getShellExecutor().executeCommand(`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`);
+		return this.getShellExecutor().executeArbitraryShellScript(`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`).toString();
 	}
 
 	/**
@@ -161,7 +161,7 @@ export class DevfilesRegistryHelper {
 	 * @param configMapName
 	 */
 	public obtainCheDevFileEditorFromCheConfigMap(configMapName: string): string {
-		return this.getShellExecutor().executeCommand(`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE}`);
+		return this.getShellExecutor().executeCommand(`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`);
 	}
 
 	/**
@@ -169,8 +169,10 @@ export class DevfilesRegistryHelper {
 	 * @param devSample
 	 */
 	public getDevfileContent(devSample: string): string {
-		const podName: string = this.getShellExecutor().executeArbitraryShellScript(`oc get pods -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} | grep dashboard | awk \'{print $1}\'`).trim()
-		const containerName: string =  this.getShellExecutor().executeArbitraryShellScript(`oc get pod -n ${API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`)
+		const command: string = `oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`;
+		console.log(`command: ${command}`);
+		const podName: string = this.getShellExecutor().executeArbitraryShellScript(`oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} | grep dashboard | awk \'{print $1}\'`).trim()
+		const containerName: string =  this.getShellExecutor().executeArbitraryShellScript(`oc get pod -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`)
 		const devfileContent: string = this.obtainDevFileContentUsingPod(podName, containerName, devSample);
 		return devfileContent;
 	}
