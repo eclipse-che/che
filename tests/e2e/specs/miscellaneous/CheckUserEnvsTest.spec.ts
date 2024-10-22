@@ -79,7 +79,7 @@ type: Opaque
 		kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
 
 		const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand('env | grep mykey');
-		expect(output, 'User env not found').contains('mykey=myvalue');
+		expect(output, 'Environment variable "mykey" from the user secret is not found').contains('mykey=myvalue');
 	});
 
 	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
