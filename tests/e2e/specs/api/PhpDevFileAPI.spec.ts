@@ -10,7 +10,7 @@
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
-import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
+import { DevfilesHelper } from '../../utils/DevfilesHelper';
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
@@ -22,7 +22,7 @@ import { Logger } from '../../utils/Logger';
 import crypto from 'crypto';
 
 suite('PHP devfile API test', function (): void {
-	const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
+	const devfilesRegistryHelper: DevfilesHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);

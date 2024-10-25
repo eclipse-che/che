@@ -13,16 +13,72 @@ import YAML from 'yaml';
 import { API_TEST_CONSTANTS, SUPPORTED_DEVFILE_REGISTRIES } from '../constants/API_TEST_CONSTANTS';
 import { injectable } from 'inversify';
 import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS';
-import {ShellExecutor} from "./ShellExecutor";
-import {e2eContainer} from "../configs/inversify.config";
-import {CLASSES} from "../configs/inversify.types";
+import { ShellExecutor } from './ShellExecutor';
+import { e2eContainer } from '../configs/inversify.config';
+import { CLASSES } from '../configs/inversify.types';
 
 @injectable()
-export class DevfilesRegistryHelper {
-
-	private getShellExecutor(): ShellExecutor {
-		return e2eContainer.get(CLASSES.ShellExecutor);
+export class DevfilesHelper {
+	public getInternalClusterURLToDevFile(devFileName: string): string {
+		const devfileSampleURIPrefix: string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
+		let serviceClusterIp: string = '';
+		let servicePort: string = '';
+		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(
+			`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.clusterIP}'`
+		);
+		servicePort = this.getShellExecutor().executeArbitraryShellScript(
+			`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.ports[*].port}'`
+		);
+		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
 	}
+
+	/**
+	 * grab devfile content from the Dashboard pod (currently, in the image of dashboard builds with devfile content and we use it for getting devfile description)
+	 * @param podName
+	 * @param containerName
+	 * @param devFileName
+	 */
+	public obtainDevFileContentUsingPod(podName: string, containerName: string, devFileName: string): string {
+		const clusterURL: string = this.getInternalClusterURLToDevFile(devFileName);
+		this.getShellExecutor().executeCommand(
+			`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`
+		);
+		return this.getShellExecutor()
+			.executeArbitraryShellScript(
+				`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`
+			)
+			.toString();
+	}
+
+	/**
+	 * grab devfile content from the Che config map
+	 * @param configMapName
+	 */
+	public obtainCheDevFileEditorFromCheConfigMap(configMapName: string): string {
+		return this.getShellExecutor().executeCommand(
+			`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`
+		);
+	}
+
+	/**
+	 * find the Dashboard pod and container name and grab devfile content from it
+	 * @param devSample
+	 */
+	public getDevfileContent(devSample: string): string {
+		const command: string = `oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`;
+		console.log(`command: ${command}`);
+		const podName: string = this.getShellExecutor()
+			.executeArbitraryShellScript(
+				`oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} | grep dashboard | awk \'{print $1}\'`
+			)
+			.trim();
+		const containerName: string = this.getShellExecutor().executeArbitraryShellScript(
+			`oc get pod -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`
+		);
+		const devfileContent: string = this.obtainDevFileContentUsingPod(podName, containerName, devSample);
+		return devfileContent;
+	}
+
 	/**
 	 * @deprecated applicable only for inbuilt devfiles
 	 * @param sampleNamePatterns
@@ -103,7 +159,6 @@ export class DevfilesRegistryHelper {
 		return devfileSamples;
 	}
 
-
 	private filterSamples(sampleNamePatterns: string[] | undefined, content: any): Promise<any[]> {
 		if (sampleNamePatterns) {
 			const commonSampleNamePattern: RegExp = new RegExp(sampleNamePatterns.join('|'), 'i');
@@ -111,7 +166,9 @@ export class DevfilesRegistryHelper {
 		}
 		return content;
 	}
-
+	private getShellExecutor(): ShellExecutor {
+		return e2eContainer.get(CLASSES.ShellExecutor);
+	}
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async getContent(url: string, headers?: object): Promise<AxiosResponse> {
 		Logger.trace(`${url}`);
@@ -134,47 +191,4 @@ export class DevfilesRegistryHelper {
 		}
 		return response?.data;
 	}
-
-	public getInternalClusterURLToDevFile(devFileName:string): string {
-		let devfileSampleURIPrefix:string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
-		let serviceClusterIp:string = ''
-		let servicePort:string = ''
-		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.clusterIP}'`);
-		servicePort = this.getShellExecutor().executeArbitraryShellScript(`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.ports[*].port}'`);
-		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
-	}
-
-	/**
-	 * grab devfile content from the Dashboard pod (currently, in the image of dashboard builds with devfile content and we use it for getting devfile description)
-	 * @param podName
-	 * @param containerName
-	 * @param devFileName
-	 */
-	public obtainDevFileContentUsingPod(podName:string, containerName:string, devFileName:string): string {
-		const clusterURL:string = this.getInternalClusterURLToDevFile(devFileName);
-		this.getShellExecutor().executeCommand(`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`);
-		return this.getShellExecutor().executeArbitraryShellScript(`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- cat /tmp/${devFileName}-devfile.yaml`).toString();
-	}
-
-	/**
-	 *  use internal CHE config map for getting description of CHE editor
-	 * @param configMapName
-	 */
-	public obtainCheDevFileEditorFromCheConfigMap(configMapName: string): string {
-		return this.getShellExecutor().executeCommand(`oc get configmap ${configMapName} -o jsonpath="{.data.che-code\\.yaml}" -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`);
-	}
-
-	/**
-	 * find the Dashboard pod and container name and grab devfile content from it
-	 * @param devSample
-	 */
-	public getDevfileContent(devSample: string): string {
-		const command: string = `oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()}`;
-		console.log(`command: ${command}`);
-		const podName: string = this.getShellExecutor().executeArbitraryShellScript(`oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} | grep dashboard | awk \'{print $1}\'`).trim()
-		const containerName: string =  this.getShellExecutor().executeArbitraryShellScript(`oc get pod -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} ${podName} -o jsonpath=\'{.spec.containers[*].name}\'`)
-		const devfileContent: string = this.obtainDevFileContentUsingPod(podName, containerName, devSample);
-		return devfileContent;
-	}
-
 }
