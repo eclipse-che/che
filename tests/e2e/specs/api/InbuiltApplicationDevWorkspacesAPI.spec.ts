@@ -12,7 +12,7 @@ import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigu
 import { ShellString } from 'shelljs';
 import { expect } from 'chai';
 import { StringUtil } from '../../utils/StringUtil';
-import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
+import { DevfilesHelper } from '../../utils/DevfilesHelper';
 import { Logger } from '../../utils/Logger';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
@@ -27,7 +27,7 @@ import { MOCHA_CONSTANTS } from '../../constants/MOCHA_CONSTANTS';
  */
 
 void (async function (): Promise<void> {
-	const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
+	const devfilesRegistryHelper: DevfilesHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 	let devfileSamples: any;
 	if (MOCHA_CONSTANTS.MOCHA_DELAYED_SUITE) {
 		devfileSamples = await devfilesRegistryHelper.collectPathsToDevfilesFromRegistry(

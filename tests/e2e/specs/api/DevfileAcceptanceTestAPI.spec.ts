@@ -16,7 +16,7 @@ import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
-import { DevfilesRegistryHelper } from '../../utils/DevfilesRegistryHelper';
+import { DevfilesHelper } from '../../utils/DevfilesHelper';
 import { MOCHA_CONSTANTS } from '../../constants/MOCHA_CONSTANTS';
 import { API_TEST_CONSTANTS } from '../../constants/API_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
@@ -26,7 +26,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
  * info: https://mochajs.org/#delayed-root-suite
  */
 void (async function (): Promise<void> {
-	const devfilesRegistryHelper: DevfilesRegistryHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
+	const devfilesRegistryHelper: DevfilesHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 
 	let devfileSamples: any = [];
 	if (

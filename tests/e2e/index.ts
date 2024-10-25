@@ -5,7 +5,7 @@ export * from './configs/mocharc';
 export * from './driver/ChromeDriver';
 export * from './driver/IDriver';
 export * from './utils/BrowserTabsUtil';
-export * from './utils/DevfilesRegistryHelper';
+export * from './utils/DevfilesHelper';
 export * from './utils/DevWorkspaceConfigurationHelper';
 export * from './utils/DriverHelper';
 export * from './utils/IContextParams';
