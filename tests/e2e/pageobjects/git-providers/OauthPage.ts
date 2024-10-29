@@ -157,10 +157,10 @@ export class OauthPage {
 		await this.driverHelper.waitDisappearance(OauthPage.APPROVE_BUTTON);
 	}
 
-	async waitTwoStepVerificationForm(): Promise<void> {
+	async waitVisibilityTwoStepVerificationForm(): Promise<boolean> {
 		Logger.debug();
 
-		await this.driverHelper.waitVisibility(OauthPage.ENABLE_TWO_STEP_VERIFICATION_FORM);
+		return this.driverHelper.waitVisibilityBoolean(OauthPage.ENABLE_TWO_STEP_VERIFICATION_FORM);
 	}
 
 	async clickOnDenyTwoStepVerification(): Promise<void> {
@@ -179,9 +179,10 @@ export class OauthPage {
 		Logger.debug();
 
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
-			await this.waitTwoStepVerificationForm();
-			await this.clickOnDenyTwoStepVerification();
-			await this.waitDisappearanceTwoStepVerificationForm();
+			if (await this.waitVisibilityTwoStepVerificationForm()) {
+				await this.clickOnDenyTwoStepVerification();
+				await this.waitDisappearanceTwoStepVerificationForm();
+			}
 		}
 
 		await this.waitLoginPage();
