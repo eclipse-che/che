@@ -178,13 +178,6 @@ export class OauthPage {
 	async login(): Promise<void> {
 		Logger.debug();
 
-		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
-			if (await this.waitVisibilityTwoStepVerificationForm()) {
-				await this.clickOnDenyTwoStepVerification();
-				await this.waitDisappearanceTwoStepVerificationForm();
-			}
-		}
-
 		await this.waitLoginPage();
 		await this.enterUserName(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
 		if (
@@ -199,6 +192,13 @@ export class OauthPage {
 			await this.clickOnNotRememberCredentialsButton();
 		}
 		await this.waitClosingLoginPage();
+
+		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
+			if (await this.waitVisibilityTwoStepVerificationForm()) {
+				await this.clickOnDenyTwoStepVerification();
+				await this.waitDisappearanceTwoStepVerificationForm();
+			}
+		}
 	}
 
 	async confirmAccess(): Promise<void> {
