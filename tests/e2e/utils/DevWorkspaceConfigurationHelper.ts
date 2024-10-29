@@ -20,7 +20,7 @@ import { IContextParams } from './IContextParams';
 import { e2eContainer } from '../configs/inversify.config';
 import { CLASSES, EXTERNAL_CLASSES } from '../configs/inversify.types';
 import getDecorators from 'inversify-inject-decorators';
-import {DevfilesHelper} from "./DevfilesHelper";
+import { DevfilesHelper } from './DevfilesHelper';
 
 const { lazyInject } = getDecorators(e2eContainer);
 
