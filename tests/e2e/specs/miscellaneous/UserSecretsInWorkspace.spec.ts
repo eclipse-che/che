@@ -34,7 +34,7 @@ suite('"User secrets in workspace" test', function (): void {
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-	const userProject: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + `-devspaces`;
+	const userProject: string = OAUTH_CONSTANTS.TS_SELENIUM_OCP_USERNAME + '-devspaces';
 	const stackName: string = 'Empty Workspace';
 
 	const mountEnvCommand: string = `echo '
@@ -72,7 +72,7 @@ type: Opaque
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 	});
 
-	test('Check that mounted secret exists in envs list', async function (): Promise<void> {
+	test('Check that mounted secret exists in envs list', function (): void {
 		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 		kubernetesCommandLineToolsExecutor.workspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		kubernetesCommandLineToolsExecutor.loginToOcp();
