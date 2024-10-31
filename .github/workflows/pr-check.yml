@@ -30,7 +30,9 @@ env:
 jobs:
   pr-check:
     runs-on: ubuntu-22.04
-
+    defaults:
+        run:
+          working-directory: tests/e2e
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -47,6 +49,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+
+      - name: Check compilation errors
+        run: |
+          npm ci
+          npm run tsc
+
+      - name: Check lint errors
+        run: |
+          npm run lint
 
       - name: Start minikube
         id: run-minikube
@@ -92,8 +103,6 @@ jobs:
 
       - name: Run Empty Workspace API test
         run: |
-          cd tests/e2e
-          npm ci
           export TS_PLATFORM=kubernetes && 
           export TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL=kubectl && 
           export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH=false && 
@@ -109,7 +118,6 @@ jobs:
         run: |
             # for saving disk space we can remove the assembly folder because it is legacy code
             rm -rf assembly
-            cd tests/e2e
             docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
 
         # we have already ran API test, built test image and do not need e2e test-code, remove for saving disk space
