@@ -48,6 +48,12 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Check compilation errors
+        run: npm run tsc
+
+      - name: Check lint errors
+        run: npm run lint
+
       - name: Start minikube
         id: run-minikube
         uses: che-incubator/setup-minikube-action@next
