@@ -47,16 +47,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-
+      - working-directory: tests/e2e
       - name: Check compilation errors
         run: |
-          cd tests/e2e
           npm run tsc
+          npm ci
 
       - name: Check lint errors
-        run: |
-          cd tests/e2e
-          npm run lint
+        run: cd tests/e2e
 
       - name: Start minikube
         id: run-minikube
@@ -102,8 +100,6 @@ jobs:
 
       - name: Run Empty Workspace API test
         run: |
-          cd tests/e2e
-          npm ci
           export TS_PLATFORM=kubernetes && 
           export TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL=kubectl && 
           export TS_SELENIUM_VALUE_OPENSHIFT_OAUTH=false && 
