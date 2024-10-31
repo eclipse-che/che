@@ -118,7 +118,6 @@ jobs:
         run: |
             # for saving disk space we can remove the assembly folder because it is legacy code
             rm -rf assembly
-            cd tests/e2e
             docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
 
         # we have already ran API test, built test image and do not need e2e test-code, remove for saving disk space
