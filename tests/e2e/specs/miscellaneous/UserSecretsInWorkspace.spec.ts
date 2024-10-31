@@ -72,7 +72,7 @@ type: Opaque
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 	});
 
-	test('Check that mounted secret exists in envs list', async function (): Promise<void> {
+	test('Check that mounted secret exists in envs list', function (): void {
 		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 		kubernetesCommandLineToolsExecutor.workspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		kubernetesCommandLineToolsExecutor.loginToOcp();
