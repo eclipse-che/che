@@ -30,7 +30,9 @@ env:
 jobs:
   pr-check:
     runs-on: ubuntu-22.04
-
+    defaults:
+        run:
+          working-directory: tests/e2e
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -47,14 +49,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - working-directory: tests/e2e
+
       - name: Check compilation errors
         run: |
-          npm run tsc
           npm ci
+          npm run tsc
 
       - name: Check lint errors
-        run: cd tests/e2e
+        run: |
+          npm run lint
 
       - name: Start minikube
         id: run-minikube
