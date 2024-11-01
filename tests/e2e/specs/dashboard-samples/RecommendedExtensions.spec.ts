@@ -123,6 +123,10 @@ for (const sample of samples) {
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		});
 
+		test('Accept the project as a trusted one', async function (): Promise<void> {
+			await projectAndFileTests.performTrustAuthorDialog();
+		});
+
 		test('Check the project files were imported', async function (): Promise<void> {
 			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
 			// using TS_IDE_LOAD_TIMEOUT easier than performing of finishing animation  all elements
@@ -130,10 +134,6 @@ for (const sample of samples) {
 			projectSection = await projectAndFileTests.getProjectViewSession();
 			expect(await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName), 'Files not imported').not
 				.undefined;
-		});
-
-		test('Accept the project as a trusted one', async function (): Promise<void> {
-			await projectAndFileTests.performTrustAuthorDialog();
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
