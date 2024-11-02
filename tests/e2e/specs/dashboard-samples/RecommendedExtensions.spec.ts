@@ -135,13 +135,15 @@ for (const sample of samples) {
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			projectSection = await projectAndFileTests.getProjectViewSession();
 			try {
-				// try with default project level 2, as for samples from https://github.com/devspaces-samples/
+				// try using project level 2, as in samples from https://github.com/devspaces-samples/
 				expect(
 					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel),
 					'Files not imported'
 				).not.undefined;
 			} catch (err) {
-				// try with default project level 1, as for samples with defined metadata.projectType in devfile.yaml, like "JBoss EAP"
+				Logger.debug(
+					'Try using project level 1, as in samples with a defined metadata.projectType in the devfile.yaml, such as JBoss EAP.'
+				);
 				vsCodeFolderItemLevel = vsCodeFolderItemLevel - 1;
 				expect(
 					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel),
