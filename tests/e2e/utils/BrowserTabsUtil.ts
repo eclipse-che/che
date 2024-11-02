@@ -76,14 +76,22 @@ export class BrowserTabsUtil {
 	async getCurrentUrl(): Promise<string> {
 		Logger.trace();
 
-		let currentUrl: string = '';
-		try {
-			currentUrl = await this.driverHelper.getDriver().getCurrentUrl();
-		} catch (e) {
-			Logger.trace('cannot get current url');
+		const maxAttempts: number = 5;
+		let attempts: number = 0;
+		while (attempts < maxAttempts) {
+			try {
+				return await this.driverHelper.getDriver().getCurrentUrl();
+
+			} catch (e) {
+				Logger.trace(`Attempt ${attempts + 1} failed: cannot get current url`);
+
+				attempts++;
+
+				await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
+			}
 		}
 
-		return currentUrl;
+		throw new Error('Max attempts reached: cannot get current url');
 	}
 
 	async waitURL(expectedUrl: string, timeout: number): Promise<void> {
