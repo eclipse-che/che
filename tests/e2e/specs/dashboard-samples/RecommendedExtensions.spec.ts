@@ -98,6 +98,8 @@ for (const sample of samples) {
 
 		const [pathToExtensionsListFileName, extensionsListFileName]: string[] = ['.vscode', 'extensions.json'];
 
+		let vsCodeFolderItemLevel: number = 2;
+
 		let recommendedExtensions: any = {
 			recommendations: []
 		};
@@ -132,19 +134,37 @@ for (const sample of samples) {
 			// using TS_IDE_LOAD_TIMEOUT easier than performing of finishing animation  all elements
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			projectSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName), 'Files not imported').not
-				.undefined;
+			try {
+				// try with default project level 2, as for samples from https://github.com/devspaces-samples/
+				expect(
+					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel),
+					'Files not imported'
+				).not.undefined;
+			} catch (err) {
+				// try with default project level 1, as for samples with defined metadata.projectType in devfile.yaml, like "JBoss EAP"
+				vsCodeFolderItemLevel = vsCodeFolderItemLevel - 1;
+				expect(
+					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel),
+					'Files not imported'
+				).not.undefined;
+			}
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
 			// sometimes the Trust Dialog does not appear as expected - as result we need to execute "projectAndFileTests.performManageWorkspaceTrustBox()" method. In this case.
 			try {
-				await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+				await (
+					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
+				)?.select();
 			} catch (err) {
 				await projectAndFileTests.performManageWorkspaceTrustBox();
-				await (await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName))?.select();
+				await (
+					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
+				)?.select();
 			}
-			await (await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, 3))?.select();
+			await (
+				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
+			)?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
 			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);

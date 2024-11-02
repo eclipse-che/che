@@ -81,7 +81,6 @@ export class BrowserTabsUtil {
 		while (attempts < maxAttempts) {
 			try {
 				return await this.driverHelper.getDriver().getCurrentUrl();
-
 			} catch (e) {
 				Logger.trace(`Attempt ${attempts + 1} failed: cannot get current url`);
 
