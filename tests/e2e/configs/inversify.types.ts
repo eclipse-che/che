@@ -48,7 +48,11 @@ const CLASSES: any = {
 	KubernetesCommandLineToolsExecutor: 'KubernetesCommandLineToolsExecutor',
 	ShellExecutor: 'ShellExecutor',
 	ContainerTerminal: 'ContainerTerminal',
-	WebTerminalPage: 'WebTerminalPage'
+	UserPreferences: 'UserPreferences',
+	WebTerminalPage: 'WebTerminalPage',
+	RevokeOauthPage: 'RevokeOauthPage',
+	TrustAuthorPopup: 'TrustAuthorPopup',
+	ViewsMoreActionsButton: 'ViewsMoreActionsButton'
 };
 
 const EXTERNAL_CLASSES: any = {

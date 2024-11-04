@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2021 Red Hat, Inc.
+ * copyright (c) 2021-2024 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,8 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -53,11 +55,14 @@ suite(
 		const oauthPage: OauthPage = e2eContainer.get(CLASSES.OauthPage);
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
 		let rest: SingleScmProvider[];
 		let scmContextMenu: ContextMenu;
+		let viewsActionsButton: boolean;
 
 		// test specific data
 		const timeToRefresh: number = 1500;
@@ -76,6 +81,7 @@ suite(
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
 			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+			await createWorkspace.performTrustAuthorPopup();
 		});
 
 		test(`Authorize with a ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} OAuth and deny access`, async function (): Promise<void> {
@@ -103,15 +109,13 @@ suite(
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
 			test('Check that a project folder has not been cloned', async function (): Promise<void> {
 				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.multiProviderItem);
+				await driverHelper.waitVisibility(webCheCodeLocators.TitleBar.itemElement);
 				await projectAndFileTests.performTrustAuthorDialog();
 				const isProjectFolderUnable: string = await driverHelper.waitAndGetElementAttribute(
 					(webCheCodeLocators.TreeItem as any).projectFolderItem,
 					'aria-label'
 				);
-				expect(isProjectFolderUnable).to.contain(
-					'/projects/' + testRepoProjectName + ' • Unable to resolve workspace folder (Unable to resolve nonexistent file'
-				);
+				expect(isProjectFolderUnable).to.contain('No Folder Opened Section');
 			});
 		} else {
 			test('Check if a project folder has been created', async function (): Promise<void> {
@@ -159,8 +163,8 @@ suite(
 			test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-				await scmProvider.takeAction(refreshButtonLabel);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				// wait while changes counter will be refreshed
 				await driverHelper.wait(timeToRefresh);
 				const changes: number = await scmProvider.getChangeCount();
@@ -170,6 +174,10 @@ suite(
 
 			test('Stage the changes', async function (): Promise<void> {
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				viewsActionsButton = await viewsMoreActionsButton.viewsAndMoreActionsButtonIsVisible();
+				if (viewsActionsButton) {
+					await viewsMoreActionsButton.closeSourceControlGraph();
+				}
 				Logger.debug('scmProvider.openMoreActions');
 				scmContextMenu = await scmProvider.openMoreActions();
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
@@ -182,8 +190,8 @@ suite(
 				await scmProvider.commitChanges('Commit ' + changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-				await scmProvider.takeAction(refreshButtonLabel);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				// wait while changes counter will be refreshed
 				await driverHelper.wait(timeToRefresh);
 				const changes: number = await scmProvider.getChangeCount();
@@ -247,6 +255,8 @@ suite(
 		});
 
 		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			// to avoid a possible creating workspace which is not appeared on Dashboard yet. TODO: implement a better solution.
+			await driverHelper.wait(30000);
 			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 

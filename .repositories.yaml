@@ -94,7 +94,7 @@ repositories:
   - url: https://github.com/eclipse-che/che-website
     name: website
     description: >-
-      https://eclipse.org/che website source code.
+      https://eclipse.dev/che website source code.
     devfile: https://github.com/eclipse-che/che-website/blob/main/.devfile.yaml
     useCheReleaseLifecycle: false
   - url: https://github.com/eclipse-che/che-workspace-client

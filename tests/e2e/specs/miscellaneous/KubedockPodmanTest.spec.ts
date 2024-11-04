@@ -41,17 +41,32 @@ suite(
 			'echo KUBEDOCK_ENABLED\n' +
 			'/entrypoint.sh\n' +
 			'cd $PROJECT_SOURCE\n' +
+			'export ARCH=$(uname -m)\n' +
+			'export DATE=$(date +"%m%d%y")\n' +
 			'export USER=$(oc whoami)\n' +
 			'export TKN=$(oc whoami -t)\n' +
 			'export REG="image-registry.openshift-image-registry.svc:5000"\n' +
 			'export PROJECT=$(oc project -q)\n' +
-			'export IMG="${REG}/${PROJECT}/hello"\n' +
+			'export IMG="${REG}/${PROJECT}/hello:${DATE}"\n' +
 			'podman login --tls-verify=false --username ${USER} --password ${TKN} ${REG}\n' +
-			'podman build -t ${IMG} .\n' +
-			'podman push --tls-verify=false ${IMG}\n' +
+			'podman build -t ${IMG} -f Dockerfile.${ARCH}\n' +
+			'podman push --tls-verify=false ${IMG}\n';
+
+		const runTestScript: string =
+			'# Enable Kubedock\n' +
+			'export KUBEDOCK_ENABLED=true\n' +
+			'echo KUBEDOCK_ENABLED\n' +
+			'/entrypoint.sh\n' +
+			'export DATE=$(date +"%m%d%y")\n' +
+			'export USER=$(oc whoami)\n' +
+			'export TKN=$(oc whoami -t)\n' +
+			'export REG="image-registry.openshift-image-registry.svc:5000"\n' +
+			'export PROJECT=$(oc project -q)\n' +
+			'export IMG="${REG}/${PROJECT}/hello:${DATE}"\n' +
+			'podman login --tls-verify=false --username ${USER} --password ${TKN} ${REG}\n' +
 			'podman run --rm ${IMG}';
 
-		const factoryUrl: string = 'https://github.com/l0rd/dockerfile-hello-world';
+		const factoryUrl: string = 'https://github.com/crw-qe/dockerfile-hello-world';
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
@@ -77,7 +92,7 @@ suite(
 
 		test('Check the project files were imported', async function (): Promise<void> {
 			const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile'), 'Files not imported').not.undefined;
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile.ppc64le'), 'Files not imported').not.undefined;
 		});
 
 		test('Create and check container runs using kubedock and podman', function (): void {
@@ -86,7 +101,9 @@ suite(
 			kubernetesCommandLineToolsExecutor.loginToOcp();
 			kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
 			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(testScript);
-			expect(output, 'Podman test script failed').contains('Hello from Kubedock!');
+			expect(output, 'Podman test script failed').contains('Successfully tagged');
+			const runOutput: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(runTestScript);
+			expect(runOutput, 'Podman test script failed').contains('Hello from Kubedock!');
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {

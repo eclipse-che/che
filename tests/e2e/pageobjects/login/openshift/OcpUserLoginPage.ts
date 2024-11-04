@@ -22,7 +22,7 @@ export class OcpUserLoginPage implements IOcpLoginPage {
 	async login(): Promise<void> {
 		Logger.debug();
 
-		if (OAUTH_CONSTANTS.TS_OCP_LOGIN_PAGE_PROVIDER_TITLE !== '') {
+		if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
 			await this.ocpLogin.waitAndClickOnLoginProviderTitle();
 		}
 

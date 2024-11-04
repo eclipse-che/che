@@ -18,12 +18,11 @@ import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
-import { Locators, ModalDialog } from 'monaco-page-objects';
+import { By, Locators, ModalDialog } from 'monaco-page-objects';
 import { expect } from 'chai';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
-import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 suite('"Check workspace idle timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -39,14 +38,17 @@ suite('"Check workspace idle timeout" test', function (): void {
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
-	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 	const stackName: string = 'Empty Workspace';
 	const cheClusterName: string = 'devspaces';
 	let stopWorkspaceTimeout: number = 0;
 
+	async function checkDialogButton(buttonName: string): Promise<void> {
+		await driverHelper.waitVisibility(By.xpath(`//div[@class='dialog-buttons']//a[text()='${buttonName}']`));
+	}
+
 	suiteSetup(function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
+		kubernetesCommandLineToolsExecutor.loginToOcp();
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
 		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
@@ -84,21 +86,18 @@ suite('"Check workspace idle timeout" test', function (): void {
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
 
-	test('Wait idle timeout dialog and click on "Return to Dashboard" button', async function (): Promise<void> {
+	test('Wait idle timeout dialog and check Dialog buttons', async function (): Promise<void> {
 		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 		const dialog: ModalDialog = new ModalDialog();
 		expect(await dialog.getDetails()).includes('Your workspace has stopped due to inactivity.');
-		await dialog.pushButton('Return to dashboard');
+		await checkDialogButton('Cancel');
+		await checkDialogButton('Return to dashboard');
+		await checkDialogButton('Restart your workspace');
 	});
 
 	test('Check that the workspace has Stopped state', async function (): Promise<void> {
-		await dashboard.waitPage();
-		await workspaces.waitWorkspaceWithStoppedStatus(WorkspaceHandlingTests.getWorkspaceName());
-	});
-
-	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
 		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();
+		await workspaces.waitWorkspaceWithStoppedStatus(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {

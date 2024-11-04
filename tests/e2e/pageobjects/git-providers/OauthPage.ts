@@ -24,6 +24,8 @@ export class OauthPage {
 	private static APPROVE_BUTTON: By;
 	private static DENY_ACCESS_BUTTON: By;
 	private static DENY_SAVE_CREDENTIALS_BUTTON: By;
+	private static ENABLE_TWO_STEP_VERIFICATION_FORM: By;
+	private static DENY_TWO_STEP_VERIFICATION: By;
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -55,6 +57,8 @@ export class OauthPage {
 					OauthPage.SUBMIT_BUTTON = By.id('login-submit');
 					OauthPage.APPROVE_BUTTON = By.xpath('//button[@value="approve"]');
 					OauthPage.DENY_ACCESS_BUTTON = By.xpath('//button[@value="deny"]');
+					OauthPage.ENABLE_TWO_STEP_VERIFICATION_FORM = By.id('ProductHeading');
+					OauthPage.DENY_TWO_STEP_VERIFICATION = By.id('mfa-promote-dismiss');
 				}
 				break;
 			case GitProviderType.GITLAB:
@@ -153,6 +157,24 @@ export class OauthPage {
 		await this.driverHelper.waitDisappearance(OauthPage.APPROVE_BUTTON);
 	}
 
+	async waitVisibilityTwoStepVerificationForm(): Promise<boolean> {
+		Logger.debug();
+
+		return this.driverHelper.waitVisibilityBoolean(OauthPage.ENABLE_TWO_STEP_VERIFICATION_FORM);
+	}
+
+	async clickOnDenyTwoStepVerification(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(OauthPage.DENY_TWO_STEP_VERIFICATION);
+	}
+
+	async waitDisappearanceTwoStepVerificationForm(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitDisappearance(OauthPage.ENABLE_TWO_STEP_VERIFICATION_FORM);
+	}
+
 	async login(): Promise<void> {
 		Logger.debug();
 
@@ -170,6 +192,13 @@ export class OauthPage {
 			await this.clickOnNotRememberCredentialsButton();
 		}
 		await this.waitClosingLoginPage();
+
+		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
+			if (await this.waitVisibilityTwoStepVerificationForm()) {
+				await this.clickOnDenyTwoStepVerification();
+				await this.waitDisappearanceTwoStepVerificationForm();
+			}
+		}
 	}
 
 	async confirmAccess(): Promise<void> {

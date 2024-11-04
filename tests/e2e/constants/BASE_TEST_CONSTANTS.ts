@@ -13,7 +13,6 @@ export enum Platform {
 }
 
 export const BASE_TEST_CONSTANTS: {
-	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: boolean;
 	OCP_INFRA: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
@@ -66,13 +65,13 @@ export const BASE_TEST_CONSTANTS: {
 		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('devspaces')
 			? 'devspaces'
 			: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.includes('che')
-			? 'che'
-			: 'default';
+				? 'che'
+				: 'default';
 	},
 	/**
 	 * testing application version
 	 */
-	TESTING_APPLICATION_VERSION: process.env.TESTING_APPLICATION_VERSION || '3.9',
+	TESTING_APPLICATION_VERSION: process.env.TESTING_APPLICATION_VERSION || 'next',
 
 	/**
 	 * is "https://access.redhat.com/documentation/en-us/red_hat_openshift_dev_spaces/{TESTING_APPLICATION_VERSION}/" available online
@@ -130,11 +129,6 @@ export const BASE_TEST_CONSTANTS: {
 	 * stop and remove workspace if a test fails.
 	 */
 	DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
-
-	/**
-	 * stop and remove all workspaces on test run finish
-	 */
-	DELETE_ALL_WORKSPACES_ON_RUN_FINISH: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.

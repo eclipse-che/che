@@ -97,7 +97,7 @@ export const TIMEOUT_CONSTANTS: {
 	/**
 	 * timeout for interactions with editor tab - wait, click, select, "8 000" by default.
 	 */
-	TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 8_000,
+	TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
 
 	// -------------------------------------------- IDE --------------------------------------------
 

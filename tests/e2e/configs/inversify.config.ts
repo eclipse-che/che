@@ -47,11 +47,14 @@ import { BASE_TEST_CONSTANTS, Platform } from '../constants/BASE_TEST_CONSTANTS'
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
 import { LocatorLoader } from 'monaco-page-objects/out/locators/loader';
 import { OauthPage } from '../pageobjects/git-providers/OauthPage';
-import { DevfilesRegistryHelper } from '../utils/DevfilesRegistryHelper';
+import { DevfilesHelper } from '../utils/DevfilesHelper';
 import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/main';
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../utils/ShellExecutor';
-import { WebTerminalPage } from "../pageobjects/webterminal/WebTerminalPage";
+import { UserPreferences } from '../pageobjects/dashboard/UserPreferences';
+import { WebTerminalPage } from '../pageobjects/webterminal/WebTerminalPage';
+import { TrustAuthorPopup } from '../pageobjects/dashboard/TrustAuthorPopup';
+import { ViewsMoreActionsButton } from '../pageobjects/ide/ViewsMoreActionsButton';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -81,13 +84,17 @@ e2eContainer.bind<StringUtil>(CLASSES.StringUtil).to(StringUtil);
 e2eContainer.bind<ApiUrlResolver>(CLASSES.ApiUrlResolver).to(ApiUrlResolver);
 e2eContainer.bind<WorkspaceHandlingTests>(CLASSES.WorkspaceHandlingTests).to(WorkspaceHandlingTests);
 e2eContainer.bind<RedHatLoginPage>(CLASSES.RedHatLoginPage).to(RedHatLoginPage);
-e2eContainer.bind<DevfilesRegistryHelper>(CLASSES.DevfilesRegistryHelper).to(DevfilesRegistryHelper);
+e2eContainer.bind<DevfilesHelper>(CLASSES.DevfilesRegistryHelper).to(DevfilesHelper);
 e2eContainer.bind<KubernetesCommandLineToolsExecutor>(CLASSES.KubernetesCommandLineToolsExecutor).to(KubernetesCommandLineToolsExecutor);
 e2eContainer.bind<ShellExecutor>(CLASSES.ShellExecutor).to(ShellExecutor);
 e2eContainer.bind<ContainerTerminal>(CLASSES.ContainerTerminal).to(ContainerTerminal);
 e2eContainer.bind<WebTerminalPage>(CLASSES.WebTerminalPage).to(WebTerminalPage);
+e2eContainer.bind<UserPreferences>(CLASSES.UserPreferences).to(UserPreferences);
 e2eContainer.bind<Generator>(EXTERNAL_CLASSES.Generator).to(Generator);
 e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
+e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
+e2eContainer.bind<TrustAuthorPopup>(CLASSES.TrustAuthorPopup).to(TrustAuthorPopup);
+e2eContainer.bind<ViewsMoreActionsButton>(CLASSES.ViewsMoreActionsButton).to(ViewsMoreActionsButton);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {

@@ -34,9 +34,11 @@ suite('Empty workspace API test', function (): void {
 	suiteSetup(`Create empty workspace with OC client ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, async function (): Promise<void> {
 		const workspaceName: string = 'empty-' + Math.floor(Math.random() * 1000);
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
+		const editorContent: string = '';
 
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
-			devfileContent
+			devfileContent,
+			editorContent
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;

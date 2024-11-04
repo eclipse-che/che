@@ -90,14 +90,15 @@ export class DevWorkspaceConfigurationHelper {
 			e.kind === 'DevWorkspace'
 				? (content.DevWorkspace = e)
 				: e.kind === 'DevWorkspaceTemplate'
-				? (content.DevWorkspaceTemplate = e)
-				: Logger.error(
-						'Problems with configuration parsing, string should be in format "DevWorkspace\\n---\\nDevWorkspaceTemplate"'
-				  );
+					? (content.DevWorkspaceTemplate = e)
+					: Logger.error(
+							'Problems with configuration parsing, string should be in format "DevWorkspace\\n---\\nDevWorkspaceTemplate"'
+						);
 		});
 
 		return content;
 	}
+
 	patchDevWorkspaceConfigWithBuildContainerAttribute(devfileContextDevWorkspace: any): void {
 		Logger.debug();
 		devfileContextDevWorkspace.spec.template.attributes = YAML.parse(`

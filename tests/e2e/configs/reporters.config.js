@@ -15,6 +15,11 @@ module.exports = {
 	allureMochaReporterOptions: {
 		resultsDir: '.allure-results'
 	},
+
+	reporterOptions: {
+		mochaFile: `${REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER}/junit/test-results.xml`
+	},
+
 	reportportalAgentJsMochaReporterOptions: {
 		apiKey: REPORTER_CONSTANTS.RP_API_KEY,
 		endpoint: REPORTER_CONSTANTS.RP_ENDPOINT(),

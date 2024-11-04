@@ -1,11 +1,8 @@
 # Global Owners
-* @nickboldt
-
-# dockerfiles
-dockerfiles/** @nickboldt
+* @dmytro-ndp @SDawley
 
 # e2e tests
-tests/e2e/** @musienko-maxim @nickboldt @ScrewTSW @dmytro-ndp
+tests/e2e/** @musienko-maxim @dmytro-ndp
 
 # devworkspace happy path test
 tests/devworkspace-happy-path/** @musienko-maxim

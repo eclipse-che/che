@@ -13,6 +13,7 @@ export const CHROME_DRIVER_CONSTANTS: {
 	TS_USE_WEB_DRIVER_FOR_TEST: boolean;
 	TS_SELENIUM_LAUNCH_FULLSCREEN: boolean;
 	TS_SELENIUM_REMOTE_DRIVER_URL: string;
+	TS_SELENIUM_PROXY_SERVER: string;
 } = {
 	/**
 	 * remote driver URL.
@@ -38,5 +39,10 @@ export const CHROME_DRIVER_CONSTANTS: {
 	/**
 	 * run browser with an enabled or disabled W3C protocol (on Chrome  76 and upper, it is enabled by default), "true" by default.
 	 */
-	TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false'
+	TS_SELENIUM_W3C_CHROME_OPTION: process.env.TS_SELENIUM_W3C_CHROME_OPTION !== 'false',
+
+	/**
+	 * run browser with proxy settings
+	 */
+	TS_SELENIUM_PROXY_SERVER: process.env.TS_SELENIUM_PROXY_SERVER || ''
 };

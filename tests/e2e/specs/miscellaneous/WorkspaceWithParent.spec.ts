@@ -22,6 +22,10 @@ import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTes
 import { registerRunningWorkspace } from '../MochaHooks';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -34,6 +38,9 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+
 	let podName: string = '';
 
 	suiteSetup(function (): void {
@@ -44,13 +51,20 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await loginTests.loginIntoChe();
 	});
 
-	test('Create a workspace using a parent', async function (): Promise<void> {
-		const factoryUrl: string = `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}/dashboard/#https://github.com/testsfactory/parentDevfile`;
+	test('Create a workspace from child devfile', async function (): Promise<void> {
+		const factoryUrl: string =
+			FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL.length === 0
+				? BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + 'https://github.com/testsfactory/parentDevfile'
+				: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL;
 		await dashboard.waitPage();
 		await browserTabsUtil.navigateTo(factoryUrl);
+		await createWorkspace.performTrustAuthorPopup();
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+		// add 10 sec timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
+		// using 10 sec easier than performing of finishing animation a all elements
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
 
@@ -68,8 +82,12 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await input.setText('>Tasks: Run Task');
 		const runTaskItem: QuickPickItem | undefined = await input.findQuickPick('Tasks: Run Task');
 		await runTaskItem?.click();
+		// pause for avoiding StaleElement exception. It is easier solution than try/catch or writing separate function for this
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const devFileTask: QuickPickItem | undefined = await input.findQuickPick('devfile');
 		await devFileTask?.click();
+		// pause for avoiding StaleElement exception. It is easier solution than try/catch or writing separate function for this
+		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		const firstExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('1. This command from the devfile');
 		const secondExpectedQuickPick: QuickPickItem | undefined = await input.findQuickPick('2. This command from the parent');
 		expect(firstExpectedQuickPick).not.undefined;
@@ -77,16 +95,16 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 	});
 
 	test('Check expected containers in the parent POD', function (): void {
-		const getPodNameCommand: string = `${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pods -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --selector=controller.devfile.io/devworkspace_name=sample-using-parent --output jsonpath=\'{.items[0].metadata.name}\'`;
+		const getPodNameCommand: string = `${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pods -n ${kubernetesCommandLineToolsExecutor.namespace} --selector=controller.devfile.io/devworkspace_name=sample-using-parent --output jsonpath=\'{.items[0].metadata.name}\'`;
 
 		podName = shellExecutor.executeArbitraryShellScript(getPodNameCommand);
 		const containerNames: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --output jsonpath=\'{.spec.containers[*].name}\'`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${kubernetesCommandLineToolsExecutor.namespace} --output jsonpath=\'{.spec.containers[*].name}\'`
 		);
 		expect(containerNames).contains('tools').and.contains('che-gateway');
 
 		const initContainerName: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${BASE_TEST_CONSTANTS.TEST_NAMESPACE} --output jsonpath=\'{.spec.initContainers[].name}\'`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${kubernetesCommandLineToolsExecutor.namespace} --output jsonpath=\'{.spec.initContainers[].name}\'`
 		);
 		expect(initContainerName).contains('che-code-injector');
 	});
