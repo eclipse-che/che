@@ -85,6 +85,9 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 			await dashboard.selectAboutMenuItem(link.text);
 			await browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID);
 			const currentUrl: string = await browserTabsUtil.getCurrentUrl();
+
+			Logger.trace(`Current URL: ${currentUrl}`);
+
 			expect(link.href, `${link.href} not includes ${currentUrl}`).oneOf([currentUrl, currentUrl + '/']);
 			await browserTabsUtil.switchToWindow(parentGUID);
 			await browserTabsUtil.closeAllTabsExceptCurrent();
