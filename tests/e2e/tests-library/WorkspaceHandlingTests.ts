@@ -23,8 +23,8 @@ import { By, error } from 'selenium-webdriver';
 @injectable()
 export class WorkspaceHandlingTests {
 	private static WORKSPACE_NAME: By = By.xpath('//h1[contains(.,"Starting workspace ")]');
-	private static WORKSPACE_STATUS: By = By.xpath('//*/span[@class="pf-c-label__content"]/text()');
-	private static WORKSPACE_ALERT_TITLE: By = By.xpath('//*/h4[@class="pf-c-alert__title"]/text()');
+	private static WORKSPACE_STATUS: By = By.xpath('//*/span[@class="pf-c-label__content"]');
+	private static WORKSPACE_ALERT_TITLE: By = By.xpath('//h4[@class="pf-c-alert__title"]');
 	private static WORKSPACE_ALERT_DESCRIPTION: By = By.xpath('//*/div[@class="pf-c-alert__description"]');
 	private static workspaceName: string = 'undefined';
 	private static parentGUID: string;
@@ -152,7 +152,7 @@ export class WorkspaceHandlingTests {
 
 	async getWorkspaceAlertTitle(): Promise<string> {
 		try {
-			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_TITLE).getText();
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_TITLE).getAttribute('innerHTML');
 		} catch (err) {
 			return '';
 		}
@@ -164,8 +164,7 @@ export class WorkspaceHandlingTests {
 		const alertDescription: string = await this.getWorkspaceAlertDescription();
 
 		Logger.info('Start workspace status: ' + status);
-		if (status === 'Failed') {
-			Logger.info('Start workspace details: ' + alertTitle + ' - ' + alertDescription);
-		}
+		Logger.info('Start workspace progress title: ' + alertTitle);
+		Logger.info('Start workspace progress description: ' + alertDescription);
 	}
 }
