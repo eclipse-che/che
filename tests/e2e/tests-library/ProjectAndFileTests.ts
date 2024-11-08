@@ -16,6 +16,7 @@ import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
 import { By, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -25,7 +26,9 @@ export class ProjectAndFileTests {
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper,
 		@inject(CLASSES.CheCodeLocatorLoader)
-		private readonly cheCodeLocatorLoader: CheCodeLocatorLoader
+		private readonly cheCodeLocatorLoader: CheCodeLocatorLoader,
+		@inject(CLASSES.WorkspaceHandlingTests)
+		private readonly workspaceHandlingTests: WorkspaceHandlingTests
 	) {}
 
 	async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
@@ -40,6 +43,10 @@ export class ProjectAndFileTests {
 			Logger.debug(`editor was opened in ${end - start} seconds.`);
 		} catch (err) {
 			Logger.error(`waiting for workspace readiness failed: ${err}`);
+
+			// assume that start workspace page is still opened
+			await this.workspaceHandlingTests.logStartWorkspaceInfo();
+
 			throw err;
 		}
 	}
