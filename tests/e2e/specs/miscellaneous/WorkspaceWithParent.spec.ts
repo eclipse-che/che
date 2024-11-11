@@ -39,8 +39,6 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
-
 	let podName: string = '';
 
 	suiteSetup(function (): void {

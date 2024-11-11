@@ -177,7 +177,8 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 	 * set user preferences for Che   "security.workspace.trust.enabled": false using JS. in background mode
 	 */
 	async switchOffTrustDialogWithJavaScript(): Promise<void> {
-		const  javaScriptExecCode: string = '(async function importData() {\n' +
+		const javaScriptExecCode: string =
+			'(async function importData() {\n' +
 			'  const stub = "{\\"vscode-web-db\\":{\\"vscode-userdata-store\\":{\\"/User/settings.json\\":{\\"type\\":\\"Uint8Array\\",\\"value\\":\\"%7B%0A%20%20%20%20%22security.workspace.trust.enabled%22%3A%20false%0A%7D\\"}}}}";\n' +
 			'  for (const [dbName, dbData] of Object.entries(JSON.parse(stub))) {\n' +
 			'    const req = indexedDB.open(dbName);\n' +
@@ -195,7 +196,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 			'      await new Promise((r) => (transaction.oncomplete = r));\n' +
 			'    }\n' +
 			'  }\n' +
-			'})().then(() => {});'
+			'})().then(() => {});';
 		await this.driverHelper.getDriver().executeScript(javaScriptExecCode);
 	}
 }
