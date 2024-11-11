@@ -20,7 +20,6 @@ import axios, { AxiosResponse } from 'axios';
 import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 import { ApiUrlResolver } from './ApiUrlResolver';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
-import {string} from "yaml/dist/schema/common/string";
 
 @injectable()
 export class TestWorkspaceUtil implements ITestWorkspaceUtil {
