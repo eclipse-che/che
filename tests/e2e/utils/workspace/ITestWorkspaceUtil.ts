@@ -40,4 +40,9 @@ export interface ITestWorkspaceUtil {
 	 * Similar with 'force' deleting
 	 */
 	deleteAllWorkspaces(): Promise<void>;
+
+	/**
+	 * set user preferences for Che   "security.workspace.trust.enabled": false using JS.
+	 */
+	switchOffTrustDialogWithJavaScript(): Promise<void>;
 }
