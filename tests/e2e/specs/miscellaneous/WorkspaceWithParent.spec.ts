@@ -25,7 +25,6 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
-import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
