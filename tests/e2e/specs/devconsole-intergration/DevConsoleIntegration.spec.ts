@@ -14,7 +14,6 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
-import { DriverHelper } from '../../utils/DriverHelper';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { expect } from 'chai';
 import { OcpMainPage } from '../../pageobjects/openshift/OcpMainPage';
@@ -26,14 +25,14 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
-import {Logger} from "../../utils/Logger";
-import {ShellExecutor} from "../../utils/ShellExecutor";
-import {ShellString} from "shelljs";
+import { Logger } from '../../utils/Logger';
+import { ShellExecutor } from '../../utils/ShellExecutor';
+import { ShellString } from 'shelljs';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
 	let ocpApplicationPage: OcpApplicationPage;
-	let parentGUID=''
+	let parentGUID: string = '';
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -41,7 +40,6 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const ocpMainPage: OcpMainPage = e2eContainer.get(CLASSES.OcpMainPage);
-	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
@@ -54,7 +52,7 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	suiteSetup('Create new empty project using ocp', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 		// delete the test project on a cluster if it has not been deleted properly in the previous run
-		const expectedProject :ShellString = shellExecutor.executeCommand(`oc get project ${projectName}`);
+		const expectedProject: ShellString = shellExecutor.executeCommand(`oc get project ${projectName}`);
 		if (expectedProject.stderr.length === 0) {
 			kubernetesCommandLineToolsExecutor.deleteProject(projectName);
 		}
@@ -62,8 +60,6 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	});
 
 	loginTests.loginIntoOcpConsole();
-
-
 
 	test('Select test project and Developer role on DevConsole', async function (): Promise<void> {
 		parentGUID = await browserTabsUtil.getCurrentWindowHandle();
@@ -120,12 +116,12 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		).not.undefined;
 	});
 
-	test ('Check redirection to DevSpaces from App launcher', async function (): Promise<void> {
+	test('Check redirection to DevSpaces from App launcher', async function (): Promise<void> {
 		await browserTabsUtil.switchToWindow(parentGUID);
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 		await ocpMainPage.clickOnAppLauncherAndDevSpaceItem();
 		await loginTests.loginIntoChe();
-		await dashboard.waitPage()
+		await dashboard.waitPage();
 	});
 
 	suiteTeardown('Delete project using ocp', function (): void {
@@ -133,14 +129,12 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 			WorkspaceHandlingTests.getWorkspaceName() !== '' ? WorkspaceHandlingTests.getWorkspaceName() : 'spring-music';
 		try {
 			kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
-		}
-		catch (err) {
+		} catch (err) {
 			Logger.error(`Error while deleting workspace: ${err}`);
 		}
 		try {
 			kubernetesCommandLineToolsExecutor.deleteProject(projectName);
-		}
-		catch (err) {
+		} catch (err) {
 			Logger.error(`Cannot delete the project: ${err}`);
 		}
 	});
