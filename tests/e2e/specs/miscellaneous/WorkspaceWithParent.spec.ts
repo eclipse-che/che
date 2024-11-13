@@ -42,7 +42,6 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 
 	suiteSetup(function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
-		kubernetesCommandLineToolsExecutor.namespace = BASE_TEST_CONSTANTS.TEST_NAMESPACE;
 	});
 
 	suiteSetup('Login', async function (): Promise<void> {
