@@ -16,6 +16,7 @@ import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { OcpImportFromGitPage } from './OcpImportFromGitPage';
 import { e2eContainer } from '../../configs/inversify.config';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 
 @injectable()
 export class OcpMainPage {
@@ -29,7 +30,9 @@ export class OcpMainPage {
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper
+		private readonly driverHelper: DriverHelper,
+		@inject(CLASSES.BrowserTabsUtil)
+		private readonly browserTabsUtil: BrowserTabsUtil
 	) {}
 
 	async waitOpenMainPage(): Promise<void> {
@@ -82,6 +85,14 @@ export class OcpMainPage {
 		await this.driverHelper.waitAndClick(this.getProjectDropdownItemLocator(projectName));
 	}
 
+	async clickOnAppLauncherAndDevSpaceItem(): Promise<void> {
+		Logger.debug('click on app launcher menu');
+		const parentGUID: string = await this.browserTabsUtil.getCurrentWindowHandle();
+		await this.driverHelper.waitAndClick(By.css('nav[data-test-id="application-launcher"]'));
+		await this.driverHelper.waitAndClick(By.xpath('//span[contains(.,"Red Hat OpenShift Dev Spaces")]'));
+		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+	}
+
 	private getRoleLocator(role: string): By {
 		return By.xpath(`//a//*[text()="${role}"]`);
 	}
@@ -95,7 +106,6 @@ export class OcpMainPage {
 
 		await this.driverHelper.waitAndClick(this.getRoleLocator(role));
 	}
-
 	private async tryToSkipWebTour(): Promise<void> {
 		Logger.debug();
 
