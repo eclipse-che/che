@@ -25,7 +25,6 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
-import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -39,8 +38,6 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
-
 	let podName: string = '';
 
 	suiteSetup(function (): void {
@@ -57,13 +54,13 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 				? BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + 'https://github.com/testsfactory/parentDevfile'
 				: BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL;
 		await dashboard.waitPage();
+		await testWorkspaceUtil.switchOffTrustDialogWithJavaScript();
 		await browserTabsUtil.navigateTo(factoryUrl);
-		await createWorkspace.performTrustAuthorPopup();
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		// add 10 sec timeout for waiting for finishing animation of all IDE parts (Welcome parts. bottom widgets. etc.)
-		// using 10 sec easier than performing of finishing animation a all elements
+		// using 10 sec easier than performing of finishing animation  of all elements
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
 		await projectAndFileTests.performTrustAuthorDialog();
 	});

@@ -172,4 +172,31 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 			await this.deleteWorkspaceByName(response.data.items[i].metadata.name);
 		}
 	}
+
+	/**
+	 * set user preferences for Che   "security.workspace.trust.enabled": false using JS. in background mode
+	 */
+	async switchOffTrustDialogWithJavaScript(): Promise<void> {
+		const javaScriptExecCode: string =
+			'(async function importData() {\n' +
+			'  const stub = "{\\"vscode-web-db\\":{\\"vscode-userdata-store\\":{\\"/User/settings.json\\":{\\"type\\":\\"Uint8Array\\",\\"value\\":\\"%7B%0A%20%20%20%20%22security.workspace.trust.enabled%22%3A%20false%0A%7D\\"}}}}";\n' +
+			'  for (const [dbName, dbData] of Object.entries(JSON.parse(stub))) {\n' +
+			'    const req = indexedDB.open(dbName);\n' +
+			'    req.onupgradeneeded = ({ target: { result: db } }) =>\n' +
+			'      Object.keys(dbData).forEach((name) => db.createObjectStore(name));\n' +
+			'    await new Promise((r) => (req.onsuccess = r));\n' +
+			'    for (const [storeName, storeData] of Object.entries(dbData)) {\n' +
+			'      const transaction = req.result.transaction(storeName, "readwrite");\n' +
+			'      const store = transaction.objectStore(storeName);\n' +
+			'      store.clear();\n' +
+			'      for (const [key, { type, value }] of Object.entries(storeData)) {\n' +
+			'        const str = decodeURIComponent(value);\n' +
+			'        store.put(type === "String" ? str : new TextEncoder().encode(str), key);\n' +
+			'      }\n' +
+			'      await new Promise((r) => (transaction.oncomplete = r));\n' +
+			'    }\n' +
+			'  }\n' +
+			'})().then(() => {});';
+		await this.driverHelper.getDriver().executeScript(javaScriptExecCode);
+	}
 }
