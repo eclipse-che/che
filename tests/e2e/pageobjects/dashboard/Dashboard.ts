@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2024 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ export class Dashboard {
 		browserVersion: 'browser-version',
 		username: 'username'
 	};
+	private static readonly CONTINUE_WITH_DEFAULT_DEVFILE_BUTTON: By = By.xpath('//button[text()="Continue with default devfile"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -182,6 +183,12 @@ export class Dashboard {
 		await this.driverHelper.waitAndClick(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
 		await this.driverHelper.waitAndClick(Dashboard.LOGOUT_BUTTON, timeout);
 		await this.driverHelper.waitDisappearance(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
+	}
+
+	async clickContinueWithDefaultDevfileButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(Dashboard.CONTINUE_WITH_DEFAULT_DEVFILE_BUTTON, timeout);
 	}
 
 	private getAboutMenuItemButtonLocator(text: string): By {
