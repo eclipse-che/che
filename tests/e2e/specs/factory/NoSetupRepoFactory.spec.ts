@@ -105,6 +105,26 @@ suite(
 				const allCreatedWorkspacesNames: string[] = await workspaces.getAllCreatedWorkspacesNames();
 				expect(allCreatedWorkspacesNames).has.length(numberOfCreatedWorkspaces);
 			});
+
+			test('Check creating workspace using default devfile', async function (): Promise<void> {
+				await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+				await dashboard.waitLoader();
+				await dashboard.clickContinueWithDefaultDevfileButton();
+				await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+				registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+				await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+			});
+
+			test('Check that a project folder has not been cloned', async function (): Promise<void> {
+				testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
+				await driverHelper.waitVisibility(webCheCodeLocators.TitleBar.itemElement);
+				await projectAndFileTests.performTrustAuthorDialog();
+				const isProjectFolderUnable: string = await driverHelper.waitAndGetElementAttribute(
+					(webCheCodeLocators.TreeItem as any).projectFolderItem,
+					'aria-label'
+				);
+				expect(isProjectFolderUnable).to.contain('No Folder Opened Section');
+			});
 		} else {
 			test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 				await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
