@@ -173,7 +173,7 @@ export class WebTerminalPage {
 	}
 
 	async clickOnTimeUnitDropDown(): Promise<void> {
-		await this.driverHelper.waitAndClick(WebTerminalPage.TIME_UNIT_DROP_DAWN);
+		await this.driverHelper.scrollToAndClick(WebTerminalPage.TIME_UNIT_DROP_DAWN);
 	}
 	async selectTimeUnit(timeUnits: TimeUnits): Promise<void> {
 		await this.driverHelper.waitAndClick(By.xpath(`//button[@data-test-id='dropdown-menu' and text()='${timeUnits}']`));

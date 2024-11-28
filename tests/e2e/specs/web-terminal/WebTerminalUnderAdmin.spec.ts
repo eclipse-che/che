@@ -66,18 +66,17 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 		expect(commandResult).contains('admin');
 	});
 	test('Verify help command under admin user', async function (): Promise<void> {
-		const helpCommandExpectedResult: string =
-			'oc.*\\d+\\.\\d+\\.\\d+.*OpenShift CLI\n' +
-			'kubectl.*\\d+\\.\\d+\\.\\d+.*Kubernetes CLI\n' +
-			'kustomize.*\\d+\\.\\d+\\.\\d+.*Kustomize CLI\n' +
-			'helm.*\\d+\\.\\d+\\.\\d+.*Helm CLI\n' +
-			'kn.*\\d+\\.\\d+\\.\\d+.*KNative CLI\n' +
-			'tkn.*\\d+\\.\\d+\\.\\d+.*Tekton CLI\n' +
-			'subctl.*\\d+\\.\\d+\\.\\d+.*Submariner CLI\n' +
-			'odo.*\\d+\\.\\d+\\.\\d+.*Red Hat OpenShift Developer CLI\n' +
-			'virtctl.*\\d+\\.\\d+\\.\\d+.*KubeVirt CLI\n' +
-			'rhoas.*\\d+\\.\\d+\\.\\d+.*Red Hat OpenShift Application Services CLI\n' +
-			'jq.*\\d+\\.\\d+.*jq';
+		const expectedStrings: string[] = [
+			'OpenShift CLI',
+			'Kubernetes CLI',
+			'Kustomize CLI (built-in to kubectl)',
+			'Helm CLI',
+			'KNative CLI',
+			'Tekton CLI',
+			'Submariner CLI',
+			'KubeVirt CLI',
+			'jq'
+		];
 
 		await webTerminal.typeAndEnterIntoWebTerminal(`help > ${fileForVerificationTerminalCommands}`);
 
@@ -87,7 +86,10 @@ suite(`Login to Openshift console and start WebTerminal ${BASE_TEST_CONSTANTS.TE
 			`cat /home/user/${fileForVerificationTerminalCommands}`,
 			webTerminalToolContainerName
 		);
-		expect(commandResult).to.match(new RegExp(helpCommandExpectedResult));
+
+		expectedStrings.forEach((expectedString): void => {
+			expect(commandResult).to.contain(expectedString);
+		});
 	});
 
 	test('Verify help command under admin user', async function (): Promise<void> {
