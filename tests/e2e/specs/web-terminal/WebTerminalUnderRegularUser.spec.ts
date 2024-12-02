@@ -37,6 +37,7 @@ suite(`Login to Openshift console and check WebTerminal ${BASE_TEST_CONSTANTS.TE
 
 	suiteSetup(function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
+		kubernetesCommandLineToolsExecutor.deleteProject(testProjectName);
 	});
 
 	suiteTeardown(function (): void {
