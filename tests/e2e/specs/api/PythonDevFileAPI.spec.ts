@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
@@ -21,12 +22,12 @@ import YAML from 'yaml';
 import { Logger } from '../../utils/Logger';
 import crypto from 'crypto';
 
-suite('PHP devfile API test', function (): void {
+suite('Python devfile API test', function (): void {
 	const devfilesRegistryHelper: DevfilesHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const devfileID: string = 'php';
+	const devfileID: string = 'python';
 	const containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
