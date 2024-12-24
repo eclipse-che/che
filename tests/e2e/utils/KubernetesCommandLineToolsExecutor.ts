@@ -94,16 +94,33 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		return output.stderr ? output.stderr : output.stdout.replace('\n', '');
 	}
 
-	deleteDevWorkspace(): void {
-		Logger.debug(`${this.kubernetesCommandLineTool} - delete '${this.workspaceName}' workspace`);
+	// used to delete when devWorkspace and devWorkspaceTemplate have the same names
+	deleteDevWorkspace(): void;
+
+	// used to delete when devWorkspace and devWorkspaceTemplate have different names
+	deleteDevWorkspace(dwTemplateName: string): void;
+
+	deleteDevWorkspace(dwTemplateName?: string): void {
+		Logger.debug(`${this.kubernetesCommandLineTool} - delete '${this.workspaceName}' devWorkspace`);
 
 		this.shellExecutor.executeCommand(
 			`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`
 		);
 		this.shellExecutor.executeCommand(`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} delete dwt ${BASE_TEST_CONSTANTS.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`
-		);
+
+		if (dwTemplateName === undefined) {
+			Logger.debug(`${this.kubernetesCommandLineTool} - delete '${this.workspaceName}' devWorkspaceTemplate`);
+
+			this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} delete dwt ${BASE_TEST_CONSTANTS.TS_SELENIUM_EDITOR}-${this.workspaceName} -n ${this.namespace} || true`
+			);
+		} else {
+			Logger.debug(`${this.kubernetesCommandLineTool} - delete '${dwTemplateName}' devWorkspaceTemplate`);
+
+			this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} delete dwt ${BASE_TEST_CONSTANTS.TS_SELENIUM_EDITOR}-${dwTemplateName} -n ${this.namespace} || true`
+			);
+		}
 	}
 
 	applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {
