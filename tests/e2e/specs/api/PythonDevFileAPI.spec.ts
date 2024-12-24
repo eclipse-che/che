@@ -32,6 +32,7 @@ suite('Python devfile API test', function (): void {
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
 	let devfileContent: string = '';
+	let dwtName: string = '';
 
 	suiteSetup(`Prepare login ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
@@ -42,6 +43,7 @@ suite('Python devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
+		dwtName = YAML.parse(devfileContent).metadata.name;
 		const uniqName: string = YAML.parse(devfileContent).metadata.name + randomPref;
 		kubernetesCommandLineToolsExecutor.workspaceName = uniqName;
 
@@ -71,7 +73,7 @@ suite('Python devfile API test', function (): void {
 		expect(output.stdout.trim()).contains('Hello, world!');
 	});
 
-	suiteTeardown('Delete workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+	suiteTeardown('Delete DevWorkspace', function (): void {
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(dwtName);
 	});
 });
