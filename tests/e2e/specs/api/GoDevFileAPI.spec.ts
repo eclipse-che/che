@@ -22,12 +22,12 @@ import YAML from 'yaml';
 import { Logger } from '../../utils/Logger';
 import crypto from 'crypto';
 
-suite('Python devfile API test', function (): void {
+suite('Go devfile API test', function (): void {
 	const devfilesRegistryHelper: DevfilesHelper = e2eContainer.get(CLASSES.DevfilesRegistryHelper);
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const devfileID: string = 'python';
+	const devfileID: string = 'go';
 	const containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
@@ -61,16 +61,29 @@ suite('Python devfile API test', function (): void {
 		expect(output.stdout).contains('condition met');
 	});
 
-	test('Check running application', function (): void {
+	test('Check devfile commands', function (): void {
 		const workdir: string = YAML.parse(devfileContent).commands[0].exec.workingDir;
-		const commandLine: string = YAML.parse(devfileContent).commands[0].exec.commandLine;
+		const buildCommandLine: string = YAML.parse(devfileContent).commands[0].exec.commandLine;
 		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
-		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
-		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
-		const runCommandInBash: string = `cd ${workdir} && ${commandLine}`;
+
+		Logger.info('"Test \'build\' command execution"');
+		Logger.info(`workdir from exec section of DevFile: ${workdir}`);
+		Logger.info(`commandLine from exec section of DevFile: ${buildCommandLine}`);
+		const runCommandInBash: string = `cd ${workdir} && ${buildCommandLine}`;
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+		Logger.info(`Output stderr: ${output.stderr}`);
 		expect(output.code).eqls(0);
-		expect(output.stdout.trim()).contains('Hello, world!');
+		expect(output.stderr.trim()).contains('go: downloading');
+
+		Logger.info('"Test \'run\' command execution"');
+		const runCommandLine: string = YAML.parse(devfileContent).commands[1].exec.commandLine;
+		Logger.info(`commandLine from exec section of DevFile: ${runCommandLine}`);
+		const runCommandInBash2: string = `cd ${workdir} && sh -c "(${runCommandLine} > server.log 2>&1 &) && exit"`;
+		const output2: ShellString = containerTerminal.execInContainerCommand(runCommandInBash2, containerName);
+		expect(output2.code).eqls(0);
+		const logOutput: ShellString = containerTerminal.execInContainerCommand(`cat ${workdir}/server.log`, containerName);
+		Logger.info(`Log output: ${logOutput.stdout}`);
+		expect(logOutput.stdout.trim()).contains('Web server running on port 8080');
 	});
 
 	suiteTeardown('Delete DevWorkspace', function (): void {
