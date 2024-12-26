@@ -32,9 +32,10 @@ suite('Cpp devfile API test', function (): void {
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
 	let devfileContent: string = '';
+	let dwtName: string = '';
 	const workDirPath: string = 'c-plus-plus/strings';
-	const buildCommand: string = 'rm -f bin.out && g++ -g "knuth_morris_pratt.cpp" -o bin.out && echo "Build complete"';
-	const runCommand: string = './bin.out';
+	const fileName: string = 'knuth_morris_pratt.cpp';
+	const tasksJsonPath: string = 'c-plus-plus/.vscode/tasks.json';
 
 	suiteSetup(`Prepare login ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
@@ -45,6 +46,7 @@ suite('Cpp devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
+		dwtName = YAML.parse(devfileContent).metadata.name;
 		const uniqName: string = YAML.parse(devfileContent).metadata.name + randomPref;
 		kubernetesCommandLineToolsExecutor.workspaceName = uniqName;
 
@@ -63,24 +65,33 @@ suite('Cpp devfile API test', function (): void {
 	});
 
 	test('Check commands', function (): void {
-		let runCommandInBash: string;
 		let output: ShellString;
 		const toolsComponent: any = YAML.parse(devfileContent).components.find((component: any): boolean => component.name === 'tools');
 		const containerName: string = toolsComponent ? toolsComponent.name : 'Component not found';
 		Logger.info(`container from components section of Devfile:: ${containerName}`);
-		runCommandInBash = `cd ${workDirPath} && ${buildCommand}`;
-		Logger.info('Check build command');
+		const tasksJsonContent: string = containerTerminal.execInContainerCommand(`cat ${tasksJsonPath}`, containerName).stdout;
+		const parsedJson: any = YAML.parse(tasksJsonContent);
+
+		Logger.info('"Check \'build current algorithm\' command"');
+		const buildTaskCommand: string = parsedJson.tasks[0].command;
+		const buildCommand: string = buildTaskCommand.replaceAll('${file}', fileName).replaceAll(/'/g, '"');
+		Logger.info(`commandLine from tasks.json file of project: ${buildCommand}`);
+		const runCommandInBash: string = `cd ${workDirPath} && ${buildCommand}`;
 		output = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 		expect(output.stdout.trim()).contains('Build complete');
-		Logger.info('Check run command');
-		runCommandInBash = `cd ${workDirPath} && ${runCommand}`;
-		output = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+
+		Logger.info('"Check \'run current algorithm\' command"');
+		const runTaskCommand: string = parsedJson.tasks[1].command;
+		const runCommand: string = runTaskCommand.replaceAll('${file}', fileName).replaceAll(/'/g, '"');
+		Logger.info(`commandLine from tasks.json file of project: ${runCommand}`);
+		const runCommandInBash2: string = `cd ${workDirPath} && ${runCommand}`;
+		output = containerTerminal.execInContainerCommand(runCommandInBash2, containerName);
 		expect(output.code).eqls(0);
 		expect(output.stdout.trim()).contains('Found');
 	});
 
 	suiteTeardown('Delete workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(dwtName);
 	});
 });
