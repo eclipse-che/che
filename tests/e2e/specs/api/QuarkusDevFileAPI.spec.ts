@@ -26,11 +26,12 @@ suite('Quarkus devfile API test', function (): void {
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
-	const devfileID: string = 'quarkus';
+	const devfileID: string = 'quarkus-rest-api';
 	const containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
 	let devfileContent: string = '';
+	let devfileName: string = '';
 
 	suiteSetup(`Prepare login ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
@@ -41,6 +42,7 @@ suite('Quarkus devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
+		devfileName = YAML.parse(devfileContent).metadata.name;
 		const uniqueName: string = YAML.parse(devfileContent).metadata.name + randomPref;
 		kubernetesCommandLineToolsExecutor.workspaceName = uniqueName;
 
@@ -51,16 +53,7 @@ suite('Quarkus devfile API test', function (): void {
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		if (devfileContext.devWorkspace.metadata) {
 			devfileContext.devWorkspace.metadata.name = uniqueName;
-
-			if (
-				devfileContext.devWorkspaceTemplates &&
-				devfileContext.devWorkspaceTemplates.length > 0 &&
-				devfileContext.devWorkspaceTemplates[0].metadata
-			) {
-				devfileContext.devWorkspaceTemplates[0].metadata.name = uniqueName;
-			}
 		}
-
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
 		const output: ShellString = kubernetesCommandLineToolsExecutor.applyAndWaitDevWorkspace(devWorkspaceConfigurationYamlString);
@@ -74,10 +67,9 @@ suite('Quarkus devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		let runCommandInBash: string = '"${commandLine}"'.replaceAll('$', '\\$');
-
+		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 		if (workdir !== undefined && workdir !== '') {
-			runCommandInBash = 'cd ${workdir} && ' + runCommandInBash;
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
 		}
 
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
@@ -92,13 +84,10 @@ suite('Quarkus devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		let runCommandInBash: string = '"${commandLine}"'.replaceAll('$', '\\$');
-
+		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 		if (workdir !== undefined && workdir !== '') {
-			runCommandInBash = 'cd ${workdir} && ' + runCommandInBash;
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
 		}
-
-		runCommandInBash.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
@@ -106,6 +95,6 @@ suite('Quarkus devfile API test', function (): void {
 	});
 
 	suiteTeardown('Delete workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(devfileName);
 	});
 });
