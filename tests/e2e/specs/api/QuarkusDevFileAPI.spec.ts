@@ -41,8 +41,8 @@ suite('Quarkus devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
-		const uniqName: string = YAML.parse(devfileContent).metadata.name + randomPref;
-		kubernetesCommandLineToolsExecutor.workspaceName = uniqName;
+		const uniqueName: string = YAML.parse(devfileContent).metadata.name + randomPref;
+		kubernetesCommandLineToolsExecutor.workspaceName = uniqueName;
 
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			editorContent: editorDevfileContent,
@@ -50,14 +50,14 @@ suite('Quarkus devfile API test', function (): void {
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		if (devfileContext.devWorkspace.metadata) {
-			devfileContext.devWorkspace.metadata.name = uniqName;
+			devfileContext.devWorkspace.metadata.name = uniqueName;
 
 			if (
 				devfileContext.devWorkspaceTemplates &&
 				devfileContext.devWorkspaceTemplates.length > 0 &&
 				devfileContext.devWorkspaceTemplates[0].metadata
 			) {
-				devfileContext.devWorkspaceTemplates[0].metadata.name = uniqName;
+				devfileContext.devWorkspaceTemplates[0].metadata.name = uniqueName;
 			}
 		}
 
@@ -76,7 +76,7 @@ suite('Quarkus devfile API test', function (): void {
 
 		let runCommandInBash = '\"${commandLine}\"'.replaceAll('$', '\\$');
 
-		if (workdir != undefined && workdir !== '') {
+		if (workdir !== undefined && workdir !== '') {
 			runCommandInBash = 'cd ${workdir} && ' + runCommandInBash;
 		}
 
