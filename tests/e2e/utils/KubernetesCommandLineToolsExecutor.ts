@@ -111,9 +111,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 
 		Logger.debug(`${this.kubernetesCommandLineTool} - delete '${dwtName}' devWorkspaceTemplate`);
 
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} delete dwt ${dwtName} -n ${this.namespace} || true`
-		);
+		this.shellExecutor.executeCommand(`${this.kubernetesCommandLineTool} delete dwt ${dwtName} -n ${this.namespace} || true`);
 	}
 
 	applyAndWaitDevWorkspace(yamlConfiguration: string): ShellString {

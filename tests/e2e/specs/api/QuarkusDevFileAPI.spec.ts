@@ -74,7 +74,7 @@ suite('Quarkus devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		let runCommandInBash = '\"${commandLine}\"'.replaceAll('$', '\\$');
+		let runCommandInBash: string = '"${commandLine}"'.replaceAll('$', '\\$');
 
 		if (workdir !== undefined && workdir !== '') {
 			runCommandInBash = 'cd ${workdir} && ' + runCommandInBash;
@@ -92,9 +92,9 @@ suite('Quarkus devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		let runCommandInBash = '\"${commandLine}\"'.replaceAll('$', '\\$');
+		let runCommandInBash: string = '"${commandLine}"'.replaceAll('$', '\\$');
 
-		if (workdir != undefined && workdir !== '') {
+		if (workdir !== undefined && workdir !== '') {
 			runCommandInBash = 'cd ${workdir} && ' + runCommandInBash;
 		}
 
