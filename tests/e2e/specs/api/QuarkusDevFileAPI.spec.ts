@@ -72,7 +72,7 @@ suite('Quarkus devfile API test', function (): void {
 			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
 		}
 
-		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName, '5m');
 		expect(output.code).eqls(0);
 		expect(output.stdout.trim()).contains('BUILD SUCCESS');
 	});
@@ -86,12 +86,15 @@ suite('Quarkus devfile API test', function (): void {
 
 		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 		if (workdir !== undefined && workdir !== '') {
-			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
+			runCommandInBash = `cd ${workdir} && sh -c "(` + runCommandInBash + ' > server.log 2>&1 &) && exit"';
 		}
 
-		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
-		expect(output.code).eqls(0);
-		expect(output.stdout.trim()).contains('Listening for transport dt_socket at address: 5005');
+		const commandOutput: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+		expect(commandOutput.code).eqls(0);
+
+		const commandLog: ShellString = containerTerminal.execInContainerCommand(`cat ${workdir}/command.log`, containerName);
+		Logger.info(`Command log: ${commandLog.stdout}`);
+		expect(commandLog.stdout.trim()).contains('Listening on: http://0.0.0.0:8080');
 	});
 
 	suiteTeardown('Delete workspace', function (): void {

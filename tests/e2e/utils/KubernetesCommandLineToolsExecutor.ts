@@ -124,12 +124,22 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		return this.waitDevWorkspace();
 	}
 
-	execInContainerCommand(commandToExecute: string, container: string = KubernetesCommandLineToolsExecutor.container): ShellString {
+	execInContainerCommand(
+		commandToExecute: string,
+		container: string = KubernetesCommandLineToolsExecutor.container,
+		requestTimeout?: string
+	): ShellString {
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
-		return this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
-		);
+		if (requestTimeout) {
+			return this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} --request-timeout=${requestTimeout} -- sh -c '${commandToExecute}'`
+			);
+		} else {
+			return this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
+			);
+		}
 	}
 
 	applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
