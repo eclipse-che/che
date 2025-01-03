@@ -32,7 +32,7 @@ suite('Cpp devfile API test', function (): void {
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
 	let devfileContent: string = '';
-	let dwtName: string = '';
+	let devfileName: string = '';
 	const workDirPath: string = 'c-plus-plus/strings';
 	const fileName: string = 'knuth_morris_pratt.cpp';
 	const tasksJsonPath: string = 'c-plus-plus/.vscode/tasks.json';
@@ -46,9 +46,9 @@ suite('Cpp devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
-		dwtName = YAML.parse(devfileContent).metadata.name;
-		const uniqName: string = YAML.parse(devfileContent).metadata.name + randomPref;
-		kubernetesCommandLineToolsExecutor.workspaceName = uniqName;
+		devfileName = YAML.parse(devfileContent).metadata.name;
+		const uniqueName: string = YAML.parse(devfileContent).metadata.name + randomPref;
+		kubernetesCommandLineToolsExecutor.workspaceName = uniqueName;
 
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			editorContent: editorDevfileContent,
@@ -56,7 +56,7 @@ suite('Cpp devfile API test', function (): void {
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		if (devfileContext.devWorkspace.metadata) {
-			devfileContext.devWorkspace.metadata.name = uniqName;
+			devfileContext.devWorkspace.metadata.name = uniqueName;
 		}
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
@@ -92,6 +92,6 @@ suite('Cpp devfile API test', function (): void {
 	});
 
 	suiteTeardown('Delete workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(dwtName);
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(devfileName);
 	});
 });
