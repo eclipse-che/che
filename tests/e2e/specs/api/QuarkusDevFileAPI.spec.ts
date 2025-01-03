@@ -88,7 +88,7 @@ suite('Quarkus devfile API test', function (): void {
 
 		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 		if (workdir !== undefined && workdir !== '') {
-			runCommandInBash = `cd ${workdir} && sh -c "(` + runCommandInBash + ' > command.log 2>&1 &) && exit"';
+			runCommandInBash = `cd ${workdir} && sh -c "(` + runCommandInBash + ' > command.log 2>&1 &) && sleep 30s && exit"';
 		}
 
 		let commandOutput: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
