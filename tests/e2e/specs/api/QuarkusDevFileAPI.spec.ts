@@ -37,7 +37,7 @@ suite('Quarkus devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
 
-	test(`Create  ${devfileID} workspace`, async function (): Promise<void> {
+	test(`Create ${devfileID} workspace`, async function (): Promise<void> {
 		const randomPref: string = crypto.randomBytes(4).toString('hex');
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
@@ -61,9 +61,18 @@ suite('Quarkus devfile API test', function (): void {
 	});
 
 	test('Check packaging application', function (): void {
+		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
+
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.info('Test cluster is disconnected. Init Java Truststore...');
+			const initJavaTruststoreCommand: string =
+				'cp /home/user/init-java-truststore.sh /tmp && chmod +x /tmp/init-java-truststore.sh && /tmp/init-java-truststore.sh';
+			const output: ShellString = containerTerminal.execInContainerCommand(initJavaTruststoreCommand, containerName);
+			expect(output.code).eqls(0);
+		}
+
 		const workdir: string = YAML.parse(devfileContent).commands[0].exec.workingDir;
 		const commandLine: string = YAML.parse(devfileContent).commands[0].exec.commandLine;
-		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
@@ -72,7 +81,7 @@ suite('Quarkus devfile API test', function (): void {
 			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
 		}
 
-		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName, '5m');
+		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
 		const outputText: string = output.stdout.trim();
@@ -88,7 +97,7 @@ suite('Quarkus devfile API test', function (): void {
 
 		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
 		if (workdir !== undefined && workdir !== '') {
-			runCommandInBash = `cd ${workdir} && sh -c "(` + runCommandInBash + ' > command.log 2>&1 &) && sleep 30s && exit"';
+			runCommandInBash = `cd ${workdir} && sh -c "(` + runCommandInBash + ' > command.log 2>&1 &) && sleep 15s && exit"';
 		}
 
 		let commandOutput: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);

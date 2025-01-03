@@ -38,7 +38,7 @@ suite('Python devfile API test', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
 
-	test(`Create  ${devfileID} workspace`, async function (): Promise<void> {
+	test(`Create ${devfileID} workspace`, async function (): Promise<void> {
 		const randomPref: string = crypto.randomBytes(4).toString('hex');
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
