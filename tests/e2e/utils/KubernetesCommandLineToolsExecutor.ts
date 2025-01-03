@@ -131,7 +131,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	): ShellString {
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
-		if (requestTimeout) {
+		if (requestTimeout !== undefined) {
 			return this.shellExecutor.executeCommand(
 				`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} --request-timeout=${requestTimeout} -- sh -c '${commandToExecute}'`
 			);
