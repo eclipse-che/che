@@ -55,7 +55,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		try {
 			({ docs, links, productVersion } = JSON.parse(
 				shellExecutor.curl(
-					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${majorMinorVersion}-rhel-8/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
+					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${majorMinorVersion}-rhel-9/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
 				)
 			));
 		} catch (e) {
