@@ -114,7 +114,7 @@ suite('NodeJS Express devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		// Pretrier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
+		// Prettier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
 		// prettier-ignore
 		let runCommandInBash: string = commandLine.replaceAll('\'', '\'\"\'\"\'');
 
