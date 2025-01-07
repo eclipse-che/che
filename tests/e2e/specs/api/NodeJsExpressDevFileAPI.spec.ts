@@ -31,38 +31,20 @@ suite('NodeJS Express devfile API test', function (): void {
 	let devWorkspaceConfigurationHelper: DevWorkspaceConfigurationHelper;
 	let devfileContext: DevfileContext;
 	let devfileContent: string = '';
-
-	function startCommand(devfileContent: string, commandNubmer: number, expectedMessage: string, timeout: string = '0'): void {
-		let output: ShellString = new ShellString('');
-		const workdir: string = YAML.parse(devfileContent).commands[commandNubmer].exec.workingDir;
-		const commandLine: string = YAML.parse(devfileContent).commands[commandNubmer].exec.commandLine;
-		const containerName: string = YAML.parse(devfileContent).commands[commandNubmer].exec.component;
-		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
-		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
-		const runCommandInBash: string = `cd ${workdir} && ${commandLine}`;
-
-		if (timeout !== '0') {
-			output = containerTerminal.execInContainerCommandWithTimeout(runCommandInBash, containerName);
-			expect(output.code).eqls(124);
-		} else {
-			output = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
-			expect(output.code).eqls(0);
-		}
-
-		expect(output.stdout.trim()).contains(expectedMessage);
-	}
+	let devfileName: string = '';
 
 	suiteSetup(`Prepare login ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
 
-	test(`Create  ${devfileID} workspace`, async function (): Promise<void> {
+	test(`Create ${devfileID} workspace`, async function (): Promise<void> {
 		const randomPref: string = crypto.randomBytes(4).toString('hex');
 		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
-		const uniqName: string = YAML.parse(devfileContent).metadata.name + randomPref;
-		kubernetesCommandLineToolsExecutor.workspaceName = uniqName;
+		devfileName = YAML.parse(devfileContent).metadata.name;
+		const uniqueName: string = YAML.parse(devfileContent).metadata.name + randomPref;
+		kubernetesCommandLineToolsExecutor.workspaceName = uniqueName;
 
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			editorContent: editorDevfileContent,
@@ -70,7 +52,7 @@ suite('NodeJS Express devfile API test', function (): void {
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		if (devfileContext.devWorkspace.metadata) {
-			devfileContext.devWorkspace.metadata.name = uniqName;
+			devfileContext.devWorkspace.metadata.name = uniqueName;
 		}
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
@@ -78,15 +60,96 @@ suite('NodeJS Express devfile API test', function (): void {
 		expect(output.stdout).contains('condition met');
 	});
 
-	test('Check running application', function (): void {
-		// check `npm install` command
-		startCommand(devfileContent, 0, 'Run `npm audit` for details.');
+	test('Check packaging application', function (): void {
+		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
 
-		// check `run` command
-		startCommand(devfileContent, 1, 'Example app listening on port 3000!', '15');
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.info('Test cluster is disconnected. Init Java Truststore...');
+			const initJavaTruststoreCommand: string =
+				'cp /home/user/init-java-truststore.sh /tmp && chmod +x /tmp/init-java-truststore.sh && /tmp/init-java-truststore.sh';
+			const output: ShellString = containerTerminal.execInContainerCommand(initJavaTruststoreCommand, containerName);
+			expect(output.code).eqls(0);
+		}
+
+		const workdir: string = YAML.parse(devfileContent).commands[0].exec.workingDir;
+		const commandLine: string = YAML.parse(devfileContent).commands[0].exec.commandLine;
+		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
+		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
+
+		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
+		if (workdir !== undefined && workdir !== '') {
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
+		}
+
+		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+		expect(output.code).eqls(0);
+
+		const outputText: string = output.stdout.trim();
+		expect(outputText).contains('Run `npm audit` for details.');
+	});
+
+	test('Check "run the web app" command', function (): void {
+		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
+		const workdir: string = YAML.parse(devfileContent).commands[1].exec.workingDir;
+		const commandLine: string = YAML.parse(devfileContent).commands[1].exec.commandLine;
+		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
+		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
+
+		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
+		if (workdir !== undefined && workdir !== '') {
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
+		}
+
+		const output: ShellString = containerTerminal.execInContainerCommandWithTimeout(runCommandInBash, containerName);
+		expect(output.code).eqls(124);
+
+		const outputText: string = output.stdout.trim();
+		expect(outputText).contains('Example app listening on port 3000!');
+	});
+
+	test('Check "stop the web app" command', function (): void {
+		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
+		const workdir: string = YAML.parse(devfileContent).commands[4].exec.workingDir;
+		const commandLine: string = YAML.parse(devfileContent).commands[4].exec.commandLine;
+		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
+		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
+
+		// Pretrier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
+		// prettier-ignore
+		let runCommandInBash: string = commandLine.replaceAll('\'', '\'\"\'\"\'');
+
+		if (workdir !== undefined && workdir !== '') {
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
+		}
+
+		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
+		expect(output.code).eqls(0);
+
+		const outputText: string = output.stdout.trim();
+		expect(outputText).contains('Done.');
+	});
+
+	test('Check "Run the web app (debugging enabled)" command', function (): void {
+		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
+
+		const workdir: string = YAML.parse(devfileContent).commands[3].exec.workingDir;
+		const commandLine: string = YAML.parse(devfileContent).commands[3].exec.commandLine;
+		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
+		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
+
+		let runCommandInBash: string = commandLine.replaceAll('$', '\\$'); // don't wipe out env. vars like "${PROJECTS_ROOT}"
+		if (workdir !== undefined && workdir !== '') {
+			runCommandInBash = `cd ${workdir} && ` + runCommandInBash;
+		}
+
+		const output: ShellString = containerTerminal.execInContainerCommandWithTimeout(runCommandInBash, containerName);
+		expect(output.code).eqls(124);
+
+		const outputText: string = output.stdout.trim();
+		expect(outputText).contains('Example app listening on port 3000!');
 	});
 
 	suiteTeardown('Delete workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(devfileName);
 	});
 });
