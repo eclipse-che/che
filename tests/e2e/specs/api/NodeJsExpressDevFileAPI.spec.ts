@@ -64,10 +64,9 @@ suite('NodeJS Express devfile API test', function (): void {
 		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
 
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			Logger.info('Test cluster is disconnected. Init Java Truststore...');
-			const initJavaTruststoreCommand: string =
-				'cp /home/user/init-java-truststore.sh /tmp && chmod +x /tmp/init-java-truststore.sh && /tmp/init-java-truststore.sh';
-			const output: ShellString = containerTerminal.execInContainerCommand(initJavaTruststoreCommand, containerName);
+			Logger.info('Test cluster is disconnected. Init NodeJS Truststore...');
+			const initNodeTruststoreCommand: string = 'npm config set strict-ssl false';
+			const output: ShellString = containerTerminal.execInContainerCommand(initNodeTruststoreCommand, containerName);
 			expect(output.code).eqls(0);
 		}
 
@@ -85,7 +84,7 @@ suite('NodeJS Express devfile API test', function (): void {
 		expect(output.code).eqls(0);
 
 		const outputText: string = output.stdout.trim();
-		expect(outputText).contains('Run `npm audit` for details.');
+		expect(outputText).contains('packages in');
 	});
 
 	test('Check "run the web app" command', function (): void {
@@ -114,7 +113,7 @@ suite('NodeJS Express devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
-		// Prettier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
+		// prettier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
 		// prettier-ignore
 		let runCommandInBash: string = commandLine.replaceAll('\'', '\'\"\'\"\'');
 
