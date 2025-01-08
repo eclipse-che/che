@@ -64,9 +64,9 @@ suite('NodeJS Express devfile API test', function (): void {
 		const containerName: string = YAML.parse(devfileContent).commands[0].exec.component;
 
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			Logger.info('Test cluster is disconnected. Init NodeJS Truststore...');
-			const initNodeTruststoreCommand: string = 'npm config set strict-ssl false';
-			const output: ShellString = containerTerminal.execInContainerCommand(initNodeTruststoreCommand, containerName);
+			Logger.info('Test cluster is disconnected. Ignore Self-Signed Certificate error.');
+			const ignoreSelfSignedCertificateErrorCommand: string = 'npm config set strict-ssl false';
+			const output: ShellString = containerTerminal.execInContainerCommand(ignoreSelfSignedCertificateErrorCommand, containerName);
 			expect(output.code).eqls(0);
 		}
 
