@@ -17,6 +17,7 @@ import { OAUTH_CONSTANTS } from '../constants/OAUTH_CONSTANTS';
 import { IKubernetesCommandLineToolsExecutor } from './IKubernetesCommandLineToolsExecutor';
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../configs/inversify.types';
+import * as fs from 'fs';
 
 @injectable()
 export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLineToolsExecutor {
@@ -128,7 +129,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
 		return this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
+			`${this.kubernetesCommandLineTool} exec -i -t ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
 		);
 	}
 
@@ -147,8 +148,13 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	applyYamlConfigurationAsStringOutput(yamlConfiguration: string): ShellString {
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
+		// write yaml configuration to the devfile file
+		const randomSuffix: number = Math.floor(Math.random() * 10000);
+		const devfileYamlPath: string = `/tmp/devfile-${randomSuffix}.yaml`;
+		fs.writeFileSync(devfileYamlPath, yamlConfiguration);
+
 		return this.shellExecutor.executeCommand(
-			`cat <<EOF | ${this.kubernetesCommandLineTool} apply -n ${this.namespace} -f - \n` + yamlConfiguration + '\n' + 'EOF'
+			`${this.kubernetesCommandLineTool} apply -n ${this.namespace} -f ${devfileYamlPath} && rm -f ${devfileYamlPath}`
 		);
 	}
 
