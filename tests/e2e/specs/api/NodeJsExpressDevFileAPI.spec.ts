@@ -113,6 +113,9 @@ suite('NodeJS Express devfile API test', function (): void {
 		Logger.info(`workdir from exec section of DevWorkspace file: ${workdir}`);
 		Logger.info(`commandLine from exec section of DevWorkspace file: ${commandLine}`);
 
+		// stop app command has single and double quotes in the command line, so it should be escaped properly to run by oc exec command in bash
+		// stop command -> `node_server_pids=$(pgrep -fx '.*nodemon (--inspect )?app.js' | tr "\\n" " ") && echo "Stopping node server with PIDs: ${node_server_pids}" &&  kill -15 ${node_server_pids} &>/dev/null && echo 'Done.''`
+		
 		// prettier changes next line to `replaceAll("'", "'\"'\"'")` that throws an error from eslint.
 		// prettier-ignore
 		let runCommandInBash: string = commandLine.replaceAll('\'', '\'\"\'\"\'');
