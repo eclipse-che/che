@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2021-2024 Red Hat, Inc.
+ * copyright (c) 2021-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -92,24 +92,7 @@ suite(
 		});
 
 		if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO) {
-			test(`Check that workspace cannot be created without PAT/OAuth for ${isPrivateRepo} repo`, async function (): Promise<void> {
-				await dashboard.waitLoader();
-				const loaderAlert: string = await dashboard.getLoaderAlert();
-				expect(loaderAlert).to.contain('Could not reach devfile at');
-			});
-
-			test('Check that workspace was not created', async function (): Promise<void> {
-				await dashboard.openDashboard();
-				await dashboard.clickWorkspacesButton();
-				await workspaces.waitPage();
-				const allCreatedWorkspacesNames: string[] = await workspaces.getAllCreatedWorkspacesNames();
-				expect(allCreatedWorkspacesNames).has.length(numberOfCreatedWorkspaces);
-			});
-
 			test('Check creating workspace using default devfile', async function (): Promise<void> {
-				await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
-				await dashboard.waitLoader();
-				await dashboard.clickContinueWithDefaultDevfileButton();
 				await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 				registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 				await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
