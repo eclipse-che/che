@@ -65,7 +65,6 @@ suite(
 		let viewsActionsButton: boolean;
 
 		// test specific data
-		let numberOfCreatedWorkspaces: number = 0;
 		const timeToRefresh: number = 1500;
 		const changesToCommit: string = new Date().getTime().toString();
 		const fileToChange: string = 'Date.txt';
@@ -78,12 +77,6 @@ suite(
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
-		});
-
-		test('Get number of previously created workspaces', async function (): Promise<void> {
-			await dashboard.clickWorkspacesButton();
-			await workspaces.waitPage();
-			numberOfCreatedWorkspaces = (await workspaces.getAllCreatedWorkspacesNames()).length;
 		});
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
