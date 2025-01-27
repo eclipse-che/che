@@ -40,7 +40,7 @@ suite('Python devfile API test', function (): void {
 
 	test(`Create ${devfileID} workspace`, async function (): Promise<void> {
 		const randomPref: string = crypto.randomBytes(4).toString('hex');
-		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE || 'admin-devspaces';
+		kubernetesCommandLineToolsExecutor.namespace = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE;
 		devfileContent = devfilesRegistryHelper.getDevfileContent(devfileID);
 		const editorDevfileContent: string = devfilesRegistryHelper.obtainCheDevFileEditorFromCheConfigMap('editors-definitions');
 		devfileName = YAML.parse(devfileContent).metadata.name;
