@@ -33,7 +33,6 @@ import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTes
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
@@ -53,7 +52,6 @@ suite(
 		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
 		const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
@@ -65,7 +63,6 @@ suite(
 		let viewsActionsButton: boolean;
 
 		// test specific data
-		let numberOfCreatedWorkspaces: number = 0;
 		const timeToRefresh: number = 1500;
 		const changesToCommit: string = new Date().getTime().toString();
 		const fileToChange: string = 'Date.txt';
@@ -78,12 +75,6 @@ suite(
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
-		});
-
-		test('Get number of previously created workspaces', async function (): Promise<void> {
-			await dashboard.clickWorkspacesButton();
-			await workspaces.waitPage();
-			numberOfCreatedWorkspaces = (await workspaces.getAllCreatedWorkspacesNames()).length;
 		});
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
