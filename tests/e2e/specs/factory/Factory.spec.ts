@@ -88,8 +88,8 @@ suite(
 			});
 		}
 
-		if (BASE_TEST_CONSTANTS.IS_RESTART_EXISTING_WORKSPACE) {
-			test('Restart existing workspace', async function (): Promise<void> {
+		if (BASE_TEST_CONSTANTS.SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW) {
+			test('Select opening an existing workspacee', async function (): Promise<void> {
 				await dashboard.waitExistingWorkspaceFoundAlert();
 				await dashboard.clickOpenExistingWorkspaceButton();
 			});
@@ -222,13 +222,9 @@ suite(
 				await driverHelper.wait(30000);
 				await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 			});
-	
+
 			suiteTeardown('Unregister running workspace', function (): void {
 				registerRunningWorkspace('');
-			});
-		} else {
-			suiteTeardown('Registering the running workspace', function (): void {
-				registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 			});
 		}
 	}
