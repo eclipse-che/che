@@ -172,14 +172,14 @@ jobs:
 
       - name: Store e2e artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-artifacts
           path: /tmp/tests
 
       - name: Store k8s logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: k8s-logs
           path: /tmp/pr-check-artifacts/admin-che-info
