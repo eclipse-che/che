@@ -89,7 +89,7 @@ suite(
 		}
 
 		if (BASE_TEST_CONSTANTS.SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW) {
-			test('Select opening an existing workspacee', async function (): Promise<void> {
+			test('Select opening an existing workspace instead of creating a new one', async function (): Promise<void> {
 				await dashboard.waitExistingWorkspaceFoundAlert();
 				await dashboard.clickOpenExistingWorkspaceButton();
 			});
