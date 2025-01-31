@@ -33,8 +33,8 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
 pre-commit hook.
 Full set of rules can be found:
 
-- [.eslintrc](.eslintrc.js)
-- [.prettierrc](.prettierrc.json)
+-   [.eslintrc](.eslintrc.js)
+-   [.prettierrc](.prettierrc.json)
 
 ### Preferable code style
 

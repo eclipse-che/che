@@ -15,6 +15,8 @@ export enum Platform {
 export const BASE_TEST_CONSTANTS: {
 	OCP_INFRA: string;
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
+	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: boolean;
+	SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
 	OCP_VERSION: string;
@@ -129,6 +131,19 @@ export const BASE_TEST_CONSTANTS: {
 	 * stop and remove workspace if a test fails.
 	 */
 	DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true',
+
+	/**
+	 * stop and remove workspace if a test is successful.
+	 * true by default.
+	 */
+	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: process.env.DELETE_WORKSPACE_ON_SUCCESSFUL_TEST !== 'false',
+
+	/**
+	 * select opening an existing workspace instead of creating a new one, if a duplicate workspace is created from the factory or sample list.
+	 * this option is false by default.
+	 */
+	SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW:
+		process.env.SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.
