@@ -25,6 +25,7 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { error } from 'selenium-webdriver';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL} repository`,
@@ -42,6 +43,7 @@ suite(
 		const appVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION
 			? BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.')
 			: 'next';
+		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		let currentNamespace: string | undefined = '';
 		let cheClusterNamespace: string | undefined = '';
 		let cheClusterName: string | undefined = '';
@@ -56,6 +58,7 @@ suite(
 			await browserTabsUtil.navigateTo(
 				FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL() || 'https://github.com/redhat-developer/devspaces/'
 			);
+			await createWorkspace.performTrustAuthorPopup();
 		});
 
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
@@ -112,7 +115,7 @@ suite(
 			const commandToBuildCustomVSXImage: string = `cd ${pathToPluginRegistry} && yes | ./build.sh`;
 			const commandLoginIntoInternalRegistry: string =
 				'podman login -u $(oc whoami | tr -d :) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000';
-			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel8:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${appVersion}`;
+			const retagImageCommand: string = `podman tag quay.io/devspaces/pluginregistry-rhel9:next  ${internalRegistry}/${currentNamespace}/che-plugin-registry:${appVersion}`;
 
 			const output: ShellString = kubernetesCommandLineToolsExecutor.execInContainerCommand(commandToBuildCustomVSXImage);
 			expect(output.code).equals(0);
@@ -130,6 +133,8 @@ suite(
 
 		test('Configure Che to use the embedded Eclipse Open VSX server', function (): void {
 			// create secret for using internal registry
+			kubernetesCommandLineToolsExecutor.execInContainerCommand(`oc delete secret regcred -n ${cheClusterNamespace} || true`);
+
 			const createRegistrySecretCommand: string = `oc create secret -n ${cheClusterNamespace} docker-registry regcred --docker-server=${internalRegistry} --docker-username=\$(oc whoami | tr -d :) --docker-password=\$(oc whoami -t)`;
 			const createSecretOutput: string = kubernetesCommandLineToolsExecutor.execInContainerCommand(createRegistrySecretCommand);
 			expect(createSecretOutput).contains('regcred created');
