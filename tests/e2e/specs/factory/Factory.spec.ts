@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2021-2024 Red Hat, Inc.
+ * copyright (c) 2021-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -92,6 +92,13 @@ suite(
 			test('Select opening an existing workspace instead of creating a new one', async function (): Promise<void> {
 				await dashboard.waitExistingWorkspaceFoundAlert();
 				await dashboard.clickOpenExistingWorkspaceButton();
+			});
+		}
+
+		if (BASE_TEST_CONSTANTS.SELECT_OF_CREATION_NEW_WORKSPACE) {
+			test('Select of creating a new workspace', async function (): Promise<void> {
+				await dashboard.waitExistingWorkspaceFoundAlert();
+				await dashboard.clickOnCreateNewWorkspaceButton();
 			});
 		}
 
