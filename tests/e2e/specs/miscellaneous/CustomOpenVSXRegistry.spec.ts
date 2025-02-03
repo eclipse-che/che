@@ -199,6 +199,7 @@ suite(
 		});
 
 		suiteTeardown('Clean up resources and restore default CHE cluster CR', async function (): Promise<void> {
+			kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
 			try {
 				kubernetesCommandLineToolsExecutor.execInContainerCommand(`oc delete secret regcred -n ${cheClusterNamespace}`);
 			} catch (error) {
