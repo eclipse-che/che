@@ -17,7 +17,7 @@ export const BASE_TEST_CONSTANTS: {
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: boolean;
 	SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW: boolean;
-	SELECT_OF_CREATION_NEW_WORKSPACE: boolean;
+	SELECT_CREATING_NEW_WORKSPACE: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
 	OCP_VERSION: string;
@@ -150,7 +150,7 @@ export const BASE_TEST_CONSTANTS: {
 	 * select creation of a new workspace, if a duplicate workspace is created from the factory or sample list.
 	 * this option is false by default.
 	 */
-	SELECT_OF_CREATION_NEW_WORKSPACE: process.env.SELECT_OF_CREATION_NEW_WORKSPACE === 'true',
+	SELECT_CREATING_NEW_WORKSPACE: process.env.SELECT_CREATING_NEW_WORKSPACE === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.

@@ -95,7 +95,7 @@ suite(
 			});
 		}
 
-		if (BASE_TEST_CONSTANTS.SELECT_OF_CREATION_NEW_WORKSPACE) {
+		if (BASE_TEST_CONSTANTS.SELECT_CREATING_NEW_WORKSPACE) {
 			test('Select of creating a new workspace', async function (): Promise<void> {
 				await dashboard.waitExistingWorkspaceFoundAlert();
 				await dashboard.clickOnCreateNewWorkspaceButton();
