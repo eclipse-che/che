@@ -25,6 +25,7 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -38,6 +39,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 	let podName: string = '';
 
 	suiteSetup(function (): void {
@@ -56,6 +58,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		await dashboard.waitPage();
 		await testWorkspaceUtil.switchOffTrustDialogWithJavaScript();
 		await browserTabsUtil.navigateTo(factoryUrl);
+		await createWorkspace.performTrustAuthorPopup();
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
