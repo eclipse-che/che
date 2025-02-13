@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2020-2023 Red Hat, Inc.
+ * copyright (c) 2020-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ export const BASE_TEST_CONSTANTS: {
 	DELETE_WORKSPACE_ON_FAILED_TEST: boolean;
 	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: boolean;
 	SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW: boolean;
+	SELECT_CREATING_NEW_WORKSPACE: boolean;
 	IS_CLUSTER_DISCONNECTED: () => boolean;
 	IS_PRODUCT_DOCUMENTATION_RELEASED: any;
 	OCP_VERSION: string;
@@ -144,6 +145,12 @@ export const BASE_TEST_CONSTANTS: {
 	 */
 	SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW:
 		process.env.SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW === 'true',
+
+	/**
+	 * select creation of a new workspace, if a duplicate workspace is created from the factory or sample list.
+	 * this option is false by default.
+	 */
+	SELECT_CREATING_NEW_WORKSPACE: process.env.SELECT_CREATING_NEW_WORKSPACE === 'true',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.
