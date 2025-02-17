@@ -20,6 +20,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 const stackName: string = BASE_TEST_CONSTANTS.TS_SELENIUM_DASHBOARD_SAMPLE_NAME || 'Python';
 const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || 'python-hello-world';
@@ -31,6 +32,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 
 	let projectSection: ViewSection;
 	let existedWorkspaceName: string;
@@ -65,6 +67,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		existedWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
 
 		await browserTabsUtil.navigateTo(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
+		await createWorkspace.performTrustAuthorPopup();
+
 		await dashboard.waitPage();
 		await workspaceHandlingTests.createAndOpenWorkspaceWithExistedWorkspaceName(stackName);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
