@@ -28,6 +28,7 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { Logger } from '../../utils/Logger';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ShellString } from 'shelljs';
+import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
@@ -43,6 +44,8 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
+
 	// test specific data
 	const gitImportRepo: string = 'https://github.com/crw-qe/summit-lab-spring-music.git';
 	const gitImportReference: string = 'pipeline';
@@ -92,6 +95,7 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	});
 
 	test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
+		await createWorkspace.performTrustAuthorPopup();
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 	});
 
