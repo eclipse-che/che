@@ -17,6 +17,7 @@ import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
 import { By, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
+import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -28,7 +29,9 @@ export class ProjectAndFileTests {
 		@inject(CLASSES.CheCodeLocatorLoader)
 		private readonly cheCodeLocatorLoader: CheCodeLocatorLoader,
 		@inject(CLASSES.WorkspaceHandlingTests)
-		private readonly workspaceHandlingTests: WorkspaceHandlingTests
+		private readonly workspaceHandlingTests: WorkspaceHandlingTests,
+		@inject(CLASSES.RestrictedModeButton)
+		private readonly restrictedModeButton: RestrictedModeButton
 	) {}
 
 	async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
@@ -51,6 +54,10 @@ export class ProjectAndFileTests {
 		}
 	}
 
+	/**
+	 * perform to 'trust author of the files' dialog box, when it appears
+	 * manage to 'Trusted' Workspace Mode, when the 'trust author of the files' dialog does not appear
+	 */
 	async performTrustAuthorDialog(): Promise<void> {
 		Logger.debug();
 		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
@@ -60,10 +67,20 @@ export class ProjectAndFileTests {
 			await workbench.click();
 			await this.driverHelper.waitAndClick(
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
-				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 			);
 		} catch (e) {
-			Logger.info('Second welcome content dialog box was not shown');
+			Logger.info('"Do you trust authors of the files in this workspace?" dialog box was not shown');
+
+			try {
+				await this.restrictedModeButton.clickOnRestrictedModeButton();
+				await this.driverHelper.waitAndClick(
+					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				);
+			} catch (e) {
+				Logger.info('Restricted Mode button or Trusted Workspace box was not shown');
+			}
 		}
 	}
 
