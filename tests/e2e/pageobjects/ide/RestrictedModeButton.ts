@@ -16,7 +16,7 @@ import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class RestrictedModeButton {
-	private static readonly RESTRICTED_MODE_BUTTON: By = By.id('status.workspaceTrust]');
+	private static readonly RESTRICTED_MODE_BUTTON: By = By.id('status.workspaceTrust');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
