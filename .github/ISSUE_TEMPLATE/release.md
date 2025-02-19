@@ -21,16 +21,15 @@ Phase 2:
 - [ ] che-e2e, che-plugin-registry, che-dashboard.
 
 Phase 3:
-- [ ] che-operator.
+- [ ] [chectl](https://github.com/che-incubator/chectl/pulls/che-bot). _(Che operator PRs must be approved after reviewing and verifying test runs in PR checks)_
 
 Phase 4:
-- [ ] [chectl](https://github.com/che-incubator/chectl/pulls/che-bot) _(depends on che-operator)_
-- [ ] [Che community operator PRs for K8S](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pulls/che-bot) _(depends on che-operator)_
+- [ ] [chectl](https://github.com/che-incubator/chectl/pulls/tolusha) _(depends on che-operator)_
+- [ ] [Che community operator PRs for Openshift](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pulls/che-incubator-bot) _(depends on che-operator)_
 - [ ] [che-docs PR](https://github.com/eclipse/che-docs/pulls/che-bot) _(depends on che-operator)_
 
 Phase 5
-- [ ] released Che docs are published on the [Eclipse Che website]https://eclipse.dev/che/docs/stable/administration-guide/enabling-fuse-for-all-workspaces/
-
+- [ ] released Che docs are published on the [Eclipse Che website](https://eclipse.dev/che/docs/stable/administration-guide/enabling-fuse-for-all-workspaces/)
 Phase 6
 Release can be marked as complete, and this issue can be closed after these steps:
 - [ ] check for [remaining version update PRs](https://github.com/eclipse-che/che-release/actions/workflows/release-check-unmerged-PRs.yml) and merge/close them.

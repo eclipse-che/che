@@ -106,7 +106,7 @@ repositories:
     name: configbump
     description: >-
       Simple Kubernetes controller that is able to quickly synchronize a set of config maps
-    useCheReleaseLifecycle: false
+    useCheReleaseLifecycle: true
   - url: https://github.com/che-incubator/workspace-data-sync
     name: workspace-data-sync
     description: >-
