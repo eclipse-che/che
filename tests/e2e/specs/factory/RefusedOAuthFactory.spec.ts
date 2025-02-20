@@ -153,10 +153,6 @@ suite(
 				const scmView: NewScmView = new NewScmView();
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
 				[scmProvider, ...rest] = await scmView.getProviders();
-				if (scmProvider === undefined) {
-					await projectAndFileTests.performManageWorkspaceTrustBox();
-					[scmProvider, ...rest] = await scmView.getProviders();
-				}
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 			});
 
