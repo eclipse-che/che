@@ -54,6 +54,9 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				TreeItem: {
 					projectFolderItem: By.className('pane-header expanded')
+				},
+				Workbench: {
+					workspaceTrustButton: By.xpath('//a[@role="button" and text()="Trust"]')
 				}
 			}
 		};
