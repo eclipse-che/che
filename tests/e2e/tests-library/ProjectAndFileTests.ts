@@ -73,8 +73,11 @@ export class ProjectAndFileTests {
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 			);
+			await this.restrictedModeButton.isRestrictedModeButtonDisappearance();
 		} catch (e) {
-			Logger.info('"Do you trust authors of the files in this workspace?" dialog box was not shown');
+			Logger.info(
+				'"Do you trust authors of the files in this workspace?" dialog box was not shown, or Restricted Mode is still active'
+			);
 
 			try {
 				await this.restrictedModeButton.clickOnRestrictedModeButton();

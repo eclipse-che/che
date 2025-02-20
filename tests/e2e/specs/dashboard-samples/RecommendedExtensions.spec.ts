@@ -178,7 +178,7 @@ for (const sample of samples) {
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-			
+
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
