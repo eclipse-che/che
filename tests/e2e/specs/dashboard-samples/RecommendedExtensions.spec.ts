@@ -153,17 +153,10 @@ for (const sample of samples) {
 		});
 
 		test(`Get recommended extensions list from ${extensionsListFileName}`, async function (): Promise<void> {
-			// sometimes the Trust Dialog does not appear as expected - as result we need to execute "projectAndFileTests.performManageWorkspaceTrustBox()" method. In this case.
-			try {
-				await (
-					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
-				)?.select();
-			} catch (err) {
-				await projectAndFileTests.performManageWorkspaceTrustBox();
-				await (
-					await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
-				)?.select();
-			}
+			await (
+				await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
+			)?.select();
+
 			await (
 				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
 			)?.select();
@@ -185,13 +178,8 @@ for (const sample of samples) {
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-			// sometimes the Trust Dialog does not appear as expected - as result we need to execute "projectAndFileTests.performManageWorkspaceTrustBox()" method. In this case.
-			try {
-				extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
-			} catch (err) {
-				await projectAndFileTests.performManageWorkspaceTrustBox();
-				extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
-			}
+			
+			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
 
