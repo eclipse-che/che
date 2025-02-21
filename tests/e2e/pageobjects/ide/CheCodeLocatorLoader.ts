@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0

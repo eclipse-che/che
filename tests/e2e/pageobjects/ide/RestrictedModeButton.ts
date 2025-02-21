@@ -29,9 +29,9 @@ export class RestrictedModeButton {
 		await this.driverHelper.waitAndClick(RestrictedModeButton.RESTRICTED_MODE_BUTTON);
 	}
 
-	async isRestrictedModeButtonDisappearance(): Promise<boolean> {
+	async isRestrictedModeButtonDisappearance(): Promise<void> {
 		Logger.debug();
 
-		return this.driverHelper.waitDisappearanceBoolean(RestrictedModeButton.RESTRICTED_MODE_BUTTON);
+		await this.driverHelper.waitDisappearance(RestrictedModeButton.RESTRICTED_MODE_BUTTON);
 	}
 }
