@@ -73,6 +73,7 @@ export class ProjectAndFileTests {
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 			);
+			await this.driverHelper.refreshPage()
 			await this.restrictedModeButton.isRestrictedModeButtonDisappearance();
 		} catch (e) {
 			Logger.info(
