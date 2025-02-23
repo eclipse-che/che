@@ -65,6 +65,7 @@ export class ProjectAndFileTests {
 
 		try {
 			await workbench.click();
+			await this.driverHelper.refreshPage()
 			await this.driverHelper.waitVisibility(
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.text,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
@@ -73,7 +74,6 @@ export class ProjectAndFileTests {
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 			);
-			await this.driverHelper.refreshPage()
 			await this.restrictedModeButton.isRestrictedModeButtonDisappearance();
 		} catch (e) {
 			Logger.info(
