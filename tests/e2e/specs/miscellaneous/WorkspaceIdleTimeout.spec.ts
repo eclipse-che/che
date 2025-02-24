@@ -97,6 +97,8 @@ suite('"Check workspace idle timeout" test', function (): void {
 
 	test('Check that the workspace has Stopped state', async function (): Promise<void> {
 		await dashboard.openDashboard();
+		await dashboard.clickWorkspacesButton();
+		await workspaces.waitPage();
 		await workspaces.waitWorkspaceWithStoppedStatus(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
