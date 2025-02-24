@@ -21,6 +21,12 @@ import { CLASSES } from '../configs/inversify.types';
 export class DevfilesHelper {
 	public getInternalClusterURLToDevFile(devFileName: string): string {
 		const devfileSampleURIPrefix: string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
+
+		// internal clusterIP is restricted by proxy when get devfile from the disconnected cluster
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			return `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}${devfileSampleURIPrefix}`;
+		}
+
 		let serviceClusterIp: string = '';
 		let servicePort: string = '';
 		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(
