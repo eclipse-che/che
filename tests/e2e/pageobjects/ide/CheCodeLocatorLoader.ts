@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -54,10 +54,6 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				TreeItem: {
 					projectFolderItem: By.className('pane-header expanded')
-				},
-				ScmView: {
-					manageWorkspaceTrust: By.xpath('.//a[@class="monaco-button monaco-text-button"]'),
-					modifiedFile: By.xpath('//div[@class="monaco-list-row" and contains(@aria-label, "Modified")]')
 				},
 				Workbench: {
 					workspaceTrustButton: By.xpath('//a[@role="button" and text()="Trust"]')

@@ -52,7 +52,8 @@ const CLASSES: any = {
 	WebTerminalPage: 'WebTerminalPage',
 	RevokeOauthPage: 'RevokeOauthPage',
 	TrustAuthorPopup: 'TrustAuthorPopup',
-	ViewsMoreActionsButton: 'ViewsMoreActionsButton'
+	ViewsMoreActionsButton: 'ViewsMoreActionsButton',
+	RestrictedModeButton: 'RestrictedModeButton'
 };
 
 const EXTERNAL_CLASSES: any = {

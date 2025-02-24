@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
 import { By, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
+import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -28,7 +29,9 @@ export class ProjectAndFileTests {
 		@inject(CLASSES.CheCodeLocatorLoader)
 		private readonly cheCodeLocatorLoader: CheCodeLocatorLoader,
 		@inject(CLASSES.WorkspaceHandlingTests)
-		private readonly workspaceHandlingTests: WorkspaceHandlingTests
+		private readonly workspaceHandlingTests: WorkspaceHandlingTests,
+		@inject(CLASSES.RestrictedModeButton)
+		private readonly restrictedModeButton: RestrictedModeButton
 	) {}
 
 	async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
@@ -51,6 +54,10 @@ export class ProjectAndFileTests {
 		}
 	}
 
+	/**
+	 * perform to 'trust author of the files' dialog box, when it appears
+	 * manage to 'Trusted' Workspace Mode, when the 'trust author of the files' dialog does not appear
+	 */
 	async performTrustAuthorDialog(): Promise<void> {
 		Logger.debug();
 		// sometimes the trust dialog does not appear at first time, for avoiding this problem we send click event for activating
@@ -58,38 +65,31 @@ export class ProjectAndFileTests {
 
 		try {
 			await workbench.click();
+			await this.driverHelper.waitVisibility(
+				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.text,
+				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
+			);
 			await this.driverHelper.waitAndClick(
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
-				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
 			);
+			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for reloading the IDE
+			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+			await this.restrictedModeButton.isRestrictedModeButtonDisappearance();
 		} catch (e) {
-			Logger.info('Second welcome content dialog box was not shown');
-		}
-	}
+			Logger.info(
+				'"Do you trust authors of the files in this workspace?" dialog box was not shown, or Restricted Mode is still active'
+			);
 
-	/**
-	 * manage to 'Trusted' Workspace Mode, when the trust author dialog does not appear
-	 * the "Manage Workspace Trust" box is appeared in Source Control View
-	 */
-	async performManageWorkspaceTrustBox(): Promise<void> {
-		Logger.debug();
-
-		try {
-			await this.driverHelper.waitAndClick(
-				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).manageWorkspaceTrust,
-				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-			);
-			await this.driverHelper.waitAndClick(
-				(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
-				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-			);
-			await this.driverHelper.waitAndClick(
-				(this.cheCodeLocatorLoader.webCheCodeLocators.ScmView as any).modifiedFile,
-				TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
-			);
-		} catch (err) {
-			Logger.error(`Manage Workspace Trust box was not shown: ${err}`);
-			throw err;
+			try {
+				await this.restrictedModeButton.clickOnRestrictedModeButton();
+				await this.driverHelper.waitAndClick(
+					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
+					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
+				);
+			} catch (e) {
+				Logger.info('Restricted Mode button or Trusted Workspace box was not shown');
+			}
 		}
 	}
 
@@ -97,7 +97,6 @@ export class ProjectAndFileTests {
 	 * find an ViewSection with project tree.
 	 * @returns Promise resolving to ViewSection object
 	 */
-
 	async getProjectViewSession(): Promise<ViewSection> {
 		Logger.debug();
 
