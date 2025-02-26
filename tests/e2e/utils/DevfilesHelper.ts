@@ -34,7 +34,7 @@ export class DevfilesHelper {
 	public obtainDevFileContentUsingPod(podName: string, containerName: string, devFileName: string): string {
 		const clusterURL: string = this.getInternalClusterURLToDevFile(devFileName);
 		this.getShellExecutor().executeCommand(
-			`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- sh -c 'curl -k -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`
+			`oc exec -i ${podName} -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -c ${containerName} -- sh -c 'curl -o /tmp/${devFileName}-devfile.yaml ${clusterURL}'`
 		);
 		return this.getShellExecutor()
 			.executeArbitraryShellScript(
