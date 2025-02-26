@@ -24,6 +24,8 @@ export class DevfilesHelper {
 
 		// internal clusterIP is restricted by proxy when get devfile from the disconnected cluster
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.debug('Cluster is disconnected, using the base URL');
+
 			return `${BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL}${devfileSampleURIPrefix}`;
 		}
 
