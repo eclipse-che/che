@@ -21,15 +21,8 @@ import { CLASSES } from '../configs/inversify.types';
 export class DevfilesHelper {
 	public getInternalClusterURLToDevFile(devFileName: string): string {
 		const devfileSampleURIPrefix: string = `/dashboard/api/airgap-sample/devfile/download?id=${devFileName}`;
-		let serviceClusterIp: string = '';
-		let servicePort: string = '';
-		serviceClusterIp = this.getShellExecutor().executeArbitraryShellScript(
-			`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.clusterIP}'`
-		);
-		servicePort = this.getShellExecutor().executeArbitraryShellScript(
-			`oc get svc devspaces-dashboard -n  ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} -o=jsonpath='{.spec.ports[*].port}'`
-		);
-		return `http://${serviceClusterIp}:${servicePort}${devfileSampleURIPrefix}`;
+
+		return `http://devspaces-dashboard.openshift-devspaces.svc:8080${devfileSampleURIPrefix}`;
 	}
 
 	/**
