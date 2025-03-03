@@ -46,6 +46,9 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				ContextMenu: {
 					contextView: By.className('monaco-menu-container')
+				},
+				Editor: {
+					inputArea: By.className('native-edit'),
 				}
 			},
 			extras: {
