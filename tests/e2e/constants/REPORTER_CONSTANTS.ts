@@ -140,7 +140,7 @@ export const REPORTER_CONSTANTS: {
 		if (process.env.RP_ENDPOINT !== '') {
 			return process.env.RP_ENDPOINT;
 		}
-		return 'https://reportportal-crw.apps.ocp-c1.prod.psi.redhat.com/api/v1';
+		return 'https://reportportal-crw.apps.dno.ocp-hub.prod.psi.redhat.com/api/v1';
 	},
 
 	/**
