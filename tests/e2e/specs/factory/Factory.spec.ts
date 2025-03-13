@@ -15,6 +15,7 @@ import {
 	ActivityBar,
 	ContextMenu,
 	EditorView,
+	Key,
 	Locators,
 	NewScmView,
 	SingleScmProvider,
@@ -136,10 +137,8 @@ suite(
 			await projectSection.openItem(testRepoProjectName, fileToChange);
 			const editor: TextEditor = (await new EditorView().openEditor(fileToChange)) as TextEditor;
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			Logger.debug('editor.clearText');
-			await editor.clearText();
-			Logger.debug(`editor.typeTextAt: "${changesToCommit}"`);
-			await editor.typeTextAt(1, 1, changesToCommit);
+			Logger.debug(`editor.setText: "${changesToCommit}"`);
+			await editor.setText(changesToCommit);
 		});
 
 		test('Open a source control manager', async function (): Promise<void> {
@@ -179,8 +178,16 @@ suite(
 		});
 
 		test('Commit the changes', async function (): Promise<void> {
-			Logger.debug(`scmProvider.commitChanges: commit name "Commit ${changesToCommit}"`);
-			await scmProvider.commitChanges('Commit ' + changesToCommit);
+			Logger.info(`ScmView inputField locator: "${(webCheCodeLocators.ScmView as any).scmEditor}"`);
+			Logger.debug('Click on the Scm Editor');
+			await driverHelper
+				.getDriver()
+				.findElement((webCheCodeLocators.ScmView as any).scmEditor)
+				.click();
+			Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
+			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
+			Logger.debug('Press Enter to commit the changes');
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
 			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
