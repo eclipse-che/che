@@ -48,10 +48,13 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 					contextView: By.className('monaco-menu-container')
 				},
 				Editor: {
-					inputArea: By.className('native-edit'),
+					inputArea: By.className('native-edit-context-textarea')
 				}
 			},
 			extras: {
+				ScmView: {
+					scmEditor: By.className('scm-editor')
+				},
 				ExtensionsViewSection: {
 					requireReloadButton: By.xpath('//a[text()="Reload Required"]')
 				},
