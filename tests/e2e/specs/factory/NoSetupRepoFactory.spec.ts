@@ -252,18 +252,18 @@ suite(
 				);
 				expect(isCommitButtonDisabled).to.be.true;
 			});
-
-			suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
-				await dashboard.openDashboard();
-				await browserTabsUtil.closeAllTabsExceptCurrent();
-			});
-
-			suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
-				// to avoid a possible creating workspace which is not appeared on Dashboard yet. TODO: implement a better solution.
-				await driverHelper.wait(30000);
-				await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
-			});
 		}
+
+		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			await dashboard.openDashboard();
+			await browserTabsUtil.closeAllTabsExceptCurrent();
+		});
+
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			// to avoid a possible creating workspace which is not appeared on Dashboard yet. TODO: implement a better solution.
+			await driverHelper.wait(30000);
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		});
 
 		suiteTeardown('Unregister running workspace', function (): void {
 			registerRunningWorkspace('');
