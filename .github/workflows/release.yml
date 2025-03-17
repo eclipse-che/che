@@ -51,7 +51,6 @@ jobs:
           sudo chmod +x /usr/bin/yq
       - 
         name: Perform a release
-        if: github.event.inputs.makeRelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
         run: |
