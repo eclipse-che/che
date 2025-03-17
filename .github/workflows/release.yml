@@ -11,22 +11,6 @@ name: Release Che E2E Tests
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'release version in format 7.y.z'
-        required: true
-      forceRecreateTags:
-        description: If true, tags will be recreated. Use with caution
-        required: false
-        default: 'false'
-      makeRelease:
-        description: If true, release script will be performed (new version tag and images will be created)
-        required: false
-        default: 'true'
-      publishToNpmJs:
-        description: If true, Project will be published to npmjs. The version tag must exist.
-        required: false
-        default: 'true'
 
 jobs:
   build:
@@ -43,26 +27,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - 
-        name: Check existing tags
-        if: github.event.inputs.makeRelease == 'true'
-        run: |
-          set +e
-          RECREATE_TAGS=${{ github.event.inputs.forceRecreateTags }}
-          VERSION=${{ github.event.inputs.version }}
-          EXISTING_TAG=$(git ls-remote --exit-code origin refs/tags/${VERSION})
-          if [[ -n ${EXISTING_TAG} ]]; then
-            if [[ ${RECREATE_TAGS} == "true" ]]; then
-              echo "[INFO] Removing tag for ${VERSION} version. New tag will be recreated during release."
-              git push origin :$VERSION
-              git tag -d || true
-            else
-              echo "[ERROR] Cannot proceed with release - tag ${EXISTING_TAG} already exists."
-              exit 1
-            fi
-          else
-            echo "[INFO] No existing tags detected for $VERSION"
-          fi
       -
         name: "Set up QEMU"
         uses: docker/setup-qemu-action@v2
@@ -96,27 +60,5 @@ jobs:
           git config --global pull.rebase true
 
           export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-          ./make-release.sh --version ${{ github.event.inputs.version}}
-      - name: Publish to npmjs
-        if: github.event.inputs.publishToNpmJs == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
-        run: |
-          git checkout ${{ github.event.inputs.version}}
-          pushd tests/e2e >/dev/null || exit
-            npm ci && npm run tsc && npm publish
-          popd  >/dev/null || exit
-      #- name: Create failure MM message
-        #if: ${{ failure() }}
-        #run: |
-          #echo "{\"text\":\":no_entry_sign: Che E2E Tests ${{ github.event.inputs.version }} release has failed: https://github.com/eclipse/che/actions/workflows/release.yml\"}" > mattermost.json
-      #- name: Create success MM message
-        #run: |
-          #echo "{\"text\":\":white_check_mark: Che E2E Tests image and generator ${{ github.event.inputs.version }} release job is complete: \n Performed tagging and container build of new image: https://quay.io/eclipse/che-e2e:${{ github.event.inputs.version }}. \n Published package to npmjs https://www.npmjs.com/package/@eclipse-che/che-e2e/v/${{ github.event.inputs.version }}.\"}" > mattermost.json
-      #- name: Send MM message
-        #if: ${{ success() }} || ${{ failure() }}
-        #uses: mattermost/action-mattermost-notify@1.1.0
-        #env:
-          #MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
-          #MATTERMOST_CHANNEL: eclipse-che-releases
-          #MATTERMOST_USERNAME: che-bot
+          ./make-release.sh
+      
