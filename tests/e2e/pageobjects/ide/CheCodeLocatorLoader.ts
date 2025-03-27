@@ -49,6 +49,9 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 				},
 				Editor: {
 					inputArea: By.className('native-edit-context-textarea')
+				},
+				ExtensionsViewSection: {
+					searchBox: By.className('native-edit-context-textarea')
 				}
 			},
 			extras: {

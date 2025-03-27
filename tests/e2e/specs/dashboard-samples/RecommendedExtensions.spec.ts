@@ -13,9 +13,10 @@ import {
 	EditorView,
 	ExtensionsViewItem,
 	ExtensionsViewSection,
+	Key,
 	Locators,
 	SideBarView,
-	TextEditor,
+	// textEditor,
 	ViewSection
 } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
@@ -161,10 +162,37 @@ for (const sample of samples) {
 				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
 			)?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
-			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
+			// const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
+			await new EditorView().openEditor(extensionsListFileName);
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			Logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
-			recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+			// Logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
+
+			Logger.debug('Select and copy all text in the editor');
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('c').keyUp(Key.CONTROL).perform();
+
+			Logger.debug('Read the text');
+			Logger.info('Create a hidden buffer');
+			await driverHelper.getDriver().executeScript(`
+				let input = document.createElement('textarea');
+				input.setAttribute('id', 'clipboard-buffer');
+				document.body.appendChild(input);
+				input.focus();
+			`);
+			Logger.info('Paste the text to the buffer');
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('v').keyUp(Key.CONTROL).perform();
+			Logger.info('Get the text from the buffer');
+			const text: string = await driverHelper.getDriver().executeScript(`
+				let input = document.getElementById('clipboard-buffer');
+				let text = input.value;
+				input.remove();
+				return text;
+			`);
+
+			console.log('Raw text:', text);
+			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+
+			// recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
 				const [publisher, name] = rec.split('.');
