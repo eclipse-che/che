@@ -1,6 +1,6 @@
 {
 	"name": "@eclipse-che/che-e2e",
-	"version": "7.101.0-next",
+	"version": "7.102.0-next",
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
