@@ -66,7 +66,9 @@ suite(
 			'podman login --tls-verify=false --username ${USER} --password ${TKN} ${REG}\n' +
 			'podman run --rm ${IMG}';
 
-		const factoryUrl: string = 'https://github.com/crw-qe/dockerfile-hello-world';
+		const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+			? 'https://gh.crw-qe.com/test-automation-only/dockerfile-hello-world'
+			: 'https://github.com/crw-qe/dockerfile-hello-world';
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
