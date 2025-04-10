@@ -45,19 +45,10 @@ export TKN=$(oc whoami -t)
 export REG="image-registry.openshift-image-registry.svc:5000"
 export PROJECT=$(oc project -q)
 export IMG="\${REG}/\${PROJECT}/hello:\${DATE}"
-
-# Create test directory and Dockerfile
-mkdir -p /projects/dockerfile-test
-cd /projects/dockerfile-test
-
-cat > Dockerfile << EOF
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
-RUN echo "Hello from Kubedock!" > /hello.txt
-CMD ["cat", "/hello.txt"]
-EOF
+cd $PROJECT_SOURCE
 
 podman login --tls-verify=false --username "\${USER}" --password "\${TKN}" "\${REG}"
-podman build -t "\${IMG}" .
+podman build -t "\${IMG}" -f Dockerfile.\${ARCH} .
 podman push --tls-verify=false "\${IMG}"
 `;
 
@@ -80,6 +71,10 @@ fi
 
 oc logs test-hello-pod
 `;
+
+	const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+		? 'https://gh.crw-qe.com/test-automation-only/dockerfile-hello-world'
+		: 'https://github.com/crw-qe/dockerfile-hello-world';
 
 	suiteSetup('Setup DevSpaces with container build capabilities enabled', function (): void {
 		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
@@ -108,9 +103,8 @@ oc logs test-hello-pod
 		await loginTests.loginIntoChe();
 	});
 
-	test('Create and open new Empty Workspace', async function (): Promise<void> {
-		await dashboard.waitPage();
-		await workspaceHandlingTests.createAndOpenWorkspace('Empty Workspace');
+	test(`Create and open new workspace from: ${factoryUrl}`, async function (): Promise<void> {
+		await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		workspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		expect(workspaceName, 'Workspace name was not detected').not.empty;
