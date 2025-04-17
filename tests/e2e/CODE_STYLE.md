@@ -6,35 +6,24 @@
 
 Coding standards offer several advantages, including:
 
-1. Increase Code Quality: By adhering to coding standards, developers can create code that is more secure, efficient,
-   maintainable, and uniform. This, in turn, can result in fewer errors and improved overall performance.
+1. Increase Code Quality: By adhering to coding standards, developers can create code that is more secure, efficient, maintainable, and uniform. This, in turn, can result in fewer errors and improved overall performance.
 
-2. Improved Readability and Maintainability: Coding standards contribute to code that is more comprehensible and easier
-   to maintain. Consistently formatted code aids other developers in comprehending and modifying it, saving time and
-   reducing the likelihood of introducing errors.
+2. Improved Readability and Maintainability: Coding standards contribute to code that is more comprehensible and easier to maintain. Consistently formatted code aids other developers in comprehending and modifying it, saving time and reducing the likelihood of introducing errors.
 
-3. Accelerated Development: The adherence to coding standards can expedite the development process. When developers
-   adhere to a predefined set of guidelines, they can produce code more swiftly and with fewer mistakes. Additionally,
-   uniform code formatting facilitates the identification and resolution of issues.
+3. Accelerated Development: The adherence to coding standards can expedite the development process. When developers adhere to a predefined set of guidelines, they can produce code more swiftly and with fewer mistakes. Additionally, uniform code formatting facilitates the identification and resolution of issues.
 
-4. Better Scalability: Coding standards facilitate the creation of scalable code, simplifying the incorporation of new
-   features or updates. Consistent coding practices also streamline code maintenance as the codebase expands.
+4. Better Scalability: Coding standards facilitate the creation of scalable code, simplifying the incorporation of new features or updates. Consistent coding practices also streamline code maintenance as the codebase expands.
 
-5. Elevated Collaboration and Communication: Uniform guidelines encourage better understanding and manipulation of code
-   written by fellow developers. This fosters smoother teamwork and facilitates the sharing of code.
+5. Elevated Collaboration and Communication: Uniform guidelines encourage better understanding and manipulation of code written by fellow developers. This fosters smoother teamwork and facilitates the sharing of code.
 
-6. Consistency Across Projects: The adoption of coding standards guarantees a consistent coding approach across various
-   projects. This simplifies the task of upholding code quality, transitioning between tasks, and fostering
-   collaborative work.
+6. Consistency Across Projects: The adoption of coding standards guarantees a consistent coding approach across various projects. This simplifies the task of upholding code quality, transitioning between tasks, and fostering collaborative work.
 
 ### Automated tools
 
-Automated lint checking and code format performs with ESLint and Prettier tools before every commit using Husky
-pre-commit hook.
-Full set of rules can be found:
+Automated lint checking and code format performs with ESLint and Prettier tools before every commit using Husky pre-commit hook. Full set of rules can be found:
 
--   [.eslintrc](.eslintrc.js)
--   [.prettierrc](.prettierrc.json)
+- [.eslintrc](.eslintrc.js)
+- [.prettierrc](.prettierrc.json)
 
 ### Preferable code style
 
