@@ -21,6 +21,8 @@ import { ShellString } from 'shelljs';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { ShellExecutor } from '../../utils/ShellExecutor';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { ViewSection } from 'monaco-page-objects';
 
 suite(`Test podman build container functionality ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -37,6 +39,16 @@ suite(`Test podman build container functionality ${BASE_TEST_CONSTANTS.TEST_ENVI
 	let devSpacesNamespace: string = '';
 	let cheClusterName: string = '';
 
+	/**
+	 * test requires the following files to be present in the workspace root:
+	 * - A Dockerfile named Dockerfile.${ARCH} with content:
+	 * FROM scratch
+	 * COPY hello /hello
+	 * CMD ["/hello"]
+	 * - A compiled 'hello' binary, that prints "Hello from Kubedock!" to output.
+	 *
+	 * Used to build and run a container in a pod for verifying Podman functionality.
+	 */
 	const buildPushScript: string = `
 export ARCH=$(uname -m)
 export DATE=$(date +"%m%d%y")
@@ -45,19 +57,10 @@ export TKN=$(oc whoami -t)
 export REG="image-registry.openshift-image-registry.svc:5000"
 export PROJECT=$(oc project -q)
 export IMG="\${REG}/\${PROJECT}/hello:\${DATE}"
-
-# Create test directory and Dockerfile
-mkdir -p /projects/dockerfile-test
-cd /projects/dockerfile-test
-
-cat > Dockerfile << EOF
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
-RUN echo "Hello from Kubedock!" > /hello.txt
-CMD ["cat", "/hello.txt"]
-EOF
+cd $PROJECT_SOURCE
 
 podman login --tls-verify=false --username "\${USER}" --password "\${TKN}" "\${REG}"
-podman build -t "\${IMG}" .
+podman build -t "\${IMG}" -f Dockerfile.\${ARCH} .
 podman push --tls-verify=false "\${IMG}"
 `;
 
@@ -80,6 +83,11 @@ fi
 
 oc logs test-hello-pod
 `;
+
+	const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+		? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL ||
+			'https://gh.crw-qe.com/test-automation-only/dockerfile-hello-world'
+		: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/crw-qe/dockerfile-hello-world';
 
 	suiteSetup('Setup DevSpaces with container build capabilities enabled', function (): void {
 		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
@@ -108,9 +116,8 @@ oc logs test-hello-pod
 		await loginTests.loginIntoChe();
 	});
 
-	test('Create and open new Empty Workspace', async function (): Promise<void> {
-		await dashboard.waitPage();
-		await workspaceHandlingTests.createAndOpenWorkspace('Empty Workspace');
+	test(`Create and open new workspace from: ${factoryUrl}`, async function (): Promise<void> {
+		await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		workspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		expect(workspaceName, 'Workspace name was not detected').not.empty;
@@ -119,6 +126,11 @@ oc logs test-hello-pod
 
 	test('Wait for workspace readiness', async function (): Promise<void> {
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+	});
+
+	test('Check the project files were imported', async function (): Promise<void> {
+		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile.x86_64'), 'Dockerfile not found in the project tree').not.undefined;
 	});
 
 	test('Build and push container image from workspace', function (): void {

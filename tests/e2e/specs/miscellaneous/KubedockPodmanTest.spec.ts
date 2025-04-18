@@ -21,6 +21,7 @@ import { ShellString } from 'shelljs';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 
 suite(
 	`Check possibility to manage containers within a workspace with kubedock and podman ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -35,6 +36,16 @@ suite(
 		let kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor;
 		let workspaceName: string = '';
 
+		/**
+		 * test requires the following files to be present in the workspace root:
+		 * - A Dockerfile named Dockerfile.${ARCH} with content:
+		 * FROM scratch
+		 * COPY hello /hello
+		 * CMD ["/hello"]
+		 * - A compiled 'hello' binary, that prints "Hello from Kubedock!" to output.
+		 *
+		 * Used to build and run a container in a pod for verifying Podman functionality.
+		 */
 		const testScript: string =
 			'# Enable Kubedock\n' +
 			'export KUBEDOCK_ENABLED=true\n' +
@@ -66,7 +77,10 @@ suite(
 			'podman login --tls-verify=false --username ${USER} --password ${TKN} ${REG}\n' +
 			'podman run --rm ${IMG}';
 
-		const factoryUrl: string = 'https://github.com/crw-qe/dockerfile-hello-world';
+		const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+			? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL ||
+				'https://gh.crw-qe.com/test-automation-only/dockerfile-hello-world'
+			: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/crw-qe/dockerfile-hello-world';
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();

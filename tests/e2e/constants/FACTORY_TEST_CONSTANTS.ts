@@ -20,6 +20,7 @@ export enum GitProviderType {
 
 export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_FACTORY_GIT_REPO_URL: string;
+	TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL: string;
 	TS_SELENIUM_PROJECT_NAME: string;
 	TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: boolean;
 	TS_SELENIUM_FACTORY_GIT_PROVIDER: string;
@@ -35,6 +36,11 @@ export const FACTORY_TEST_CONSTANTS: {
 	 * url to create factory
 	 */
 	TS_SELENIUM_FACTORY_GIT_REPO_URL: process.env.TS_SELENIUM_FACTORY_GIT_REPO_URL || '',
+
+	/**
+	 * url to create factory for airgap/disconnected environments
+	 */
+	TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL: process.env.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL || '',
 
 	/**
 	 * git repository name
