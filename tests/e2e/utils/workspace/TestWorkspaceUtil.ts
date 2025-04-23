@@ -124,6 +124,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 					break;
 				}
 			}
+			await this.driverHelper.wait(this.polling);
 		}
 
 		if (!deleteWorkspaceStatus) {

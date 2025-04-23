@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2024 Red Hat, Inc.
+ * copyright (c) 2024-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,7 @@ import { ContextMenu, NewScmView, SingleScmProvider, Locators } from 'monaco-pag
 
 @injectable()
 export class ViewsMoreActionsButton {
-	private static readonly VIEWS_AND_MORE_ACTIONS_BUTTON: By = By.xpath('//a[@role="button" and @aria-label="Views and More Actions..."]');
+	private static readonly VIEWS_AND_MORE_ACTIONS_BUTTON: By = By.xpath('//a[@aria-label="Views and More Actions..."]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -39,8 +39,8 @@ export class ViewsMoreActionsButton {
 		Logger.debug('scmProvider.openMoreActions');
 		const scmContextMenu: ContextMenu = await scmProvider.openMoreActions();
 		await this.driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
-		Logger.debug('scmContextMenu.select: "Source Control Graph"');
-		await scmContextMenu.select('Source Control Graph');
+		Logger.debug('scmContextMenu.select: "Graph"');
+		await scmContextMenu.select('Graph');
 	}
 
 	async viewsAndMoreActionsButtonIsVisible(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<boolean> {

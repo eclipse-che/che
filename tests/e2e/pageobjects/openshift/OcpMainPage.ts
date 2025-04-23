@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { OcpImportFromGitPage } from './OcpImportFromGitPage';
 import { e2eContainer } from '../../configs/inversify.config';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { satisfies } from 'compare-versions';
 
 @injectable()
 export class OcpMainPage {
@@ -27,6 +29,10 @@ export class OcpMainPage {
 	private static readonly SELECT_PROJECT_DROPDOWN: By = By.xpath('//div[@class="co-namespace-dropdown"]//button');
 	private static readonly PROJECT_FILTER_INPUT: By = By.xpath('//*[@data-test="dropdown-text-filter"]');
 	private static readonly SKIP_TOUR_BUTTON: By = By.xpath('//*[text()="Skip tour"]');
+	private static readonly APP_LAUNCHER_BUTTON: By = By.css(
+		'nav[data-test-id="application-launcher"], button[data-test-id="application-launcher"], button[aria-label="Application launcher"]'
+	);
+	private static readonly DEVSPACES_MENU_ITEM: By = By.xpath('//span[contains(.,"Red Hat OpenShift Dev Spaces")]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -88,12 +94,17 @@ export class OcpMainPage {
 	async clickOnAppLauncherAndDevSpaceItem(): Promise<void> {
 		Logger.debug('click on app launcher menu');
 		const parentGUID: string = await this.browserTabsUtil.getCurrentWindowHandle();
-		await this.driverHelper.waitAndClick(By.css('nav[data-test-id="application-launcher"]'));
-		await this.driverHelper.waitAndClick(By.xpath('//span[contains(.,"Red Hat OpenShift Dev Spaces")]'));
+		await this.driverHelper.waitAndClick(OcpMainPage.APP_LAUNCHER_BUTTON);
+		await this.driverHelper.waitAndClick(OcpMainPage.DEVSPACES_MENU_ITEM);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(parentGUID, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	private getRoleLocator(role: string): By {
+		if (BASE_TEST_CONSTANTS.OCP_VERSION && satisfies(BASE_TEST_CONSTANTS.OCP_VERSION, '>=4.18')) {
+			return By.xpath(
+				`//button[@role='option'][.//h2[@data-test-id='perspective-switcher-menu-option' and contains(text(), '${role}')]]`
+			);
+		}
 		return By.xpath(`//a//*[text()="${role}"]`);
 	}
 
