@@ -165,7 +165,7 @@ for (const sample of samples) {
 			// const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
 			await new EditorView().openEditor(extensionsListFileName);
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			// Logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
+			// logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 
 			Logger.debug('Select and copy all text in the editor');
 			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
