@@ -16,8 +16,10 @@ import {
 	Key,
 	Locators,
 	SideBarView,
+	until,
 	// textEditor,
-	ViewSection
+	ViewSection,
+	WebElement
 } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -37,7 +39,128 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
+// get text from editor
+async function getText(): Promise<string> {
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	Logger.debug('Select and copy all text in the editor');
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('c').keyUp(Key.CONTROL).perform();
 
+	Logger.debug('Read the text');
+	Logger.info('Create a hidden buffer');
+	await driverHelper.getDriver().executeScript(`
+		let input = document.createElement('textarea');
+		input.setAttribute('id', 'clipboard-buffer');
+		document.body.appendChild(input);
+		input.focus();
+	`);
+	Logger.info('Paste the text to the buffer');
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('v').keyUp(Key.CONTROL).perform();
+	Logger.info('Get the text from the buffer');
+	const text: string = await driverHelper.getDriver().executeScript(`
+		let input = document.getElementById('clipboard-buffer');
+		let text = input.value;
+		input.remove();
+		return text;
+	`);
+
+	console.log('Raw text:', text);
+	return text;
+}
+// helper function to determine section based on category
+function getSectionForCategory(title: string): string {
+	const category: string = title.split(' ')[0].toLowerCase();
+	switch (category) {
+		case '@disabled':
+			return 'Disabled';
+		case '@enabled':
+			return 'Enabled';
+		case '@installed':
+			return 'Installed';
+		case '@outdated':
+			return 'Outdated';
+		case '@recommended':
+			return 'Other Recommendations';
+		default:
+			return 'Marketplace';
+	}
+}
+// search for an extension by title
+async function findItem(extSection: ExtensionsViewSection, title: string): Promise<ExtensionsViewItem | undefined> {
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	await extSection.clearSearch();
+
+	const enclosingItem: WebElement = extSection.getEnclosingElement();
+	const progress: WebElement = await enclosingItem.findElement((extSection as any).constructor.locators.ViewContent.progress);
+	const searchField: WebElement = await enclosingItem.findElement(
+		(extSection as any).constructor.locators.ExtensionsViewSection.searchBox
+	);
+	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
+	Logger.info('Wait for search results');
+	try {
+		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 1000);
+	} catch (err: any) {
+		if (err.name !== 'TimeoutError') {
+			throw err;
+		}
+	}
+	Logger.info('Wait for search results to be not visible');
+	await driverHelper.getDriver().wait(until.elementIsNotVisible(progress));
+	const parent: WebElement = enclosingItem;
+	Logger.info('Get section title');
+	const sectionTitle: string = getSectionForCategory(title);
+	console.log('Section title:', sectionTitle);
+
+	// найдем секции и выберем нужную
+	const sections: WebElement[] = await parent.findElements((extSection as any).constructor.locators.ViewContent.section);
+
+	// найдем нужную секцию по заголовку
+	let targetSection: WebElement | undefined;
+	for (const sec of sections) {
+		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
+		const sectionTitleText: string = await titleElement.getText();
+		if (sectionTitleText === sectionTitle) {
+			targetSection = sec;
+			break;
+		}
+	}
+
+	if (!targetSection) {
+		Logger.info(`Section with title '${sectionTitle}' not found`);
+		return undefined;
+	}
+
+	Logger.info('Get title parts');
+	const titleParts: string[] = title.split(' ');
+	let searchTitle: string = title;
+	if (titleParts[0].startsWith('@')) {
+		searchTitle = titleParts.slice(1).join(' ');
+		console.log('Search title:', searchTitle);
+	}
+
+	// получаем элементы расширений напрямую из DOM
+	const extensionRows: WebElement[] = await targetSection.findElements(
+		(extSection as any).constructor.locators.ExtensionsViewSection.itemRow
+	);
+	Logger.info(`Found ${extensionRows.length} extension rows`);
+
+	// преобразуем WebElement в ExtensionsViewItem
+	const extensionItems: ExtensionsViewItem[] = [];
+	for (const row of extensionRows) {
+		extensionItems.push(new ExtensionsViewItem(row, extSection as any));
+	}
+
+	// ищем расширение по заголовку
+	for (const extension of extensionItems) {
+		const extensionTitle: string = await extension.getTitle();
+		if (extensionTitle === searchTitle) {
+			return extension;
+		}
+	}
+
+	Logger.info(`Extension with title '${searchTitle}' not found`);
+	return undefined;
+}
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed recommended extensions
 async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations: string[]): Promise<boolean> {
 	const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
@@ -168,28 +291,7 @@ for (const sample of samples) {
 			// logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 
 			Logger.debug('Select and copy all text in the editor');
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('c').keyUp(Key.CONTROL).perform();
-
-			Logger.debug('Read the text');
-			Logger.info('Create a hidden buffer');
-			await driverHelper.getDriver().executeScript(`
-				let input = document.createElement('textarea');
-				input.setAttribute('id', 'clipboard-buffer');
-				document.body.appendChild(input);
-				input.focus();
-			`);
-			Logger.info('Paste the text to the buffer');
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('v').keyUp(Key.CONTROL).perform();
-			Logger.info('Get the text from the buffer');
-			const text: string = await driverHelper.getDriver().executeScript(`
-				let input = document.getElementById('clipboard-buffer');
-				let text = input.value;
-				input.remove();
-				return text;
-			`);
-
-			console.log('Raw text:', text);
+			const text: string = await getText();
 			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 
 			// recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
@@ -235,10 +337,10 @@ for (const sample of samples) {
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
 			try {
-				await extensionSection.findItem('@recommended');
+				await findItem(extensionSection, '@recommended');
 			} catch (err) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-				await extensionSection.findItem('@recommended');
+				await findItem(extensionSection, '@recommended');
 			}
 			const isReloadRequired: boolean = await driverHelper.isVisible(
 				(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
@@ -262,7 +364,7 @@ for (const sample of samples) {
 				expect(extensionsView, 'Can`t find Extension View section').not.undefined;
 				[extensionSection] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
 				expect(extensionSection, 'Can`t find Extension section').not.undefined;
-				await extensionSection.findItem('@recommended ');
+				await findItem(extensionSection, '@recommended ');
 			}
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
@@ -271,10 +373,10 @@ for (const sample of samples) {
 
 			Logger.debug('extensionSection.findItem by @installed filter');
 			try {
-				await extensionSection.findItem('@installed ');
+				await findItem(extensionSection, '@installed ');
 			} catch (err) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-				await extensionSection.findItem('@installed ');
+				await findItem(extensionSection, '@installed ');
 			}
 			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
 			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
