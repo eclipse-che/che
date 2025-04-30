@@ -60,7 +60,7 @@ suite(`The ${stackName} userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, func
 	});
 
 	test('Accept the project as a trusted one', async function (): Promise<void> {
-		await projectAndFileTests.performTrustAuthorAndPublisherDialog();
+		await projectAndFileTests.performTrustDialogs();
 	});
 
 	test('Check the project files was imported', async function (): Promise<void> {

@@ -117,10 +117,9 @@ export class ProjectAndFileTests {
 	}
 
 	/**
-	 * perform to 'Trust Authors' dialog box, when it appears
-	 * perform to 'Trust Publisher' dialog box, when it appears
+	 * perform to 'Trust' dialog boxes, when they appear
 	 */
-	async performTrustAuthorAndPublisherDialog(): Promise<void> {
+	async performTrustDialogs(): Promise<void> {
 		Logger.debug();
 		await this.performTrustAuthorDialog();
 		await this.performTrustPublisherDialog();
