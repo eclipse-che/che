@@ -130,7 +130,10 @@ oc logs test-hello-pod
 
 	test('Check the project files were imported', async function (): Promise<void> {
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile.x86_64'), 'Dockerfile not found in the project tree').not.undefined;
+		expect(
+			await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile.x86_64'),
+			'Dockerfile not found in the project tree'
+		).not.undefined;
 	});
 
 	test('Build and push container image from workspace', function (): void {
