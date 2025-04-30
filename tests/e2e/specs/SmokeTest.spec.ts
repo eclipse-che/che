@@ -50,6 +50,9 @@ suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, functio
 			expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not
 				.undefined;
 		});
+		test('Accept the project as a trusted one', async function (): Promise<void> {
+			await projectAndFileTests.performTrustAuthorDialog();
+		});
 		test('Check the project files was imported', async function (): Promise<void> {
 			expect(
 				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),

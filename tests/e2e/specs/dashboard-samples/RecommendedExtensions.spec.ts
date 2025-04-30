@@ -126,7 +126,7 @@ for (const sample of samples) {
 		});
 
 		test('Accept the project as a trusted one', async function (): Promise<void> {
-			await projectAndFileTests.performTrustAuthorDialog();
+			await projectAndFileTests.performTrustAuthorAndPublisherDialog();
 		});
 
 		test('Check the project files were imported', async function (): Promise<void> {
