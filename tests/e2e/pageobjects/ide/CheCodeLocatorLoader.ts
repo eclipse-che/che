@@ -38,7 +38,7 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 		return {
 			locators: {
 				WelcomeContent: {
-					text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust")]'),
+					text: By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust the authors")]'),
 					button: By.xpath('//div[@class="monaco-dialog-box"]//a[@class="monaco-button monaco-text-button"]')
 				},
 				ScmView: {

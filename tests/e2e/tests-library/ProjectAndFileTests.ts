@@ -22,6 +22,7 @@ import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
 @injectable()
 export class ProjectAndFileTests {
 	private static BRANCH_NAME_XPATH: By = By.xpath('//a[contains(@aria-label,"Checkout Branch/Tag...")]');
+	private static TRUST_PUBLISHER_BOX: By = By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust the publisher")]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -91,6 +92,39 @@ export class ProjectAndFileTests {
 				Logger.info('Restricted Mode button or Trusted Workspace box was not shown');
 			}
 		}
+	}
+
+	/**
+	 * perform to 'Trust Publisher' dialog box, when it appears
+	 */
+	async performTrustPublisherDialog(): Promise<void> {
+		Logger.debug();
+
+		try {
+			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for appearing the box
+			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+			await this.driverHelper.waitVisibility(
+				ProjectAndFileTests.TRUST_PUBLISHER_BOX,
+				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
+			);
+			await this.driverHelper.waitAndClick(
+				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.button,
+				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
+			);
+		} catch (e) {
+			Logger.info('"Do you trust the publisher?" dialog box was not shown');
+		}
+	}
+
+	/**
+	 * perform to 'Trust Authors' dialog box, when it appears
+	 * perform to 'Trust Publisher' dialog box, when it appears
+	 */
+	async performTrustAuthorAndPublisherDialog(): Promise<void> {
+		Logger.debug();
+		await this.performTrustAuthorDialog();
+		await this.performTrustPublisherDialog();
+		await this.performTrustAuthorDialog();
 	}
 
 	/**
