@@ -22,7 +22,7 @@ import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
 @injectable()
 export class ProjectAndFileTests {
 	private static BRANCH_NAME_XPATH: By = By.xpath('//a[contains(@aria-label,"Checkout Branch/Tag...")]');
-	private static TRUST_PUBLISHER_BOX: By = By.xpath('//*[@class="dialog-message-text" and contains(text(), "trust the publisher")]');
+	private static TRUST_PUBLISHER_BOX: By = By.xpath('//*[@class="dialog-message-text" and contains(text(), "publisher")]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
