@@ -60,15 +60,14 @@ async function getText(): Promise<string> {
 	const text: string = await driverHelper.getDriver().executeScript(`
 		let input = document.getElementById('clipboard-buffer');
 		let text = input.value;
-		input.remove();
 		return text;
 	`);
 	Logger.info('Remove the hidden buffer');
 	try {
 		await driverHelper.getDriver().executeScript(`
-			const buffer = document.getElementById('clipboard-buffer');
-			if (buffer) {
-				buffer.parentNode.removeChild(buffer);
+			if (input) {
+				input.remove();
+				input.parentNode.removeChild(input);
 			}
 		`);
 	} catch (err: any) {
