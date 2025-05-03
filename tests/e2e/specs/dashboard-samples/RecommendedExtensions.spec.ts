@@ -63,7 +63,17 @@ async function getText(): Promise<string> {
 		input.remove();
 		return text;
 	`);
-
+	Logger.info('Remove the hidden buffer');
+	try {
+		await driverHelper.getDriver().executeScript(`
+			const buffer = document.getElementById('clipboard-buffer');
+			if (buffer) {
+				buffer.parentNode.removeChild(buffer);
+			}
+		`);
+	} catch (err: any) {
+		Logger.warn('Не удалось очистить буфер обмена:', err);
+	}
 	console.log('Raw text:', text);
 	return text;
 }
@@ -95,8 +105,10 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	const searchField: WebElement = await enclosingItem.findElement(
 		(extSection as any).constructor.locators.ExtensionsViewSection.searchBox
 	);
+
+	// решение проблемы с sendKeys - используем actions API
 	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
-	Logger.info('Wait for search results');
+
 	try {
 		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 1000);
 	} catch (err: any) {
@@ -104,17 +116,15 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 			throw err;
 		}
 	}
-	Logger.info('Wait for search results to be not visible');
 	await driverHelper.getDriver().wait(until.elementIsNotVisible(progress));
-	const parent: WebElement = enclosingItem;
-	Logger.info('Get section title');
+
+	// определяем название секции
 	const sectionTitle: string = getSectionForCategory(title);
-	console.log('Section title:', sectionTitle);
 
-	// найдем секции и выберем нужную
-	const sections: WebElement[] = await parent.findElements((extSection as any).constructor.locators.ViewContent.section);
+	// находим все секции
+	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
 
-	// найдем нужную секцию по заголовку
+	// находим нужную секцию по заголовку
 	let targetSection: WebElement | undefined;
 	for (const sec of sections) {
 		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
@@ -126,39 +136,29 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	}
 
 	if (!targetSection) {
-		Logger.info(`Section with title '${sectionTitle}' not found`);
 		return undefined;
 	}
 
-	Logger.info('Get title parts');
+	// извлекаем поисковый запрос
 	const titleParts: string[] = title.split(' ');
 	let searchTitle: string = title;
 	if (titleParts[0].startsWith('@')) {
 		searchTitle = titleParts.slice(1).join(' ');
-		console.log('Search title:', searchTitle);
 	}
 
-	// получаем элементы расширений напрямую из DOM
+	// находим элементы расширений
 	const extensionRows: WebElement[] = await targetSection.findElements(
 		(extSection as any).constructor.locators.ExtensionsViewSection.itemRow
 	);
-	Logger.info(`Found ${extensionRows.length} extension rows`);
 
-	// преобразуем WebElement в ExtensionsViewItem
-	const extensionItems: ExtensionsViewItem[] = [];
+	// преобразуем в ExtensionsViewItem и ищем нужное
 	for (const row of extensionRows) {
-		extensionItems.push(new ExtensionsViewItem(row, extSection as any));
-	}
-
-	// ищем расширение по заголовку
-	for (const extension of extensionItems) {
-		const extensionTitle: string = await extension.getTitle();
-		if (extensionTitle === searchTitle) {
+		const extension: ExtensionsViewItem = new ExtensionsViewItem(row, extSection as any);
+		if ((await extension.getTitle()) === searchTitle) {
 			return extension;
 		}
 	}
 
-	Logger.info(`Extension with title '${searchTitle}' not found`);
 	return undefined;
 }
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed recommended extensions
