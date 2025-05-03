@@ -60,7 +60,6 @@ async function getText(): Promise<string> {
 	const text: string = await driverHelper.getDriver().executeScript(`
 		let input = document.getElementById('clipboard-buffer');
 		let text = input.value;
-		input.remove();
 		input.parentNode.removeChild(input);
 		return text;
 	`);
