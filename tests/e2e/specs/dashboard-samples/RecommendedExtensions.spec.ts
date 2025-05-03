@@ -60,19 +60,10 @@ async function getText(): Promise<string> {
 	const text: string = await driverHelper.getDriver().executeScript(`
 		let input = document.getElementById('clipboard-buffer');
 		let text = input.value;
+		input.remove();
+		input.parentNode.removeChild(input);
 		return text;
 	`);
-	Logger.info('Remove the hidden buffer');
-	try {
-		await driverHelper.getDriver().executeScript(`
-			if (input) {
-				input.remove();
-				input.parentNode.removeChild(input);
-			}
-		`);
-	} catch (err: any) {
-		Logger.warn('Не удалось очистить буфер обмена:', err);
-	}
 	console.log('Raw text:', text);
 	return text;
 }
