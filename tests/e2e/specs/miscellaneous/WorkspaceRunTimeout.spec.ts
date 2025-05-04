@@ -15,7 +15,6 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
-import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { By, Locators, ModalDialog } from 'monaco-page-objects';
@@ -39,9 +38,10 @@ suite('"Check workspace run timeout" test', function (): void {
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
+	const SECONDS_OF_RUN_BEFORE_IDLING: number = Number(process.env.TS_SELENIUM_SECONDS_OF_RUN_BEFORE_IDLING) || 60;
 	const stackName: string = 'Empty Workspace';
 	const cheClusterName: string = 'devspaces';
-	let runTimeoutValue: number = 0;
+	let defaultRunTimeoutValue: number = 0;
 
 	async function checkDialogButton(buttonName: string): Promise<void> {
 		await driverHelper.waitVisibility(By.xpath(`//div[@class='dialog-buttons']//a[text()='${buttonName}']`));
@@ -52,22 +52,24 @@ suite('"Check workspace run timeout" test', function (): void {
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
 		// get current value of spec.devEnvironments.secondsOfRunBeforeIdling
-		runTimeoutValue = Number(
+		defaultRunTimeoutValue = Number(
 			shellExecutor.executeCommand(
 				`oc get checluster/${cheClusterName} -o "jsonpath={.spec.devEnvironments.secondsOfRunBeforeIdling}"`
 			)
 		);
 
-		// set spec.devEnvironments.secondsOfRunBeforeIdling to 60
+		// set spec.devEnvironments.secondsOfRunBeforeIdling to SECONDS_OF_RUN_BEFORE_IDLING
 		shellExecutor.executeCommand(
-			`oc patch checluster ${cheClusterName} --type=merge -p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": 60}}}'`
+			`oc patch checluster ${cheClusterName} --type=merge ` +
+				`-p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": ${SECONDS_OF_RUN_BEFORE_IDLING}}}}'`
 		);
 	});
 
 	suiteTeardown(function (): void {
 		// restore spec.devEnvironments.secondsOfRunBeforeIdling to original value
 		shellExecutor.executeCommand(
-			`oc patch checluster ${cheClusterName} --type=merge -p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": ${runTimeoutValue}}}}'`
+			`oc patch checluster ${cheClusterName} --type=merge ` +
+				`-p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": ${defaultRunTimeoutValue}}}}'`
 		);
 	});
 
@@ -87,7 +89,7 @@ suite('"Check workspace run timeout" test', function (): void {
 	});
 
 	test('Wait run timeout dialog and check Dialog buttons', async function (): Promise<void> {
-		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, SECONDS_OF_RUN_BEFORE_IDLING * 1000); // ms
 		const dialog: ModalDialog = new ModalDialog();
 		expect(await dialog.getDetails()).includes('Your workspace has stopped because it has reached the run timeout.');
 		await checkDialogButton('Cancel');
