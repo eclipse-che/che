@@ -96,7 +96,11 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	);
 
 	// решение проблемы с sendKeys - используем actions API
-	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
+//	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
+	await driverHelper.getDriver().actions().click(searchField).perform();
+	await driverHelper.wait(1000);
+	await driverHelper.getDriver().actions().sendKeys(title).perform();
+	await driverHelper.wait(1000);
 
 	try {
 		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 1000);
@@ -325,12 +329,12 @@ for (const sample of samples) {
 			);
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
-//			try {
-//				await findItem(extensionSection, '@recommended');
-//			} catch (err) {
-//				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-//				await findItem(extensionSection, '@recommended');
-//			}
+			try {
+				await findItem(extensionSection, '@recommended');
+			} catch (err) {
+				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+				await findItem(extensionSection, '@recommended');
+			}
 			const isReloadRequired: boolean = await driverHelper.isVisible(
 				(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
 			);
@@ -361,14 +365,14 @@ for (const sample of samples) {
 			Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
 
 			Logger.debug('extensionSection.findItem by @installed filter');
-//			try {
-//				await findItem(extensionSection, '@installed ');
-//			} catch (err) {
-//				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-//				await findItem(extensionSection, '@installed ');
-//			}
-//			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
-//			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
+			try {
+				await findItem(extensionSection, '@installed ');
+			} catch (err) {
+				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+				await findItem(extensionSection, '@installed ');
+			}
+			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
+			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
