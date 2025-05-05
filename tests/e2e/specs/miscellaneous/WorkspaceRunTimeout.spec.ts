@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2020-2023 Red Hat, Inc.
+ * copyright (c) 2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,7 @@ import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesComman
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
-suite('"Check workspace idle timeout" test', function (): void {
+suite('"Check workspace run timeout" test', function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -38,10 +38,10 @@ suite('"Check workspace idle timeout" test', function (): void {
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
-	const SECONDS_OF_INACTIVITY_BEFORE_IDLING: number = Number(process.env.TS_SELENIUM_SECONDS_OF_INACTIVITY_BEFORE_IDLING) || 60;
+	const SECONDS_OF_RUN_BEFORE_IDLING: number = Number(process.env.TS_SELENIUM_SECONDS_OF_RUN_BEFORE_IDLING) || 60;
 	const stackName: string = 'Empty Workspace';
 	const cheClusterName: string = 'devspaces';
-	let defaultIdleTimeoutValue: number = 0;
+	let defaultRunTimeoutValue: number = 0;
 
 	async function checkDialogButton(buttonName: string): Promise<void> {
 		await driverHelper.waitVisibility(By.xpath(`//div[@class='dialog-buttons']//a[text()='${buttonName}']`));
@@ -51,25 +51,25 @@ suite('"Check workspace idle timeout" test', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 		shellExecutor.executeCommand('oc project openshift-devspaces');
 
-		// get current value of spec.devEnvironments.secondsOfInactivityBeforeIdling
-		defaultIdleTimeoutValue = Number(
+		// get current value of spec.devEnvironments.secondsOfRunBeforeIdling
+		defaultRunTimeoutValue = Number(
 			shellExecutor.executeCommand(
-				`oc get checluster/${cheClusterName} -o "jsonpath={.spec.devEnvironments.secondsOfInactivityBeforeIdling}"`
+				`oc get checluster/${cheClusterName} -o "jsonpath={.spec.devEnvironments.secondsOfRunBeforeIdling}"`
 			)
 		);
 
-		// set spec.devEnvironments.secondsOfInactivityBeforeIdling to SECONDS_OF_INACTIVITY_BEFORE_IDLING
+		// set spec.devEnvironments.secondsOfRunBeforeIdling to SECONDS_OF_RUN_BEFORE_IDLING
 		shellExecutor.executeCommand(
 			`oc patch checluster ${cheClusterName} --type=merge ` +
-				`-p '{"spec":{"devEnvironments":{"secondsOfInactivityBeforeIdling": ${SECONDS_OF_INACTIVITY_BEFORE_IDLING}}}}'`
+				`-p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": ${SECONDS_OF_RUN_BEFORE_IDLING}}}}'`
 		);
 	});
 
 	suiteTeardown(function (): void {
-		// restore spec.devEnvironments.secondsOfInactivityBeforeIdling to original value
+		// restore spec.devEnvironments.secondsOfRunBeforeIdling to original value
 		shellExecutor.executeCommand(
 			`oc patch checluster ${cheClusterName} --type=merge ` +
-				`-p '{"spec":{"devEnvironments":{"secondsOfInactivityBeforeIdling": ${defaultIdleTimeoutValue}}}}'`
+				`-p '{"spec":{"devEnvironments":{"secondsOfRunBeforeIdling": ${defaultRunTimeoutValue}}}}'`
 		);
 	});
 
@@ -88,10 +88,10 @@ suite('"Check workspace idle timeout" test', function (): void {
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
 
-	test('Wait idle timeout dialog and check Dialog buttons', async function (): Promise<void> {
-		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, SECONDS_OF_INACTIVITY_BEFORE_IDLING * 1000); // ms
+	test('Wait run timeout dialog and check Dialog buttons', async function (): Promise<void> {
+		await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details, SECONDS_OF_RUN_BEFORE_IDLING * 1000); // ms
 		const dialog: ModalDialog = new ModalDialog();
-		expect(await dialog.getDetails()).includes('Your workspace has stopped due to inactivity.');
+		expect(await dialog.getDetails()).includes('Your workspace has stopped because it has reached the run timeout.');
 		await checkDialogButton('Cancel');
 		await checkDialogButton('Return to dashboard');
 		await checkDialogButton('Restart your workspace');
