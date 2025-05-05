@@ -60,7 +60,7 @@ async function getText(): Promise<string> {
 	const text: string = await driverHelper.getDriver().executeScript(`
 		let input = document.getElementById('clipboard-buffer');
 		let text = input.value;
-		input.parentNode.removeChild(input);
+		input.remove();
 		return text;
 	`);
 	console.log('Raw text:', text);
@@ -213,7 +213,7 @@ for (const sample of samples) {
 
 		let vsCodeFolderItemLevel: number = 2;
 
-		const recommendedExtensions: any = {
+		let recommendedExtensions: any = {
 			recommendations: []
 		};
 
@@ -280,8 +280,8 @@ for (const sample of samples) {
 			// logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 
 			Logger.debug('Select and copy all text in the editor');
-			// const text: string = await getText();
-			// recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+			const text: string = await getText();
+			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 
 			// recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
@@ -292,7 +292,7 @@ for (const sample of samples) {
 			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
 
 			publisherNames = parsedRecommendations.map((rec: { name: string; publisher: string }): string => rec.publisher);
-//			expect(parsedRecommendations, 'Recommendations not found').not.empty;
+			expect(parsedRecommendations, 'Recommendations not found').not.empty;
 		});
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
@@ -357,7 +357,7 @@ for (const sample of samples) {
 			}
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
-//			expect(await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames)).to.be.true;
+			expect(await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames)).to.be.true;
 			Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
 
 			Logger.debug('extensionSection.findItem by @installed filter');
