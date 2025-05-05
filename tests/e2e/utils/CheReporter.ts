@@ -189,6 +189,33 @@ class CheReporter extends mocha.reporters.Spec {
 			networkLogsStream.write(Buffer.from(JSON.stringify(har)), (): void => {
 				networkLogsStream.end();
 			});
+
+			try {
+				// Пытаемся проверить наличие алерта
+				const driver = this.driverHelper.getDriver();
+				try {
+				  const alert = await driver.switchTo().alert();
+				  const alertText = await alert.getText();
+				  
+				  // Записываем информацию об алерте
+				  const alertFileName: string = `${testReportDirPath}/alert-${testTitle}.txt`;
+				  const alertStream: WriteStream = fs.createWriteStream(alertFileName);
+				  alertStream.write(Buffer.from(`Alert detected with text: ${alertText}`), (): void => alertStream.end());
+				  
+				  console.log(`Обнаружен алерт с текстом: "${alertText}"`);
+				  
+				} catch (noAlertError) {
+				  // Алерт не найден, продолжаем обычный процесс
+				}
+				
+				// Продолжаем делать скриншот и другие действия
+				const screenshot: string = await driver.takeScreenshot();
+				const screenshotStream: WriteStream = fs.createWriteStream(screenshotFileName);
+				screenshotStream.write(Buffer.from(screenshot, 'base64'), (): void => screenshotStream.end());
+				
+			} catch (error) {
+				console.error('Ошибка при обработке падения теста:', error);
+			}
 		});
 	}
 
