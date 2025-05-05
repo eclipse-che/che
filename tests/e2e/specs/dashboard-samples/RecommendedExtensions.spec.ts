@@ -325,12 +325,12 @@ for (const sample of samples) {
 			);
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
-			try {
-				await findItem(extensionSection, '@recommended');
-			} catch (err) {
-				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-				await findItem(extensionSection, '@recommended');
-			}
+//			try {
+//				await findItem(extensionSection, '@recommended');
+//			} catch (err) {
+//				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+//				await findItem(extensionSection, '@recommended');
+//			}
 			const isReloadRequired: boolean = await driverHelper.isVisible(
 				(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
 			);
