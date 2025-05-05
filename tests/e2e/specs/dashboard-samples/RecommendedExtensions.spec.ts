@@ -96,7 +96,7 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	);
 
 	// решение проблемы с sendKeys - используем actions API
-//	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
+	//	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
 	await driverHelper.getDriver().actions().click(searchField).perform();
 	await driverHelper.wait(1000);
 	await driverHelper.getDriver().actions().sendKeys(title).perform();
@@ -376,6 +376,13 @@ for (const sample of samples) {
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
+			try {
+				const alert = await driverHelper.getDriver().switchTo().alert();
+				Logger.debug('Alert detected, dismissing');
+				await alert.dismiss();
+			} catch (e) {
+				Logger.debug('No alert detected');
+			}
 			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});

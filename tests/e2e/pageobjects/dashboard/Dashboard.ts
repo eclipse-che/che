@@ -80,13 +80,6 @@ export class Dashboard {
 		Logger.debug();
 
 		await this.driverHelper.navigateToUrl(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
-		try {
-			const alert = await this.driverHelper.getDriver().switchTo().alert();
-			Logger.debug('Alert detected, dismissing');
-			await alert.dismiss();
-		  } catch (e) {
-			Logger.debug('No alert detected');
-		  }
 		await this.waitPage();
 	}
 
