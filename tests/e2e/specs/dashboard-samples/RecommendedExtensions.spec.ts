@@ -280,8 +280,8 @@ for (const sample of samples) {
 			// logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 
 			Logger.debug('Select and copy all text in the editor');
-			const text: string = await getText();
-			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+			// const text: string = await getText();
+			// recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 
 			// recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
