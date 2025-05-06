@@ -376,13 +376,6 @@ for (const sample of samples) {
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
-			try {
-				const alert = await driverHelper.getDriver().switchTo().alert();
-				Logger.debug('Alert detected, dismissing');
-				await alert.dismiss();
-			} catch (e) {
-				Logger.debug('No alert detected');
-			}
 			await dashboard.openDashboard();
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 		});
