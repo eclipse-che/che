@@ -83,8 +83,8 @@ export class Dashboard {
 		try {
 			const alert: Alert = await this.driverHelper.getDriver().switchTo().alert();
 			const alertText: string = await alert.getText();
-			Logger.info(`Alert text: "${alertText}"`);
-			Logger.debug('Alert detected, accpting it');
+			Logger.info(`Alert detected, text: "${alertText}"`);
+			Logger.debug('Alert accepting');
 			await alert.accept();
 		} catch (e) {
 			Logger.debug('No alert detected');

@@ -17,7 +17,6 @@ import {
 	Locators,
 	SideBarView,
 	until,
-	// textEditor,
 	ViewSection,
 	WebElement
 } from 'monaco-page-objects';
@@ -87,7 +86,7 @@ function getSectionForCategory(title: string): string {
 // search for an extension by title
 async function findItem(extSection: ExtensionsViewSection, title: string): Promise<ExtensionsViewItem | undefined> {
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
-	await extSection.clearSearch();
+	Logger.debug(`Finding extension item with filter: "${title}"`);
 
 	const enclosingItem: WebElement = extSection.getEnclosingElement();
 	const progress: WebElement = await enclosingItem.findElement((extSection as any).constructor.locators.ViewContent.progress);
@@ -95,63 +94,70 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 		(extSection as any).constructor.locators.ExtensionsViewSection.searchBox
 	);
 
-	// решение проблемы с sendKeys - используем actions API
-	//	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
-	await driverHelper.getDriver().actions().click(searchField).perform();
-	await driverHelper.wait(1000);
-	await driverHelper.getDriver().actions().sendKeys(title).perform();
-	await driverHelper.wait(1000);
+	Logger.debug('Clearing search field with Ctrl+A');
+	await driverHelper.getDriver().actions().click(searchField).keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+	await driverHelper.wait(500);
+	Logger.debug('Deleting selected text');
+	await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
+	await driverHelper.wait(500);
+	Logger.debug(`Entering search text: "${title}"`);
+	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
 
 	try {
-		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 1000);
+		Logger.debug('Waiting for progress indicator to appear');
+		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 3000);
 	} catch (err: any) {
 		if (err.name !== 'TimeoutError') {
 			throw err;
 		}
 	}
+	Logger.debug('Waiting for progress indicator to disappear');
 	await driverHelper.getDriver().wait(until.elementIsNotVisible(progress));
 
-	// определяем название секции
 	const sectionTitle: string = getSectionForCategory(title);
+	Logger.debug(`Looking for section with title: "${sectionTitle}"`);
 
-	// находим все секции
 	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
+	Logger.debug(`Found ${sections.length} sections`);
 
-	// находим нужную секцию по заголовку
 	let targetSection: WebElement | undefined;
 	for (const sec of sections) {
 		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
 		const sectionTitleText: string = await titleElement.getText();
 		if (sectionTitleText === sectionTitle) {
 			targetSection = sec;
+			Logger.debug(`Found target section: "${sectionTitle}"`);
 			break;
 		}
 	}
 
 	if (!targetSection) {
+		Logger.debug(`Section "${sectionTitle}" not found`);
 		return undefined;
 	}
 
-	// извлекаем поисковый запрос
 	const titleParts: string[] = title.split(' ');
 	let searchTitle: string = title;
 	if (titleParts[0].startsWith('@')) {
 		searchTitle = titleParts.slice(1).join(' ');
 	}
+	Logger.debug(`Searching for extension with title: "${searchTitle}"`);
 
-	// находим элементы расширений
 	const extensionRows: WebElement[] = await targetSection.findElements(
 		(extSection as any).constructor.locators.ExtensionsViewSection.itemRow
 	);
+	Logger.debug(`Found ${extensionRows.length} extension rows in section`);
 
-	// преобразуем в ExtensionsViewItem и ищем нужное
 	for (const row of extensionRows) {
 		const extension: ExtensionsViewItem = new ExtensionsViewItem(row, extSection as any);
-		if ((await extension.getTitle()) === searchTitle) {
+		const extensionTitle: string = await extension.getTitle();
+		if (extensionTitle === searchTitle) {
+			Logger.debug(`Found matching extension: "${extensionTitle}"`);
 			return extension;
 		}
 	}
 
+	Logger.debug(`Extension with title "${searchTitle}" not found in section "${sectionTitle}"`);
 	return undefined;
 }
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed recommended extensions
@@ -278,30 +284,25 @@ for (const sample of samples) {
 				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
 			)?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
-			// const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
 			await new EditorView().openEditor(extensionsListFileName);
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			// logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
 
 			Logger.debug('Select and copy all text in the editor');
 			const text: string = await getText();
 			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 
-			// recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
 				const [publisher, name] = rec.split('.');
 				return { publisher, name };
 			});
 			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
-
 			publisherNames = parsedRecommendations.map((rec: { name: string; publisher: string }): string => rec.publisher);
 			expect(parsedRecommendations, 'Recommendations not found').not.empty;
 		});
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
