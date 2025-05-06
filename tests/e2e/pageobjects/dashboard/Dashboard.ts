@@ -10,7 +10,7 @@
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { CLASSES } from '../../configs/inversify.types';
-import { By } from 'selenium-webdriver';
+import { Alert, By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { Workspaces } from './Workspaces';
@@ -81,8 +81,8 @@ export class Dashboard {
 
 		await this.driverHelper.navigateToUrl(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
 		try {
-			const alert = await this.driverHelper.getDriver().switchTo().alert();
-			const alertText = await alert.getText();
+			const alert: Alert = await this.driverHelper.getDriver().switchTo().alert();
+			const alertText: string = await alert.getText();
 			Logger.info(`Alert text: "${alertText}"`);
 			Logger.debug('Alert detected, accpting it');
 			await alert.accept();
