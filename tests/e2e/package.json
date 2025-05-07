@@ -53,14 +53,14 @@
 		"mocha-allure-reporter": "^1.4.0",
 		"mocha-junit-reporter": "^2.2.1",
 		"mocha-multi-reporters": "^1.5.1",
-		"monaco-page-objects": "3.9.1",
+		"monaco-page-objects": "3.14.1",
 		"prettier": "^3.4.0",
 		"rimraf": "2.6.2",
 		"selenium-webdriver": "4.6.1",
 		"shelljs": "^0.8.5",
 		"ts-node": "^10.9.1",
 		"typescript": "4.9.4",
-		"vscode-extension-tester-locators": "3.7.1",
+		"vscode-extension-tester-locators": "3.12.2",
 		"yaml": "^2.2.2"
 	},
 	"dependencies": {

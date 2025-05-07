@@ -13,10 +13,12 @@ import {
 	EditorView,
 	ExtensionsViewItem,
 	ExtensionsViewSection,
+	Key,
 	Locators,
 	SideBarView,
-	TextEditor,
-	ViewSection
+	until,
+	ViewSection,
+	WebElement
 } from 'monaco-page-objects';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -36,7 +38,128 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 
 const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
+// get text from editor
+async function getText(): Promise<string> {
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	Logger.debug('Select and copy all text in the editor');
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('c').keyUp(Key.CONTROL).perform();
 
+	Logger.debug('Read the text');
+	Logger.info('Create a hidden buffer');
+	await driverHelper.getDriver().executeScript(`
+		let input = document.createElement('textarea');
+		input.setAttribute('id', 'clipboard-buffer');
+		document.body.appendChild(input);
+		input.focus();
+	`);
+	Logger.info('Paste the text to the buffer');
+	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('v').keyUp(Key.CONTROL).perform();
+	Logger.info('Get the text from the buffer');
+	const text: string = await driverHelper.getDriver().executeScript(`
+		let input = document.getElementById('clipboard-buffer');
+		let text = input.value;
+		input.remove();
+		return text;
+	`);
+	console.log('Raw text:', text);
+	return text;
+}
+// helper function to determine section based on category
+function getSectionForCategory(title: string): string {
+	const category: string = title.split(' ')[0].toLowerCase();
+	switch (category) {
+		case '@disabled':
+			return 'Disabled';
+		case '@enabled':
+			return 'Enabled';
+		case '@installed':
+			return 'Installed';
+		case '@outdated':
+			return 'Outdated';
+		case '@recommended':
+			return 'Other Recommendations';
+		default:
+			return 'Marketplace';
+	}
+}
+// search for an extension by title
+async function findItem(extSection: ExtensionsViewSection, title: string): Promise<ExtensionsViewItem | undefined> {
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	Logger.debug(`Finding extension item with filter: "${title}"`);
+
+	const enclosingItem: WebElement = extSection.getEnclosingElement();
+	const progress: WebElement = await enclosingItem.findElement((extSection as any).constructor.locators.ViewContent.progress);
+	const searchField: WebElement = await enclosingItem.findElement(
+		(extSection as any).constructor.locators.ExtensionsViewSection.searchBox
+	);
+
+	Logger.debug('Clearing search field with Ctrl+A');
+	await driverHelper.getDriver().actions().click(searchField).keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+	await driverHelper.wait(500);
+	Logger.debug('Deleting selected text');
+	await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
+	await driverHelper.wait(500);
+	Logger.debug(`Entering search text: "${title}"`);
+	await driverHelper.getDriver().actions().click(searchField).sendKeys(title).perform();
+
+	try {
+		Logger.debug('Waiting for progress indicator to appear');
+		await driverHelper.getDriver().wait(until.elementIsVisible(progress), 3000);
+	} catch (err: any) {
+		if (err.name !== 'TimeoutError') {
+			throw err;
+		}
+	}
+	Logger.debug('Waiting for progress indicator to disappear');
+	await driverHelper.getDriver().wait(until.elementIsNotVisible(progress));
+
+	const sectionTitle: string = getSectionForCategory(title);
+	Logger.debug(`Looking for section with title: "${sectionTitle}"`);
+
+	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
+	Logger.debug(`Found ${sections.length} sections`);
+
+	let targetSection: WebElement | undefined;
+	for (const sec of sections) {
+		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
+		const sectionTitleText: string = await titleElement.getText();
+		if (sectionTitleText === sectionTitle) {
+			targetSection = sec;
+			Logger.debug(`Found target section: "${sectionTitle}"`);
+			break;
+		}
+	}
+
+	if (!targetSection) {
+		Logger.debug(`Section "${sectionTitle}" not found`);
+		return undefined;
+	}
+
+	const titleParts: string[] = title.split(' ');
+	let searchTitle: string = title;
+	if (titleParts[0].startsWith('@')) {
+		searchTitle = titleParts.slice(1).join(' ');
+	}
+	Logger.debug(`Searching for extension with title: "${searchTitle}"`);
+
+	const extensionRows: WebElement[] = await targetSection.findElements(
+		(extSection as any).constructor.locators.ExtensionsViewSection.itemRow
+	);
+	Logger.debug(`Found ${extensionRows.length} extension rows in section`);
+
+	for (const row of extensionRows) {
+		const extension: ExtensionsViewItem = new ExtensionsViewItem(row, extSection as any);
+		const extensionTitle: string = await extension.getTitle();
+		if (extensionTitle === searchTitle) {
+			Logger.debug(`Found matching extension: "${extensionTitle}"`);
+			return extension;
+		}
+	}
+
+	Logger.debug(`Extension with title "${searchTitle}" not found in section "${sectionTitle}"`);
+	return undefined;
+}
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed recommended extensions
 async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations: string[]): Promise<boolean> {
 	const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
@@ -161,24 +284,25 @@ for (const sample of samples) {
 				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
 			)?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
-			const editor: TextEditor = (await new EditorView().openEditor(extensionsListFileName)) as TextEditor;
+			await new EditorView().openEditor(extensionsListFileName);
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			Logger.debug('editor.getText(): get recommended extensions as text from editor, delete comments and parse to object.');
-			recommendedExtensions = JSON.parse((await editor.getText()).replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+
+			Logger.debug('Select and copy all text in the editor');
+			const text: string = await getText();
+			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
+
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
 				const [publisher, name] = rec.split('.');
 				return { publisher, name };
 			});
 			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
-
 			publisherNames = parsedRecommendations.map((rec: { name: string; publisher: string }): string => rec.publisher);
 			expect(parsedRecommendations, 'Recommendations not found').not.empty;
 		});
 
 		test('Open "Extensions" view section', async function (): Promise<void> {
 			Logger.debug('ActivityBar().getViewControl("Extensions"))?.openView(): open Extensions view.');
-
 			extensionsView = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			expect(extensionsView, 'Can`t find Extension section').not.undefined;
 		});
@@ -207,10 +331,10 @@ for (const sample of samples) {
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
 			try {
-				await extensionSection.findItem('@recommended');
+				await findItem(extensionSection, '@recommended');
 			} catch (err) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-				await extensionSection.findItem('@recommended');
+				await findItem(extensionSection, '@recommended');
 			}
 			const isReloadRequired: boolean = await driverHelper.isVisible(
 				(webCheCodeLocators.ExtensionsViewSection as any).requireReloadButton
@@ -234,7 +358,7 @@ for (const sample of samples) {
 				expect(extensionsView, 'Can`t find Extension View section').not.undefined;
 				[extensionSection] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
 				expect(extensionSection, 'Can`t find Extension section').not.undefined;
-				await extensionSection.findItem('@recommended ');
+				await findItem(extensionSection, '@recommended ');
 			}
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
@@ -243,10 +367,10 @@ for (const sample of samples) {
 
 			Logger.debug('extensionSection.findItem by @installed filter');
 			try {
-				await extensionSection.findItem('@installed ');
+				await findItem(extensionSection, '@installed ');
 			} catch (err) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
-				await extensionSection.findItem('@installed ');
+				await findItem(extensionSection, '@installed ');
 			}
 			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
 			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
