@@ -91,8 +91,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	});
 
 	suiteTeardown(`Stop and delete all created ${stackName} workspaces by API`, async function (): Promise<void> {
-		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(existedWorkspaceName);
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {
