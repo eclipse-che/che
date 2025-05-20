@@ -39,13 +39,6 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 
 	suiteSetup('Login', async function (): Promise<void> {
 		await loginTests.loginIntoChe();
-
-		// try to stop and delete workspace if it was created in previous test run
-		try {
-			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(projectName);
-		} catch (error) {
-			console.warn('Ignoring error if workspace does not exist');
-		}
 	});
 
 	test(`Create and open new workspace, stack:${stackName}`, async function (): Promise<void> {
@@ -98,8 +91,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	});
 
 	suiteTeardown(`Stop and delete all created ${stackName} workspaces by API`, async function (): Promise<void> {
-		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(existedWorkspaceName);
+		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {
