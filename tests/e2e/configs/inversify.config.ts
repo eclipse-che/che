@@ -56,6 +56,9 @@ import { WebTerminalPage } from '../pageobjects/webterminal/WebTerminalPage';
 import { TrustAuthorPopup } from '../pageobjects/dashboard/TrustAuthorPopup';
 import { ViewsMoreActionsButton } from '../pageobjects/ide/ViewsMoreActionsButton';
 import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
+import { CommandPalette } from '../pageobjects/ide/CommandPalette';
+import { ExtensionsView } from '../pageobjects/ide/ExtensionsView';
+import { ExplorerView } from '../pageobjects/ide/ExplorerView';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -97,6 +100,9 @@ e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoade
 e2eContainer.bind<TrustAuthorPopup>(CLASSES.TrustAuthorPopup).to(TrustAuthorPopup);
 e2eContainer.bind<ViewsMoreActionsButton>(CLASSES.ViewsMoreActionsButton).to(ViewsMoreActionsButton);
 e2eContainer.bind<RestrictedModeButton>(CLASSES.RestrictedModeButton).to(RestrictedModeButton);
+e2eContainer.bind<CommandPalette>(CLASSES.CommandPalette).to(CommandPalette);
+e2eContainer.bind<ExtensionsView>(CLASSES.ExtensionsView).to(ExtensionsView);
+e2eContainer.bind<ExplorerView>(CLASSES.ExplorerView).to(ExplorerView);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {

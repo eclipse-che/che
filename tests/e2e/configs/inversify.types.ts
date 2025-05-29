@@ -53,7 +53,10 @@ const CLASSES: any = {
 	RevokeOauthPage: 'RevokeOauthPage',
 	TrustAuthorPopup: 'TrustAuthorPopup',
 	ViewsMoreActionsButton: 'ViewsMoreActionsButton',
-	RestrictedModeButton: 'RestrictedModeButton'
+	RestrictedModeButton: 'RestrictedModeButton',
+	CommandPalette: 'CommandPalette',
+	ExtensionsView: 'ExtensionsView',
+	ExplorerView: 'ExplorerView'
 };
 
 const EXTERNAL_CLASSES: any = {
