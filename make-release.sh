@@ -40,7 +40,7 @@ update_issue_template() {
 
   # take only two first digits of the version that we will release
   # will get 7.74 from input 7.74.0-next
-  local -r versionXY=$(echo "${currentReleaseVersion}" | sed -ne 's/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p')
+  local -r versionXY=$(echo "${currentReleaseVersion}" | cut -d '.' -f 1,2)
 
   # now extract the current latest version specified in the issue template
   # for example extract 7.34 if there is - "7.34@latest" as available item
