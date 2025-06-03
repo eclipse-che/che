@@ -158,11 +158,11 @@ suite(
 
 		test('Recreate workspace and check VSX custom plugin ', async function (): Promise<void> {
 			// await this.driver.sleep(30000);
-			await driverHelper.wait(30000);
+			await driverHelper.wait(10000);
 
-			await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
-			registerRunningWorkspace('');
-			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+			// await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+			// registerRunningWorkspace('');
+			await browserTabsUtil.navigateTo('https://github.com/eclipse-che/che');
 		});
 		test('Registering the running workspace', function (): void {
 			registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
@@ -170,11 +170,11 @@ suite(
 
 		test('Check Custom VSX plugin', async function (): Promise<void> {
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-			Logger.debug(`new SideBarView().getContent().getSection: get ${testRepoProjectName}`);
+			Logger.debug(`new SideBarView().getContent().getSection: get che`);
 			projectSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, testRepoProjectName), 'Project folder was not imported').not
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, "che"), 'Project folder was not imported').not
 				.undefined;
-			await projectAndFileTests.performTrustAuthorDialog();
+			await projectAndFileTests.performTrustDialogs();
 			const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
 			const sections: ViewSection[] | undefined = await extensionsView?.getContent().getSections();
