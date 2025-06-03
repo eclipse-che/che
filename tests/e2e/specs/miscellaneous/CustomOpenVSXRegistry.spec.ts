@@ -157,6 +157,9 @@ suite(
 		});
 
 		test('Recreate workspace and check VSX custom plugin ', async function (): Promise<void> {
+			// await this.driver.sleep(30000);
+			await driverHelper.wait(30000);
+
 			await testWorkspaceUtil.deleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 			registerRunningWorkspace('');
 			await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
