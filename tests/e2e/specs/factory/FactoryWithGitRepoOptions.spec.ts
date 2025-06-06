@@ -60,7 +60,7 @@ suite(`The FactoryWithGitRepoOptions userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
 				'Project files were not imported'
 			).not.undefined;
-			await projectAndFileTests.performTrustAuthorDialog();
+			await projectAndFileTests.performTrustDialogs();
 		});
 		test('Check expected branch name', async function (): Promise<void> {
 			const branchName: string = await projectAndFileTests.getBranchName();
