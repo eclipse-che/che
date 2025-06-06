@@ -53,4 +53,15 @@ export class ViewsMoreActionsButton {
 
 		return viewsActionsButton;
 	}
+
+	async clickViewsMoreActionsButton(): Promise<void> {
+		Logger.debug();
+		await this.driverHelper.waitAndClick(ViewsMoreActionsButton.VIEWS_AND_MORE_ACTIONS_BUTTON);
+	}
+
+	async waitForContextMenu(): Promise<void> {
+		const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+		const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+		await this.driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
+	}
 }
