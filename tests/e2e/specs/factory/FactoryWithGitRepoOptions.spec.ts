@@ -29,7 +29,7 @@ suite(`The FactoryWithGitRepoOptions userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 	const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 
 	const factoryUrl: string =
-		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/che-incubator/quarkus-api-example.git';
+		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/testsfactory/quarkus-api-example.git';
 	const expectedBranchName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'main';
 	let projectSection: ViewSection;
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
@@ -60,7 +60,7 @@ suite(`The FactoryWithGitRepoOptions userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
 				'Project files were not imported'
 			).not.undefined;
-			await projectAndFileTests.performTrustAuthorDialog();
+			await projectAndFileTests.performTrustDialogs();
 		});
 		test('Check expected branch name', async function (): Promise<void> {
 			const branchName: string = await projectAndFileTests.getBranchName();
