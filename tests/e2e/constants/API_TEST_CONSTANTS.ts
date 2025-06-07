@@ -35,6 +35,7 @@ export const API_TEST_CONSTANTS: {
 	TS_API_TEST_UDI_IMAGE: string | undefined;
 	TS_API_TEST_NAMESPACE: string | undefined;
 	TS_API_ACCEPTANCE_TEST_REGISTRY_URL(): string;
+	TS_API_TEST_STORAGE_TYPE: string;
 } = {
 	/**
 	 * possible values "oc" or "kubectl"
@@ -71,5 +72,7 @@ export const API_TEST_CONSTANTS: {
 		return process.env.TS_API_ACCEPTANCE_TEST_REGISTRY_URL || '';
 	},
 
-	TS_API_TEST_DEV_WORKSPACE_LIST: process.env.TS_API_TEST_DEV_WORKSPACE_LIST || undefined
+	TS_API_TEST_DEV_WORKSPACE_LIST: process.env.TS_API_TEST_DEV_WORKSPACE_LIST || undefined,
+
+	TS_API_TEST_STORAGE_TYPE: process.env.TS_API_TEST_STORAGE_TYPE || 'per-user'
 };
