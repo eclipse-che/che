@@ -263,8 +263,9 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	stopTcpPortForward(): void {
 		Logger.debug('Stop port forwarding.');
 
-		this.shellExecutor.executeCommand('lsof -i :8081');
-		this.shellExecutor.executeCommand('fuser -k 8081/tcp || true');
+		this.shellExecutor.executeCommand('pgrep -af "oc port-forward"');
+		this.shellExecutor.executeCommand('pkill -f "oc port-forward.*8081:8080" || true');
+		this.shellExecutor.executeCommand('pgrep -af "oc port-forward"');
 	}
 
 	/**
