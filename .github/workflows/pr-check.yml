@@ -141,19 +141,14 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           
-          # Clean only unused/dangling Docker images (not tagged images)
-          docker image prune -f
-          
-          # Remove containers that have exited
-          docker container prune -f
-          docker images
-
           # we have already ran API test, built test image and do not need e2e test-code
           ls -la ${GITHUB_WORKSPACE}
           rm -rf ${GITHUB_WORKSPACE}/che
 
           echo "Available space after cleanup:"
           df -h
+          docker container ls
+          docker images
 
       - name: Run Empty Workspace UI test from che-e2e container
         run: |
