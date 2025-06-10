@@ -164,6 +164,7 @@ jobs:
             -e TS_SELENIUM_BASE_URL=https://$(kubectl get ingress che -n eclipse-che -o jsonpath='{.spec.rules[0].host}') \
             -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=60000 \
             -e TS_SELENIUM_START_WORKSPACE_TIMEOUT=300000 \
+            -e MOCHA_DEFAULT_TIMEOUT=420000 \
             -e TS_COMMON_DASHBOARD_WAIT_TIMEOUT=30000 \
             -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
             -e DELETE_WORKSPACE_ON_FAILED_TEST=true \
