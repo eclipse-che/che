@@ -120,12 +120,40 @@ jobs:
             rm -rf assembly
             docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
 
-        # we have already ran API test, built test image and do not need e2e test-code, remove for saving disk space
-      - name: Clean up resources
+      - name: Clean up to save disk space
         run: |
-           ls -la ${GITHUB_WORKSPACE}
-           rm -rf ${GITHUB_WORKSPACE}/che
-           docker images
+          echo "Available space before cleanup:"
+          df -h
+
+          # Clean up unused npm artifacts
+          rm -rf node_modules
+          npm cache clean --force
+
+          # Remove large packages
+          sudo apt-get remove -y '^aspnetcore-.*' '^dotnet-.*' '^llvm-.*' '^php.*'
+          sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel
+          sudo apt-get autoremove -y
+          sudo apt-get autoclean
+          
+          # Remove large directories
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          
+          # Clean only unused/dangling Docker images (not tagged images)
+          docker image prune -f
+          
+          # Remove containers that have exited
+          docker container prune -f
+          docker images
+
+          # we have already ran API test, built test image and do not need e2e test-code
+          ls -la ${GITHUB_WORKSPACE}
+          rm -rf ${GITHUB_WORKSPACE}/che
+
+          echo "Available space after cleanup:"
+          df -h
 
       - name: Run Empty Workspace UI test from che-e2e container
         run: |
