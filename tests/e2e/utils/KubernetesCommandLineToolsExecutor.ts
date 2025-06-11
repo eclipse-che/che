@@ -250,7 +250,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 			`${this.kubernetesCommandLineTool} - start port forward for service "${serviceName}" on local port '8081' to remote port '8080'.`
 		);
 
-		require('shelljs').exec(`${this.kubernetesCommandLineTool} port-forward service/${serviceName} 8081:8080 -n ${serviceNamespace}`, {
+		exec(`${this.kubernetesCommandLineTool} port-forward service/${serviceName} 8081:8080 -n ${serviceNamespace}`, {
 			async: true
 		});
 
@@ -288,6 +288,29 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		} else {
 			Logger.error('Failed to inject kube config. HTTP status: ${response.stdout}');
 			throw new Error(`Failed to inject kube config. HTTP status: ${response.stdout}`);
+		}
+	}
+
+	/**
+	 * checks Molecule pod is removed after deleting asnsible-demo sample workspace
+	 * @throws Error if Molecule pod is not removed within the timeout
+	 */
+	waitRemovingMoleculePod(): void {
+		Logger.debug(`${this.kubernetesCommandLineTool} - get Molecule pod name.`);
+		const moleculePodMName: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} get pod -n ${this.namespace} -o name | grep 'molecule'`
+		);
+
+		Logger.debug(`${this.kubernetesCommandLineTool} - check removing Molecule pod.`);
+		const output: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete ${moleculePodMName.stdout.trim()} --timeout=40s`
+		);
+
+		if (output.stderr) {
+			Logger.error(`Failed to remove Molecule pod: ${output.stderr}`);
+			throw new Error(`Failed to remove Molecule pod: ${output.stderr}`);
+		} else {
+			Logger.debug('Molecule pod successfully removed.');
 		}
 	}
 }

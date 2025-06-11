@@ -98,7 +98,7 @@ suite('Ansible devfile API test', function (): void {
 
 		const outputText: string = output.stdout.trim();
 		expect(outputText).to.include('was installed successfully');
-		expect(outputText).to.not.include('failed=1');
+		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-list" command', function (): void {
@@ -159,7 +159,7 @@ suite('Ansible devfile API test', function (): void {
 
 		const outputText: string = output.stdout.trim();
 		expect(outputText).to.include('PLAY [Converge]');
-		expect(outputText).to.not.include('failed=1');
+		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-verify" command', function (): void {
@@ -191,7 +191,7 @@ suite('Ansible devfile API test', function (): void {
 
 		const outputText: string = output.stdout.trim();
 		expect(outputText).to.include('PLAY [Verify]');
-		expect(outputText).to.not.include('failed=1');
+		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-destroy" command', function (): void {
@@ -223,7 +223,7 @@ suite('Ansible devfile API test', function (): void {
 
 		const outputText: string = output.stdout.trim();
 		expect(outputText).to.include('PLAY [Destroy]');
-		expect(outputText).to.not.include('failed=1');
+		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-test" command', function (): void {
@@ -257,7 +257,7 @@ suite('Ansible devfile API test', function (): void {
 		expect(outputText).to.include('PLAY [Create]');
 		expect(outputText).to.include('PLAY [Converge]');
 		expect(outputText).to.include('PLAY [Verify]');
-		expect(outputText).to.not.include('failed=1');
+		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "ansible-navigator" command', function (): void {
@@ -304,6 +304,11 @@ suite('Ansible devfile API test', function (): void {
 		expect(outputText).to.include('config');
 		expect(outputText).to.include('settings');
 		expect(outputText).to.include('welcome');
+	});
+
+	test('Check removing molecule pod afer deleting workspace', function (): void {
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(devfileName);
+		kubernetesCommandLineToolsExecutor.waitRemovingMoleculePod();
 	});
 
 	suiteTeardown('Delete DevWorkspace', function (): void {
