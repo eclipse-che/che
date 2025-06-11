@@ -303,7 +303,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 
 		Logger.debug(`${this.kubernetesCommandLineTool} - check removing Molecule pod.`);
 		const output: ShellString = this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete ${moleculePodMName.stdout.trim()} --timeout=40s`
+			`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete ${moleculePodMName.stdout.trim()} --timeout=60s`
 		);
 
 		if (output.stderr) {
