@@ -60,13 +60,18 @@ export class DevWorkspaceConfigurationHelper {
 		if (!this.params.projects) {
 			this.params.projects = [];
 		}
-		return await this.generator.generateDevfileContext(
+
+		const devfileContext: DevfileContext = await this.generator.generateDevfileContext(
 			{
 				...this.params,
 				projects: this.params.projects
 			},
 			axios.default as any
 		);
+
+		this.patchDevWorkspaceConfigWithStorageTypeAttribute(devfileContext);
+
+		return devfileContext;
 	}
 
 	// write templates and then DevWorkspace in a single file
@@ -107,5 +112,18 @@ export class DevWorkspaceConfigurationHelper {
                       namespace: openshift-devspaces
                     controller.devfile.io/scc: container-build
                     controller.devfile.io/storage-type: per-user`);
+	}
+
+	/**
+	 * add storage type attribute to fix issue CRW-8922.
+	 */
+	patchDevWorkspaceConfigWithStorageTypeAttribute(
+		devfileContextDevWorkspace: DevfileContext,
+		storageType: string = API_TEST_CONSTANTS.TS_API_TEST_STORAGE_TYPE
+	): void {
+		Logger.debug();
+		devfileContextDevWorkspace.devWorkspace?.spec?.template &&
+			(devfileContextDevWorkspace.devWorkspace.spec.template.attributes = YAML.parse(`
+					controller.devfile.io/storage-type: ${storageType}`));
 	}
 }

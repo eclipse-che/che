@@ -62,7 +62,7 @@ export class DevfilesHelper {
 		console.log(`command: ${command}`);
 		const podName: string = this.getShellExecutor()
 			.executeArbitraryShellScript(
-				`oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} | grep dashboard | awk \'{print $1}\'`
+				`oc get pods -n ${BASE_TEST_CONSTANTS.TS_PLATFORM}-${BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME()} --field-selector status.phase=Running | grep dashboard | awk \'{print $1}\'`
 			)
 			.trim();
 		const containerName: string = this.getShellExecutor().executeArbitraryShellScript(
