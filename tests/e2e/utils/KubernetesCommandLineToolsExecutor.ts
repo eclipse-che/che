@@ -292,25 +292,26 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	}
 
 	/**
-	 * checks Molecule pod is removed after deleting asnsible-demo sample workspace
-	 * @throws Error if Molecule pod is not removed within the timeout
+	 * checks a pod is removed within the timeout
+	 * @param podName - name of the pod to check
+	 * @throws Error if a pod is not removed within the timeout
 	 */
-	waitRemovingMoleculePod(): void {
-		Logger.debug(`${this.kubernetesCommandLineTool} - get Molecule pod name.`);
+	waitRemovingPod(podName: string): void {
+		Logger.debug(`${this.kubernetesCommandLineTool} - get pod name ${podName}.`);
 		const moleculePodMName: ShellString = this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} get pod -n ${this.namespace} -o name | grep 'molecule'`
+			`${this.kubernetesCommandLineTool} get pod -n ${this.namespace} -o name | grep '${podName}'`
 		);
 
-		Logger.debug(`${this.kubernetesCommandLineTool} - check removing Molecule pod.`);
+		Logger.debug(`${this.kubernetesCommandLineTool} - check removing pod ${podName}.`);
 		const output: ShellString = this.shellExecutor.executeCommand(
 			`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete ${moleculePodMName.stdout.trim()} --timeout=60s`
 		);
 
 		if (output.stderr) {
-			Logger.error(`Failed to remove Molecule pod: ${output.stderr}`);
-			throw new Error(`Failed to remove Molecule pod: ${output.stderr}`);
+			Logger.error(`Failed to remove pod ${podName} : ${output.stderr}`);
+			throw new Error(`Failed to remove pod ${podName}: ${output.stderr}`);
 		} else {
-			Logger.debug('Molecule pod successfully removed.');
+			Logger.debug(`Pod ${podName} successfully removed.`);
 		}
 	}
 }

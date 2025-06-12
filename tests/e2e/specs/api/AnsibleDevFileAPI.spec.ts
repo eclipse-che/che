@@ -308,7 +308,7 @@ suite('Ansible devfile API test', function (): void {
 
 	test('Check removing molecule pod afer deleting workspace', function (): void {
 		kubernetesCommandLineToolsExecutor.deleteDevWorkspace(devfileName);
-		kubernetesCommandLineToolsExecutor.waitRemovingMoleculePod();
+		kubernetesCommandLineToolsExecutor.waitRemovingPod('molecule');
 	});
 
 	suiteTeardown('Delete DevWorkspace', function (): void {
