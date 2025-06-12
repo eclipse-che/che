@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2023 Red Hat, Inc.
+ * copyright (c) 2023-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -230,6 +230,89 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		Logger.debug(`${this.kubernetesCommandLineTool} - get server api url.`);
 
 		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':6443';
+	}
+
+	getDevWorkspaceId(): string {
+		Logger.debug(`${this.kubernetesCommandLineTool} - get devworkspaceId.`);
+		const output: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} get dw ${this.workspaceName} -n ${this.namespace} -o jsonpath='{.status.devworkspaceId}'`
+		);
+		return output.stderr ? output.stderr : output.stdout.trim();
+	}
+
+	/**
+	 * starts port forwarding between the local machine and the service in the OpenShift cluster
+	 * @param serviceName - service name in 'Services', e.g. "che-host" or "che-dashboard"
+	 * @param serviceNamespace - namespace where the service is running, e.g. "eclipse-che"
+	 */
+	startTcpPortForward(serviceName: string, serviceNamespace: string): void {
+		Logger.debug(
+			`${this.kubernetesCommandLineTool} - start port forward for service "${serviceName}" on local port '8081' to remote port '8080'.`
+		);
+
+		exec(`${this.kubernetesCommandLineTool} port-forward service/${serviceName} 8081:8080 -n ${serviceNamespace}`, {
+			async: true
+		});
+
+		this.shellExecutor.wait(5);
+	}
+
+	/**
+	 * stops port forwarding between the local machine and the service
+	 */
+	stopTcpPortForward(): void {
+		Logger.debug('Stop port forwarding.');
+
+		this.shellExecutor.executeCommand('pgrep -af "oc port-forward"');
+		this.shellExecutor.executeCommand('pkill -f "oc port-forward.*8081:8080" || true');
+		this.shellExecutor.executeCommand('pgrep -af "oc port-forward"');
+	}
+
+	/**
+	 * injectes 'kube config' file to the workspace container by API dashboard.
+	 * @param namespace - namespace where the devworkspace is running
+	 * @param devworkspaceId - uniqe identifier of the devworkspace
+	 */
+	injectKubeConfig(devworkspaceId: string): void {
+		Logger.debug('Get cluster access token.');
+		const clusterAcessToken: ShellString = this.shellExecutor.executeCommand(`${this.kubernetesCommandLineTool} whoami -t`);
+
+		Logger.debug('Inject kube config to the workspace.');
+		const response: ShellString = this.shellExecutor.executeCommand(
+			`curl -i -X 'POST' \
+				'http://localhost:8081/dashboard/api/namespace/${this.namespace}/devworkspaceId/${devworkspaceId}/kubeconfig' \
+				-H 'Authorization: Bearer ${clusterAcessToken.stdout.trim()}'`
+		);
+		if (response.stdout.trim().includes('204')) {
+			Logger.debug('Kube config successfully injected (HTTP 204).');
+		} else {
+			Logger.error('Failed to inject kube config. HTTP status: ${response.stdout}');
+			throw new Error(`Failed to inject kube config. HTTP status: ${response.stdout}`);
+		}
+	}
+
+	/**
+	 * checks a pod is removed within the timeout
+	 * @param podName - name of the pod to check
+	 * @throws Error if a pod is not removed within the timeout
+	 */
+	waitRemovingPod(podName: string): void {
+		Logger.debug(`${this.kubernetesCommandLineTool} - get pod name ${podName}.`);
+		const moleculePodMName: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} get pod -n ${this.namespace} -o name | grep '${podName}'`
+		);
+
+		Logger.debug(`${this.kubernetesCommandLineTool} - check removing pod ${podName}.`);
+		const output: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete ${moleculePodMName.stdout.trim()} --timeout=60s`
+		);
+
+		if (output.stderr) {
+			Logger.error(`Failed to remove pod ${podName} : ${output.stderr}`);
+			throw new Error(`Failed to remove pod ${podName}: ${output.stderr}`);
+		} else {
+			Logger.debug(`Pod ${podName} successfully removed.`);
+		}
 	}
 }
 
