@@ -17,6 +17,7 @@ export const TIMEOUT_CONSTANTS: {
 	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: number;
 	TS_FIND_EXTENSION_TEST_TIMEOUT: number;
 	TS_IDE_LOAD_TIMEOUT: number;
+	TS_NOTIFICATION_WAIT_TIMEOUT: number;
 	TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: number;
 	TS_SELENIUM_DEFAULT_ATTEMPTS: number;
 	TS_SELENIUM_DEFAULT_POLLING: number;
@@ -110,6 +111,11 @@ export const TIMEOUT_CONSTANTS: {
 	 * timeout for clicking on visible item, "5 000" by default
 	 */
 	TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: Number(process.env.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM) || 5_000,
+
+	/**
+	 * timeout for waiting for notifications to appear, "20 000" by default.
+	 */
+	TS_NOTIFICATION_WAIT_TIMEOUT: Number(process.env.TS_NOTIFICATION_WAIT_TIMEOUT) || 20_000,
 
 	// ----------------------------------------- PLUGINS -----------------------------------------
 
