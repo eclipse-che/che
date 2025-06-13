@@ -9,4 +9,4 @@ metadata:
   annotations:
     controller.devfile.io/mount-as: env
 data:
-  DEFAULT_EXTENSIONS: '/projects/web-nodejs-sample/redhat.vscode-yaml-1.17.0.vsix'
+  DEFAULT_EXTENSIONS: '/projects/web-nodejs-sample-with-disabled-vsix/redhat.vscode-yaml-1.17.0.vsix'
