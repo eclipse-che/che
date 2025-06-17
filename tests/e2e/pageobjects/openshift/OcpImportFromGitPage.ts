@@ -24,7 +24,7 @@ export class OcpImportFromGitPage {
 	private static readonly GIT_REFERENCE_INPUT: By = By.id('form-input-git-ref-field');
 	private static readonly EDIT_IMPORT_STRATEGY_LINK: By = By.xpath('//*[text()="Edit Import Strategy"]//ancestor::button');
 	private static readonly BUILDER_IMAGE_STRATEGY_ITEM: By = By.xpath('//*[text()="Builder Image"]//parent::div//parent::div');
-	private static readonly ADD_LABEL_LINK: By = By.xpath('//button[text()="Labels"]');
+	private static readonly ADD_LABEL_LINK: By = By.xpath('//button[text()="Labels" or .//span[text()="Labels"]]');
 	private static readonly ADD_LABEL_INPUT: By = By.id('form-selector-labels-field');
 	private static readonly SUBMIT_BUTTON: By = By.xpath('//*[@data-test-id="submit-button"]');
 

@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,11 +29,13 @@ import { Logger } from '../../utils/Logger';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ShellString } from 'shelljs';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
+import { satisfies } from 'compare-versions';
 
 suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	let ocpImportPage: OcpImportFromGitPage;
 	let ocpApplicationPage: OcpApplicationPage;
 	let parentGUID: string = '';
+	let developerPerspectiveWasEnabled: boolean = false;
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -60,6 +62,34 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 			kubernetesCommandLineToolsExecutor.deleteProject(projectName);
 		}
 		kubernetesCommandLineToolsExecutor.createProject(projectName);
+	});
+
+	// configure Developer perspective for OCP 4.19+
+	suiteSetup('Configure Developer perspective for OCP 4.19+', function (): void {
+		if (BASE_TEST_CONSTANTS.OCP_VERSION && satisfies(BASE_TEST_CONSTANTS.OCP_VERSION, '>=4.19')) {
+			// check current state
+			const checkState: ShellString = shellExecutor.executeCommand(
+				'oc get console.operator.openshift.io/cluster -o jsonpath="{.spec.customization.perspectives[?(@.id==\'dev\')].visibility.state}" 2>/dev/null || echo "notfound"'
+			);
+
+			if (checkState.stdout.trim() === 'Enabled') {
+				Logger.info('Developer perspective already enabled');
+				return;
+			}
+
+			const enableResult: ShellString = shellExecutor.executeCommand(
+				'oc patch consoles.operator.openshift.io cluster --type=merge -p \'{"spec":{"customization":{"perspectives":[{"id":"dev","visibility":{"state":"Enabled"}}]}}}\''
+			);
+
+			if (enableResult.code === 0) {
+				developerPerspectiveWasEnabled = true;
+				Logger.info('Developer perspective enabled - waiting 30s to take effect');
+				shellExecutor.executeCommand('sleep 30');
+			} else {
+				Logger.error(`Failed to enable developer perspective: ${enableResult.stderr}`);
+				throw new Error(`Failed to enable developer perspective: ${enableResult.stderr}`);
+			}
+		}
 	});
 
 	loginTests.loginIntoOcpConsole();
@@ -140,6 +170,23 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 			kubernetesCommandLineToolsExecutor.deleteProject(projectName);
 		} catch (err) {
 			Logger.error(`Cannot delete the project: ${err}`);
+		}
+	});
+
+	// restore original console configuration
+	suiteTeardown('Restore Developer perspective configuration', function (): void {
+		if (BASE_TEST_CONSTANTS.OCP_VERSION && satisfies(BASE_TEST_CONSTANTS.OCP_VERSION, '>=4.19') && developerPerspectiveWasEnabled) {
+			Logger.info('Restoring Developer perspective to disabled state');
+
+			const restoreResult: ShellString = shellExecutor.executeCommand(
+				'oc patch consoles.operator.openshift.io cluster --type=merge -p \'{"spec":{"customization":{"perspectives":[{"id":"dev","visibility":{"state":"Disabled"}}]}}}\''
+			);
+
+			if (restoreResult.code === 0) {
+				Logger.info('Developer perspective restored to disabled');
+			} else {
+				Logger.warn(`Failed to restore developer perspective: ${restoreResult.stderr}`);
+			}
 		}
 	});
 
