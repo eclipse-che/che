@@ -1,0 +1,22 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vscode-editor-configurations
+  namespace: openshift-devspaces
+  labels:
+    app.kubernetes.io/part-of: che.eclipse.org
+    app.kubernetes.io/component: workspaces-config
+data:
+  configurations.json: |
+    {
+      "extensions.install-from-vsix-enabled": false
+    }
+  settings.json: |
+    {
+      "window.header": "VSIX INSTALL = DISABLED",
+      "window.commandCenter": false,
+      "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#CCA700",
+        "titleBar.activeForeground": "#ffffff"
+      }
+    }

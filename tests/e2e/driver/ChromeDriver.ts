@@ -36,7 +36,11 @@ export class ChromeDriver implements IDriver {
 			.addArguments('--no-sandbox')
 			.addArguments('--disable-web-security')
 			.addArguments('--allow-running-insecure-content')
-			.addArguments('--ignore-certificate-errors');
+			.addArguments('--ignore-certificate-errors')
+			.addArguments('--enable-clipboard-read')
+			.addArguments('--enable-clipboard-write')
+			.addArguments('--deny-permission-prompts')
+			.addArguments('--disable-popup-blocking');
 
 		// if 'true' run in 'headless' mode
 		if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_HEADLESS) {
