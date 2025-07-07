@@ -105,7 +105,7 @@ export class DevWorkspaceConfigurationHelper {
 	}
 
 	/**
-	 * Add missed attributes to fix issues CRW-8922, CRW-9187.
+	 * add missed attributes to fix issues CRW-8922, CRW-9187.
 	 */
 	addMissedDevWorkspaceConfigAttributes(
 		devfileContextDevWorkspace: DevfileContext,
