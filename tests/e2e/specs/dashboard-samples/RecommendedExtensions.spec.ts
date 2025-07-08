@@ -160,6 +160,7 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	Logger.debug(`Extension with title "${searchTitle}" not found in section "${sectionTitle}"`);
 	return undefined;
 }
+
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed recommended extensions
 async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations: string[]): Promise<boolean> {
 	const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
@@ -180,20 +181,23 @@ async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations:
 	}
 	Logger.debug('marketplaceSection.getVisibleItems()');
 	const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+
 	const allFoundRecommendedAuthors: string[] = await Promise.all(
 		allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
 	);
 
 	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
-	const allPublisherNamesAsSorString: string = recommendations.sort().toString();
-	return allFoundAuthorsAsSortedString === allPublisherNamesAsSorString;
+	const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
+	return allFoundAuthorsAsSortedString === allPublisherNamesAsSortedString;
 }
+
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed installed extensions
 async function getVisibleFilteredItemsAndCompareWithInstalled(recommendations: string[]): Promise<boolean> {
 	const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 	const [marketplaceSection]: ExtensionsViewSection[] = (await extensionsView?.getContent().getSections()) as ExtensionsViewSection[];
 	Logger.debug('marketplaceSection.getVisibleItems()');
 	const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+
 	const allFoundRecommendedAuthors: string[] = await Promise.all(
 		allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
 	);
@@ -203,6 +207,7 @@ async function getVisibleFilteredItemsAndCompareWithInstalled(recommendations: s
 	// in some cases we can have installed not only recommended extensions with some samples (for example .Net)
 	return allFoundAuthorsAsSortedString.includes(allPublisherNamesAsSortString);
 }
+
 for (const sample of samples) {
 	suite(`Check if recommended extensions installed for ${sample} ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -292,10 +297,29 @@ for (const sample of samples) {
 			recommendedExtensions = JSON.parse(text.replace(/\/\*[\s\S]*?\*\/|(?<=[^:])\/\/.*|^\/\/.*/g, '').trim());
 
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
+
+			// skip the test if only redhat.fabric8-analytics extension is found in Dev Spaces 3.22.0 (issue CRW-9186)
+			if (BASE_TEST_CONSTANTS.OCP_VERSION === '3.22.0' && BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces') {
+				const dependencyAnalyticsExtensionName: string = 'redhat.fabric8-analytics';
+				if (
+					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
+					recommendedExtensions.recommendations.length === 1
+				) {
+					throw new Error(
+						`Only '${dependencyAnalyticsExtensionName}' extension found. This extension will not be installed because of known issue https://issues.redhat.com/browse/CRW-9186`
+					);
+				} else {
+					recommendedExtensions.recommendations = recommendedExtensions.recommendations.filter(
+						(rec: string): boolean => !rec.includes(dependencyAnalyticsExtensionName)
+					);
+				}
+			}
+
 			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
 				const [publisher, name] = rec.split('.');
 				return { publisher, name };
 			});
+
 			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
 			publisherNames = parsedRecommendations.map((rec: { name: string; publisher: string }): string => rec.publisher);
 			expect(parsedRecommendations, 'Recommendations not found').not.empty;
