@@ -15,6 +15,7 @@ import * as axios from 'axios';
 import { Logger } from './Logger';
 import { ShellExecutor } from './ShellExecutor';
 import { API_TEST_CONSTANTS } from '../constants/API_TEST_CONSTANTS';
+import { BASE_TEST_CONSTANTS } from '../constants/BASE_TEST_CONSTANTS';
 import { injectable } from 'inversify';
 import { IContextParams } from './IContextParams';
 import { e2eContainer } from '../configs/inversify.config';
@@ -69,7 +70,9 @@ export class DevWorkspaceConfigurationHelper {
 			axios.default as any
 		);
 
-		this.addMissedDevWorkspaceConfigAttributes(devfileContext);
+		if (BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces') {
+			this.addMissedDevWorkspaceConfigAttributes(devfileContext);
+		}
 
 		return devfileContext;
 	}
