@@ -109,14 +109,15 @@ export class DevWorkspaceConfigurationHelper {
 	 */
 	addMissedDevWorkspaceConfigAttributes(
 		devfileContextDevWorkspace: DevfileContext,
-		storageType: string = API_TEST_CONSTANTS.TS_API_TEST_STORAGE_TYPE
+		storageType: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_STORAGE_TYPE,
+		namespace: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE,
 	): void {
 		Logger.debug();
 		devfileContextDevWorkspace.devWorkspace?.spec?.template &&
 			(devfileContextDevWorkspace.devWorkspace.spec.template.attributes = YAML.parse(`
                     controller.devfile.io/devworkspace-config:
                       name: devworkspace-config
-                      namespace: openshift-devspaces
+                      namespace: ${namespace}
                     controller.devfile.io/scc: container-build
                     controller.devfile.io/storage-type: ${storageType}`));
 	}
