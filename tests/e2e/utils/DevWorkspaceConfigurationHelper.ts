@@ -110,7 +110,7 @@ export class DevWorkspaceConfigurationHelper {
 	addMissedDevWorkspaceConfigAttributes(
 		devfileContextDevWorkspace: DevfileContext,
 		storageType: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_STORAGE_TYPE,
-		namespace: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE,
+		namespace: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_NAMESPACE
 	): void {
 		Logger.debug();
 		devfileContextDevWorkspace.devWorkspace?.spec?.template &&

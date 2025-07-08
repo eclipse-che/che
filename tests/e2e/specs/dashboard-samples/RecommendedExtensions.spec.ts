@@ -298,13 +298,27 @@ for (const sample of samples) {
 
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 
-			// filter out the fabric8-analytics extension to work around an issue CRW-9186
-			parsedRecommendations = recommendedExtensions.recommendations
-				.filter((rec: string): boolean => !rec.includes('redhat.fabric8-analytics'))
-				.map((rec: string): { name: string; publisher: string } => {
-					const [publisher, name] = rec.split('.');
-					return { publisher, name };
-				});
+			// skip the test if only redhat.fabric8-analytics extension is found in Dev Spaces 3.22.0 (issue CRW-9186)
+			if (BASE_TEST_CONSTANTS.OCP_VERSION === '3.22.0' && BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces') {
+				const dependencyAnalyticsExtensionName: string = 'redhat.fabric8-analytics';
+				if (
+					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
+					recommendedExtensions.recommendations.length === 1
+				) {
+					throw new Error(
+						`Only '${dependencyAnalyticsExtensionName}' extension found. This extension will not be installed because of known issue https://issues.redhat.com/browse/CRW-9186`
+					);
+				} else {
+					recommendedExtensions.recommendations = recommendedExtensions.recommendations.filter(
+						(rec: string): boolean => !rec.includes(dependencyAnalyticsExtensionName)
+					);
+				}
+			}
+
+			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
+				const [publisher, name] = rec.split('.');
+				return { publisher, name };
+			});
 
 			Logger.debug(`Recommended extension for this workspace:\n${JSON.stringify(parsedRecommendations)}.`);
 			publisherNames = parsedRecommendations.map((rec: { name: string; publisher: string }): string => rec.publisher);
