@@ -298,8 +298,8 @@ for (const sample of samples) {
 
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 
-			// skip the test if only redhat.fabric8-analytics extension is found in Dev Spaces 3.22.0 (issue CRW-9186)
-			if (BASE_TEST_CONSTANTS.OCP_VERSION === '3.22.0' && BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces') {
+			// skip the test if only redhat.fabric8-analytics extension is found in Dev Spaces 3.22.x (issue CRW-9186)
+			if (BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces' && BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.startsWith('3.22')) {
 				const dependencyAnalyticsExtensionName: string = 'redhat.fabric8-analytics';
 				if (
 					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
