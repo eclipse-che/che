@@ -28,7 +28,6 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
 ### Preferable code style
 
 1. Page-object and util classes
-
     1. ✔ Class declaration using dependency injection (inversify library)
 
         ```
@@ -38,7 +37,6 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
         ```
 
     2. Public methods
-
         - ✔ Declare public methods without "public "keyword
         - ✔ Add Logger.debug() inside method to log its name (with optional message)
 
@@ -51,7 +49,6 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
         ```
 
     3. Locators
-
         - ✔ For static locators - private static readonly fields type of By
 
         ```
@@ -105,7 +102,6 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
         ```
 
 2. Mocha framework
-
     - ✔ TDD framework (`suite()`, `test()`)
     - ✔ Inject class instances, declare all test data inside test `suit()` function to avoid unnecessary code execution if test suit will not be run
 
@@ -122,7 +118,6 @@ Automated lint checking and code format performs with ESLint and Prettier tools 
     - ✔ Use test [./constants](constants) to make test flexible
 
 3. Packages
-
     1. Add packages as dev dependencies
     2. If any changes re-create package-lock.json before push
 
