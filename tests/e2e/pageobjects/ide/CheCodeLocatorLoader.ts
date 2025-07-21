@@ -48,10 +48,10 @@ export class CheCodeLocatorLoader extends LocatorLoader {
 					contextView: By.className('monaco-menu-container')
 				},
 				Editor: {
-					inputArea: By.className('native-edit-context-textarea')
+					inputArea: By.className('editor-container')
 				},
 				ExtensionsViewSection: {
-					searchBox: By.className('native-edit-context-textarea')
+					searchBox: By.className('ime-text-area')
 				},
 				ExtensionsViewItem: {
 					author: By.className('publisher')
