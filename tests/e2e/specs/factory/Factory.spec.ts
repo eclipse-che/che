@@ -11,18 +11,7 @@
 import 'reflect-metadata';
 
 import { e2eContainer } from '../../configs/inversify.config';
-import {
-	ActivityBar,
-	ContextMenu,
-	EditorView,
-	Key,
-	Locators,
-	NewScmView,
-	SingleScmProvider,
-	TextEditor,
-	ViewControl,
-	ViewSection
-} from 'monaco-page-objects';
+import { ActivityBar, ContextMenu, Key, Locators, NewScmView, SingleScmProvider, ViewControl, ViewSection } from 'monaco-page-objects';
 import { expect } from 'chai';
 import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
 import { StringUtil } from '../../utils/StringUtil';
@@ -135,10 +124,17 @@ suite(
 		test('Make changes to the file', async function (): Promise<void> {
 			Logger.debug(`projectSection.openItem: "${fileToChange}"`);
 			await projectSection.openItem(testRepoProjectName, fileToChange);
-			const editor: TextEditor = (await new EditorView().openEditor(fileToChange)) as TextEditor;
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-			Logger.debug(`editor.setText: "${changesToCommit}"`);
-			await editor.setText(changesToCommit);
+			await driverHelper.getDriver().findElement(webCheCodeLocators.Editor.inputArea).click();
+
+			Logger.debug('Clearing the editor with Ctrl+A');
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+			await driverHelper.wait(500);
+			Logger.debug('Deleting selected text');
+			await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
+			await driverHelper.wait(500);
+			Logger.debug(`Entering text: "${changesToCommit}"`);
+			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
 		});
 
 		test('Open a source control manager', async function (): Promise<void> {
