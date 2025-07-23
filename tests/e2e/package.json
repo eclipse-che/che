@@ -1,6 +1,6 @@
 {
 	"name": "@eclipse-che/che-e2e",
-	"version": "7.106.1-next",
+	"version": "7.106.1",
 	"description": "",
 	"main": "dist/index.js",
 	"scripts": {
@@ -67,7 +67,7 @@
 		"@eclipse-che/api": "latest",
 		"inversify": "6.0.1",
 		"reflect-metadata": "0.1.13",
-		"@eclipse-che/che-devworkspace-generator": "7.106.0"
+		"@eclipse-che/che-devworkspace-generator": "7.106.1"
 	},
 	"resolutions": {
 		"minimist": "^1.2.5"
