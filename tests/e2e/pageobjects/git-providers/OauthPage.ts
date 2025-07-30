@@ -50,7 +50,7 @@ export class OauthPage {
 					OauthPage.DENY_ACCESS_BUTTON = By.xpath('//span[text()="Deny"]');
 				}
 				break;
-			case GitProviderType.BITBUCKET_CLOUD_OAUTH2: 
+			case GitProviderType.BITBUCKET_CLOUD_OAUTH2:
 				{
 					OauthPage.LOGIN_FORM = By.css('[data-testid="username"]');
 					OauthPage.PASSWORD_FORM = By.id('password');
