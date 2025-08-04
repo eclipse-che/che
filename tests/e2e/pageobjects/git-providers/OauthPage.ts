@@ -41,7 +41,7 @@ export class OauthPage {
 					OauthPage.DENY_ACCESS_BUTTON = By.id('deny');
 				}
 				break;
-			case GitProviderType.BITBUCKET_SERVER_OAUTH2:
+			case GitProviderType.BITBUCKET_SERVER_OAUTH2: 
 				{
 					OauthPage.LOGIN_FORM = By.id('j_username');
 					OauthPage.PASSWORD_FORM = By.id('j_password');
