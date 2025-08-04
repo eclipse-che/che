@@ -50,17 +50,9 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Check compilation errors
-        run: |
-          npm ci
-          npm run tsc
-
-      - name: Check lint errors
-        run: |
-          npm run lint
-
       - name: Check prettier rules
         run: |
+          npm ci
           echo "Running prettier check..."
           # Get list of files with formatting issues (use list-different for just file names)
           npx prettier --list-different . > /tmp/prettier-files.txt 2>/dev/null || true
@@ -83,8 +75,14 @@ jobs:
             echo "No prettier formatting issues found."
           fi
 
-          # Clean up temporary file
-          rm -f /tmp/prettier-files.txt
+      - name: Check compilation errors
+        run: |
+          npm run tsc
+
+      - name: Check lint errors
+        run: |
+          npm run lint
+
 
       - name: Start minikube
         id: run-minikube
