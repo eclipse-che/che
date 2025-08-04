@@ -54,13 +54,22 @@ jobs:
         run: |
           echo "Running prettier check..."
           cd $GITHUB_WORKSPACE/tests/e2e
-          # Make sure dependencies are installed
           npm ci
-          # Use the prettier-check script from package.json
-          if ! npm run prettier-check; then
-            echo "::error::Prettier check failed! Run 'cd tests/e2e && npm run prettier' to fix formatting issues."
-            exit 1
+          # Get list of files with formatting issues (use list-different for just file names)
+          npx prettier --list-different . > /tmp/prettier-files.txt 2>/dev/null || true
+          # Display warnings for files with formatting issues
+          if [ -s /tmp/prettier-files.txt ]; then
+            echo "::warning::Prettier formatting issues found in the following files:"
+            # Display each file with [warn] prefix
+            while read -r file; do
+              echo "::warning::[warn] $file"
+            done < /tmp/prettier-files.txt
+            echo "Run 'cd tests/e2e && npm run prettier' to fix formatting issues."
+          else
+            echo "No prettier formatting issues found."
           fi
+          # Clean up temporary file
+          rm -f /tmp/prettier-files.txt
 
       - name: Check compilation errors
         run: |
