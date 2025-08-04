@@ -50,6 +50,14 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Check prettier rules
+        run: |
+          echo "Running prettier check..."
+          if ! npm run prettier:check; then
+            echo "::error::Prettier check failed! Run 'npm run prettier' to fix formatting issues."
+            exit 1
+          fi
+
       - name: Check compilation errors
         run: |
           npm ci
