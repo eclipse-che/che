@@ -22,8 +22,8 @@ on:
       - main
       - 7.**.x
     paths:
-      - 'tests/e2e/**'
-      - '.github/workflows/pr-check.yml'
+      - "tests/e2e/**"
+      - ".github/workflows/pr-check.yml"
 env:
   LOCAL_TEST_DIR: /tmp
 
@@ -31,8 +31,8 @@ jobs:
   pr-check:
     runs-on: ubuntu-22.04
     defaults:
-        run:
-          working-directory: tests/e2e
+      run:
+        working-directory: tests/e2e
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -48,13 +48,17 @@ jobs:
       - name: Configuring nodejs 18.x version
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Check prettier rules
         run: |
           echo "Running prettier check..."
-          if ! npm run prettier:check; then
-            echo "::error::Prettier check failed! Run 'npm run prettier' to fix formatting issues."
+          cd $GITHUB_WORKSPACE/tests/e2e
+          # Make sure dependencies are installed
+          npm ci
+          # Use the prettier-check script from package.json
+          if ! npm run prettier-check; then
+            echo "::error::Prettier check failed! Run 'cd tests/e2e && npm run prettier' to fix formatting issues."
             exit 1
           fi
 
@@ -124,9 +128,9 @@ jobs:
 
       - name: Build E2E test docker image
         run: |
-            # for saving disk space we can remove the assembly folder because it is legacy code
-            rm -rf assembly
-            docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
+          # for saving disk space we can remove the assembly folder because it is legacy code
+          rm -rf assembly
+          docker build -t quay.io/eclipse/che-e2e:"${{ env.pr_number }}" -f build/dockerfiles/Dockerfile .
 
       - name: Clean up to save disk space
         run: |
@@ -142,13 +146,13 @@ jobs:
           sudo apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel
           sudo apt-get autoremove -y
           sudo apt-get autoclean
-          
+
           # Remove large directories
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
-          
+
           # we have already ran API test, built test image and do not need e2e test-code
           ls -la ${GITHUB_WORKSPACE}
           rm -rf ${GITHUB_WORKSPACE}/che
