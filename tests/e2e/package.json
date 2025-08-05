@@ -6,7 +6,6 @@
 	"scripts": {
 		"lint": "eslint --fix .",
 		"prettier": "prettier --config .prettierrc.json . --write",
-		"prettier-check": "prettier --config .prettierrc.json . --check --log-level debug",
 		"tsc": "rm -rf ./dist && ./configs/sh-scripts/generateIndex.sh && tsc -p .",
 		"test": "./configs/sh-scripts/initDefaultValues.sh npm run lint && npm run tsc && export USERSTORY=$USERSTORY && mocha --config dist/configs/mocharc.js",
 		"driver-less-test": "export TS_USE_WEB_DRIVER_FOR_TEST=false && npm run test",
