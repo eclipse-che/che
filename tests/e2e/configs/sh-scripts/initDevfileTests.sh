@@ -11,7 +11,7 @@ launchUserstories(){
 }
 
 checkUserstoryName(){
-    local checkedName="$(ls specs/devfiles | grep ${USERSTORY}.spec.ts)";
+    local checkedName="$(ls specs/dashboard-samples | grep ${USERSTORY}.spec.ts)";
 
     if [ -z "$TS_SELENIUM_EDITOR" ]; then
         echo ""
@@ -26,7 +26,7 @@ checkUserstoryName(){
         echo ""
         echo "Current value USERSTORY=\"${USERSTORY}\" doesn't match to any of existing tests:"
         echo ""
-        echo "$(ls specs/devfiles | sed -e 's/.spec.ts//g')"
+        echo "$(ls specs/dashboard-samples | sed -e 's/.spec.ts//g')"
         echo ""
         echo "Please choose one of the tests above, or unset the \"USERSTORY\" variable for launching all of them."
         echo ""
