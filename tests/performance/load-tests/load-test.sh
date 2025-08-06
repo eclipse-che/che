@@ -145,12 +145,26 @@ function getDwStartingTime() {
 
 function precreateNamespaces() {
   if [ $start_separately = true ]; then
-    echo "Create test namespaces"
+    echo "Create test namespaces in parallel"
     for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
       namespace=$test_namespace_name$i
-      kubectl create namespace $namespace
-      oc label namespace $namespace $label_type=$label_key >/dev/null 2>&1
+      kubectl create namespace $namespace &
+      # Store the PID to wait for later
+      pids[$i]=$!
     done
+    
+    # Wait for all namespace creation to complete
+    for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
+      wait ${pids[$i]}
+    done
+    
+    # Label all namespaces in parallel
+    echo "Label test namespaces"
+    for ((i = 1; i <= $COMPLETITIONS_COUNT; i++)); do
+      namespace=$test_namespace_name$i
+      oc label namespace $namespace $label_type=$label_key >/dev/null 2>&1 &
+    done
+    wait
   fi
 }
 
