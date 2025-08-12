@@ -78,7 +78,7 @@ function getSectionForCategory(title: string): string {
 		case '@outdated':
 			return 'Outdated';
 		case '@recommended':
-			return 'Other Recommendations';
+			return 'WORKSPACE RECOMMENDATIONS';
 		default:
 			return 'Marketplace';
 	}
@@ -120,6 +120,15 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
 	Logger.debug(`Found ${sections.length} sections`);
 
+	// Debug: Log all available section titles
+	const availableSections: string[] = [];
+	for (const sec of sections) {
+		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
+		const sectionTitleText: string = await titleElement.getText();
+		availableSections.push(sectionTitleText);
+	}
+	Logger.debug(`Available sections: ${availableSections.join(', ')}`);
+
 	let targetSection: WebElement | undefined;
 	for (const sec of sections) {
 		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
@@ -132,7 +141,7 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	}
 
 	if (!targetSection) {
-		Logger.debug(`Section "${sectionTitle}" not found`);
+		Logger.debug(`Section "${sectionTitle}" not found. Available sections: ${availableSections.join(', ')}`);
 		return undefined;
 	}
 
