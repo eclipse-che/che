@@ -120,7 +120,7 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
 	Logger.debug(`Found ${sections.length} sections`);
 
-	// Debug: Log all available section titles
+	// debug: Log all available section titles
 	const availableSections: string[] = [];
 	for (const sec of sections) {
 		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
@@ -189,15 +189,36 @@ async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations:
 		}
 	}
 	Logger.debug('marketplaceSection.getVisibleItems()');
-	const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
 
-	const allFoundRecommendedAuthors: string[] = await Promise.all(
-		allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
-	);
+	// debug: Log all found recommended items
+	try {
+		const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+		const itemTitles: string[] = await Promise.all(
+			allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getTitle())
+		);
 
-	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
-	const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
-	return allFoundAuthorsAsSortedString === allPublisherNamesAsSortedString;
+		const allFoundRecommendedAuthors: string[] = await Promise.all(
+			allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
+		);
+
+		Logger.debug(`Found ${allFoundRecommendedItems.length} recommended items: ${itemTitles.join(', ')}`);
+		Logger.debug(`Found authors: ${allFoundRecommendedAuthors.join(', ')}`);
+		Logger.debug(`Expected authors: ${recommendations.join(', ')}`);
+
+		const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
+		const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
+
+		Logger.debug(`Sorted found authors: ${allFoundAuthorsAsSortedString}`);
+		Logger.debug(`Sorted expected authors: ${allPublisherNamesAsSortedString}`);
+
+		const result: boolean = allFoundAuthorsAsSortedString === allPublisherNamesAsSortedString;
+		Logger.debug(`Authors match: ${result}`);
+
+		return result;
+	} catch (error) {
+		Logger.error(`Error getting item titles: ${error}`);
+		return false;
+	}
 }
 
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed installed extensions
@@ -398,8 +419,16 @@ for (const sample of samples) {
 			}
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
-			expect(await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames)).to.be.true;
-			Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
+			try {
+				Logger.debug(`Expected publisher names: ${publisherNames.join(', ')}`);
+				const comparisonResult: boolean = await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames);
+				Logger.debug(`Comparison result: ${comparisonResult}`);
+				expect(comparisonResult).to.be.true;
+				Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
+			} catch (error) {
+				Logger.error(`Error in getVisibleFilteredItemsAndCompareWithRecommended: ${error}`);
+				throw error;
+			}
 
 			Logger.debug('extensionSection.findItem by @installed filter');
 			try {
