@@ -253,6 +253,7 @@ for (const sample of samples) {
 		let extensionSection: ExtensionsViewSection;
 		let extensionsView: SideBarView | undefined;
 		let publisherNames: string[];
+		let skipSuite: boolean = false;
 
 		const [pathToExtensionsListFileName, extensionsListFileName]: string[] = ['.vscode', 'extensions.json'];
 
@@ -265,6 +266,12 @@ for (const sample of samples) {
 		let parsedRecommendations: Array<{ name: string; publisher: string }>;
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
+		});
+
+		setup('Skip follow-up tests if flagged', function (): void {
+			if (skipSuite) {
+				this.skip();
+			}
 		});
 
 		test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
@@ -338,9 +345,11 @@ for (const sample of samples) {
 					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
 					recommendedExtensions.recommendations.length === 1
 				) {
-					throw new Error(
+					Logger.info(
 						`Only '${dependencyAnalyticsExtensionName}' extension found. This extension will not be installed because of known issue https://issues.redhat.com/browse/CRW-9186`
 					);
+					skipSuite = true;
+					this.skip();
 				} else {
 					recommendedExtensions.recommendations = recommendedExtensions.recommendations.filter(
 						(rec: string): boolean => !rec.includes(dependencyAnalyticsExtensionName)
