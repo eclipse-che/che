@@ -78,7 +78,7 @@ function getSectionForCategory(title: string): string {
 		case '@outdated':
 			return 'Outdated';
 		case '@recommended':
-			return 'Other Recommendations';
+			return 'WORKSPACE RECOMMENDATIONS';
 		default:
 			return 'Marketplace';
 	}
@@ -120,6 +120,15 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	const sections: WebElement[] = await enclosingItem.findElements((extSection as any).constructor.locators.ViewContent.section);
 	Logger.debug(`Found ${sections.length} sections`);
 
+	// debug: Log all available section titles
+	const availableSections: string[] = [];
+	for (const sec of sections) {
+		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
+		const sectionTitleText: string = await titleElement.getText();
+		availableSections.push(sectionTitleText);
+	}
+	Logger.debug(`Available sections: ${availableSections.join(', ')}`);
+
 	let targetSection: WebElement | undefined;
 	for (const sec of sections) {
 		const titleElement: WebElement = await sec.findElement((extSection as any).constructor.locators.ViewSection.title);
@@ -132,7 +141,7 @@ async function findItem(extSection: ExtensionsViewSection, title: string): Promi
 	}
 
 	if (!targetSection) {
-		Logger.debug(`Section "${sectionTitle}" not found`);
+		Logger.debug(`Section "${sectionTitle}" not found. Available sections: ${availableSections.join(', ')}`);
 		return undefined;
 	}
 
@@ -180,15 +189,36 @@ async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations:
 		}
 	}
 	Logger.debug('marketplaceSection.getVisibleItems()');
-	const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
 
-	const allFoundRecommendedAuthors: string[] = await Promise.all(
-		allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
-	);
+	// debug: Log all found recommended items
+	try {
+		const allFoundRecommendedItems: ExtensionsViewItem[] = await marketplaceSection.getVisibleItems();
+		const itemTitles: string[] = await Promise.all(
+			allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getTitle())
+		);
 
-	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
-	const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
-	return allFoundAuthorsAsSortedString === allPublisherNamesAsSortedString;
+		const allFoundRecommendedAuthors: string[] = await Promise.all(
+			allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
+		);
+
+		Logger.debug(`Found ${allFoundRecommendedItems.length} recommended items: ${itemTitles.join(', ')}`);
+		Logger.debug(`Found authors: ${allFoundRecommendedAuthors.join(', ')}`);
+		Logger.debug(`Expected authors: ${recommendations.join(', ')}`);
+
+		const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
+		const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
+
+		Logger.debug(`Sorted found authors: ${allFoundAuthorsAsSortedString}`);
+		Logger.debug(`Sorted expected authors: ${allPublisherNamesAsSortedString}`);
+
+		const result: boolean = allFoundAuthorsAsSortedString === allPublisherNamesAsSortedString;
+		Logger.debug(`Authors match: ${result}`);
+
+		return result;
+	} catch (error) {
+		Logger.error(`Error getting item titles: ${error}`);
+		return false;
+	}
 }
 
 // get visible items from Extension view, transform this from array to sorted string and compares it with existed installed extensions
@@ -223,6 +253,7 @@ for (const sample of samples) {
 		let extensionSection: ExtensionsViewSection;
 		let extensionsView: SideBarView | undefined;
 		let publisherNames: string[];
+		let skipSuite: boolean = false;
 
 		const [pathToExtensionsListFileName, extensionsListFileName]: string[] = ['.vscode', 'extensions.json'];
 
@@ -235,6 +266,12 @@ for (const sample of samples) {
 		let parsedRecommendations: Array<{ name: string; publisher: string }>;
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
+		});
+
+		setup('Skip follow-up tests if flagged', function (): void {
+			if (skipSuite) {
+				this.skip();
+			}
 		});
 
 		test(`Create and open new workspace, stack:${sample}`, async function (): Promise<void> {
@@ -298,19 +335,21 @@ for (const sample of samples) {
 
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 
-			// skip the test if only redhat.fabric8-analytics extension is found in Dev Spaces 3.22.x (issue CRW-9186)
+			// skip redhat.fabric8-analytics extension in Dev Spaces 3.22+ (issue CRW-9186)
 			if (
 				BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces' &&
-				BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.startsWith('3.22')
+				BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION >= '3.22'
 			) {
 				const dependencyAnalyticsExtensionName: string = 'redhat.fabric8-analytics';
 				if (
 					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
 					recommendedExtensions.recommendations.length === 1
 				) {
-					throw new Error(
+					Logger.info(
 						`Only '${dependencyAnalyticsExtensionName}' extension found. This extension will not be installed because of known issue https://issues.redhat.com/browse/CRW-9186`
 					);
+					skipSuite = true;
+					this.skip();
 				} else {
 					recommendedExtensions.recommendations = recommendedExtensions.recommendations.filter(
 						(rec: string): boolean => !rec.includes(dependencyAnalyticsExtensionName)
@@ -389,8 +428,16 @@ for (const sample of samples) {
 			}
 
 			Logger.debug('extensionSection.findItem by @recommended filter');
-			expect(await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames)).to.be.true;
-			Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
+			try {
+				Logger.debug(`Expected publisher names: ${publisherNames.join(', ')}`);
+				const comparisonResult: boolean = await getVisibleFilteredItemsAndCompareWithRecommended(publisherNames);
+				Logger.debug(`Comparison result: ${comparisonResult}`);
+				expect(comparisonResult).to.be.true;
+				Logger.debug(`All recommended extensions were found by  @recommended filter: ---- ${publisherNames} ----`);
+			} catch (error) {
+				Logger.error(`Error in getVisibleFilteredItemsAndCompareWithRecommended: ${error}`);
+				throw error;
+			}
 
 			Logger.debug('extensionSection.findItem by @installed filter');
 			try {
