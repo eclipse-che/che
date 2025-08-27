@@ -104,7 +104,7 @@ suite(`Workspace using a parent test suite ${BASE_TEST_CONSTANTS.TEST_ENVIRONMEN
 		expect(containerNames).contains('tools').and.contains('che-gateway');
 
 		const initContainerName: string = shellExecutor.executeArbitraryShellScript(
-			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${kubernetesCommandLineToolsExecutor.namespace} --output jsonpath=\'{.spec.initContainers[].name}\'`
+			`${API_TEST_CONSTANTS.TS_API_TEST_KUBERNETES_COMMAND_LINE_TOOL} get pod ${podName} -n ${kubernetesCommandLineToolsExecutor.namespace} --output jsonpath=\'{.spec.initContainers[*].name}\'`
 		);
 		expect(initContainerName).contains('che-code-injector');
 	});
