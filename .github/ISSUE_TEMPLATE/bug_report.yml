@@ -33,8 +33,9 @@ body:
       label: Che version
       description: if workspace is running, version can be obtained with help/about menu
       options:
-        - "7.107@latest"
+        - "7.108@latest"
         - "next (development version)"
+        - "7.107"
         - "7.106"
         - "7.105"
         - "7.104"
