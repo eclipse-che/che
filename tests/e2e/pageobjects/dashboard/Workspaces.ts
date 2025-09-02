@@ -240,7 +240,7 @@ export class Workspaces {
 	}
 
 	private getOpenButtonLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[@data-key=5]//a[text()='Open']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[@data-key=5]//button[text()='Open']`);
 	}
 
 	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {
