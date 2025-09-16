@@ -41,7 +41,8 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 	const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
 		? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL ||
 			'https://gh.crw-qe.com/test-org/python-hello-world/tree/test-vscode-extensions'
-		: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/crw-qe/python-hello-world/tree/test-vscode-extensions';
+		: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
+			'https://github.com/crw-qe/python-hello-world/tree/test-vscode-extensions';
 
 	const PROJECT_NAME: string = 'python-hello-world';
 	const PYTHON_FILE_NAME: string = 'hello-world.py';
