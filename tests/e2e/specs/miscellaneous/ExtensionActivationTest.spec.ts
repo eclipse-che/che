@@ -26,6 +26,7 @@ import { By } from 'selenium-webdriver';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { ViewSection } from 'monaco-page-objects';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 
 suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -37,7 +38,12 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 
-	const FACTORY_URL: string = 'https://github.com/crw-qe/python-hello-world/tree/test-vscode-extensions';
+	const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+		? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL ||
+			'https://gh.crw-qe.com/test-automation-only/python-hello-world/tree/test-vscode-extensions'
+		: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
+			'https://github.com/crw-qe/python-hello-world/tree/test-vscode-extensions';
+
 	const PROJECT_NAME: string = 'python-hello-world';
 	const PYTHON_FILE_NAME: string = 'hello-world.py';
 	const RUN_PYTHON_BUTTON: By = By.xpath('//a[@aria-label="Run Python File"]');
@@ -55,7 +61,7 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 	});
 
 	test('Create and open workspace from factory URL', async function (): Promise<void> {
-		await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(FACTORY_URL);
+		await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		workspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		expect(workspaceName, 'Workspace name was not detected').not.empty;
