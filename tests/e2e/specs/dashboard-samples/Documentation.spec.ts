@@ -54,8 +54,8 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 	suiteSetup('Get links from product version github branch', function (): void {
 		try {
 			({ docs, links, productVersion } = JSON.parse(
-				shellExecutor.curl(
-					`https://raw.githubusercontent.com/redhat-developer/devspaces-images/devspaces-${majorMinorVersion}-rhel-9/devspaces-dashboard/packages/dashboard-frontend/assets/branding/product.json`
+				shellExecutor.executeCommand(
+					`oc exec deploy/devspaces-dashboard -n openshift-devspaces -- cat /public/dashboard/assets/branding/product.json`
 				)
 			));
 		} catch (e) {
