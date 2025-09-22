@@ -9,6 +9,8 @@
  **********************************************************************/
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
+import * as fs from 'fs';
+import * as path from 'path';
 import { CLASSES } from '../../configs/inversify.types';
 import { By } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
@@ -34,6 +36,11 @@ export class UserPreferences {
 
 	private static readonly SSH_KEY_TAB: By = By.xpath('//button[text()="SSH Keys"]');
 	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Add SSH Key"]');
+	private static readonly ADD_SSH_KEYS_POPUP: By = By.xpath('//span[text()="Add SSH Keys"]');
+	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-private-key"]');
+	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-public-key"]');
+	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('.pf-c-button.pf-m-primary');
+	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
 
 	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Services"]');
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="warning-info-checkbox"]');
@@ -117,6 +124,38 @@ export class UserPreferences {
 
 		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
+	}
+
+	async addSshKeys(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
+		Logger.debug();
+
+		Logger.info('Adding new SSH keys');
+		await this.driverHelper.waitAndClick(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.ADD_SSH_KEYS_POPUP);
+		await this.uploadSshKeys(privateSshKeyPath, publicSshKeyPath);
+		await this.driverHelper.waitAndClick(UserPreferences.ADD_SSH_KEYS_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.GIT_SSH_KEY_NAME);
+		Logger.info('SSH keys have been added');
+	}
+
+	async uploadSshKeys(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
+		Logger.debug();
+		const privateSshKey: string = fs.readFileSync(path.resolve(privateSshKeyPath), 'utf-8');
+		const publicSshKey: string = fs.readFileSync(path.resolve(publicSshKeyPath), 'utf-8');
+
+		Logger.info('Pasting private SSH key');
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
+		await this.driverHelper.getAction().sendKeys(privateSshKey).perform();
+
+		Logger.info('Pasting public SSH key');
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
+		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
+	}
+
+	async isSshKeyAdded(): Promise<boolean> {
+		Logger.debug();
+
+		return this.driverHelper.isVisible(UserPreferences.GIT_SSH_KEY_NAME);
 	}
 
 	getServiceConfig(service: string): string {
