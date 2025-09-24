@@ -41,6 +41,11 @@ export class UserPreferences {
 	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-public-key"]');
 	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('.pf-c-button.pf-m-primary');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
+	private static readonly GIT_SSH_KEY_ACTIONS_BUTTON: By = By.css('section[id*="SshKeys-user-preferences"] button[aria-label="Actions"]');
+	private static readonly ACTIONS_DELETE_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Delete"]');
+	private static readonly CONFIRM_DELETE_SSH_KEYS_POPUP: By = By.css('div[id^="pf-modal-part"][role="dialog"]');
+	private static readonly CONFIRM_DELETE_SSH_KEYS_CHECKBOX: By = By.id('delete-ssh-keys-warning-checkbox');
+	private static readonly DELETE_SSH_KEYS_BUTTON: By = By.xpath('//button[text()="Delete"]');
 
 	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Services"]');
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="warning-info-checkbox"]');
@@ -67,7 +72,7 @@ export class UserPreferences {
 		await this.openGitServicesTab();
 		await this.openPatTab();
 		await this.openGitConfigPage();
-		await this.openSshKeyTab();
+		await this.openSshKeyTabAndWaitAddSshKeyButton();
 	}
 
 	async openContainerRegistriesTab(): Promise<void> {
@@ -123,6 +128,12 @@ export class UserPreferences {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
+	}
+
+	async openSshKeyTabAndWaitAddSshKeyButton(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
 	}
 
@@ -140,8 +151,8 @@ export class UserPreferences {
 
 	async uploadSshKeys(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
 		Logger.debug();
-		const privateSshKey: string = fs.readFileSync(path.resolve(privateSshKeyPath), 'utf-8');
-		const publicSshKey: string = fs.readFileSync(path.resolve(publicSshKeyPath), 'utf-8');
+		const privateSshKey: string = Buffer.from(fs.readFileSync(path.resolve(privateSshKeyPath), 'utf-8'), 'base64').toString('utf-8');
+		const publicSshKey: string = Buffer.from(fs.readFileSync(path.resolve(publicSshKeyPath), 'utf-8'), 'base64').toString('utf-8');
 
 		Logger.info('Pasting private SSH key');
 		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
@@ -152,10 +163,27 @@ export class UserPreferences {
 		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
 	}
 
-	async isSshKeyAdded(): Promise<boolean> {
+	async isSshKeyPresent(): Promise<boolean> {
 		Logger.debug();
 
 		return this.driverHelper.isVisible(UserPreferences.GIT_SSH_KEY_NAME);
+	}
+
+	async deleteSshKeys(): Promise<void> {
+		Logger.debug();
+
+		Logger.info('Deleting SSH keys');
+		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
+		await this.driverHelper.waitAndClick(
+			UserPreferences.GIT_SSH_KEY_ACTIONS_BUTTON,
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+		);
+		await this.driverHelper.waitAndClick(UserPreferences.ACTIONS_DELETE_SSH_KEY_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.CONFIRM_DELETE_SSH_KEYS_POPUP);
+		await this.driverHelper.waitAndClick(UserPreferences.CONFIRM_DELETE_SSH_KEYS_CHECKBOX);
+		await this.driverHelper.waitAndClick(UserPreferences.DELETE_SSH_KEYS_BUTTON);
+		await this.driverHelper.waitDisappearance(UserPreferences.GIT_SSH_KEY_NAME);
+		Logger.info('SSH keys have been deleted');
 	}
 
 	getServiceConfig(service: string): string {

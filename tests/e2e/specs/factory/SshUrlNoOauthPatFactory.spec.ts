@@ -10,7 +10,7 @@
 
 import { ViewSection } from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
-import { CLASSES } from '../../configs/inversify.types';
+import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { e2eContainer } from '../../configs/inversify.config';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { registerRunningWorkspace } from '../MochaHooks';
@@ -21,6 +21,8 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { expect } from 'chai';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -28,11 +30,13 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
+	const dashbosrd: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
 		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
-	const privateSshKeyPath: string = 'resources/private-ssh-key';
-	const publicSshKeyPath: string = 'resources/public-ssh-key';
+	const privateSshKeyPath: string = 'resources/factory/pr-k.txt';
+	const publicSshKeyPath: string = 'resources/factory/pub-k.txt';
 	let projectSection: ViewSection;
 
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
@@ -71,12 +75,17 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 				'Project files were not imported'
 			).not.undefined;
 		});
-		test('Stop the workspace by UI', async function (): Promise<void> {
-			await workspaceHandlingTests.stopWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-			await browserTabsUtil.closeAllTabsExceptCurrent();
+		suiteTeardown('Delete SSH keys', async function (): Promise<void> {
+			await dashbosrd.openDashboard();
+			await userPreferences.openUserPreferencesPage();
+			await userPreferences.openSshKeyTab();
+			if (await userPreferences.isSshKeyPresent()) {
+				await userPreferences.deleteSshKeys();
+			}
 		});
-		test('Delete the workspace by UI', async function (): Promise<void> {
-			await workspaceHandlingTests.removeWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		suiteTeardown('Stop and delete the workspace by APII', async function (): Promise<void> {
+			await browserTabsUtil.closeAllTabsExceptCurrent();
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
 		suiteTeardown('Unregister running workspace', function (): void {
 			registerRunningWorkspace('');
