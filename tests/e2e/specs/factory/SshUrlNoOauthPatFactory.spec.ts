@@ -30,7 +30,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
-	const dashbosrd: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
@@ -76,7 +76,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 			).not.undefined;
 		});
 		suiteTeardown('Delete SSH keys', async function (): Promise<void> {
-			await dashbosrd.openDashboard();
+			await dashboard.openDashboard();
 			await userPreferences.openUserPreferencesPage();
 			await userPreferences.openSshKeyTab();
 			if (await userPreferences.isSshKeyPresent()) {
