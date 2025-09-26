@@ -55,7 +55,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		try {
 			({ docs, links, productVersion } = JSON.parse(
 				shellExecutor.executeCommand(
-					`oc exec deploy/devspaces-dashboard -n openshift-devspaces -- cat /public/dashboard/assets/branding/product.json`
+					'oc exec deploy/devspaces-dashboard -n openshift-devspaces -- cat /public/dashboard/assets/branding/product.json'
 				)
 			));
 		} catch (e) {
