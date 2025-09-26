@@ -42,10 +42,9 @@ export class UserPreferences {
 	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('.pf-c-button.pf-m-primary');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
 	private static readonly GIT_SSH_KEY_ACTIONS_BUTTON: By = By.css('section[id*="SshKeys-user-preferences"] button[aria-label="Actions"]');
-	private static readonly ACTIONS_DELETE_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Delete"]');
+	private static readonly DELETE_BUTTON: By = By.xpath('//button[text()="Delete"]');
 	private static readonly CONFIRM_DELETE_SSH_KEYS_POPUP: By = By.css('div[id^="pf-modal-part"][role="dialog"]');
 	private static readonly CONFIRM_DELETE_SSH_KEYS_CHECKBOX: By = By.id('delete-ssh-keys-warning-checkbox');
-	private static readonly DELETE_SSH_KEYS_BUTTON: By = By.xpath('//button[text()="Delete"]');
 
 	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Services"]');
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="warning-info-checkbox"]');
@@ -178,10 +177,10 @@ export class UserPreferences {
 			UserPreferences.GIT_SSH_KEY_ACTIONS_BUTTON,
 			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
 		);
-		await this.driverHelper.waitAndClick(UserPreferences.ACTIONS_DELETE_SSH_KEY_BUTTON);
+		await this.driverHelper.waitAndClick(UserPreferences.DELETE_BUTTON);
 		await this.driverHelper.waitVisibility(UserPreferences.CONFIRM_DELETE_SSH_KEYS_POPUP);
 		await this.driverHelper.waitAndClick(UserPreferences.CONFIRM_DELETE_SSH_KEYS_CHECKBOX);
-		await this.driverHelper.waitAndClick(UserPreferences.DELETE_SSH_KEYS_BUTTON);
+		await this.driverHelper.waitAndClick(UserPreferences.DELETE_BUTTON);
 		await this.driverHelper.waitDisappearance(UserPreferences.GIT_SSH_KEY_NAME);
 		Logger.info('SSH keys have been deleted');
 	}
