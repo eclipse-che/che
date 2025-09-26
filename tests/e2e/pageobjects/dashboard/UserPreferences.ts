@@ -72,7 +72,7 @@ export class UserPreferences {
 		await this.openGitServicesTab();
 		await this.openPatTab();
 		await this.openGitConfigPage();
-		await this.openSshKeyTabAndWaitAddSshKeyButton();
+		await this.checkAddSshKeyButtonAvailability();
 	}
 
 	async openContainerRegistriesTab(): Promise<void> {
@@ -130,10 +130,10 @@ export class UserPreferences {
 		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
 	}
 
-	async openSshKeyTabAndWaitAddSshKeyButton(): Promise<void> {
+	async checkAddSshKeyButtonAvailability(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
+		await this.openSshKeyTab();
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
 	}
 
@@ -173,7 +173,7 @@ export class UserPreferences {
 		Logger.debug();
 
 		Logger.info('Deleting SSH keys');
-		await this.driverHelper.waitAndClick(UserPreferences.SSH_KEY_TAB);
+		await this.openSshKeyTab();
 		await this.driverHelper.waitAndClick(
 			UserPreferences.GIT_SSH_KEY_ACTIONS_BUTTON,
 			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
