@@ -23,6 +23,7 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { Logger } from '../../utils/Logger';
 
 suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -39,9 +40,19 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const publicSshKeyPath: string = 'resources/factory/pub-k.txt';
 	let projectSection: ViewSection;
 
+	async function deleteSshKeys(): Promise<void> {
+		Logger.debug('Deleting SSH keys if they are present');
+		await userPreferences.openUserPreferencesPage();
+		await userPreferences.openSshKeyTab();
+		if (await userPreferences.isSshKeyPresent()) {
+			await userPreferences.deleteSshKeys();
+		}
+	}
+
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
+			await deleteSshKeys();
 		});
 		test('Add SSH keys', async function (): Promise<void> {
 			await userPreferences.openUserPreferencesPage();
@@ -77,11 +88,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 		});
 		suiteTeardown('Delete SSH keys', async function (): Promise<void> {
 			await dashboard.openDashboard();
-			await userPreferences.openUserPreferencesPage();
-			await userPreferences.openSshKeyTab();
-			if (await userPreferences.isSshKeyPresent()) {
-				await userPreferences.deleteSshKeys();
-			}
+			await deleteSshKeys();
 		});
 		suiteTeardown('Stop and delete the workspace by APII', async function (): Promise<void> {
 			await browserTabsUtil.closeAllTabsExceptCurrent();
