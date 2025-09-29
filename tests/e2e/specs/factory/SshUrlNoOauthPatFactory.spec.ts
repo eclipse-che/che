@@ -36,8 +36,8 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
 		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
-	const privateSshKeyPath: string = 'resources/factory/pr-k.txt';
-	const publicSshKeyPath: string = 'resources/factory/pub-k.txt';
+	const privateSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY_PATH;
+	const publicSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY_PATH;
 	let projectSection: ViewSection;
 
 	async function deleteSshKeys(): Promise<void> {
