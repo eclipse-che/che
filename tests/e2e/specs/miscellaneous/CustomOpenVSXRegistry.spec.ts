@@ -170,10 +170,9 @@ suite(
 
 		test('Check Custom VSX plugin', async function (): Promise<void> {
 			await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-			Logger.debug(`new SideBarView().getContent().getSection: get che`);
+			Logger.debug('new SideBarView().getContent().getSection: get che');
 			projectSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, "che"), 'Project folder was not imported').not
-				.undefined;
+			expect(await projectAndFileTests.getProjectTreeItem(projectSection, 'che'), 'Project folder was not imported').not.undefined;
 			await projectAndFileTests.performTrustDialogs();
 			const extensionsView: SideBarView | undefined = await (await new ActivityBar().getViewControl('Extensions'))?.openView();
 			await driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
