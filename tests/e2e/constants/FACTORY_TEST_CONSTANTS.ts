@@ -25,6 +25,8 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO: boolean;
 	TS_SELENIUM_FACTORY_GIT_PROVIDER: string;
 	TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: string;
+	TS_SELENIUM_SSH_PRIVATE_KEY_PATH: string;
+	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: string;
 	TS_SELENIUM_FACTORY_URL(): string;
 } = {
 	/**
@@ -56,6 +58,16 @@ export const FACTORY_TEST_CONSTANTS: {
 	 * git repository main branch name (main or master)
 	 */
 	TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: process.env.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'master',
+
+	/**
+	 * path to SSH private key file
+	 */
+	TS_SELENIUM_SSH_PRIVATE_KEY_PATH: process.env.TS_SELENIUM_SSH_PRIVATE_KEY_PATH || 'resources/factory/pr-k.txt',
+
+	/**
+	 * path to SSH public key file
+	 */
+	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: process.env.TS_SELENIUM_SSH_PUBLIC_KEY_PATH || 'resources/factory/pub-k.txt',
 
 	/**
 	 * full factory URL
