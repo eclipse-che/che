@@ -18,6 +18,7 @@ import { Logger } from '../utils/Logger';
 import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { DriverHelper } from '../utils/DriverHelper';
+import { expect } from 'chai';
 import { By, error } from 'selenium-webdriver';
 
 @injectable()
@@ -49,16 +50,30 @@ export class WorkspaceHandlingTests {
 		WorkspaceHandlingTests.workspaceName = 'undefined';
 	}
 
-	async createAndOpenWorkspace(stack: string): Promise<void> {
+	async createAndOpenWorkspace(stack: string, createNewWorkspace: boolean = true): Promise<void> {
 		await this.dashboard.clickWorkspacesButton();
 		await this.dashboard.waitPage();
 		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
 		await this.apiUrlResolver.getWorkspacesApiUrl();
 		await this.dashboard.clickCreateWorkspaceButton();
 		await this.createWorkspace.waitPage();
+		await this.createWorkspace.setCreateNewWorkspaceCheckbox(createNewWorkspace);
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
 		await this.createWorkspace.clickOnSampleNoEditorSelection(stack);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+	}
+
+	async check(): Promise<void> {
+		await this.dashboard.waitPage();
+		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
+		await this.apiUrlResolver.getWorkspacesApiUrl();
+		await this.dashboard.clickCreateWorkspaceButton();
+		await this.createWorkspace.waitPage();
+
+		await this.createWorkspace.setCreateNewWorkspaceCheckbox(false);
+
+		// const isChecked = await this.createWorkspace.isCreateNewWorkspaceCheckboxChecked();
+		// logger.debug(`Checkbox is checked: ${isChecked}`);
 	}
 
 	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string, branchName?: string): Promise<void> {
