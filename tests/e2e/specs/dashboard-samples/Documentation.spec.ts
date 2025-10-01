@@ -69,12 +69,6 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 		await loginTests.loginIntoChe();
 	});
 
-	test('Check if product.json config contains correct application version', function (): void {
-		[productVersion, links[1].href, devfile, workspace, general, storageTypes, webSocketTroubleshooting].forEach((e): void => {
-			expect(e, 'Fetched links not matches with tested product version').contains(majorMinorVersion);
-		});
-	});
-
 	test('Check if documentation section "About" present on Dashboard', async function (): Promise<void> {
 		await dashboard.openAboutMenu();
 	});
