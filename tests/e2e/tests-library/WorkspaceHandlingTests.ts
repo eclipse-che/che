@@ -49,24 +49,30 @@ export class WorkspaceHandlingTests {
 		WorkspaceHandlingTests.workspaceName = 'undefined';
 	}
 
-	async createAndOpenWorkspace(stack: string): Promise<void> {
+	async createAndOpenWorkspace(stack: string, createNewWorkspace: boolean = true): Promise<void> {
 		await this.dashboard.clickWorkspacesButton();
 		await this.dashboard.waitPage();
 		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
 		await this.apiUrlResolver.getWorkspacesApiUrl();
 		await this.dashboard.clickCreateWorkspaceButton();
 		await this.createWorkspace.waitPage();
+		await this.createWorkspace.setCreateNewWorkspaceCheckbox(createNewWorkspace);
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
 		await this.createWorkspace.clickOnSampleNoEditorSelection(stack);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
-	async createAndOpenWorkspaceFromGitRepository(factoryUrl: string, branchName?: string): Promise<void> {
+	async createAndOpenWorkspaceFromGitRepository(
+		factoryUrl: string,
+		branchName?: string,
+		createNewWorkspace: boolean = true
+	): Promise<void> {
 		await this.dashboard.waitPage();
 		Logger.debug('fetching user kubernetes namespace, storing auth token by getting workspaces API URL.');
 		await this.apiUrlResolver.getWorkspacesApiUrl();
 		await this.dashboard.clickCreateWorkspaceButton();
 		await this.createWorkspace.waitPage();
+		await this.createWorkspace.setCreateNewWorkspaceCheckbox(createNewWorkspace);
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
 		await this.createWorkspace.importFromGitUsingUI(factoryUrl, branchName);
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);

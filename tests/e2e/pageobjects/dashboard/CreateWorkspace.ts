@@ -11,7 +11,7 @@
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../../configs/inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By, Key } from 'selenium-webdriver';
+import { By, Key, WebElement } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
@@ -24,6 +24,8 @@ export class CreateWorkspace {
 	private static readonly GIT_BRANCH_NAME: By = By.xpath('//input[@aria-label="Git Branch"]');
 	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
 	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.xpath('//input[@id="create-new-if-exist-switch"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -107,6 +109,40 @@ export class CreateWorkspace {
 		} catch (e) {
 			Logger.info('"Trust author" popup was not shown');
 		}
+	}
+
+	async isCreateNewWorkspaceCheckboxChecked(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL): Promise<boolean> {
+		Logger.debug();
+
+		const element: WebElement = await this.driverHelper.waitPresence(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX_VALUE, timeout);
+		return await element.isSelected();
+	}
+
+	async clickOnCreateNewWorkspaceCheckbox(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
+	}
+
+	async setCreateNewWorkspaceCheckbox(
+		checked: boolean = true,
+		timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL
+	): Promise<void> {
+		Logger.debug(`checked: ${checked}`);
+
+		// check current state
+		const isCurrentlyChecked: boolean = await this.isCreateNewWorkspaceCheckboxChecked(timeout);
+
+		// if already in desired state, do nothing
+		if (isCurrentlyChecked === checked) {
+			Logger.debug(`Checkbox is already ${checked ? 'set' : 'unset'}, no action needed`);
+			return;
+		}
+
+		// click to change state
+		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
+		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
+		await this.driverHelper.wait(1000);
 	}
 
 	private getEditorsDropdownListLocator(sampleName: string): By {
