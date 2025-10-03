@@ -78,20 +78,6 @@ suite(
 			});
 		}
 
-		if (BASE_TEST_CONSTANTS.SELECT_OPENING_EXISTING_WORKSPACE_INSTEAD_OF_CREATION_NEW) {
-			test('Select opening an existing workspace instead of creating a new one', async function (): Promise<void> {
-				await dashboard.waitExistingWorkspaceFoundAlert();
-				await dashboard.clickOpenExistingWorkspaceButton();
-			});
-		}
-
-		if (BASE_TEST_CONSTANTS.SELECT_CREATING_NEW_WORKSPACE) {
-			test('Select of creating a new workspace', async function (): Promise<void> {
-				await dashboard.waitExistingWorkspaceFoundAlert();
-				await dashboard.clickOnCreateNewWorkspaceButton();
-			});
-		}
-
 		test('Obtain workspace name from workspace loader page', async function (): Promise<void> {
 			await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		});
