@@ -16,19 +16,16 @@ export class StringUtil {
 	/**
 	 * extracts the project (repository) name from a Git HTTPS URL.
 	 *
-	 * The method:
-	 * - Removes query parameters (`?…`) and hash fragments (`#…`);
-	 * - Trims branch or tree paths (e.g. `/tree/<branch>` or `/-/tree/<branch>`);
-	 * - Splits the cleaned URL into parts by "/" or ".";
-	 * - Filters out empty parts and generic words like `"git"`;
-	 * - Returns the last remaining part — the actual project name.
+	 * Handles URLs from GitLab, GitHub, and Bitbucket by:
+	 * - Removing query parameters and hash fragments;
+	 * - Trimming branch or tree paths (e.g. `/tree/<branch>`, `/-/tree/<branch>`, `/src/<branch>`);
+	 * - Stripping the `.git` suffix.
 	 *
-	 * ⚠️ Notes:
-	 * - Avoid naming repositories as just `"git"`;
-	 * - Avoid using dots in the repo name (e.g. `name.with.dots`), since they may be treated as separators.
+	 * ⚠️ Avoid naming repositories as `"git"` or using dots in names (`name.with.dots`),
+	 * as they may be treated as separators.
 	 *
-	 * @param url Git HTTPS URL (same as used for `git clone`)
-	 * @returns The extracted project name, or an empty string if parsing fails
+	 * @param url Git HTTPS URL (as used for `git clone`)
+	 * @returns Extracted project name, or an empty string if parsing fails
 	 */
 	static getProjectNameFromGitUrl(url: string): string {
 		Logger.debug(`Original URL: ${url}`);
@@ -37,16 +34,13 @@ export class StringUtil {
 			// remove query and hash fragments
 			url = url.split('?')[0].split('#')[0];
 
-			// remove branch/tree parts for GitLab, GitHub, Bitbucket
+			// remove branch/tree path fragments for major providers
 			url = url
 				.replace(/\/-?\/tree\/[^/]+$/, '') // gitLab, GitHub
 				.replace(/\/src\/[^/]+.*$/, ''); // bitbucket
 
-			// extract last part of the path
-			let projectName: string = url.split('/').filter(Boolean).pop() || '';
-
-			// remove .git if present
-			projectName = projectName.replace(/\.git$/, '');
+			// take the last segment of the path and strip ".git"
+			const projectName: string = (url.split('/').filter(Boolean).pop() || '').replace(/\.git$/, '');
 
 			Logger.debug(`Extracted project name: ${projectName}`);
 			return projectName;
