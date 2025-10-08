@@ -38,7 +38,11 @@ export class OcpRedHatLoginPage implements ICheLoginPage {
 			OcpRedHatLoginPage.OPENSHIFT_LOGIN_LANDING_PAGE_BUTTON,
 			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
 		);
-		await this.ocpLogin.waitAndClickOnLoginProviderTitle();
+
+		if (await this.ocpLogin.isIdentityProviderLinkVisible()) {
+			await this.ocpLogin.waitAndClickOnLoginProviderTitle();
+		}
+
 		await this.redHatLogin.waitRedHatLoginWelcomePage();
 		try {
 			await this.redHatLogin.waitAndConfirmCookiePolicy();
