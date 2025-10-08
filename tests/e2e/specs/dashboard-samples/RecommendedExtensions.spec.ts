@@ -335,28 +335,6 @@ for (const sample of samples) {
 
 			Logger.debug('recommendedExtensions.recommendations: Get recommendations clear names using map().');
 
-			// skip redhat.fabric8-analytics extension in Dev Spaces 3.22+ (issue CRW-9186)
-			if (
-				BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces' &&
-				BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION >= '3.22'
-			) {
-				const dependencyAnalyticsExtensionName: string = 'redhat.fabric8-analytics';
-				if (
-					recommendedExtensions.recommendations.includes(dependencyAnalyticsExtensionName) &&
-					recommendedExtensions.recommendations.length === 1
-				) {
-					Logger.info(
-						`Only '${dependencyAnalyticsExtensionName}' extension found. This extension will not be installed because of known issue https://issues.redhat.com/browse/CRW-9186`
-					);
-					skipSuite = true;
-					this.skip();
-				} else {
-					recommendedExtensions.recommendations = recommendedExtensions.recommendations.filter(
-						(rec: string): boolean => !rec.includes(dependencyAnalyticsExtensionName)
-					);
-				}
-			}
-
 			parsedRecommendations = recommendedExtensions.recommendations.map((rec: string): { name: string; publisher: string } => {
 				const [publisher, name] = rec.split('.');
 				return { publisher, name };
