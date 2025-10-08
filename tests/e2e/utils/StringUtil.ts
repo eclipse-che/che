@@ -14,7 +14,7 @@ import { injectable } from 'inversify';
 @injectable()
 export class StringUtil {
 	/**
-	 * Extracts the project (repository) name from a Git HTTPS URL.
+	 * extracts the project (repository) name from a Git HTTPS URL.
 	 *
 	 * The method:
 	 * - Removes query parameters (`?…`) and hash fragments (`#…`);
@@ -34,18 +34,18 @@ export class StringUtil {
 		Logger.debug(`Original URL: ${url}`);
 
 		try {
-			// Remove query and hash fragments
+			// remove query and hash fragments
 			url = url.split('?')[0].split('#')[0];
 
-			// Remove branch/tree parts for GitLab, GitHub, Bitbucket
+			// remove branch/tree parts for GitLab, GitHub, Bitbucket
 			url = url
-				.replace(/\/-?\/tree\/[^/]+$/, '') // GitLab, GitHub
-				.replace(/\/src\/[^/]+.*$/, ''); // Bitbucket
+				.replace(/\/-?\/tree\/[^/]+$/, '') // gitLab, GitHub
+				.replace(/\/src\/[^/]+.*$/, ''); // bitbucket
 
-			// Extract last part of the path
-			let projectName = url.split('/').filter(Boolean).pop() || '';
+			// extract last part of the path
+			let projectName: string = url.split('/').filter(Boolean).pop() || '';
 
-			// Remove .git if present
+			// remove .git if present
 			projectName = projectName.replace(/\.git$/, '');
 
 			Logger.debug(`Extracted project name: ${projectName}`);
