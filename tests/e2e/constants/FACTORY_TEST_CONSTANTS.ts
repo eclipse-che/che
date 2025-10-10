@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2020-2023 Red Hat, Inc.
+ * copyright (c) 2020-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -74,8 +74,7 @@ export const FACTORY_TEST_CONSTANTS: {
 	 */
 	TS_SELENIUM_FACTORY_URL(): string {
 		return (
-			process.env.TS_SELENIUM_FACTORY_URL ||
-			BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/dashboard/#/' + this.TS_SELENIUM_FACTORY_GIT_REPO_URL
+			process.env.TS_SELENIUM_FACTORY_URL || BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL + '/#/' + this.TS_SELENIUM_FACTORY_GIT_REPO_URL
 		);
 	}
 };

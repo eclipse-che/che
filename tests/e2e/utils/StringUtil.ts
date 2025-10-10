@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019 Red Hat, Inc.
+ * copyright (c) 2019-2025 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,27 +14,40 @@ import { injectable } from 'inversify';
 @injectable()
 export class StringUtil {
 	/**
-	 * method extracts a test repo name from git clone https url;
-	 * it splits the url into string[] by "/" or ".", deletes empty elements and elements that contains just "git", "main" or "tree" word, than returns the last one;
-	 * please, avoid to call the test repo as just "git" or to use dots in the name, like: github.com/user/git.git, github.com/user/name.with.dots.
-	 * @param url git https url (which using for "git clone")
-	 * @return project name
+	 * extracts the project (repository) name from a Git HTTPS URL.
+	 *
+	 * Handles URLs from GitLab, GitHub, and Bitbucket by:
+	 * - Removing query parameters and hash fragments;
+	 * - Trimming branch or tree paths (e.g. `/tree/<branch>`, `/-/tree/<branch>`, `/src/<branch>`);
+	 * - Stripping the `.git` suffix.
+	 *
+	 * ⚠️ Avoid naming repositories as `"git"` or using dots in names (`name.with.dots`),
+	 * as they may be treated as separators.
+	 *
+	 * @param url Git HTTPS URL (as used for `git clone`)
+	 * @returns Extracted project name, or an empty string if parsing fails
 	 */
 	static getProjectNameFromGitUrl(url: string): string {
-		Logger.debug(`${url}`);
+		Logger.debug(`Original URL: ${url}`);
 
-		if (url.includes('?')) {
-			url = url.substring(0, url.indexOf('?'));
+		try {
+			// remove query and hash fragments
+			url = url.split('?')[0].split('#')[0];
+
+			// remove branch/tree path fragments for major providers
+			url = url
+				.replace(/\/-?\/tree\/[^/]+$/, '') // gitLab, GitHub
+				.replace(/\/src\/[^/]+.*$/, ''); // bitbucket
+
+			// take the last segment of the path and strip ".git"
+			const projectName: string = (url.split('/').filter(Boolean).pop() || '').replace(/\.git$/, '');
+
+			Logger.debug(`Extracted project name: ${projectName}`);
+			return projectName;
+		} catch (err) {
+			Logger.error(`Failed to extract project name from URL ${url}: ${err}`);
+			return '';
 		}
-		if (url.includes('/tree/')) {
-			url = url.split('/').slice(0, -2).join('/');
-		}
-		const projectName: string = url
-			.split(/[\/.]/)
-			.filter((e: string): boolean => !['git', ''].includes(e))
-			.reverse()[0];
-		Logger.debug(`${projectName}`);
-		return projectName;
 	}
 
 	static sanitizeTitle(arg: string): string {

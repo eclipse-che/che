@@ -253,7 +253,7 @@ for (const sample of samples) {
 		let extensionSection: ExtensionsViewSection;
 		let extensionsView: SideBarView | undefined;
 		let publisherNames: string[];
-		let skipSuite: boolean = false;
+		const skipSuite: boolean = false;
 
 		const [pathToExtensionsListFileName, extensionsListFileName]: string[] = ['.vscode', 'extensions.json'];
 
