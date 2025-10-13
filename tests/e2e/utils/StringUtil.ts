@@ -30,24 +30,21 @@ export class StringUtil {
 	static getProjectNameFromGitUrl(url: string): string {
 		Logger.debug(`Original URL: ${url}`);
 
-		try {
-			// remove query and hash fragments
-			url = url.split('?')[0].split('#')[0];
+		// remove query and hash fragments
+		url = url.split('?')[0].split('#')[0];
 
-			// remove branch/tree path fragments for major providers
-			url = url
-				.replace(/\/-?\/tree\/[^/]+$/, '') // gitLab, GitHub
-				.replace(/\/src\/[^/]+.*$/, ''); // bitbucket
-
-			// take the last segment of the path and strip ".git"
-			const projectName: string = (url.split('/').filter(Boolean).pop() || '').replace(/\.git$/, '');
-
-			Logger.debug(`Extracted project name: ${projectName}`);
-			return projectName;
-		} catch (err) {
-			Logger.error(`Failed to extract project name from URL ${url}: ${err}`);
-			return '';
+		// remove branch/tree fragments for GitHub, GitLab, Bitbucket
+		if (url.includes('/tree/') || url.includes('/-/tree/') || url.includes('/src/')) {
+			url = url.split('/').slice(0, -2).join('/');
 		}
+
+		const projectName: string = url
+			.split(/[\/.]/)
+			.filter((e: string): boolean => !['git', ''].includes(e))
+			.reverse()[0];
+
+		Logger.debug(`Extracted project name: ${projectName}`);
+		return projectName;
 	}
 
 	static sanitizeTitle(arg: string): string {
