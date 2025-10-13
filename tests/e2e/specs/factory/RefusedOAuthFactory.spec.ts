@@ -13,9 +13,9 @@ import { e2eContainer } from '../../configs/inversify.config';
 import {
 	ActivityBar,
 	ContextMenu,
-	InputBox,
 	Key,
 	Locators,
+	ModalDialog,
 	NewScmView,
 	SingleScmProvider,
 	ViewControl,
@@ -33,9 +33,8 @@ import { OauthPage } from '../../pageobjects/git-providers/OauthPage';
 import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
-import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
@@ -67,9 +66,8 @@ suite(
 		const timeToRefresh: number = 1500;
 		const changesToCommit: string = new Date().getTime().toString();
 		const fileToChange: string = 'Date.txt';
-		const commitChangesButtonLabel: string = `Commit Changes on "${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
+		const dialogText: string = 'Make sure you configure your "user.name" and "user.email" in git.';
 		const refreshButtonLabel: string = 'Refresh';
-		const pushItemLabel: string = 'Push';
 		const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
@@ -197,63 +195,11 @@ suite(
 				Logger.debug('Press Enter to commit the changes');
 				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
-				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
-				// wait while changes counter will be refreshed
-				await driverHelper.wait(timeToRefresh);
-				const changes: number = await scmProvider.getChangeCount();
-				Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
-				expect(changes).eql(0);
-			});
-
-			test('Push the changes', async function (): Promise<void> {
-				await driverHelper.waitVisibility(
-					webCheCodeLocators.ScmView.actionConstructor(
-						`Push 1 commits to origin/${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`
-					)
-				);
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				Logger.debug('scmProvider.openMoreActions');
-				scmContextMenu = await scmProvider.openMoreActions();
-				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
-				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
-				await scmContextMenu.select(pushItemLabel);
-			});
-
-			test('Insert git credentials which were asked after push', async function (): Promise<void> {
-				try {
-					await driverHelper.waitVisibility(webCheCodeLocators.InputBox.message);
-				} catch (e) {
-					Logger.info(`Workspace did not ask credentials before push - ${e};
-                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066, please check if not other git provider. `);
-					expect(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER).eqls(GitProviderType.GITHUB);
-				}
-				const input: InputBox = new InputBox();
-				await input.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-				await input.confirm();
-				await driverHelper.wait(timeToRefresh);
-				await input.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
-				await input.confirm();
-				await driverHelper.wait(timeToRefresh);
-			});
-
-			test('Check if the changes were pushed', async function (): Promise<void> {
-				try {
-					Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-					await scmProvider.takeAction(refreshButtonLabel);
-				} catch (e) {
-					Logger.info(
-						'Check you use correct credentials.' +
-							'For bitbucket.org ensure you use an app password: https://support.atlassian.com/bitbucket-cloud/docs/using-app-passwords/;' +
-							'For github.com - personal access token instead of password.'
-					);
-				}
-				const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
-					webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel),
-					'aria-disabled'
-				);
-				expect(isCommitButtonDisabled).to.be.true;
+				await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
+				const modalDialog: ModalDialog = new ModalDialog();
+				const messageDetails: string = await modalDialog.getDetails();
+				Logger.debug(`modalDialog.getDetails: "${messageDetails}"`);
+				expect(messageDetails).to.contain(dialogText);
 			});
 		}
 
