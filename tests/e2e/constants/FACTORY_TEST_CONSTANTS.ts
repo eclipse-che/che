@@ -27,6 +27,8 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: string;
 	TS_SELENIUM_SSH_PRIVATE_KEY_PATH: string;
 	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: string;
+	TS_GIT_CONFIG_USER_NAME: string;
+	TS_GIT_CONFIG_USER_EMAIL: string;
 	TS_SELENIUM_FACTORY_URL(): string;
 } = {
 	/**
@@ -68,6 +70,16 @@ export const FACTORY_TEST_CONSTANTS: {
 	 * path to SSH public key file
 	 */
 	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: process.env.TS_SELENIUM_SSH_PUBLIC_KEY_PATH || 'resources/factory/pub-k.txt',
+
+	/**
+	 * git config user name
+	 */
+	TS_GIT_CONFIG_USER_NAME: process.env.TS_GIT_CONFIG_USER_NAME || 'user',
+
+	/**
+	 * git config user email
+	 */
+	TS_GIT_CONFIG_USER_EMAIL: process.env.TS_GIT_CONFIG_USER_EMAIL || 'user@user.com',
 
 	/**
 	 * full factory URL

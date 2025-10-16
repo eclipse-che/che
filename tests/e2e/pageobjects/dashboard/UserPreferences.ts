@@ -33,6 +33,9 @@ export class UserPreferences {
 	private static readonly ADD_NEW_PAT_BUTTON: By = By.xpath('//button[text()="Add Personal Access Token"]');
 
 	private static readonly GIT_CONFIG_PAGE: By = By.xpath('//button[text()="Gitconfig"]');
+	private static readonly GIT_CONFIG_USER_NAME: By = By.id('gitconfig-user-name');
+	private static readonly GIT_CONFIG_USER_EMAIL: By = By.id('gitconfig-user-email');
+	private static readonly GIT_CONFIG_SAVE_BUTTON: By = By.css('[data-testid="button-save"]');
 
 	private static readonly SSH_KEY_TAB: By = By.xpath('//button[text()="SSH Keys"]');
 	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Add SSH Key"]');
@@ -121,6 +124,35 @@ export class UserPreferences {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(UserPreferences.GIT_CONFIG_PAGE);
+	}
+
+	async enterGitConfigUserName(userName: string): Promise<void> {
+		Logger.debug(`"${userName}"`);
+
+		await this.driverHelper.enterValue(UserPreferences.GIT_CONFIG_USER_NAME, userName);
+	}
+
+	async enterGitConfigUserEmail(userEmail: string): Promise<void> {
+		Logger.debug(`"${userEmail}"`);
+
+		await this.driverHelper.enterValue(UserPreferences.GIT_CONFIG_USER_EMAIL, userEmail);
+	}
+
+	async clickOnGitConfigSaveButton(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(UserPreferences.GIT_CONFIG_SAVE_BUTTON);
+	}
+
+	async waitGitConfigSaveButtonIsDisabled(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAttributeValue(
+			UserPreferences.GIT_CONFIG_SAVE_BUTTON,
+			'aria-disabled',
+			'true',
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+		);
 	}
 
 	async openSshKeyTab(): Promise<void> {
