@@ -138,10 +138,6 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 		await workspaces.waitWorkspaceWithStoppedStatus(currentWorkspaceName);
 
 		const originalWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
-
-		// workaround: Wait before restarting workspace to avoid "Container tools has state Error" issue
-		// see: https://issues.redhat.com/browse/CRW-9526
-		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
 		await workspaces.clickOpenButton(currentWorkspaceName);
 
 		await browserTabsUtil.waitAndSwitchToAnotherWindow(originalWindowHandle, WORKSPACE_RESTART_TIMEOUT);
