@@ -40,7 +40,7 @@
 		"axios": "^0.25.0",
 		"chai": "^4.3.4",
 		"chrome-har": "^0.13.2",
-		"chromedriver": "^141.0.0",
+		"chromedriver": "^125.0.0",
 		"clone-deep": "^4.0.1",
 		"eslint": "^8.45.0",
 		"eslint-config-prettier": "^8.10.0",
