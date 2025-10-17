@@ -234,10 +234,13 @@ suite(
 				await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
 				await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 
-				await driverHelper.waitAndClick((webCheCodeLocators.ScmView as any).scmEditor, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+				await driverHelper.waitAndClick(
+					(webCheCodeLocators.ScmView as any).scmEditor,
+					TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT
+				);
 				const scmView: NewScmView = new NewScmView();
 				[scmProvider, ...rest] = await scmView.getProviders();
-				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`)
+				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 
 				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
 				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
