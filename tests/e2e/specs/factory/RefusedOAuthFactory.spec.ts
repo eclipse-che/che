@@ -13,6 +13,7 @@ import { e2eContainer } from '../../configs/inversify.config';
 import {
 	ActivityBar,
 	ContextMenu,
+	InputBox,
 	Key,
 	Locators,
 	ModalDialog,
@@ -35,10 +36,14 @@ import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
+import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
+import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -55,6 +60,8 @@ suite(
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
+		const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
+		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -68,9 +75,19 @@ suite(
 		const fileToChange: string = 'Date.txt';
 		const dialogText: string = 'Make sure you configure your "user.name" and "user.email" in git.';
 		const refreshButtonLabel: string = 'Refresh';
+		const pushItemLabel: string = 'Push';
 		const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
+
+		async function setupGitConfig(userName: string, userEmail: string): Promise<void> {
+			await userPreferences.openUserPreferencesPage();
+			await userPreferences.openGitConfigPage();
+			await userPreferences.enterGitConfigUserName(userName);
+			await userPreferences.enterGitConfigUserEmail(userEmail);
+			await userPreferences.clickOnGitConfigSaveButton();
+			await userPreferences.waitGitConfigSaveButtonIsDisabled();
+		}
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
@@ -183,7 +200,7 @@ suite(
 				await scmContextMenu.select('Changes', 'Stage All Changes');
 			});
 
-			test('Commit the changes', async function (): Promise<void> {
+			test('Get modal dialog when try to commit changes', async function (): Promise<void> {
 				Logger.info(`ScmView inputField locator: "${(webCheCodeLocators.ScmView as any).scmEditor}"`);
 				Logger.debug('Click on the Scm Editor');
 				await driverHelper
@@ -200,6 +217,77 @@ suite(
 				const messageDetails: string = await modalDialog.getDetails();
 				Logger.debug(`modalDialog.getDetails: "${messageDetails}"`);
 				expect(messageDetails).to.contain(dialogText);
+			});
+
+			test('Set gitconfig data in UserPreferences page', async function (): Promise<void> {
+				const currentWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+				expect(currentWorkspaceName, 'Workspace name not available').not.empty;
+				await dashboard.openDashboard();
+				await dashboard.waitPage();
+				await dashboard.stopWorkspaceByUI(currentWorkspaceName);
+				await workspaces.waitWorkspaceWithStoppedStatus(currentWorkspaceName);
+
+				await setupGitConfig(FACTORY_TEST_CONSTANTS.TS_GIT_CONFIG_USER_NAME, FACTORY_TEST_CONSTANTS.TS_GIT_CONFIG_USER_EMAIL);
+			});
+
+			test('Commit changes after restart workspace by run the factory again', async function (): Promise<void> {
+				await browserTabsUtil.navigateTo(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_URL());
+				await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
+
+				await driverHelper.waitAndClick((webCheCodeLocators.ScmView as any).scmEditor, TIMEOUT_CONSTANTS.TS_WAIT_LOADER_PRESENCE_TIMEOUT);
+				const scmView: NewScmView = new NewScmView();
+				[scmProvider, ...rest] = await scmView.getProviders();
+				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`)
+
+				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
+				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
+				Logger.debug('Press Enter to commit the changes');
+				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				await driverHelper.wait(timeToRefresh);
+				Logger.debug(`Wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+				// wait while changes counter will be refreshed
+				await driverHelper.wait(timeToRefresh);
+				const changes: number = await scmProvider.getChangeCount();
+				Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
+				expect(changes).eql(0);
+			});
+
+			test('Push the changes', async function (): Promise<void> {
+				await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				Logger.debug('scmProvider.openMoreActions');
+				scmContextMenu = await scmProvider.openMoreActions();
+				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
+				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
+				await scmContextMenu.select(pushItemLabel);
+
+				// wait for user name input to appear and create InputBox with waiting
+				Logger.debug('Waiting for username input to appear');
+				const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+				Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
+				await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
+				await inputUsername.confirm();
+
+				// wait for password input to appear after username confirmation
+				Logger.debug('Waiting for password input to appear');
+				const inputPassword: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+				Logger.debug('Setting password');
+				await inputPassword.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
+				await inputPassword.confirm();
+			});
+
+			test('Check if the changes were pushed', async function (): Promise<void> {
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				await driverHelper.wait(timeToRefresh);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+				const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
+					webCheCodeLocators.Notification.action,
+					'aria-disabled'
+				);
+				expect(isCommitButtonDisabled).to.equal('true');
 			});
 		}
 
