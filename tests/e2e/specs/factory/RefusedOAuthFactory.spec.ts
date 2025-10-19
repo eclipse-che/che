@@ -242,6 +242,8 @@ suite(
 				[scmProvider, ...rest] = await scmView.getProviders();
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
 
+				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
+				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
 				Logger.debug('Press Enter to commit the changes');
 				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
