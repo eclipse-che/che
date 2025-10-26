@@ -57,7 +57,8 @@ const CLASSES: any = {
 	CommandPalette: 'CommandPalette',
 	ExtensionsView: 'ExtensionsView',
 	ExplorerView: 'ExplorerView',
-	NotificationHandler: 'NotificationHandler'
+	NotificationHandler: 'NotificationHandler',
+	SourceControlModule: 'SourceControlModule'
 };
 
 const EXTERNAL_CLASSES: any = {

@@ -35,6 +35,7 @@ export * from './pageobjects/ide/ExplorerView';
 export * from './pageobjects/ide/ExtensionsView';
 export * from './pageobjects/ide/NotificationHandler';
 export * from './pageobjects/ide/RestrictedModeButton';
+export * from './pageobjects/ide/SourceControlModule';
 export * from './pageobjects/ide/ViewsMoreActionsButton';
 export * from './pageobjects/login/interfaces/ICheLoginPage';
 export * from './pageobjects/login/interfaces/IOcpLoginPage';

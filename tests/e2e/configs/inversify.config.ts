@@ -60,6 +60,7 @@ import { CommandPalette } from '../pageobjects/ide/CommandPalette';
 import { ExtensionsView } from '../pageobjects/ide/ExtensionsView';
 import { ExplorerView } from '../pageobjects/ide/ExplorerView';
 import { NotificationHandler } from '../pageobjects/ide/NotificationHandler';
+import { SourceControlModule } from '../pageobjects/ide/SourceControlModule';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -105,6 +106,7 @@ e2eContainer.bind<CommandPalette>(CLASSES.CommandPalette).to(CommandPalette);
 e2eContainer.bind<ExtensionsView>(CLASSES.ExtensionsView).to(ExtensionsView);
 e2eContainer.bind<ExplorerView>(CLASSES.ExplorerView).to(ExplorerView);
 e2eContainer.bind<NotificationHandler>(CLASSES.NotificationHandler).to(NotificationHandler);
+e2eContainer.bind<SourceControlModule>(CLASSES.SourceControlModule).to(SourceControlModule);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {
