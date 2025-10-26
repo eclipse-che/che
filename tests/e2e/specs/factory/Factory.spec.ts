@@ -105,8 +105,10 @@ suite(
 		});
 
 		test('Check if the project files were imported', async function (): Promise<void> {
-			const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not.undefined;
+			expect(
+				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+				'Project files were not imported'
+			).not.undefined;
 		});
 
 		test('Make changes to the file', async function (): Promise<void> {
