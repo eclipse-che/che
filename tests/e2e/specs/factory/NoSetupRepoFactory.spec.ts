@@ -41,6 +41,7 @@ import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
+import { SourceControlModule } from '../../pageobjects/ide/SourceControlModule';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without PAT/OAuth setup ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -57,6 +58,7 @@ suite(
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
 		const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
+		const sourceControlModule: SourceControlModule = e2eContainer.get(CLASSES.SourceControlModule);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -72,18 +74,12 @@ suite(
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
-		async function setupGitConfig(userName: string, userEmail: string): Promise<void> {
-			await userPreferences.openUserPreferencesPage();
-			await userPreferences.openGitConfigPage();
-			await userPreferences.enterGitConfigUserName(userName);
-			await userPreferences.enterGitConfigUserEmail(userEmail);
-			await userPreferences.clickOnGitConfigSaveButton();
-			// await userPreferences.waitGitConfigSaveButtonIsDisabled();// TODO: restore this line after the bug is fixed
-		}
-
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
-			await setupGitConfig(FACTORY_TEST_CONSTANTS.TS_GIT_CONFIG_USER_NAME, FACTORY_TEST_CONSTANTS.TS_GIT_CONFIG_USER_EMAIL);
+			await userPreferences.setupGitConfig(
+				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_NAME,
+				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_EMAIL
+			);
 		});
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
@@ -133,9 +129,10 @@ suite(
 			});
 
 			test('Check if the project files were imported', async function (): Promise<void> {
-				const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
-				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not
-					.undefined;
+				expect(
+					await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+					'Project files were not imported'
+				).not.undefined;
 			});
 
 			test('Make changes to the file', async function (): Promise<void> {
@@ -198,9 +195,7 @@ suite(
 					.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 					.click();
 				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
-				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
-				Logger.debug('Press Enter to commit the changes');
-				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
+				await sourceControlModule.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
 				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
@@ -232,7 +227,7 @@ suite(
 				Logger.debug('Waiting for password input to appear');
 				const inputPassword: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
 				Logger.debug('Setting password');
-				await inputPassword.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
+				await inputPassword.setText(FACTORY_TEST_CONSTANTS.TS_GIT_PERSONAL_ACCESS_TOKEN);
 				await inputPassword.confirm();
 			});
 
@@ -245,7 +240,7 @@ suite(
 					webCheCodeLocators.Notification.action,
 					'aria-disabled'
 				);
-				expect(isCommitButtonDisabled).to.equal('true');
+				expect(isCommitButtonDisabled === 'true').to.be.true;
 			});
 		}
 

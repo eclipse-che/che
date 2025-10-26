@@ -31,6 +31,7 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
+import { SourceControlModule } from '../../pageobjects/ide/SourceControlModule';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -47,6 +48,7 @@ suite(
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
+		const sourceControlModule: SourceControlModule = e2eContainer.get(CLASSES.SourceControlModule);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -167,9 +169,7 @@ suite(
 				.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 				.click();
 			Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
-			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
-			Logger.debug('Press Enter to commit the changes');
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
+			await sourceControlModule.typeCommitMessage(changesToCommit);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
 			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
@@ -200,7 +200,7 @@ suite(
 				webCheCodeLocators.Notification.action,
 				'aria-disabled'
 			);
-			expect(isCommitButtonDisabled).to.equal('true');
+			expect(isCommitButtonDisabled === 'true').to.be.true;
 		});
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {

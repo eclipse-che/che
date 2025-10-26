@@ -27,8 +27,9 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_FACTORY_GIT_REPO_BRANCH: string;
 	TS_SELENIUM_SSH_PRIVATE_KEY_PATH: string;
 	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: string;
-	TS_GIT_CONFIG_USER_NAME: string;
-	TS_GIT_CONFIG_USER_EMAIL: string;
+	TS_GIT_COMMIT_AUTHOR_NAME: string;
+	TS_GIT_COMMIT_AUTHOR_EMAIL: string;
+	TS_GIT_PERSONAL_ACCESS_TOKEN: string;
 	TS_SELENIUM_FACTORY_URL(): string;
 } = {
 	/**
@@ -74,12 +75,17 @@ export const FACTORY_TEST_CONSTANTS: {
 	/**
 	 * git config user name
 	 */
-	TS_GIT_CONFIG_USER_NAME: process.env.TS_GIT_CONFIG_USER_NAME || 'user',
+	TS_GIT_COMMIT_AUTHOR_NAME: process.env.TS_GIT_CONFIG_USER_NAME || 'user',
 
 	/**
 	 * git config user email
 	 */
-	TS_GIT_CONFIG_USER_EMAIL: process.env.TS_GIT_CONFIG_USER_EMAIL || 'user@user.com',
+	TS_GIT_COMMIT_AUTHOR_EMAIL: process.env.TS_GIT_CONFIG_USER_EMAIL || 'user@user.com',
+
+	/**
+	 * personal access token of git provider (or api token if Bitbucket.org)
+	 */
+	TS_GIT_PERSONAL_ACCESS_TOKEN: process.env.TS_GIT_PERSONAL_ACCESS_TOKEN || '',
 
 	/**
 	 * full factory URL
