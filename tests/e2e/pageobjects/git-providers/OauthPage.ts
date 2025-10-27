@@ -74,7 +74,7 @@ export class OauthPage {
 				{
 					OauthPage.LOGIN_FORM = By.id('login_field');
 					OauthPage.PASSWORD_FORM = By.id('password');
-					OauthPage.APPROVE_BUTTON = By.xpath('//*[@id="js-oauth-authorize-btn"]');
+					OauthPage.APPROVE_BUTTON = By.xpath('//button[contains(., "Authorize")]');
 					OauthPage.SUBMIT_BUTTON = By.xpath('//*[@value="Sign in"]');
 					OauthPage.DENY_ACCESS_BUTTON = By.xpath('//button[contains(., "Cancel")]');
 				}
