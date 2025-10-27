@@ -45,6 +45,7 @@ import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
 import { SourceControlModule } from '../../pageobjects/ide/SourceControlModule';
+import { DialogBoxGitHubExtension } from '../../pageobjects/ide/DialogBoxGitHubExtension';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -64,6 +65,7 @@ suite(
 		const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
 		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 		const sourceControlModule: SourceControlModule = e2eContainer.get(CLASSES.SourceControlModule);
+		const dialogBoxGitHubExtension: DialogBoxGitHubExtension = e2eContainer.get(CLASSES.DialogBoxGitHubExtension);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -201,7 +203,6 @@ suite(
 					.getDriver()
 					.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 					.click();
-				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
 				await sourceControlModule.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
@@ -258,6 +259,10 @@ suite(
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
 				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
 				await scmContextMenu.select(pushItemLabel);
+
+				if (await dialogBoxGitHubExtension.isDialogBoxGitHubExtensionVisible()) {
+					await dialogBoxGitHubExtension.closeDialogBoxGitHubExtension();
+				}
 
 				// wait for user name input to appear and create InputBox with waiting
 				Logger.debug('Waiting for username input to appear');

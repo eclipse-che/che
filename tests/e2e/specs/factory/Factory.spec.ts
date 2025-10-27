@@ -170,7 +170,6 @@ suite(
 				.getDriver()
 				.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 				.click();
-			Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
 			await sourceControlModule.typeCommitMessage(changesToCommit);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
