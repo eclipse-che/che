@@ -31,6 +31,7 @@ export * from './pageobjects/dashboard/Workspaces';
 export * from './pageobjects/git-providers/OauthPage';
 export * from './pageobjects/ide/CheCodeLocatorLoader';
 export * from './pageobjects/ide/CommandPalette';
+export * from './pageobjects/ide/DialogBoxGitHubExtension';
 export * from './pageobjects/ide/ExplorerView';
 export * from './pageobjects/ide/ExtensionsView';
 export * from './pageobjects/ide/NotificationHandler';

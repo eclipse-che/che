@@ -58,7 +58,8 @@ const CLASSES: any = {
 	ExtensionsView: 'ExtensionsView',
 	ExplorerView: 'ExplorerView',
 	NotificationHandler: 'NotificationHandler',
-	SourceControlModule: 'SourceControlModule'
+	SourceControlModule: 'SourceControlModule',
+	DialogBoxGitHubExtension: 'DialogBoxGitHubExtension'
 };
 
 const EXTERNAL_CLASSES: any = {
