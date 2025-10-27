@@ -21,7 +21,13 @@ export class SourceControlModule {
 		readonly driverHelper: DriverHelper
 	) {}
 
+	/**
+	 * type the commit message and press Ctrl+Enter to commit the changes.
+	 * @param textCommit Text to commit.
+	 */
 	async typeCommitMessage(textCommit: string): Promise<void> {
+		Logger.debug(`Type commit text: "Commit ${textCommit}"`);
+
 		await this.driverHelper.getDriver().actions().sendKeys(textCommit).perform();
 		Logger.debug('Press Enter to commit the changes');
 		await this.driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
