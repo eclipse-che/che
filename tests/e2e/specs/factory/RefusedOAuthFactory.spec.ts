@@ -237,8 +237,6 @@ suite(
 				const scmView: NewScmView = new NewScmView();
 				[scmProvider, ...rest] = await scmView.getProviders();
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
-
-				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
 				await sourceControlModule.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
