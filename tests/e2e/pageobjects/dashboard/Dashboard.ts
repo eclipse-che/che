@@ -28,7 +28,11 @@ export class Dashboard {
 	private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=""]//parent::button');
 	private static readonly INFO_DROPDOWN_BUTTON: By = By.xpath('//button[@aria-label="About Menu"]');
 	private static readonly ABOUT_DIALOG_WINDOW_CLOSE_BUTTON: By = By.xpath('//button[@aria-label="Close Dialog"]');
-	private static readonly EXISTING_WORKSPACE_FOUND_ALERT: By = By.xpath('//h4[text()="Existing workspace found"]');
+	private static readonly EXISTING_WORKSPACE_FOUND_ALERT: By = By.xpath(
+		'//div[text()="Several workspaces created from the same repository have been found. Should you want to open one of the existing workspaces or create a new one, please choose the corresponding action."]'
+	);
+	private static readonly EXISTING_WORKSPACE_FOUND_LIST: By = By.xpath('//button//span[text()="Open the existing workspace"]');
+	private static readonly EXISTING_WORKSPACE_NAME: By = By.xpath('//li//a[text()="python-hello-world"]"]');
 	private static readonly CREATE_NEW_WORKSPACE_LINK: By = By.xpath('//button[text()="Create a new workspace"]');
 	private static readonly ABOUT_DIALOG_ITEM_DATA_TEST_IDS: any = {
 		serverVersion: 'server-version',
@@ -178,6 +182,15 @@ export class Dashboard {
 		Logger.debug();
 
 		await this.driverHelper.waitVisibility(Dashboard.EXISTING_WORKSPACE_FOUND_ALERT, timeout);
+	}
+
+	async startExistedWorkspace(workspaceName: string): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(Dashboard.EXISTING_WORKSPACE_FOUND_LIST);
+		const element = await this.driverHelper.waitPresence(Dashboard.EXISTING_WORKSPACE_FOUND_LIST);
+		await this.driverHelper.getDriver().executeScript('arguments[0].click();', element);
+		await this.driverHelper.waitAndClick(By.xpath(`//li//a[text()="${workspaceName}"]`));
 	}
 
 	async clickOnCreateNewWorkspaceButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
