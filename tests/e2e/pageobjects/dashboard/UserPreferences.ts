@@ -148,6 +148,33 @@ export class UserPreferences {
 		Logger.info('SSH keys have been added');
 	}
 
+	async addSshKeysFromStrings(privateSshKey: string, publicSshKey: string): Promise<void> {
+		Logger.debug();
+
+		if (!privateSshKey || privateSshKey === '') {
+			throw new Error('Private SSH key is empty or not provided');
+		}
+		if (!publicSshKey || publicSshKey === '') {
+			throw new Error('Public SSH key is empty or not provided');
+		}
+
+		Logger.info('Adding new SSH keys from strings');
+		await this.driverHelper.waitAndClick(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.ADD_SSH_KEYS_POPUP);
+
+		Logger.info('Pasting private SSH key');
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
+		await this.driverHelper.getAction().sendKeys(privateSshKey).perform();
+
+		Logger.info('Pasting public SSH key');
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
+		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
+
+		await this.driverHelper.waitAndClick(UserPreferences.ADD_SSH_KEYS_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.GIT_SSH_KEY_NAME);
+		Logger.info('SSH keys have been added');
+	}
+
 	async uploadSshKeys(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
 		Logger.debug();
 		const privateSshKey: string = Buffer.from(fs.readFileSync(path.resolve(privateSshKeyPath), 'utf-8'), 'base64').toString('utf-8');
