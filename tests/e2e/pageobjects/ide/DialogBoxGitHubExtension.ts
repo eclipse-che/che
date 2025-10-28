@@ -12,12 +12,15 @@ import 'reflect-metadata';
 import { CLASSES } from '../../configs/inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { Logger } from '../../utils/Logger';
-import { ModalDialog } from 'monaco-page-objects';
-import { expect } from 'chai';
+import { By, ModalDialog } from 'monaco-page-objects';
 import { CheCodeLocatorLoader } from './CheCodeLocatorLoader';
 
 @injectable()
 export class DialogBoxGitHubExtension {
+	private static readonly DIALOG_BOX_GITHUB_EXTENSION_LOCATOR: By = By.xpath(
+		'//div[@class="dialog-message-detail" and contains(., "The extension \'GitHub\' wants to sign in using GitHub.")]'
+	);
+
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper,
@@ -33,25 +36,10 @@ export class DialogBoxGitHubExtension {
 		Logger.debug();
 
 		const dialogBoxGitHubExtension: boolean = await this.driverHelper.waitVisibilityBoolean(
-			this.cheCodeLocatorLoader.webCheCodeLocators.Dialog.constructor
+			DialogBoxGitHubExtension.DIALOG_BOX_GITHUB_EXTENSION_LOCATOR
 		);
 
-		await this.waitDialogBoxGitHubExtensionMessage();
 		return dialogBoxGitHubExtension;
-	}
-
-	/**
-	 * wait for the dialog box with the message about the GitHub extension to be visible.
-	 */
-	async waitDialogBoxGitHubExtensionMessage(): Promise<void> {
-		// prettier-ignore
-		const dialogMessage: string = 'The extension \'GitHub\' wants to sign in using GitHub.';
-		Logger.debug(`dialogMessage: "${dialogMessage}"`);
-
-		const modalDialog: ModalDialog = new ModalDialog();
-		const messageDetails: string = await modalDialog.getDetails();
-		Logger.debug(`modalDialog.getDetails: "${messageDetails}"`);
-		expect(messageDetails).to.contain(dialogMessage);
 	}
 
 	/**
