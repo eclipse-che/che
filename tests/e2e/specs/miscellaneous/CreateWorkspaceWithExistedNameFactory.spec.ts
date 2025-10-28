@@ -138,7 +138,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		).not.undefined;
 	});
 
-	suiteTeardown(`Stop and delete all created workspaces`, async function (): Promise<void> {
+	suiteTeardown('Stop and delete all created workspaces', async function (): Promise<void> {
 		await workspaceHandlingTests.stopAndRemoveWorkspace(firstWorkspaceName);
 		await workspaceHandlingTests.stopAndRemoveWorkspace(secondWorkspaceName);
 	});
