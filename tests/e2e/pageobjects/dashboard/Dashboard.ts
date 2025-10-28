@@ -10,7 +10,7 @@
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { CLASSES } from '../../configs/inversify.types';
-import { Alert, By } from 'selenium-webdriver';
+import { Alert, By, WebElement } from 'selenium-webdriver';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { Workspaces } from './Workspaces';
@@ -188,7 +188,7 @@ export class Dashboard {
 		Logger.debug();
 
 		await this.driverHelper.waitVisibility(Dashboard.EXISTING_WORKSPACE_FOUND_LIST);
-		const element = await this.driverHelper.waitPresence(Dashboard.EXISTING_WORKSPACE_FOUND_LIST);
+		const element: WebElement = await this.driverHelper.waitPresence(Dashboard.EXISTING_WORKSPACE_FOUND_LIST);
 		await this.driverHelper.getDriver().executeScript('arguments[0].click();', element);
 		await this.driverHelper.waitAndClick(By.xpath(`//li//a[text()="${workspaceName}"]`));
 	}
