@@ -94,6 +94,22 @@ export class CreateWorkspace {
 		await this.performTrustAuthorPopup();
 	}
 
+	async setGitRepositoryUrl(factoryUrl: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+		Logger.debug(`factoryUrl: "${factoryUrl}"`);
+		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
+		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl), timeout);
+	}
+
+	async getGitRepositoryUrl(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<string> {
+		Logger.debug();
+		return await this.driverHelper.waitAndGetValue(CreateWorkspace.FACTORY_URL, timeout);
+	}
+
+	async clickOnCreateAndOpenButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+		Logger.debug();
+		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout);
+	}
+
 	async clickOnEditorsDropdownListButton(sampleName: string, timeout: number): Promise<void> {
 		Logger.debug(`sampleName: "${sampleName}, editor ${BASE_TEST_CONSTANTS.TS_SELENIUM_EDITOR}"`);
 
