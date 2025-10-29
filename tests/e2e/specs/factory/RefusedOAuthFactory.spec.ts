@@ -44,8 +44,8 @@ import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsBu
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
-import { SourceControlModule } from '../../pageobjects/ide/SourceControlModule';
-import { DialogBoxGitHubExtension } from '../../pageobjects/ide/DialogBoxGitHubExtension';
+import { SourceControlView } from '../../pageobjects/ide/SourceControlView';
+import { GitHubExtensionDialog } from '../../pageobjects/ide/GitHubExtensionDialog';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository and deny the access ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -64,8 +64,8 @@ suite(
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
 		const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
 		const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
-		const sourceControlModule: SourceControlModule = e2eContainer.get(CLASSES.SourceControlModule);
-		const dialogBoxGitHubExtension: DialogBoxGitHubExtension = e2eContainer.get(CLASSES.DialogBoxGitHubExtension);
+		const sourceControlView: SourceControlView = e2eContainer.get(CLASSES.SourceControlView);
+		const gitHubExtensionDialog: GitHubExtensionDialog = e2eContainer.get(CLASSES.GitHubExtensionDialog);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -203,7 +203,7 @@ suite(
 					.getDriver()
 					.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 					.click();
-				await sourceControlModule.typeCommitMessage(changesToCommit);
+				await sourceControlView.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
 				const modalDialog: ModalDialog = new ModalDialog();
@@ -237,7 +237,7 @@ suite(
 				const scmView: NewScmView = new NewScmView();
 				[scmProvider, ...rest] = await scmView.getProviders();
 				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
-				await sourceControlModule.typeCommitMessage(changesToCommit);
+				await sourceControlView.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
 				Logger.debug(`Wait and click on: "${refreshButtonLabel}"`);
@@ -258,11 +258,11 @@ suite(
 				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
 				await scmContextMenu.select(pushItemLabel);
 
-				if (await dialogBoxGitHubExtension.isDialogBoxGitHubExtensionVisible()) {
-					await dialogBoxGitHubExtension.closeDialogBoxGitHubExtension();
+				if (await gitHubExtensionDialog.isDialogVisible()) {
+					await gitHubExtensionDialog.closeDialog();
 				}
 
-				// wait for user name input to appear and create InputBox with waiting
+				// wait for the user name input to appear and create an InputBox to enter the user name
 				Logger.debug('Waiting for username input to appear');
 				const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
 				Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
@@ -286,7 +286,7 @@ suite(
 					webCheCodeLocators.Notification.action,
 					'aria-disabled'
 				);
-				expect(isCommitButtonDisabled === 'true').to.be.true;
+				expect(isCommitButtonDisabled).to.equal('true');
 			});
 		}
 
