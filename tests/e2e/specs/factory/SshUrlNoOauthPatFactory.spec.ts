@@ -36,6 +36,8 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
 		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
+	const privateSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY;
+	const publicSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY;
 	const privateSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY_PATH;
 	const publicSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY_PATH;
 	let projectSection: ViewSection;
@@ -57,7 +59,14 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 		test('Add SSH keys', async function (): Promise<void> {
 			await userPreferences.openUserPreferencesPage();
 			await userPreferences.openSshKeyTab();
-			await userPreferences.addSshKeys(privateSshKeyPath, publicSshKeyPath);
+			// use environment variables if available, otherwise fall back to file paths
+			if (privateSshKey && publicSshKey) {
+				Logger.info('Using SSH keys from environment variables');
+				await userPreferences.addSshKeysFromStrings(privateSshKey, publicSshKey);
+			} else {
+				Logger.info('Using SSH keys from file paths');
+				await userPreferences.addSshKeysFromFiles(privateSshKeyPath, publicSshKeyPath);
+			}
 		});
 		test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {
 			await workspaceHandlingTests.createAndOpenWorkspaceFromGitRepository(factoryUrl);
