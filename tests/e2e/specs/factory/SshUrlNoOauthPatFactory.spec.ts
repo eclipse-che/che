@@ -65,7 +65,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 				await userPreferences.addSshKeysFromStrings(privateSshKey, publicSshKey);
 			} else {
 				Logger.info('Using SSH keys from file paths');
-				await userPreferences.addSshKeys(privateSshKeyPath, publicSshKeyPath);
+				await userPreferences.addSshKeysFromFiles(privateSshKeyPath, publicSshKeyPath);
 			}
 		});
 		test(`Create and open new workspace from factory:${factoryUrl}`, async function (): Promise<void> {

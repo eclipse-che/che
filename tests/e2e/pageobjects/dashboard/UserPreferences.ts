@@ -136,10 +136,10 @@ export class UserPreferences {
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
 	}
 
-	async addSshKeys(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
+	async addSshKeysFromFiles(privateSshKeyPath: string, publicSshKeyPath: string): Promise<void> {
 		Logger.debug();
 
-		Logger.info('Adding new SSH keys');
+		Logger.info('Adding new SSH keys from files');
 		await this.driverHelper.waitAndClick(UserPreferences.ADD_NEW_SSH_KEY_BUTTON);
 		await this.driverHelper.waitVisibility(UserPreferences.ADD_SSH_KEYS_POPUP);
 		await this.uploadSshKeys(privateSshKeyPath, publicSshKeyPath);
