@@ -30,6 +30,8 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_GIT_COMMIT_AUTHOR_NAME: string;
 	TS_GIT_COMMIT_AUTHOR_EMAIL: string;
 	TS_GIT_PERSONAL_ACCESS_TOKEN: string;
+	TS_SELENIUM_SSH_PRIVATE_KEY: string;
+	TS_SELENIUM_SSH_PUBLIC_KEY: string;
 	TS_SELENIUM_FACTORY_URL(): string;
 } = {
 	/**
@@ -73,12 +75,12 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_SSH_PUBLIC_KEY_PATH: process.env.TS_SELENIUM_SSH_PUBLIC_KEY_PATH || 'resources/factory/pub-k.txt',
 
 	/**
-	 * git config user name
+	 * git commit author name
 	 */
 	TS_GIT_COMMIT_AUTHOR_NAME: process.env.TS_GIT_CONFIG_USER_NAME || 'user',
 
 	/**
-	 * git config user email
+	 * git commit author email
 	 */
 	TS_GIT_COMMIT_AUTHOR_EMAIL: process.env.TS_GIT_CONFIG_USER_EMAIL || 'user@user.com',
 
@@ -86,6 +88,16 @@ export const FACTORY_TEST_CONSTANTS: {
 	 * personal access token of git provider (or api token if Bitbucket.org)
 	 */
 	TS_GIT_PERSONAL_ACCESS_TOKEN: process.env.TS_GIT_PERSONAL_ACCESS_TOKEN || '',
+
+	/**
+	 * sSH private key as string (from environment variable)
+	 */
+	TS_SELENIUM_SSH_PRIVATE_KEY: process.env.TS_SELENIUM_SSH_PRIVATE_KEY || '',
+
+	/**
+	 * sSH public key as string (from environment variable)
+	 */
+	TS_SELENIUM_SSH_PUBLIC_KEY: process.env.TS_SELENIUM_SSH_PUBLIC_KEY || '',
 
 	/**
 	 * full factory URL
