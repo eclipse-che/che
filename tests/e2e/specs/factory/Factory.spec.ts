@@ -31,6 +31,7 @@ import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
+import { SourceControlView } from '../../pageobjects/ide/SourceControlView';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -47,6 +48,7 @@ suite(
 		const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
+		const sourceControlView: SourceControlView = e2eContainer.get(CLASSES.SourceControlView);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -103,8 +105,10 @@ suite(
 		});
 
 		test('Check if the project files were imported', async function (): Promise<void> {
-			const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not.undefined;
+			expect(
+				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+				'Project files were not imported'
+			).not.undefined;
 		});
 
 		test('Make changes to the file', async function (): Promise<void> {
@@ -166,10 +170,7 @@ suite(
 				.getDriver()
 				.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 				.click();
-			Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
-			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
-			Logger.debug('Press Enter to commit the changes');
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
+			await sourceControlView.typeCommitMessage(changesToCommit);
 			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 			await driverHelper.wait(timeToRefresh);
 			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);

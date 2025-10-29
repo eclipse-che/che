@@ -57,7 +57,9 @@ const CLASSES: any = {
 	CommandPalette: 'CommandPalette',
 	ExtensionsView: 'ExtensionsView',
 	ExplorerView: 'ExplorerView',
-	NotificationHandler: 'NotificationHandler'
+	NotificationHandler: 'NotificationHandler',
+	SourceControlView: 'SourceControlView',
+	GitHubExtensionDialog: 'GitHubExtensionDialog'
 };
 
 const EXTERNAL_CLASSES: any = {

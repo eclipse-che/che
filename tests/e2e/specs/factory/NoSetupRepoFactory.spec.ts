@@ -16,7 +16,6 @@ import {
 	InputBox,
 	Key,
 	Locators,
-	ModalDialog,
 	NewScmView,
 	SingleScmProvider,
 	ViewControl,
@@ -34,12 +33,16 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
-import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
-import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
+import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
+import { OAUTH_CONSTANTS } from '../../constants/OAUTH_CONSTANTS';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
+import { SourceControlView } from '../../pageobjects/ide/SourceControlView';
+import { GitHubExtensionDialog } from '../../pageobjects/ide/GitHubExtensionDialog';
 
 suite(
 	`Create a workspace via launching a factory from the ${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER} repository without PAT/OAuth setup ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`,
@@ -55,6 +58,9 @@ suite(
 		const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 		const createWorkspace: CreateWorkspace = e2eContainer.get(CLASSES.CreateWorkspace);
 		const viewsMoreActionsButton: ViewsMoreActionsButton = e2eContainer.get(CLASSES.ViewsMoreActionsButton);
+		const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
+		const sourceControlView: SourceControlView = e2eContainer.get(CLASSES.SourceControlView);
+		const gitHubExtensionDialog: GitHubExtensionDialog = e2eContainer.get(CLASSES.GitHubExtensionDialog);
 
 		let projectSection: ViewSection;
 		let scmProvider: SingleScmProvider;
@@ -65,15 +71,17 @@ suite(
 		const timeToRefresh: number = 1500;
 		const changesToCommit: string = new Date().getTime().toString();
 		const fileToChange: string = 'Date.txt';
-		const pushItemLabel: string = 'Push';
-		const commitChangesButtonLabel: string = `Commit Changes on "${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}"`;
 		const refreshButtonLabel: string = 'Refresh';
-		const label: string = BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME;
+		const pushItemLabel: string = 'Push';
 		let testRepoProjectName: string;
 		const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
+			await userPreferences.setupGitConfig(
+				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_NAME,
+				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_EMAIL
+			);
 		});
 
 		test(`Navigate to the ${isPrivateRepo} repository factory URL`, async function (): Promise<void> {
@@ -123,8 +131,10 @@ suite(
 			});
 
 			test('Check if the project files were imported', async function (): Promise<void> {
-				expect(await projectAndFileTests.getProjectTreeItem(projectSection, label), 'Project files were not imported').not
-					.undefined;
+				expect(
+					await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
+					'Project files were not imported'
+				).not.undefined;
 			});
 
 			test('Make changes to the file', async function (): Promise<void> {
@@ -186,10 +196,7 @@ suite(
 					.getDriver()
 					.findElement((webCheCodeLocators.ScmView as any).scmEditor)
 					.click();
-				Logger.debug(`Type commit text: "Commit ${changesToCommit}"`);
-				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
-				Logger.debug('Press Enter to commit the changes');
-				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys(Key.ENTER).keyUp(Key.CONTROL).perform();
+				await sourceControlView.typeCommitMessage(changesToCommit);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				await driverHelper.wait(timeToRefresh);
 				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
@@ -202,60 +209,43 @@ suite(
 			});
 
 			test('Push the changes', async function (): Promise<void> {
-				await driverHelper.waitVisibility(
-					webCheCodeLocators.ScmView.actionConstructor(
-						`Push 1 commits to origin/${FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH}`
-					)
-				);
+				await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
 				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
 				Logger.debug('scmProvider.openMoreActions');
 				scmContextMenu = await scmProvider.openMoreActions();
 				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
 				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
 				await scmContextMenu.select(pushItemLabel);
-			});
 
-			if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER === GitProviderType.GITHUB) {
-				test('Decline GitHub Extension', async function (): Promise<void> {
-					await driverHelper.waitVisibility(webCheCodeLocators.Dialog.details);
-					const gitHaExtensionDialog: ModalDialog = new ModalDialog();
-					await gitHaExtensionDialog.pushButton('Cancel');
-				});
-			}
-
-			test('Insert git credentials which were asked after push', async function (): Promise<void> {
-				try {
-					await driverHelper.waitVisibility(webCheCodeLocators.InputBox.message);
-				} catch (e) {
-					Logger.info(`Workspace did not ask credentials before push - ${e};
-                Known issue for github.com - https://issues.redhat.com/browse/CRW-4066, please check if not other git provider. `);
-					expect(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER).eqls(GitProviderType.GITHUB);
+				if (await gitHubExtensionDialog.isDialogVisible()) {
+					await gitHubExtensionDialog.closeDialog();
 				}
-				const input: InputBox = new InputBox();
-				await input.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-				await input.confirm();
-				await driverHelper.wait(timeToRefresh);
-				await input.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_PASSWORD);
-				await input.confirm();
-				await driverHelper.wait(timeToRefresh);
+
+				// wait for the user name input to appear and create an InputBox to enter the user name
+				Logger.debug('Waiting for username input to appear');
+				const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+				Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
+				await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
+				await inputUsername.confirm();
+
+				// wait for password input to appear after username confirmation
+				Logger.debug('Waiting for password input to appear');
+				const inputPassword: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+				Logger.debug('Setting password');
+				await inputPassword.setText(FACTORY_TEST_CONSTANTS.TS_GIT_PERSONAL_ACCESS_TOKEN);
+				await inputPassword.confirm();
 			});
 
 			test('Check if the changes were pushed', async function (): Promise<void> {
-				try {
-					Logger.debug(`scmProvider.takeAction: "${refreshButtonLabel}"`);
-					await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
-				} catch (e) {
-					Logger.info(
-						'Check you use correct credentials.' +
-							'For bitbucket.org ensure you use an app password: https://support.atlassian.com/bitbucket-cloud/docs/using-app-passwords/;' +
-							'For github.com - personal access token instead of password.'
-					);
-				}
+				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+				await driverHelper.wait(timeToRefresh);
+				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
 				const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
-					webCheCodeLocators.ScmView.actionConstructor(commitChangesButtonLabel),
+					webCheCodeLocators.Notification.action,
 					'aria-disabled'
 				);
-				expect(isCommitButtonDisabled).to.be.true;
+				expect(isCommitButtonDisabled).to.equal('true');
 			});
 		}
 
