@@ -35,7 +35,7 @@ import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
