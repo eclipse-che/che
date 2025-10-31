@@ -35,7 +35,7 @@ import { StringUtil } from '../../utils/StringUtil';
 import { Logger } from '../../utils/Logger';
 import { LoginTests } from '../../tests-library/LoginTests';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
+import { FACTORY_TEST_CONSTANTS, GitProviderType } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
@@ -262,12 +262,14 @@ suite(
 					await gitHubExtensionDialog.closeDialog();
 				}
 
-				// wait for the user name input to appear and create an InputBox to enter the user name
-				Logger.debug('Waiting for username input to appear');
-				const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
-				Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
-				await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-				await inputUsername.confirm();
+				if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER !== GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
+					// wait for the user name input to appear and create an InputBox to enter the user name
+					Logger.debug('Waiting for username input to appear');
+					const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+					Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
+					await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
+					await inputUsername.confirm();
+				}
 
 				// wait for password input to appear after username confirmation
 				Logger.debug('Waiting for password input to appear');
