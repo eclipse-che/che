@@ -97,12 +97,13 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		expect(WorkspaceHandlingTests.getWorkspaceName()).to.be.equal(firstWorkspaceName);
 	});
 
-	test('Ensure `policies.create=perclick` is appended and a new workspace is created without warnings', async function (): Promise<void> {
+	test('Ensure `new` is appended and a new workspace is created without warnings', async function (): Promise<void> {
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
 		await createWorkspace.setCreateNewWorkspaceCheckbox(true);
-		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl + '?policies.create=perclick');
+
+		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl + '?new');
 
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
@@ -110,8 +111,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitWorkspaceReadiness();
 
 		secondWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
-		expect(secondWorkspaceName).to.have.string(firstWorkspaceName);
-		expect(secondWorkspaceName.length).to.be.equal(firstWorkspaceName.length + 5);
+		// validate workspace name follows pattern: firstWorkspaceName + "-xxxx" (4 alphanumeric chars)
+		expect(secondWorkspaceName).to.match(new RegExp(`^${firstWorkspaceName}-[a-z0-9]{4}$`));
 	});
 
 	test('Verify warning appears with list of existing workspaces and open the first created workspace', async function (): Promise<void> {
