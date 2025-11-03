@@ -38,6 +38,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
 	const privateSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY;
 	const publicSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY;
+	const sshPassphrase: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PASSPHRASE;
 	const privateSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY_PATH;
 	const publicSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY_PATH;
 	let projectSection: ViewSection;
@@ -62,7 +63,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 			// use environment variables if available, otherwise fall back to file paths
 			if (privateSshKey && publicSshKey) {
 				Logger.info('Using SSH keys from environment variables');
-				await userPreferences.addSshKeysFromStrings(privateSshKey, publicSshKey);
+				await userPreferences.addSshKeysFromStrings(privateSshKey, publicSshKey, sshPassphrase);
 			} else {
 				Logger.info('Using SSH keys from file paths');
 				await userPreferences.addSshKeysFromFiles(privateSshKeyPath, publicSshKeyPath);
@@ -99,7 +100,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 			await dashboard.openDashboard();
 			await deleteSshKeys();
 		});
-		suiteTeardown('Stop and delete the workspace by APII', async function (): Promise<void> {
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
 			await browserTabsUtil.closeAllTabsExceptCurrent();
 			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 		});
