@@ -13,7 +13,7 @@ import '../../specs/dashboard-samples/Quarkus.spec';
 import '../../specs/dashboard-samples/RecommendedExtensions.spec';
 import '../../specs/dashboard-samples/Documentation.spec';
 import '../../specs/devconsole-intergration/DevConsoleIntegration.spec';
-import '../../specs/miscellaneous/CreateWorkspaceWithExistedNameFactory.spec';
+import '../../specs/miscellaneous/CreateWorkspaceWithExistingNameFromGitUrl.spec';
 import '../../specs/miscellaneous/KubedockPodmanTest.spec';
 import '../../specs/miscellaneous/WorkspaceWithParent.spec';
 import '../../specs/miscellaneous/PredefinedNamespace.spec';
