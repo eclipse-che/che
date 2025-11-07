@@ -207,7 +207,7 @@ export class UserPreferences {
 		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
 		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
 
-		if (passphrase && passphrase !== '') {
+		if (passphrase) {
 			Logger.info('Pasting SSH passphrase');
 			await this.driverHelper.waitAndClick(UserPreferences.PASTE_SSH_PASSPHRASE_FIELD);
 			await this.driverHelper.getAction().sendKeys(passphrase).perform();
