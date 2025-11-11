@@ -101,7 +101,7 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_SELENIUM_SSH_PUBLIC_KEY: process.env.TS_SELENIUM_SSH_PUBLIC_KEY || '',
 
 	/**
-	 * ssh passphrase as string (from environment variable)
+	 * ssh key passphrase as string (from environment variable)
 	 */
 	TS_SELENIUM_SSH_KEY_PASSPHRASE: process.env.TS_SELENIUM_SSH_KEY_PASSPHRASE || '',
 
