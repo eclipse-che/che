@@ -42,7 +42,7 @@ export class UserPreferences {
 	private static readonly ADD_SSH_KEYS_POPUP: By = By.xpath('//span[text()="Add SSH Keys"]');
 	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-private-key"]');
 	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-public-key"]');
-	private static readonly PASTE_SSH_PASSPHRASE_FIELD: By = By.xpath('//input[@placeholder="Enter passphrase (optional)"]');
+	private static readonly PASTE_SSH_KEY_PASSPHRASE_FIELD: By = By.xpath('//input[@placeholder="Enter passphrase (optional)"]');
 	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('.pf-c-button.pf-m-primary');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
 	private static readonly GIT_SSH_KEY_ACTIONS_BUTTON: By = By.css('section[id*="SshKeys-user-preferences"] button[aria-label="Actions"]');
@@ -208,8 +208,8 @@ export class UserPreferences {
 		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
 
 		if (passphrase) {
-			Logger.info('Pasting SSH passphrase');
-			await this.driverHelper.waitAndClick(UserPreferences.PASTE_SSH_PASSPHRASE_FIELD);
+			Logger.info('Pasting SSH key passphrase');
+			await this.driverHelper.waitAndClick(UserPreferences.PASTE_SSH_KEY_PASSPHRASE_FIELD);
 			await this.driverHelper.getAction().sendKeys(passphrase).perform();
 		}
 
