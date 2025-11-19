@@ -27,7 +27,7 @@ suite(`The SmokeTest userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, functio
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
-		'https://github.com/che-incubator/quarkus-api-example.git?policies.create=perclick';
+		'https://github.com/che-incubator/quarkus-api-example.git?new';
 	let projectSection: ViewSection;
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
 		suiteSetup('Login', async function (): Promise<void> {
