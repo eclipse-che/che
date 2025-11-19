@@ -34,8 +34,15 @@ export class StringUtil {
 		url = url.split('?')[0].split('#')[0];
 
 		// remove branch/tree fragments for GitHub, GitLab, Bitbucket
-		if (url.includes('/tree/') || url.includes('/-/tree/') || url.includes('/src/')) {
-			url = url.split('/').slice(0, -2).join('/');
+		if (url.includes('/-/tree/')) {
+			// gitLab specific pattern: remove everything from /-/tree/ onwards
+			url = url.substring(0, url.indexOf('/-/tree/'));
+		} else if (url.includes('/tree/')) {
+			// gitHub pattern: remove /tree/ and everything after it
+			url = url.substring(0, url.indexOf('/tree/'));
+		} else if (url.includes('/src/')) {
+			// bitbucket pattern: remove /src/ and everything after it
+			url = url.substring(0, url.indexOf('/src/'));
 		}
 
 		const projectName: string = url
