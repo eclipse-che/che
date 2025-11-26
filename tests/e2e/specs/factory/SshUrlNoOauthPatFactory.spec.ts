@@ -8,7 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { ViewSection } from 'monaco-page-objects';
+import {
+	ActivityBar,
+	ContextMenu,
+	InputBox,
+	Key,
+	Locators,
+	NewScmView,
+	SingleScmProvider,
+	ViewControl,
+	ViewSection
+} from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { CLASSES, TYPES } from '../../configs/inversify.types';
 import { e2eContainer } from '../../configs/inversify.config';
@@ -24,6 +34,8 @@ import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { Logger } from '../../utils/Logger';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 
 suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -31,8 +43,13 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const userPreferences: UserPreferences = e2eContainer.get(CLASSES.UserPreferences);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
+	const cheCodeLocatorLoader: CheCodeLocatorLoader = e2eContainer.get(CLASSES.CheCodeLocatorLoader);
+
+	const webCheCodeLocators: Locators = cheCodeLocatorLoader.webCheCodeLocators;
+
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
 		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
@@ -41,7 +58,19 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	const sshPassphrase: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_KEY_PASSPHRASE;
 	const privateSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY_PATH;
 	const publicSshKeyPath: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY_PATH;
+
 	let projectSection: ViewSection;
+	let scmProvider: SingleScmProvider;
+	let scmContextMenu: ContextMenu;
+	let viewsActionsButton: boolean;
+	// test specific data
+	const timeToRefresh: number = 1500;
+	const changesToCommit: string = new Date().getTime().toString();
+	const fileToChange: string = 'Date.txt';
+	const refreshButtonLabel: string = 'Refresh';
+	const pushItemLabel: string = 'Push';
+	let testRepoProjectName: string;
+	const isPrivateRepo: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_IS_PRIVATE_FACTORY_GIT_REPO ? 'private' : 'public';
 
 	async function deleteSshKeys(): Promise<void> {
 		Logger.debug('Deleting SSH keys if they are present');
@@ -95,7 +124,49 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 				await projectAndFileTests.getProjectTreeItem(projectSection, BASE_TEST_CONSTANTS.TS_SELENIUM_PROJECT_ROOT_FILE_NAME),
 				'Project files were not imported'
 			).not.undefined;
+			testRepoProjectName = StringUtil.getProjectNameFromGitUrl(FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL);
 		});
+
+		test('Make changes to the file', async function (): Promise<void> {
+			Logger.debug(`projectSection.openItem: "${fileToChange}"`);
+			await projectSection.openItem(testRepoProjectName, fileToChange);
+			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
+			await driverHelper.getDriver().findElement(webCheCodeLocators.Editor.inputArea).click();
+
+			Logger.debug('Clearing the editor with Ctrl+A');
+			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+			await driverHelper.wait(500);
+			Logger.debug('Deleting selected text');
+			await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
+			await driverHelper.wait(500);
+			Logger.debug(`Entering text: "${changesToCommit}"`);
+			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
+		});
+
+		test('Open a source control manager', async function (): Promise<void> {
+			const viewSourceControl: string = 'Source Control';
+			const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
+			Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
+			await sourceControl.openView();
+			const scmView: NewScmView = new NewScmView();
+			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
+			let rest: SingleScmProvider[];
+			[scmProvider, ...rest] = await scmView.getProviders();
+			Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
+		});
+
+		test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
+			await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+			await driverHelper.wait(timeToRefresh);
+			Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+			await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+			// wait while changes counter will be refreshed
+			await driverHelper.wait(timeToRefresh);
+			const changes: number = await scmProvider.getChangeCount();
+			Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
+			expect(changes).eql(1);
+		});
+
 		suiteTeardown('Delete SSH keys', async function (): Promise<void> {
 			await dashboard.openDashboard();
 			await deleteSshKeys();
