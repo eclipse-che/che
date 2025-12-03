@@ -36,7 +36,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	let firstWorkspaceName: string;
 	let secondWorkspaceName: string;
 	const factoryUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
-		? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL || 'https://gh.crw-qe.com/test-automation-only/python-hello-world'
+		? FACTORY_TEST_CONSTANTS.TS_SELENIUM_AIRGAP_FACTORY_GIT_REPO_URL ||
+			'https://gh.crw-qe.com/test-automation-only/python-hello-world/tree/test'
 		: FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/crw-qe/python-hello-world';
 
 	suiteSetup('Login', async function (): Promise<void> {
