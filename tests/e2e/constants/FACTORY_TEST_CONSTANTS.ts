@@ -32,6 +32,7 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_GIT_PERSONAL_ACCESS_TOKEN: string;
 	TS_SELENIUM_SSH_PRIVATE_KEY: string;
 	TS_SELENIUM_SSH_PUBLIC_KEY: string;
+	TS_SELENIUM_SSH_KEY_PASSPHRASE: string;
 	TS_SELENIUM_FACTORY_URL(): string;
 } = {
 	/**
@@ -90,14 +91,19 @@ export const FACTORY_TEST_CONSTANTS: {
 	TS_GIT_PERSONAL_ACCESS_TOKEN: process.env.TS_GIT_PERSONAL_ACCESS_TOKEN || '',
 
 	/**
-	 * sSH private key as string (from environment variable)
+	 * ssh private key as string (from environment variable)
 	 */
 	TS_SELENIUM_SSH_PRIVATE_KEY: process.env.TS_SELENIUM_SSH_PRIVATE_KEY || '',
 
 	/**
-	 * sSH public key as string (from environment variable)
+	 * ssh public key as string (from environment variable)
 	 */
 	TS_SELENIUM_SSH_PUBLIC_KEY: process.env.TS_SELENIUM_SSH_PUBLIC_KEY || '',
+
+	/**
+	 * ssh key passphrase as string (from environment variable)
+	 */
+	TS_SELENIUM_SSH_KEY_PASSPHRASE: process.env.TS_SELENIUM_SSH_KEY_PASSPHRASE || '',
 
 	/**
 	 * full factory URL
