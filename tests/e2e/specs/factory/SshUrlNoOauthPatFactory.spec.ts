@@ -58,7 +58,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	let viewsActionsButton: boolean;
 	// test specific data
 	const timeToRefresh: number = 1500;
-	const changesToCommit: string = new Date().getTime().toString();
+	const changesToCommit: string = 'Commit ' + new Date().getTime().toString();
 	const fileToChange: string = 'Date.txt';
 	const refreshButtonLabel: string = 'Refresh';
 	const pushItemLabel: string = 'Push';
