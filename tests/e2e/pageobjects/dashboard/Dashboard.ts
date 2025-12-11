@@ -231,14 +231,6 @@ export class Dashboard {
 		await this.driverHelper.waitAndClick(Dashboard.CONTINUE_WITH_DEFAULT_DEVFILE_BUTTON, timeout);
 	}
 
-	private getAboutMenuItemButtonLocator(text: string): By {
-		return By.xpath(`//li/button[text()="${text}"]`);
-	}
-
-	private getAboutDialogWindowItemLocator(itemDataTestId: string): By {
-		return By.xpath(`//dd[@data-testid="${itemDataTestId}"]`);
-	}
-
 	async openChooseEditorMenu(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug('open "choose Editor" menu');
 
@@ -249,5 +241,13 @@ export class Dashboard {
 		Logger.debug('select Editor. Editor: ' + editor);
 
 		await this.driverHelper.waitAndClick(By.xpath(editor), timeout);
+	}
+
+	private getAboutMenuItemButtonLocator(text: string): By {
+		return By.xpath(`//li/button[text()="${text}"]`);
+	}
+
+	private getAboutDialogWindowItemLocator(itemDataTestId: string): By {
+		return By.xpath(`//dd[@data-testid="${itemDataTestId}"]`);
 	}
 }

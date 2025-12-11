@@ -9,7 +9,6 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
-import { By } from 'selenium-webdriver';
 import { expect } from 'chai';
 
 suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
@@ -25,7 +24,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-	const VSCodeEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
+	const vsCodeEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 	const titlexPath: string = '/html/body/h1';
 
 	const samplesForCheck: string[] = [
@@ -47,6 +46,24 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
+	async function testVSCode(sampleOrUrl: string, isUrl: boolean): Promise<void> {
+		Logger.debug(sampleOrUrl);
+		await dashboard.openDashboard();
+		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(vsCodeEditor, sampleOrUrl, isUrl, titlexPath);
+
+		const headerText: string = await workspaceHandlingTests.getTextFromWorkspaceElement(titlexPath);
+		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+
+		await deleteWorkspace();
+	}
+
+	async function deleteWorkspace(): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+		await dashboard.forceStopWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+	}
+
 	suiteSetup('Login into OC', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
 	});
@@ -66,24 +83,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			await testVSCode(url, true);
 		}
 	});
-
-	async function testVSCode(sampleOrUrl: string, isUrl: boolean) {
-		Logger.debug(sampleOrUrl);
-		await dashboard.openDashboard();
-		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(VSCodeEditor, sampleOrUrl, isUrl, titlexPath);
-
-		const headerText = await workspaceHandlingTests.getTextFromWorkspaceElement(titlexPath);
-		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
-
-		await deleteWorkspace();
-	}
-
-	async function deleteWorkspace() {
-		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();
-		await dashboard.forceStopWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
-		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
-	}
 
 	suiteTeardown('Delete default DevWorkspace', function (): void {
 		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();

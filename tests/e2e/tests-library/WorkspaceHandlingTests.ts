@@ -150,30 +150,6 @@ export class WorkspaceHandlingTests {
 		Logger.info('Start workspace progress description: ' + alertDescription);
 	}
 
-	private async getWorkspaceAlertDescription(): Promise<string> {
-		try {
-			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_DESCRIPTION).getText();
-		} catch (err) {
-			return '(unknown)';
-		}
-	}
-
-	private async getWorkspaceStatus(): Promise<string> {
-		try {
-			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_STATUS).getText();
-		} catch (err) {
-			return '(unknown)';
-		}
-	}
-
-	private async getWorkspaceAlertTitle(): Promise<string> {
-		try {
-			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_TITLE).getAttribute('innerHTML');
-		} catch (err) {
-			return '(unknown)';
-		}
-	}
-
 	async createAndOpenWorkspaceWithSpecificEditorAndSample(
 		editor: string,
 		sample: string,
@@ -204,5 +180,29 @@ export class WorkspaceHandlingTests {
 	async getTextFromWorkspaceElement(xpath: string): Promise<string> {
 		Logger.debug('returning text from xPath: ' + xpath);
 		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
+	}
+
+	private async getWorkspaceAlertDescription(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_DESCRIPTION).getText();
+		} catch (err) {
+			return '(unknown)';
+		}
+	}
+
+	private async getWorkspaceStatus(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_STATUS).getText();
+		} catch (err) {
+			return '(unknown)';
+		}
+	}
+
+	private async getWorkspaceAlertTitle(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_TITLE).getAttribute('innerHTML');
+		} catch (err) {
+			return '(unknown)';
+		}
 	}
 }
