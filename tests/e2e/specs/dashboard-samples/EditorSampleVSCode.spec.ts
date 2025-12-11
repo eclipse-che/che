@@ -46,6 +46,13 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
+	async function deleteWorkspace(): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+		await dashboard.forceStopWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+	}
+
 	async function testVSCode(sampleOrUrl: string, isUrl: boolean): Promise<void> {
 		Logger.debug(sampleOrUrl);
 		await dashboard.openDashboard();
@@ -55,13 +62,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
 
 		await deleteWorkspace();
-	}
-
-	async function deleteWorkspace(): Promise<void> {
-		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();
-		await dashboard.forceStopWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
-		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 	}
 
 	suiteSetup('Login into OC', function (): void {
