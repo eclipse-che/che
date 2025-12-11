@@ -12,7 +12,6 @@ import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTes
 import { By } from 'selenium-webdriver';
 import { expect } from 'chai';
 
-
 suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
 	this.timeout(6000000);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -25,8 +24,9 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	
+
 	const VSCodeEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
+	const titlexPath: string = '/html/body/h1';
 
 	const samplesForCheck: string[] = [
 		'Empty Workspace',
@@ -46,7 +46,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
 		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
-
 
 	suiteSetup('Login into OC', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
@@ -68,13 +67,13 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		}
 	});
 
-	async function testVSCode(sampleOrUrl: string, isUrl: boolean){
+	async function testVSCode(sampleOrUrl: string, isUrl: boolean) {
 		Logger.debug(sampleOrUrl);
 		await dashboard.openDashboard();
-		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(VSCodeEditor, sampleOrUrl, isUrl);
+		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(VSCodeEditor, sampleOrUrl, isUrl, titlexPath);
 
-		const headerText = await workspaceHandlingTests.getTextFromWorkspaceElement('/html/body/h1');
-		expect("Workspace " + WorkspaceHandlingTests.getWorkspaceName() + " is running").equal(headerText);
+		const headerText = await workspaceHandlingTests.getTextFromWorkspaceElement(titlexPath);
+		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
 
 		await deleteWorkspace();
 	}
@@ -85,7 +84,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await dashboard.forceStopWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 	}
-
 
 	suiteTeardown('Delete default DevWorkspace', function (): void {
 		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();

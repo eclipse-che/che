@@ -174,7 +174,12 @@ export class WorkspaceHandlingTests {
 		}
 	}
 
-	async createAndOpenWorkspaceWithSpecificEditorAndSample(editor: string, sample: string, isUrl: boolean = false): Promise<void> {
+	async createAndOpenWorkspaceWithSpecificEditorAndSample(
+		editor: string,
+		sample: string,
+		isUrl: boolean = false,
+		xPathForVerify: string
+	): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and Sample. Sample ' + editor);
 		await this.selectEditor(editor);
 
@@ -187,10 +192,7 @@ export class WorkspaceHandlingTests {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 		await this.obtainWorkspaceNameFromStartingPage();
 
-		await this.driverHelper.waitVisibility(
-			By.xpath('/html/body/h1'),
-			TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
-		);
+		await this.driverHelper.waitVisibility(By.xpath(xPathForVerify), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 	}
 
 	async selectEditor(editor: string): Promise<void> {
