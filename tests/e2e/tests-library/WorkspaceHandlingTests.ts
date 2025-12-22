@@ -150,6 +150,38 @@ export class WorkspaceHandlingTests {
 		Logger.info('Start workspace progress description: ' + alertDescription);
 	}
 
+	async createAndOpenWorkspaceWithSpecificEditorAndSample(
+		editor: string,
+		sample: string,
+		isUrl: boolean = false,
+		xPathForVerify: string
+	): Promise<void> {
+		Logger.debug('Create and open workspace with specific Editor and Sample. Sample ' + editor);
+		await this.selectEditor(editor);
+
+		if (isUrl) {
+			await this.createWorkspace.importFromGitUsingUI(sample);
+		} else {
+			await this.createWorkspace.clickOnSampleNoEditorSelection(sample);
+		}
+
+		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+		await this.obtainWorkspaceNameFromStartingPage();
+
+		await this.driverHelper.waitVisibility(By.xpath(xPathForVerify), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+	}
+
+	async selectEditor(editor: string): Promise<void> {
+		Logger.debug('select Editor. Editor: ' + editor);
+		await this.dashboard.openChooseEditorMenu();
+		await this.dashboard.chooseEditor(editor);
+	}
+
+	async getTextFromWorkspaceElement(xpath: string): Promise<string> {
+		Logger.debug('returning text from xPath: ' + xpath);
+		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
+	}
+
 	private async getWorkspaceAlertDescription(): Promise<string> {
 		try {
 			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_DESCRIPTION).getText();
