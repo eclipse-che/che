@@ -54,6 +54,11 @@ export class DexLoginPage {
 	async waitDexLoginPageDisappearance(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitDisappearance(DexLoginPage.DEX_PAGE_CONTENT_CONTAINER, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		const attempts: number = Math.ceil(TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT / TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+		await this.driverHelper.waitDisappearance(
+			DexLoginPage.DEX_PAGE_CONTENT_CONTAINER,
+			attempts,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+		);
 	}
 }
