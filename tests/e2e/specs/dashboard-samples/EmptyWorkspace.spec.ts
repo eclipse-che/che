@@ -63,11 +63,13 @@ suite(`${stackName} test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): 
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 	});
 
-	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
-		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
-	});
+	if (BASE_TEST_CONSTANTS.DELETE_WORKSPACE_ON_SUCCESSFUL_TEST) {
+		suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
+			await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
+		});
 
-	suiteTeardown('Unregister running workspace', function (): void {
-		registerRunningWorkspace('');
-	});
+		suiteTeardown('Unregister running workspace', function (): void {
+			registerRunningWorkspace('');
+		});
+	}
 });
