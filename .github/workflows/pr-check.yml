@@ -135,8 +135,6 @@ jobs:
           export NODE_TLS_REJECT_UNAUTHORIZED=0 && 
           export TS_SELENIUM_LOG_LEVEL=TRACE && 
           export TS_SELENIUM_DEFAULT_ATTEMPTS=2 &&
-          export DELETE_WORKSPACE_ON_FAILED_TEST=false &&
-          export DELETE_WORKSPACE_ON_SUCCESSFUL_TEST=false &&
           export USERSTORY=EmptyWorkspaceAPI && 
           export TS_API_TEST_UDI_IMAGE=quay.io/devfile/universal-developer-image:ubi8-latest &&
           npm run driver-less-test

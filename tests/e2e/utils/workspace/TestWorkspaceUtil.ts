@@ -103,10 +103,10 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 			deleteWorkspaceResponse = await this.processRequestHandler.delete(deleteWorkspaceApiUrl);
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 404) {
-				Logger.error(`the workspace :${workspaceName} not found`);
-				throw error;
+				Logger.info(`Workspace ${workspaceName} not found, already deleted`);
+				return;
 			}
-			Logger.error(`delete workspace call failed. URL used: ${deleteWorkspaceStatus}`);
+			Logger.error(`delete workspace call failed. URL used: ${deleteWorkspaceApiUrl}`);
 			throw error;
 		}
 
@@ -117,12 +117,14 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 		for (let i: number = 0; i < this.attempts; i++) {
 			try {
 				deleteWorkspaceResponse = await this.processRequestHandler.get(deleteWorkspaceApiUrl);
+				Logger.trace(`GET ${deleteWorkspaceApiUrl} returned status: ${deleteWorkspaceResponse.status}`);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 404) {
 					deleteWorkspaceStatus = true;
 					Logger.debug(`${workspaceName} deleted successfully`);
 					break;
 				}
+				Logger.trace(`GET ${deleteWorkspaceApiUrl} threw error: ${error}`);
 			}
 			await this.driverHelper.wait(this.polling);
 		}
