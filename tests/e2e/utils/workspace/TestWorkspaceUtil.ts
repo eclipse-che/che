@@ -117,7 +117,9 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 		for (let i: number = 0; i < this.attempts; i++) {
 			try {
 				deleteWorkspaceResponse = await this.processRequestHandler.get(deleteWorkspaceApiUrl);
-				Logger.trace(`GET ${deleteWorkspaceApiUrl} returned status: ${deleteWorkspaceResponse.status}`);
+				Logger.trace(
+					`GET ${deleteWorkspaceApiUrl} returned status: ${deleteWorkspaceResponse.status}; data: ${deleteWorkspaceResponse.data}`
+				);
 			} catch (error) {
 				if (axios.isAxiosError(error) && error.response?.status === 404) {
 					deleteWorkspaceStatus = true;
