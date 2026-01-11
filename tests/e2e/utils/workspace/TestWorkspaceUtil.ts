@@ -121,7 +121,7 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 					`GET ${deleteWorkspaceApiUrl} returned status: ${deleteWorkspaceResponse.status}; data: ${deleteWorkspaceResponse.data}`
 				);
 			} catch (error) {
-				if (axios.isAxiosError(error) && error.response?.status === 404 || error.response?.status === 500) {
+				if (axios.isAxiosError(error) && (error.response?.status === 404 || error.response?.status === 500)) {
 					deleteWorkspaceStatus = true;
 					Logger.debug(`${workspaceName} deleted successfully`);
 					break;
