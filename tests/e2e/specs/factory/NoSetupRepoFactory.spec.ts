@@ -137,118 +137,121 @@ suite(
 				).not.undefined;
 			});
 
-			test('Make changes to the file', async function (): Promise<void> {
-				Logger.debug(`projectSection.openItem: "${fileToChange}"`);
-				await projectSection.openItem(testRepoProjectName, fileToChange);
-				await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
-				await driverHelper.getDriver().findElement(webCheCodeLocators.Editor.inputArea).click();
+			// skip change/push tests for public GitHub repos without OAuth/PAT - only verify project was cloned
+			if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER !== GitProviderType.GITHUB) {
+				test('Make changes to the file', async function (): Promise<void> {
+					Logger.debug(`projectSection.openItem: "${fileToChange}"`);
+					await projectSection.openItem(testRepoProjectName, fileToChange);
+					await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
+					await driverHelper.getDriver().findElement(webCheCodeLocators.Editor.inputArea).click();
 
-				Logger.debug('Clearing the editor with Ctrl+A');
-				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
-				await driverHelper.wait(500);
-				Logger.debug('Deleting selected text');
-				await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
-				await driverHelper.wait(500);
-				Logger.debug(`Entering text: "${changesToCommit}"`);
-				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
-			});
+					Logger.debug('Clearing the editor with Ctrl+A');
+					await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+					await driverHelper.wait(500);
+					Logger.debug('Deleting selected text');
+					await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
+					await driverHelper.wait(500);
+					Logger.debug(`Entering text: "${changesToCommit}"`);
+					await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
+				});
 
-			test('Open a source control manager', async function (): Promise<void> {
-				const viewSourceControl: string = 'Source Control';
-				const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
-				Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
-				await sourceControl.openView();
-				const scmView: NewScmView = new NewScmView();
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
-				let rest: SingleScmProvider[];
-				[scmProvider, ...rest] = await scmView.getProviders();
-				Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
-			});
+				test('Open a source control manager', async function (): Promise<void> {
+					const viewSourceControl: string = 'Source Control';
+					const sourceControl: ViewControl = (await new ActivityBar().getViewControl(viewSourceControl)) as ViewControl;
+					Logger.debug(`sourceControl.openView: "${viewSourceControl}"`);
+					await sourceControl.openView();
+					const scmView: NewScmView = new NewScmView();
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.inputField);
+					let rest: SingleScmProvider[];
+					[scmProvider, ...rest] = await scmView.getProviders();
+					Logger.debug(`scmView.getProviders: "${JSON.stringify(scmProvider)}, ${rest}"`);
+				});
 
-			test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
-				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
-				// wait while changes counter will be refreshed
-				await driverHelper.wait(timeToRefresh);
-				const changes: number = await scmProvider.getChangeCount();
-				Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
-				expect(changes).eql(1);
-			});
+				test('Check if the changes are displayed in the source control manager', async function (): Promise<void> {
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+					await driverHelper.wait(timeToRefresh);
+					Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+					await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+					// wait while changes counter will be refreshed
+					await driverHelper.wait(timeToRefresh);
+					const changes: number = await scmProvider.getChangeCount();
+					Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
+					expect(changes).eql(1);
+				});
 
-			test('Stage the changes', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				viewsActionsButton = await viewsMoreActionsButton.viewsAndMoreActionsButtonIsVisible();
-				if (viewsActionsButton) {
-					await viewsMoreActionsButton.closeSourceControlGraph();
-				}
-				scmContextMenu = await scmProvider.openMoreActions();
-				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
-				Logger.debug('scmContextMenu.select: "Changes" -> "Stage All Changes"');
-				await scmContextMenu.select('Changes', 'Stage All Changes');
-			});
+				test('Stage the changes', async function (): Promise<void> {
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+					viewsActionsButton = await viewsMoreActionsButton.viewsAndMoreActionsButtonIsVisible();
+					if (viewsActionsButton) {
+						await viewsMoreActionsButton.closeSourceControlGraph();
+					}
+					scmContextMenu = await scmProvider.openMoreActions();
+					await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.contextView);
+					Logger.debug('scmContextMenu.select: "Changes" -> "Stage All Changes"');
+					await scmContextMenu.select('Changes', 'Stage All Changes');
+				});
 
-			test('Commit the changes', async function (): Promise<void> {
-				Logger.info(`ScmView inputField locator: "${(webCheCodeLocators.ScmView as any).scmEditor}"`);
-				Logger.debug('Click on the Scm Editor');
-				await driverHelper
-					.getDriver()
-					.findElement((webCheCodeLocators.ScmView as any).scmEditor)
-					.click();
-				await sourceControlView.typeCommitMessage(changesToCommit);
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
-				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
-				// wait while changes counter will be refreshed
-				await driverHelper.wait(timeToRefresh);
-				const changes: number = await scmProvider.getChangeCount();
-				Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
-				expect(changes).eql(0);
-			});
+				test('Commit the changes', async function (): Promise<void> {
+					Logger.info(`ScmView inputField locator: "${(webCheCodeLocators.ScmView as any).scmEditor}"`);
+					Logger.debug('Click on the Scm Editor');
+					await driverHelper
+						.getDriver()
+						.findElement((webCheCodeLocators.ScmView as any).scmEditor)
+						.click();
+					await sourceControlView.typeCommitMessage(changesToCommit);
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+					await driverHelper.wait(timeToRefresh);
+					Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+					await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+					// wait while changes counter will be refreshed
+					await driverHelper.wait(timeToRefresh);
+					const changes: number = await scmProvider.getChangeCount();
+					Logger.debug(`scmProvider.getChangeCount: number of changes is "${changes}"`);
+					expect(changes).eql(0);
+				});
 
-			test('Push the changes', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				Logger.debug('scmProvider.openMoreActions');
-				scmContextMenu = await scmProvider.openMoreActions();
-				await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
-				Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
-				await scmContextMenu.select(pushItemLabel);
+				test('Push the changes', async function (): Promise<void> {
+					await driverHelper.waitVisibility(webCheCodeLocators.Notification.action);
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+					Logger.debug('scmProvider.openMoreActions');
+					scmContextMenu = await scmProvider.openMoreActions();
+					await driverHelper.waitVisibility(webCheCodeLocators.ContextMenu.itemConstructor(pushItemLabel));
+					Logger.debug(`scmContextMenu.select: "${pushItemLabel}"`);
+					await scmContextMenu.select(pushItemLabel);
 
-				if (await gitHubExtensionDialog.isDialogVisible()) {
-					await gitHubExtensionDialog.closeDialog();
-				}
+					if (await gitHubExtensionDialog.isDialogVisible()) {
+						await gitHubExtensionDialog.closeDialog();
+					}
 
-				if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER !== GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
-					// wait for the user name input to appear and create an InputBox to enter the user name
-					Logger.debug('Waiting for username input to appear');
-					const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
-					Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
-					await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
-					await inputUsername.confirm();
-				}
+					if (FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_PROVIDER !== GitProviderType.BITBUCKET_CLOUD_OAUTH2) {
+						// wait for the user name input to appear and create an InputBox to enter the user name
+						Logger.debug('Waiting for username input to appear');
+						const inputUsername: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+						Logger.debug(`Setting username: "${OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME}"`);
+						await inputUsername.setText(OAUTH_CONSTANTS.TS_SELENIUM_GIT_PROVIDER_USERNAME);
+						await inputUsername.confirm();
+					}
 
-				// wait for password input to appear after username confirmation
-				Logger.debug('Waiting for password input to appear');
-				const inputPassword: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
-				Logger.debug('Setting password');
-				await inputPassword.setText(FACTORY_TEST_CONSTANTS.TS_GIT_PERSONAL_ACCESS_TOKEN);
-				await inputPassword.confirm();
-			});
+					// wait for password input to appear after username confirmation
+					Logger.debug('Waiting for password input to appear');
+					const inputPassword: InputBox = await InputBox.create(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
+					Logger.debug('Setting password');
+					await inputPassword.setText(FACTORY_TEST_CONSTANTS.TS_GIT_PERSONAL_ACCESS_TOKEN);
+					await inputPassword.confirm();
+				});
 
-			test('Check if the changes were pushed', async function (): Promise<void> {
-				await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
-				await driverHelper.wait(timeToRefresh);
-				Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
-				await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
-				const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
-					webCheCodeLocators.Notification.action,
-					'aria-disabled'
-				);
-				expect(isCommitButtonDisabled).to.equal('true');
-			});
+				test('Check if the changes were pushed', async function (): Promise<void> {
+					await driverHelper.waitVisibility(webCheCodeLocators.ScmView.more);
+					await driverHelper.wait(timeToRefresh);
+					Logger.debug(`wait and click on: "${refreshButtonLabel}"`);
+					await driverHelper.waitAndClick(webCheCodeLocators.ScmView.actionConstructor(refreshButtonLabel));
+					const isCommitButtonDisabled: string = await driverHelper.waitAndGetElementAttribute(
+						webCheCodeLocators.Notification.action,
+						'aria-disabled'
+					);
+					expect(isCommitButtonDisabled).to.equal('true');
+				});
+			}
 		}
 
 		suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
