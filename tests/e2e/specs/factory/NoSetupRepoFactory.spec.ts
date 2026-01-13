@@ -127,7 +127,9 @@ suite(
 			});
 
 			test('Accept the project as a trusted one', async function (): Promise<void> {
-				await projectAndFileTests.performTrustAuthorDialog();
+				await projectAndFileTests.performTrustDialogs();
+				// it needs to wait here for the Trust dialogs to be closed and the Editor to be ready
+				await driverHelper.wait(5000);
 			});
 
 			test('Check if the project files were imported', async function (): Promise<void> {
@@ -142,13 +144,14 @@ suite(
 				await projectSection.openItem(testRepoProjectName, fileToChange);
 				await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
 				await driverHelper.getDriver().findElement(webCheCodeLocators.Editor.inputArea).click();
+				await driverHelper.wait(1000);
 
 				Logger.debug('Clearing the editor with Ctrl+A');
 				await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
-				await driverHelper.wait(500);
+				await driverHelper.wait(1000);
 				Logger.debug('Deleting selected text');
 				await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
-				await driverHelper.wait(500);
+				await driverHelper.wait(1000);
 				Logger.debug(`Entering text: "${changesToCommit}"`);
 				await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
 			});
