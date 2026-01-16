@@ -42,8 +42,8 @@ jobs:
           echo running on PR ${GITHUB_REF}, branch - ${GITHUB_HEAD_REF}
           echo "pr_number=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> "$GITHUB_ENV"
           docker images
-          # remove build-in images form the VM becqause it is not used
-          docker rmi -f $(docker images -aq)
+          # remove build-in images from the VM because it is not used
+          docker rmi -f $(docker images -aq) || true
 
       - name: Configuring nodejs 18.x version
         uses: actions/setup-node@v3

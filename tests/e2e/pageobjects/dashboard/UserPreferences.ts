@@ -152,12 +152,23 @@ export class UserPreferences {
 		);
 	}
 
-	async setupGitConfig(userName: string, userEmail: string): Promise<void> {
+	async ensureGitConfig(userName: string, userEmail: string): Promise<void> {
 		await this.openUserPreferencesPage();
 		await this.openGitConfigPage();
+
+		// check if the values are already set correctly
+		const currentUserName: string = await this.driverHelper.waitAndGetElementAttribute(UserPreferences.GIT_CONFIG_USER_NAME, 'value');
+		const currentEmail: string = await this.driverHelper.waitAndGetElementAttribute(UserPreferences.GIT_CONFIG_USER_EMAIL, 'value');
+
+		if (currentUserName === userName && currentEmail === userEmail) {
+			Logger.info(`Git config already set correctly: name="${userName}", email="${userEmail}"`);
+			return;
+		}
+
+		Logger.info(`Setting git config: name="${userName}", email="${userEmail}"`);
 		await this.enterGitConfigUsernameAndEmail(userName, userEmail);
 		await this.clickOnGitConfigSaveButton();
-		// await userPreferences.waitGitConfigSaveButtonIsDisabled();// TODO: restore line after fix https://github.com/eclipse-che/che/issues/23625
+		await this.waitGitConfigSaveButtonIsDisabled();
 	}
 
 	async openSshKeyTab(): Promise<void> {
