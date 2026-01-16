@@ -78,7 +78,7 @@ suite(
 
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
-			await userPreferences.setupGitConfig(
+			await userPreferences.ensureGitConfig(
 				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_NAME,
 				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_EMAIL
 			);

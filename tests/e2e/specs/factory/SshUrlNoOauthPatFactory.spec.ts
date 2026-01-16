@@ -76,7 +76,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
 		suiteSetup('Login', async function (): Promise<void> {
 			await loginTests.loginIntoChe();
-			await userPreferences.setupGitConfig(
+			await userPreferences.ensureGitConfig(
 				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_NAME,
 				FACTORY_TEST_CONSTANTS.TS_GIT_COMMIT_AUTHOR_EMAIL
 			);

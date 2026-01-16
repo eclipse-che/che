@@ -152,15 +152,15 @@ export class UserPreferences {
 		);
 	}
 
-	async setupGitConfig(userName: string, userEmail: string): Promise<void> {
+	async ensureGitConfig(userName: string, userEmail: string): Promise<void> {
 		await this.openUserPreferencesPage();
 		await this.openGitConfigPage();
 
 		// check if the values are already set correctly
-		const currentName: string = await this.driverHelper.waitAndGetElementAttribute(UserPreferences.GIT_CONFIG_USER_NAME, 'value');
+		const currentUserName: string = await this.driverHelper.waitAndGetElementAttribute(UserPreferences.GIT_CONFIG_USER_NAME, 'value');
 		const currentEmail: string = await this.driverHelper.waitAndGetElementAttribute(UserPreferences.GIT_CONFIG_USER_EMAIL, 'value');
 
-		if (currentName === userName && currentEmail === userEmail) {
+		if (currentUserName === userName && currentEmail === userEmail) {
 			Logger.info(`Git config already set correctly: name="${userName}", email="${userEmail}"`);
 			return;
 		}
