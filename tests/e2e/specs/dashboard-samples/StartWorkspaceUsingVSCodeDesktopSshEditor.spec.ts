@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { Logger } from '../../utils/Logger';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
 import fs from 'fs';
 import path from 'path';

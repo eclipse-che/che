@@ -164,13 +164,6 @@ export class WorkspaceHandlingTests {
 		await this.waitForControlXpath(xPath);
 	}
 
-	private async waitForControlXpath(xPathToWait: string): Promise<void> {
-		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
-		await this.obtainWorkspaceNameFromStartingPage();
-
-		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-	}
-
 	async selectEditor(editor: string): Promise<void> {
 		Logger.debug('select Editor. Editor: ' + editor);
 		await this.dashboard.openChooseEditorMenu();
@@ -180,6 +173,13 @@ export class WorkspaceHandlingTests {
 	async getTextFromUIElementByXpath(xpath: string): Promise<string> {
 		Logger.debug('returning text from xPath: ' + xpath);
 		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
+	}
+
+	private async waitForControlXpath(xPathToWait: string): Promise<void> {
+		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+		await this.obtainWorkspaceNameFromStartingPage();
+
+		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 	}
 
 	private async getWorkspaceAlertDescription(): Promise<string> {
