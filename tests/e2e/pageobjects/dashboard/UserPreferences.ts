@@ -50,7 +50,7 @@ export class UserPreferences {
 	private static readonly CONFIRM_DELETE_SSH_KEYS_POPUP: By = By.css('div[id^="pf-modal-part"][role="dialog"]');
 	private static readonly CONFIRM_DELETE_SSH_KEYS_CHECKBOX: By = By.id('delete-ssh-keys-warning-checkbox');
 
-	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Services"]');
+	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//span[text()="Revoke Git Service"]');
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="warning-info-checkbox"]');
 	private static readonly DELETE_ITEM_BUTTON_ENABLED: By = By.xpath('//button[@data-testid="revoke-button" and not(@disabled)]');
 
