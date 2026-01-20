@@ -58,17 +58,6 @@ export class Dashboard {
 		await this.clickWorkspacesButton();
 		await this.workspaces.waitPage();
 		await this.workspaces.waitWorkspaceListItem(workspaceName);
-		await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
-		await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
-		await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
-	}
-
-	async forceStopWorkspaceByUI(workspaceName: string): Promise<void> {
-		Logger.debug(`"${workspaceName}"`);
-
-		await this.clickWorkspacesButton();
-		await this.workspaces.waitPage();
-		await this.workspaces.waitWorkspaceListItem(workspaceName);
 		await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
 		await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
 	}

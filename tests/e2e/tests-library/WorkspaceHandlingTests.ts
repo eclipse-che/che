@@ -150,25 +150,25 @@ export class WorkspaceHandlingTests {
 		Logger.info('Start workspace progress description: ' + alertDescription);
 	}
 
-	async createAndOpenWorkspaceWithSpecificEditorAndSample(
-		editor: string,
-		sample: string,
-		isUrl: boolean = false,
-		xPathForVerify: string
-	): Promise<void> {
+	async createAndOpenWorkspaceWithSpecificEditorAndSample(editor: string, sampleName: string, xPath: string): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and Sample. Sample ' + editor);
 		await this.selectEditor(editor);
+		await this.createWorkspace.clickOnSampleNoEditorSelection(sampleName);
+		await this.waitForControlXpath(xPath);
+	}
 
-		if (isUrl) {
-			await this.createWorkspace.importFromGitUsingUI(sample);
-		} else {
-			await this.createWorkspace.clickOnSampleNoEditorSelection(sample);
-		}
+	async createAndOpenWorkspaceWithSpecificEditorAndSampleUrl(editor: string, sampleUrl: string, xPath: string): Promise<void> {
+		Logger.debug('Create and open workspace with specific Editor and URL. Sample ' + editor);
+		await this.selectEditor(editor);
+		await this.createWorkspace.importFromGitUsingUI(sampleUrl);
+		await this.waitForControlXpath(xPath);
+	}
 
+	private async waitForControlXpath(xPathToWait: string): Promise<void> {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 		await this.obtainWorkspaceNameFromStartingPage();
 
-		await this.driverHelper.waitVisibility(By.xpath(xPathForVerify), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
 	}
 
 	async selectEditor(editor: string): Promise<void> {
@@ -177,7 +177,7 @@ export class WorkspaceHandlingTests {
 		await this.dashboard.chooseEditor(editor);
 	}
 
-	async getTextFromWorkspaceElement(xpath: string): Promise<string> {
+	async getTextFromUIElementByXpath(xpath: string): Promise<string> {
 		Logger.debug('returning text from xPath: ' + xpath);
 		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
 	}

@@ -1,0 +1,140 @@
+/** *******************************************************************
+ * copyright (c) 2026 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
+
+import { Logger } from '../../utils/Logger';
+import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
+import { e2eContainer } from '../../configs/inversify.config';
+import { CLASSES } from '../../configs/inversify.types';
+import { LoginTests } from '../../tests-library/LoginTests';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
+import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
+import { expect } from 'chai';
+
+suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
+	this.timeout(6000000);
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const pathToSampleFile: string = path.resolve('resources/default-devfile.yaml');
+	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
+	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
+		CLASSES.KubernetesCommandLineToolsExecutor
+	);
+	kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+
+	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
+	const titlexPath: string = '/html/body/h1';
+	const ocPortForwardxPath: string = '//*[@id="port-forward"]';
+	const sshKeyxPath: string = '//*[@id="key"]';
+	const sshKonfigxPath: string = '//*[@id="config"]';
+
+	const samplesForCheck: string[] = [
+		'Empty Workspace',
+		'JBoss EAP 8.0',
+		'Java Lombok',
+		'Node.js Express',
+		'Python',
+		'Quarkus REST API',
+		'.NET',
+		'Ansible',
+		'C/C++',
+		'Go',
+		'PHP'
+	];
+
+	const gitRepoUrlsToCheck: string[] = [
+		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
+		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
+	];
+
+	async function deleteWorkspace(): Promise<void> {
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+		await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+	}
+
+	suiteSetup('Login into OCP', function (): void {
+		kubernetesCommandLineToolsExecutor.loginToOcp();
+	});
+
+	suiteSetup('Login into Che', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
+
+	async function testStartVSCode(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
+		await dashboard.openDashboard();
+		if (isUrl) {
+			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSampleUrl(
+				vsCodeDesktopSshEditor,
+				sampleNameOrUrl,
+				titlexPath
+			);
+		} else {
+			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
+				vsCodeDesktopSshEditor,
+				sampleNameOrUrl,
+				titlexPath
+			);
+		}
+
+		// check title
+		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
+		Logger.debug(headerText);
+		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+		// check oc-port-forwarding
+		const ocPortForward: string = await workspaceHandlingTests.getTextFromUIElementByXpath(ocPortForwardxPath);
+		Logger.debug(ocPortForward);
+		expect(ocPortForward).contains('oc port-forward -n admin-devspaces');
+		// check ssh key
+		const sshKey: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKeyxPath);
+		Logger.debug(sshKey);
+		expect(sshKey).contains('-----BEGIN OPENSSH PRIVATE KEY-----').and.contains('-----END OPENSSH PRIVATE KEY-----');
+		// check .ssh/kofig
+		const sshKonfig: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKonfigxPath);
+		Logger.debug(sshKonfig);
+		expect(sshKonfig)
+			.contains('HostName')
+			.and.contains('User')
+			.and.contains('Port')
+			.and.contains('IdentityFile')
+			.and.contains('UserKnownHostsFile');
+
+		await deleteWorkspace();
+	}
+
+	suiteSetup('Login into OCP', function (): void {
+		kubernetesCommandLineToolsExecutor.loginToOcp();
+	});
+
+	suiteSetup('Login into Che', async function (): Promise<void> {
+		await loginTests.loginIntoChe();
+	});
+
+	test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
+		for (const sampleName of samplesForCheck) {
+			await testStartVSCode(sampleName, false);
+		}
+	});
+
+	test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
+		for (const url of gitRepoUrlsToCheck) {
+			await testStartVSCode(url, true);
+		}
+	});
+
+	suiteTeardown('Delete default DevWorkspace', function (): void {
+		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+	});
+});
