@@ -179,7 +179,8 @@ export class Dashboard {
 	async waitStartingPageLoaderDisappearance(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitDisappearance(Dashboard.STARTING_PAGE_LOADER, timeout);
+		const attempts: number = Math.ceil(timeout / TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+		await this.driverHelper.waitDisappearance(Dashboard.STARTING_PAGE_LOADER, attempts, TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 	}
 
@@ -222,7 +223,12 @@ export class Dashboard {
 		await this.openDashboard();
 		await this.driverHelper.waitAndClick(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
 		await this.driverHelper.waitAndClick(Dashboard.LOGOUT_BUTTON, timeout);
-		await this.driverHelper.waitDisappearance(Dashboard.USER_SETTINGS_DROPDOWN, timeout);
+		const attempts: number = Math.ceil(timeout / TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+		await this.driverHelper.waitDisappearance(
+			Dashboard.USER_SETTINGS_DROPDOWN,
+			attempts,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+		);
 	}
 
 	async clickContinueWithDefaultDevfileButton(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
