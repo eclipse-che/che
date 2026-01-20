@@ -91,19 +91,15 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 
 		// check title
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
-		Logger.debug(headerText);
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
 		// check oc-port-forwarding
 		const ocPortForward: string = await workspaceHandlingTests.getTextFromUIElementByXpath(ocPortForwardxPath);
-		Logger.debug(ocPortForward);
 		expect(ocPortForward).contains('oc port-forward -n admin-devspaces');
 		// check ssh key
 		const sshKey: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKeyxPath);
-		Logger.debug(sshKey);
 		expect(sshKey).contains('-----BEGIN OPENSSH PRIVATE KEY-----').and.contains('-----END OPENSSH PRIVATE KEY-----');
 		// check .ssh/kofig
 		const sshKonfig: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKonfigxPath);
-		Logger.debug(sshKonfig);
 		expect(sshKonfig)
 			.contains('HostName')
 			.and.contains('User')
