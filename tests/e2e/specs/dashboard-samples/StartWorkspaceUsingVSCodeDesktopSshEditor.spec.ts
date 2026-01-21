@@ -19,6 +19,8 @@ import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { expect } from 'chai';
+import { Logger } from '../../utils/Logger';
+import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
 	this.timeout(6000000);
@@ -58,6 +60,10 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
+	const gitRepoUrlsToCheckAirgap: string[] = [
+		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
+	];
+
 	async function deleteWorkspace(): Promise<void> {
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
@@ -72,10 +78,10 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await loginTests.loginIntoChe();
 	});
 
-	async function testStartVSCode(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
+	async function testWorkspaceStartup(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
 		await dashboard.openDashboard();
 		if (isUrl) {
-			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSampleUrl(
+			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
 				vsCodeDesktopSshEditor,
 				sampleNameOrUrl,
 				titlexPath
@@ -109,23 +115,22 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await deleteWorkspace();
 	}
 
-	suiteSetup('Login into OCP', function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp();
-	});
-
-	suiteSetup('Login into Che', async function (): Promise<void> {
-		await loginTests.loginIntoChe();
-	});
-
 	test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
 		for (const sampleName of samplesForCheck) {
-			await testStartVSCode(sampleName, false);
+			await testWorkspaceStartup(sampleName, false);
 		}
 	});
 
 	test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
-		for (const url of gitRepoUrlsToCheck) {
-			await testStartVSCode(url, true);
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+			for (const url of gitRepoUrlsToCheckAirgap) {
+				await testWorkspaceStartup(url, true);
+			}
+		} else {
+			for (const url of gitRepoUrlsToCheck) {
+				await testWorkspaceStartup(url, true);
+			}
 		}
 	});
 

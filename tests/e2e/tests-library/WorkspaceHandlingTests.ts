@@ -157,7 +157,7 @@ export class WorkspaceHandlingTests {
 		await this.waitForControlXpath(xPath);
 	}
 
-	async createAndOpenWorkspaceWithSpecificEditorAndSampleUrl(editor: string, sampleUrl: string, xPath: string): Promise<void> {
+	async createAndOpenWorkspaceWithSpecificEditorAndGitUrl(editor: string, sampleUrl: string, xPath: string): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and URL. Sample ' + editor);
 		await this.selectEditor(editor);
 		await this.createWorkspace.importFromGitUsingUI(sampleUrl);
@@ -180,6 +180,7 @@ export class WorkspaceHandlingTests {
 		await this.obtainWorkspaceNameFromStartingPage();
 
 		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+		await this.driverHelper.waitVisibility(By.xpath(xPathToWait+"asdasdasd"), TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
 	}
 
 	private async getWorkspaceAlertDescription(): Promise<string> {
