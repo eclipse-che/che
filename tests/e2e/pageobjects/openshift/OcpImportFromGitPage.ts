@@ -15,6 +15,7 @@ import { By } from 'selenium-webdriver';
 import { Logger } from '../../utils/Logger';
 import { OcpApplicationPage } from './OcpApplicationPage';
 import { e2eContainer } from '../../configs/inversify.config';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class OcpImportFromGitPage {
@@ -36,7 +37,7 @@ export class OcpImportFromGitPage {
 	async enterGitRepoUrl(gitRepoUrl: string): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_URL_INPUT, gitRepoUrl);
+		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_URL_INPUT, gitRepoUrl, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async clickOnAdvancedOptionsButton(): Promise<void> {
