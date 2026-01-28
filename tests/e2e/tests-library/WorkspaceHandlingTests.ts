@@ -180,7 +180,6 @@ export class WorkspaceHandlingTests {
 		await this.obtainWorkspaceNameFromStartingPage();
 
 		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
-		await this.driverHelper.waitVisibility(By.xpath(xPathToWait+"asdasdasd"), TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
 	}
 
 	private async getWorkspaceAlertDescription(): Promise<string> {

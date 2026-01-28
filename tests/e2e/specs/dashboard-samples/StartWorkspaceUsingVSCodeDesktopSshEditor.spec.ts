@@ -61,6 +61,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	];
 
 	const gitRepoUrlsToCheckAirgap: string[] = [
+		'https://gh.crw-qe.com/test-automation-only/ubi8/tree/ubi8-latest',
 		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
@@ -69,10 +70,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 		await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 	}
-
-	suiteSetup('Login into OCP', function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp();
-	});
 
 	suiteSetup('Login into Che', async function (): Promise<void> {
 		await loginTests.loginIntoChe();
@@ -134,7 +131,8 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		}
 	});
 
-	suiteTeardown('Delete default DevWorkspace', function (): void {
-		kubernetesCommandLineToolsExecutor.deleteDevWorkspace();
+	suiteTeardown('Delete DevWorkspace', async function (): Promise<void> {
+		Logger.info('Deleting DevWorkspace...');
+		await deleteWorkspace();
 	});
 });
