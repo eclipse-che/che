@@ -56,7 +56,7 @@ export class OcpMainPage {
 	async clickAddToProjectButton(): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.ADD_BUTTON);
+		await this.driverHelper.waitAndClick(OcpMainPage.ADD_BUTTON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 	}
 
 	async selectDeveloperRole(): Promise<void> {
@@ -72,7 +72,7 @@ export class OcpMainPage {
 	async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM);
+		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
 		return e2eContainer.get(CLASSES.OcpImportFromGitPage);
 	}
 
