@@ -136,7 +136,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 		try {
-			await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		} catch (e) {
 			Logger.info('Cannot find or stop DevWorkspace in suiteTeardown. Normal behaviour if test passed.');
 		}
