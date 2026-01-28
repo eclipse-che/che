@@ -132,7 +132,13 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	});
 
 	suiteTeardown('Delete DevWorkspace', async function (): Promise<void> {
-		Logger.info('Deleting DevWorkspace...');
-		await deleteWorkspace();
+		Logger.info('Deleting DevWorkspace... After all.');
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+		try {
+			await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+		} catch (e) {
+			Logger.info("Cannot find or stop DevWorkspace in suiteTeardown. Normal behaviour if test passed.")
+		}
 	});
 });
