@@ -136,7 +136,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		Logger.info('Deleting DevWorkspace... After all.');
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-		if (WorkspaceHandlingTests.getWorkspaceName() != 'undefined') {
+		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
 	});
