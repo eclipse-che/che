@@ -69,6 +69,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 		await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+		WorkspaceHandlingTests.clearWorkspaceName();
 	}
 
 	suiteSetup('Login into Che', async function (): Promise<void> {
@@ -135,10 +136,8 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		Logger.info('Deleting DevWorkspace... After all.');
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
-		try {
+		if (WorkspaceHandlingTests.getWorkspaceName() != 'undefined') {
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
-		} catch (e) {
-			Logger.info('Cannot find or stop DevWorkspace in suiteTeardown. Normal behaviour if test passed.');
 		}
 	});
 });
