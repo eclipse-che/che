@@ -66,8 +66,8 @@ export class ProjectAndFileTests {
 
 		try {
 			await workbench.click();
-			// add timeout for waiting for trust dialog to appear
-			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_TRUST_DIALOG_WAIT_TIMEOUT);
+			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for reloading the IDE
+			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			await this.driverHelper.waitVisibility(
 				this.cheCodeLocatorLoader.webCheCodeLocators.WelcomeContent.text,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM
@@ -101,8 +101,8 @@ export class ProjectAndFileTests {
 		Logger.debug();
 
 		try {
-			// add timeout for waiting for trust publisher dialog to appear
-			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_TRUST_DIALOG_WAIT_TIMEOUT);
+			// add TS_IDE_LOAD_TIMEOUT timeout for waiting for appearing the box
+			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 			await this.driverHelper.waitVisibility(
 				ProjectAndFileTests.TRUST_PUBLISHER_BOX,
 				TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM

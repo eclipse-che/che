@@ -24,7 +24,6 @@ export const TIMEOUT_CONSTANTS: {
 	TS_SELENIUM_LOAD_PAGE_TIMEOUT: number;
 	TS_SELENIUM_START_WORKSPACE_TIMEOUT: number;
 	TS_SELENIUM_WAIT_FOR_URL: number;
-	TS_TRUST_DIALOG_WAIT_TIMEOUT: number;
 	TS_WAIT_LOADER_ABSENCE_TIMEOUT: number;
 	TS_WAIT_LOADER_PRESENCE_TIMEOUT: number;
 } = {
@@ -107,11 +106,6 @@ export const TIMEOUT_CONSTANTS: {
 	 * timeout for context menu manipulation, "10 000" by default
 	 */
 	TS_DIALOG_WINDOW_DEFAULT_TIMEOUT: Number(process.env.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT) || 10_000,
-
-	/**
-	 * timeout for waiting for trust dialog to appear, "20 000" by default.
-	 */
-	TS_TRUST_DIALOG_WAIT_TIMEOUT: Number(process.env.TS_TRUST_DIALOG_WAIT_TIMEOUT) || 20_000,
 
 	/**
 	 * timeout for clicking on visible item, "5 000" by default
