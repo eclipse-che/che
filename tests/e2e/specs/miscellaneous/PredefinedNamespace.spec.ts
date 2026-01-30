@@ -54,11 +54,22 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	// generate empty workspace DevFile and create it through oc client under a regular user
 	suiteSetup('Login', async function (): Promise<void> {
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
+		const devSpacesEditorImage: string = 'quay.io/redhat-user-workloads/devspaces-tenant/devspaces/code-rhel9:latest';
 		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			devfileContent
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
+
+		// update che-code-injector image to use Dev Spaces VS Code Editor
+		devfileContext.devWorkspaceTemplates.forEach((template): void => {
+			template.spec?.components?.forEach((component): void => {
+				if (component.name === 'che-code-injector' && component.container?.image) {
+					component.container.image = devSpacesEditorImage;
+				}
+			});
+		});
+
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
 		kubernetesCommandLineToolsExecutor.applyWithoutNamespace(devWorkspaceConfigurationYamlString);
