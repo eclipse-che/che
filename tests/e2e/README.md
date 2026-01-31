@@ -55,7 +55,7 @@ Note: If there is any modifications in package.json, manually execute the `npm i
 
 ## Debug docker launch
 
-The `'eclipse/che-e2e'` docker image has VNC server installed inside. For connecting use `'0.0.0.0:5920'` address.
+The `'quay.io/eclipse/che-e2e'` docker image has VNC server installed inside. For connecting use `'0.0.0.0:5920'` address.
 
 ## The "Happy Path" scenario launching
 
