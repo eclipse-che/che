@@ -438,16 +438,19 @@ Run E2E tests against **Eclipse Che** or **Red Hat OpenShift Dev Spaces** using 
 **Usage:** `/run-e2e-test [URL USERNAME PASSWORD [TESTNAME] [METHOD]]`
 
 **Features:**
+
 - **Interactive mode**: Run without arguments to be prompted for all parameters
 - **Auto-detect platform**: Determines Eclipse Che vs Dev Spaces from URL
 - **Smart rebuild**: Detects local code changes vs `origin/main` and rebuilds only when needed
 - **Test-specific parameters**: Prompts for additional env vars based on selected test type
 
 **Examples:**
+
 - `/run-e2e-test` - Interactive mode (recommended)
 - `/run-e2e-test https://devspaces.apps.example.com/ admin password SmokeTest npm`
 - `/run-e2e-test https://che.apps.example.com/ admin password EmptyWorkspace podman`
 
 **Run methods:**
+
 - `npm` - Local Chrome browser (faster, see browser in real-time)
 - `podman` - Isolated container with VNC support at `localhost:5920`

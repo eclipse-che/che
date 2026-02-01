@@ -1,13 +1,13 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(source ~/.nvm/nvm.sh)",
-      "Bash(nvm use:*)",
-      "Bash(npm run prettier:*)",
-      "Bash(node:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run tsc:*)",
-      "Bash(export:*)"
-    ]
-  }
+	"permissions": {
+		"allow": [
+			"Bash(source ~/.nvm/nvm.sh)",
+			"Bash(nvm use:*)",
+			"Bash(npm run prettier:*)",
+			"Bash(node:*)",
+			"Bash(npm run lint:*)",
+			"Bash(npm run tsc:*)",
+			"Bash(export:*)"
+		]
+	}
 }
