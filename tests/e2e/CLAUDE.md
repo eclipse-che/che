@@ -2,19 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Available commands:**
+**Available skills:**
 
-- `/e2e-test-development` - Comprehensive E2E test development guidance (code style, patterns, architecture)
+- `/e2e-test-developer` - Comprehensive E2E test development guidance (code style, patterns, architecture)
 
-**Eclipse Che:**
+**Available custom commands:**
 
-- `/run-che-e2e-test-using-podman` - Run E2E tests using che-e2e container with Podman
-- `/run-che-e2e-test-locally` - Run E2E tests using local Chrome browser
-
-**Red Hat OpenShift Dev Spaces:**
-
-- `/run-devspaces-e2e-test-using-podman` - Run E2E tests against Dev Spaces using Podman container
-- `/run-devspaces-e2e-test-locally` - Run E2E tests against Dev Spaces using local browser
+- `/run-e2e-test` - Run E2E tests against Eclipse Che or Red Hat OpenShift Dev Spaces using local browser or Podman container
 
 ## Overview
 

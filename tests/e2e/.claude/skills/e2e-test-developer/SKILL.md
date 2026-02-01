@@ -1,3 +1,8 @@
+---
+name: e2e-test-developer
+description: Comprehensive E2E test development guidance for Eclipse Che / Red Hat OpenShift Dev Spaces. Use this skill when writing, modifying, or reviewing TypeScript Mocha Selenium tests, page objects, utilities, or test infrastructure. Provides code style rules, patterns, dependency injection setup, and best practices.
+---
+
 # Eclipse Che E2E TypeScript Mocha Selenium Test Development Skill
 
 You are a Software Quality Engineer, who is an expert developer for Eclipse Che / Red Hat OpenShift Dev Spaces E2E tests. This skill provides comprehensive guidance for developing and maintaining E2E TypeScript Mocha Selenium tests.
@@ -33,6 +38,13 @@ This is the E2E test suite for Eclipse Che / Red Hat OpenShift Dev Spaces. It us
 # Install dependencies
 npm ci
 
+# Lint and format
+npm run lint
+npm run prettier
+
+# Build TypeScript only
+npm run tsc
+
 # Run all tests (requires environment variables)
 export TS_SELENIUM_BASE_URL=<che-url>
 export TS_SELENIUM_OCP_USERNAME=<username>
@@ -40,17 +52,12 @@ export TS_SELENIUM_OCP_PASSWORD=<password>
 npm run test
 
 # Run a single test file (without .spec.ts extension)
-export USERSTORY=SmokeTest && npm run test
+export USERSTORY=SmokeTest
+npm run test
 
 # Run API-only tests (no browser)
-export USERSTORY=EmptyWorkspaceAPI && npm run driver-less-test
-
-# Lint and format
-npm run lint
-npm run prettier
-
-# Build TypeScript only
-npm run tsc
+export USERSTORY=EmptyWorkspaceAPI
+npm run driver-less-test
 
 # View Allure test report
 npm run open-allure-dasboard
@@ -64,7 +71,7 @@ Every TypeScript file MUST start with this exact header:
 
 ```typescript
 /** *******************************************************************
- * copyright (c) 2023 Red Hat, Inc.
+ * copyright (c) 2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -412,12 +419,7 @@ suite('API Test', function (): void {
 
 When helping with E2E test development and maintenance:
 
-1. **Keep command files up to date** - When test infrastructure changes (new environment variables, test patterns, or execution methods), update the related command files in `.claude/commands/`:
-
-    - `run-che-e2e-test-locally.md`
-    - `run-che-e2e-test-using-podman.md`
-    - `run-devspaces-e2e-test-locally.md`
-    - `run-devspaces-e2e-test-using-podman.md`
+1. **Keep command files up to date** - When test infrastructure changes (new environment variables, test patterns, or execution methods), update the command file `.claude/commands/run-e2e-test.md`.
 
 2. **Review test-specific parameters** - When adding or modifying tests that require new environment variables, update the "Test-Specific Parameters" section in the command files.
 
@@ -429,14 +431,23 @@ When helping with E2E test development and maintenance:
 
 ## Related Commands
 
-For running E2E tests, use these companion commands:
+### `/run-e2e-test` - Unified E2E Test Runner
 
-### Eclipse Che
+Run E2E tests against **Eclipse Che** or **Red Hat OpenShift Dev Spaces** using either a **local Chrome browser** or **Podman container**.
 
-- **`/run-che-e2e-test-using-podman`** - Run E2E tests against Eclipse Che using the che-e2e container with Podman (isolated environment with VNC support)
-- **`/run-che-e2e-test-locally`** - Run E2E tests against Eclipse Che using a local Chrome browser (for development and debugging)
+**Usage:** `/run-e2e-test [URL USERNAME PASSWORD [TESTNAME] [METHOD]]`
 
-### Red Hat OpenShift Dev Spaces
+**Features:**
+- **Interactive mode**: Run without arguments to be prompted for all parameters
+- **Auto-detect platform**: Determines Eclipse Che vs Dev Spaces from URL
+- **Smart rebuild**: Detects local code changes vs `origin/main` and rebuilds only when needed
+- **Test-specific parameters**: Prompts for additional env vars based on selected test type
 
-- **`/run-devspaces-e2e-test-using-podman`** - Run E2E tests against Dev Spaces using the che-e2e container with Podman (includes OAuth configuration)
-- **`/run-devspaces-e2e-test-locally`** - Run E2E tests against Dev Spaces using a local Chrome browser (includes SSO/OAuth setup)
+**Examples:**
+- `/run-e2e-test` - Interactive mode (recommended)
+- `/run-e2e-test https://devspaces.apps.example.com/ admin password SmokeTest npm`
+- `/run-e2e-test https://che.apps.example.com/ admin password EmptyWorkspace podman`
+
+**Run methods:**
+- `npm` - Local Chrome browser (faster, see browser in real-time)
+- `podman` - Isolated container with VNC support at `localhost:5920`
