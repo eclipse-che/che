@@ -44,6 +44,7 @@ export class Dashboard {
 	};
 	private static readonly CONTINUE_WITH_DEFAULT_DEVFILE_BUTTON: By = By.xpath('//button[text()="Continue with default devfile"]');
 	private static readonly OPEN_EXISTING_WORKSPACE_LINK: By = By.xpath('//button[text()="Open the existing workspace"]');
+	private static readonly CHOOSE_EDITOR_MENU: By = By.xpath('//*[@id="accordion-item-selector"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -57,7 +58,6 @@ export class Dashboard {
 		await this.clickWorkspacesButton();
 		await this.workspaces.waitPage();
 		await this.workspaces.waitWorkspaceListItem(workspaceName);
-		await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName);
 		await this.workspaces.stopWorkspaceByActionsButton(workspaceName);
 		await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName);
 	}
@@ -224,6 +224,18 @@ export class Dashboard {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(Dashboard.CONTINUE_WITH_DEFAULT_DEVFILE_BUTTON, timeout);
+	}
+
+	async openChooseEditorMenu(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+		Logger.debug('open "choose Editor" menu');
+
+		await this.driverHelper.waitAndClick(Dashboard.CHOOSE_EDITOR_MENU, timeout);
+	}
+
+	async chooseEditor(editor: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
+		Logger.debug('select Editor. Editor: ' + editor);
+
+		await this.driverHelper.waitAndClick(By.xpath(editor), timeout);
 	}
 
 	private getAboutMenuItemButtonLocator(text: string): By {
