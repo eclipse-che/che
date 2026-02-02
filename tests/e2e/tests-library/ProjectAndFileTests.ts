@@ -41,7 +41,7 @@ export class ProjectAndFileTests {
 			const start: number = new Date().getTime();
 			await this.driverHelper.waitVisibility(
 				this.cheCodeLocatorLoader.webCheCodeLocators.Workbench.constructor,
-				TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+				TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT
 			);
 			const end: number = new Date().getTime();
 			Logger.debug(`editor was opened in ${end - start} seconds.`);

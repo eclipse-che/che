@@ -17,6 +17,7 @@ export const TIMEOUT_CONSTANTS: {
 	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: number;
 	TS_FIND_EXTENSION_TEST_TIMEOUT: number;
 	TS_IDE_LOAD_TIMEOUT: number;
+	TS_IDE_START_TIMEOUT: number;
 	TS_NOTIFICATION_WAIT_TIMEOUT: number;
 	TS_SELENIUM_CLICK_ON_VISIBLE_ITEM: number;
 	TS_SELENIUM_DEFAULT_ATTEMPTS: number;
@@ -48,6 +49,11 @@ export const TIMEOUT_CONSTANTS: {
 	 * wait between workspace started and IDE ready to be used, "20 000" by default.
 	 */
 	TS_IDE_LOAD_TIMEOUT: Number(process.env.TS_IDE_LOAD_TIMEOUT) || 20_000,
+
+	/**
+	 * timeout for waiting for IDE to start during workspace startup, "310 000" by default.
+	 */
+	TS_IDE_START_TIMEOUT: Number(process.env.TS_IDE_START_TIMEOUT) || 310_000,
 
 	/**
 	 * timeout in milliseconds waiting for workspace start, "360 000" by default.
