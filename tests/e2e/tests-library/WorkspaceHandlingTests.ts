@@ -150,18 +150,28 @@ export class WorkspaceHandlingTests {
 		Logger.info('Start workspace progress description: ' + alertDescription);
 	}
 
-	async createAndOpenWorkspaceWithSpecificEditorAndSample(editor: string, sampleName: string, xPath: string): Promise<void> {
+	async createAndOpenWorkspaceWithSpecificEditorAndSample(
+		editor: string,
+		sampleName: string,
+		xPath: string,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+	): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and Sample. Sample ' + editor);
 		await this.selectEditor(editor);
 		await this.createWorkspace.clickOnSampleNoEditorSelection(sampleName);
-		await this.waitForControlXpath(xPath);
+		await this.waitForControlXpath(xPath, polling);
 	}
 
-	async createAndOpenWorkspaceWithSpecificEditorAndGitUrl(editor: string, sampleUrl: string, xPath: string): Promise<void> {
+	async createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
+		editor: string,
+		sampleUrl: string,
+		xPath: string,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+	): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and URL. Sample ' + editor);
 		await this.selectEditor(editor);
 		await this.createWorkspace.importFromGitUsingUI(sampleUrl);
-		await this.waitForControlXpath(xPath);
+		await this.waitForControlXpath(xPath, polling);
 	}
 
 	async selectEditor(editor: string): Promise<void> {
@@ -175,11 +185,11 @@ export class WorkspaceHandlingTests {
 		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
 	}
 
-	private async waitForControlXpath(xPathToWait: string): Promise<void> {
+	private async waitForControlXpath(xPathToWait: string, polling: number): Promise<void> {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 		await this.obtainWorkspaceNameFromStartingPage();
 
-		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+		await this.driverHelper.waitVisibility(By.xpath(xPathToWait), TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT, polling);
 	}
 
 	private async getWorkspaceAlertDescription(): Promise<string> {
