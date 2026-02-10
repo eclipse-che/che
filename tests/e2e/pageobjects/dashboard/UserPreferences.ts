@@ -214,9 +214,29 @@ export class UserPreferences {
 		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
 		await this.driverHelper.getAction().sendKeys(privateSshKey).perform();
 
+		// verify private SSH key was correctly set
+		const enteredPrivateKey: string = await this.driverHelper.waitAndGetValue(
+			UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD,
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+		);
+		if (enteredPrivateKey !== privateSshKey) {
+			throw new Error('Private SSH key was not correctly set in the field');
+		}
+		Logger.info('Private SSH key verified successfully');
+
 		Logger.info('Pasting public SSH key');
 		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
 		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
+
+		// verify public SSH key was correctly set
+		const enteredPublicKey: string = await this.driverHelper.waitAndGetValue(
+			UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD,
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+		);
+		if (enteredPublicKey !== publicSshKey) {
+			throw new Error('Public SSH key was not correctly set in the field');
+		}
+		Logger.info('Public SSH key verified successfully');
 
 		if (passphrase) {
 			Logger.info('Pasting SSH key passphrase');
