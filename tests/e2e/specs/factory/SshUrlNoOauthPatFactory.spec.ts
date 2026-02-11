@@ -45,7 +45,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL ||
-		'ssh://git@bitbucket-ssh.apps.ds-airgap2-v15.crw-qe.com/~admin/private-bb-repo.git';
+		'ssh://git@bitbucket-ssh.apps.ds-airgap-v20.crw-qe.com/~admin/private-bb-repo.git';
 	const privateSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PRIVATE_KEY;
 	const publicSshKey: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_PUBLIC_KEY;
 	const sshPassphrase: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_SSH_KEY_PASSPHRASE;
