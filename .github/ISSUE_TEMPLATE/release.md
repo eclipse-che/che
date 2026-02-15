@@ -24,8 +24,8 @@ Phase 3:
 - [ ] che-operator.
 
 Phase 4:
-- [ ] [chectl](https://github.com/che-incubator/chectl/pulls/che-bot) _(depends on che-operator)_
-- [ ] [Che community operator PRs for K8S](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pulls/che-bot) _(depends on che-operator)_
+- [ ] [chectl](https://github.com/che-incubator/chectl/pulls?q=is%3Apr+is%3Aopen+Release+version) _(depends on che-operator)_
+- [ ] [Che community operator PRs for K8S](https://github.com/redhat-openshift-ecosystem/community-operators-prod/pulls?q=is%3Apr+author%3Ache-incubator-bot+) _(depends on che-operator)_
 - [ ] [che-docs PR](https://github.com/eclipse/che-docs/pulls/che-bot) _(depends on che-operator)_
 
 Phase 5
