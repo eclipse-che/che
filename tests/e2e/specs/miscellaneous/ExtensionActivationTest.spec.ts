@@ -75,8 +75,7 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 
 	test('Open Python file and run it', async function (): Promise<void> {
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		await projectSection.openItem(PROJECT_NAME, PYTHON_FILE_NAME);
-		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+		await projectAndFileTests.openFileAndVerify(projectSection, PROJECT_NAME, PYTHON_FILE_NAME);
 
 		await driverHelper.waitAndClick(RUN_PYTHON_BUTTON);
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
@@ -108,8 +107,7 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		await projectSection.openItem(PROJECT_NAME, PYTHON_FILE_NAME);
-		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+		await projectAndFileTests.openFileAndVerify(projectSection, PROJECT_NAME, PYTHON_FILE_NAME);
 
 		await driverHelper.waitAndClick(RUN_PYTHON_BUTTON);
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);
@@ -147,8 +145,7 @@ suite(`Extension Activation Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, funct
 
 	test('Verify Python execution after workspace restart', async function (): Promise<void> {
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		await projectSection.openItem(PROJECT_NAME, PYTHON_FILE_NAME);
-		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+		await projectAndFileTests.openFileAndVerify(projectSection, PROJECT_NAME, PYTHON_FILE_NAME);
 
 		await driverHelper.waitAndClick(RUN_PYTHON_BUTTON);
 		await driverHelper.wait(TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT);

@@ -15,7 +15,7 @@ import { CLASSES } from '../configs/inversify.types';
 import { Logger } from '../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
-import { By, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
+import { By, EditorView, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
 
@@ -189,5 +189,38 @@ export class ProjectAndFileTests {
 		const output: string = await this.driverHelper.waitAndGetText(ProjectAndFileTests.BRANCH_NAME_XPATH);
 
 		return output.trimStart();
+	}
+
+	/**
+	 * open a file in the project tree and verify it is opened in the editor.
+	 * Retries up to 2 times if the file doesn't open on the first attempt.
+	 * @param projectSection ViewSection with project tree files.
+	 * @param projectName Name of the project folder.
+	 * @param fileName Name of the file to open.
+	 */
+	async openFileAndVerify(projectSection: ViewSection, projectName: string, fileName: string): Promise<void> {
+		const maxAttempts: number = 2;
+		const editorView: EditorView = new EditorView();
+
+		for (let attempt: number = 1; attempt <= maxAttempts; attempt++) {
+			Logger.debug(`Attempt ${attempt}/${maxAttempts}: opening file "${fileName}" in project "${projectName}"`);
+			await projectSection.openItem(projectName, fileName);
+			await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
+
+			const openEditorTitles: string[] = await editorView.getOpenEditorTitles();
+			Logger.debug(`Open editor titles: ${openEditorTitles.join(', ')}`);
+
+			if (openEditorTitles.includes(fileName)) {
+				Logger.debug(`File "${fileName}" successfully opened in the editor`);
+				return;
+			}
+
+			if (attempt < maxAttempts) {
+				Logger.warn(`File "${fileName}" not found in editor tabs, retrying...`);
+				await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+			}
+		}
+
+		throw new Error(`File "${fileName}" was not opened in the editor after ${maxAttempts} attempts`);
 	}
 }
