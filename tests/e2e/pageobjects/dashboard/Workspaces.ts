@@ -22,11 +22,12 @@ export enum WorkspaceStatusUI {
 
 @injectable()
 export class Workspaces {
-	private static readonly ADD_WORKSPACE_BUTTON: By = By.xpath('//button[text()="Add Workspace"]');
+	private static readonly ADD_WORKSPACE_BUTTON: By = By.css('button[aria-label="Add a new workspace"]');
 	private static readonly WORKSPACE_ITEM_TABLE_NAME_SECTION: By = By.xpath('//td[@data-label="Name"]/span/a');
 	private static readonly DELETE_WORKSPACE_BUTTON_ENABLED: By = By.xpath(
 		'//button[@data-testid="delete-workspace-button" and not(@disabled)]'
 	);
+	private static readonly WORKSPACE_ACTION_POPUP: By = By.css('div[class*="workspaceActionSelector"]');
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.xpath('//input[@data-testid="confirmation-checkbox"]');
 	private static readonly CONFIRMATION_WINDOW: By = By.xpath('//div[@aria-label="Delete workspaces confirmation window"]');
 	private static readonly LEARN_MORE_DOC_LINK: By = By.xpath('//div/p/a');
@@ -99,7 +100,7 @@ export class Workspaces {
 	async waitActionsPopup(workspaceName: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
 		Logger.debug(`of the '${workspaceName}' list item`);
 
-		await this.driverHelper.waitVisibility(this.getExpandedActionsLocator(workspaceName), timeout);
+		await this.driverHelper.waitVisibility(Workspaces.WORKSPACE_ACTION_POPUP, timeout);
 	}
 
 	async openActionsPopup(workspaceName: string, timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
@@ -112,19 +113,19 @@ export class Workspaces {
 	async clickActionsDeleteButton(workspaceName: string): Promise<void> {
 		Logger.debug(`for the '${workspaceName}' list item`);
 
-		await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Delete Workspace'));
+		await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator('Delete Workspace'));
 	}
 
 	async clickActionsStopWorkspaceButton(workspaceName: string): Promise<void> {
 		Logger.debug(`for the '${workspaceName}' list item`);
 		// todo: workaround because of issue CRW-3649
 		try {
-			await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+			await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator('Stop Workspace'));
 		} catch (e) {
 			Logger.warn(`for the '${workspaceName}' list item - popup was missed, try to click one more time (issue CRW-3649).`);
 
 			await this.driverHelper.waitAndClick(this.getActionsLocator(workspaceName));
-			await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator(workspaceName, 'Stop Workspace'));
+			await this.driverHelper.waitAndClick(this.getActionsPopupButtonLocator('Stop Workspace'));
 		}
 	}
 
@@ -214,7 +215,7 @@ export class Workspaces {
 	}
 
 	private getWorkspaceListItemLocator(workspaceName: string): By {
-		return By.xpath(`//tr[td//a[text()='${workspaceName}']]`);
+		return By.xpath(`//tr[td//span[text()='${workspaceName}']]`);
 	}
 
 	private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: WorkspaceStatusUI): By {
@@ -226,21 +227,21 @@ export class Workspaces {
 	}
 
 	private getActionsLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}/td/div/button[@aria-label='Actions']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}/td/button[@aria-label='Actions']`);
 	}
 
-	private getExpandedActionsLocator(workspaceName: string): By {
+	/* private getExpandedActionsLocator(workspaceName: string): By {
 		return By.xpath(
 			`${this.getWorkspaceListItemLocator(workspaceName).value}//button[@aria-label='Actions' and @aria-expanded='true']`
 		);
-	}
+	}*/
 
-	private getActionsPopupButtonLocator(workspaceName: string, buttonText: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//button[text()='${buttonText}']`);
+	private getActionsPopupButtonLocator(buttonText: string): By {
+		return By.css(`button[aria-label="Action: ${buttonText}"]`);
 	}
 
 	private getOpenButtonLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[@data-key=5]//button[text()='Open']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//td[contains(@class, 'openIde')]//span[text()='Open']`);
 	}
 
 	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {

@@ -187,6 +187,6 @@ export class CreateWorkspace {
 	private getSampleLocator(sampleName: string): By {
 		Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
-		return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
+		return By.xpath(`//div[contains(@id, 'sample-card') and text()='${sampleName}']`);
 	}
 }

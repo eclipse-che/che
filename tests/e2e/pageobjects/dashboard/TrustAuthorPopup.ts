@@ -17,7 +17,7 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class TrustAuthorPopup {
-	private static readonly CONTINUE_BUTTON: By = By.xpath('//button[text()="Continue"]');
+	private static readonly CONTINUE_BUTTON: By = By.xpath('//span[text()="Continue"]');
 	private static readonly TRUST_AUTHOR_POPUP_PAGE: By = By.xpath(
 		'//span[contains(text(), "Do you trust the authors of this repository?")]'
 	);

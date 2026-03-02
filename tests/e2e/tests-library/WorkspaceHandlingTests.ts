@@ -23,9 +23,9 @@ import { By, error } from 'selenium-webdriver';
 @injectable()
 export class WorkspaceHandlingTests {
 	private static WORKSPACE_NAME: By = By.xpath('//h1[contains(.,"Starting workspace ")]');
-	private static WORKSPACE_STATUS: By = By.xpath('//*/span[@class="pf-c-label__content"]');
-	private static WORKSPACE_ALERT_TITLE: By = By.xpath('//h4[@class="pf-c-alert__title"]');
-	private static WORKSPACE_ALERT_DESCRIPTION: By = By.xpath('//*/div[@class="pf-c-alert__description"]');
+	private static WORKSPACE_STATUS: By = By.css('span[class*="label__content"]');
+	private static WORKSPACE_ALERT_TITLE: By = By.css('h4[class*="alert__title"]');
+	private static WORKSPACE_ALERT_DESCRIPTION: By = By.css('div[class*="alert__description"]');
 	private static workspaceName: string = 'undefined';
 	private static parentGUID: string;
 

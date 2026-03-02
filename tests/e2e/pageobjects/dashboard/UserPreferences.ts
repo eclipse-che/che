@@ -21,7 +21,7 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 @injectable()
 export class UserPreferences {
 	private static readonly USER_SETTINGS_DROPDOWN: By = By.xpath('//header//button/span[text()!=""]//parent::button');
-	private static readonly USER_PREFERENCES_BUTTON: By = By.xpath('//button[text()="User Preferences"]');
+	private static readonly USER_PREFERENCES_BUTTON: By = By.xpath('//span[text()="User Preferences"]');
 	private static readonly USER_PREFERENCES_PAGE: By = By.xpath('//h1[text()="User Preferences"]');
 
 	private static readonly CONTAINER_REGISTRIES_TAB: By = By.xpath('//button[text()="Container Registries"]');
@@ -43,10 +43,10 @@ export class UserPreferences {
 	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-private-key"]');
 	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-public-key"]');
 	private static readonly PASTE_SSH_KEY_PASSPHRASE_FIELD: By = By.xpath('//input[@placeholder="Enter passphrase (optional)"]');
-	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('.pf-c-button.pf-m-primary');
+	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('button[aria-label="Add SSH Key"]');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
 	private static readonly GIT_SSH_KEY_ACTIONS_BUTTON: By = By.css('section[id*="SshKeys-user-preferences"] button[aria-label="Actions"]');
-	private static readonly DELETE_BUTTON: By = By.xpath('//button[text()="Delete"]');
+	private static readonly DELETE_BUTTON: By = By.xpath('//span[text()="Delete"]');
 	private static readonly CONFIRM_DELETE_SSH_KEYS_POPUP: By = By.css('div[id^="pf-modal-part"][role="dialog"]');
 	private static readonly CONFIRM_DELETE_SSH_KEYS_CHECKBOX: By = By.id('delete-ssh-keys-warning-checkbox');
 
@@ -146,7 +146,7 @@ export class UserPreferences {
 
 		await this.driverHelper.waitAttributeValue(
 			UserPreferences.GIT_CONFIG_SAVE_BUTTON,
-			'aria-disabled',
+			'disabled',
 			'true',
 			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
 		);
