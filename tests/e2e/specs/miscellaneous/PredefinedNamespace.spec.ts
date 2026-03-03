@@ -29,6 +29,11 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 
+	// dev Spaces specific images
+	const majorMinorVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.');
+	const devSpacesEditorImage: string = `quay.io/redhat-user-workloads/devspaces-tenant/devspaces/code-rhel9:${majorMinorVersion}`;
+	const devSpacesUdiImage: string = 'registry.redhat.io/devspaces/udi-rhel9:latest';
+
 	suiteSetup(function (): void {
 		// create a predefined namespace for user using shell script and login into user dashboard
 		Logger.debug('Test prerequisites:');
@@ -54,20 +59,28 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	// generate empty workspace DevFile and create it through oc client under a regular user
 	suiteSetup('Login', async function (): Promise<void> {
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
-		const majorMinorVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.');
-		const devSpacesEditorImage: string = `quay.io/redhat-user-workloads/devspaces-tenant/devspaces/code-rhel9:${majorMinorVersion}`;
 		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			devfileContent
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 
-		// update che-code-injector image to use Dev Spaces VS Code Editor (Dev Spaces only)
+		// update component images for Dev Spaces only
 		if (BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME() === 'devspaces') {
+			// update che-code-injector image in devWorkspaceTemplates
 			devfileContext.devWorkspaceTemplates.forEach((template): void => {
 				template.spec?.components?.forEach((component): void => {
 					if (component.name === 'che-code-injector' && component.container?.image) {
 						component.container.image = devSpacesEditorImage;
+					}
+				});
+			});
+
+			// update che-code-runtime-description (UDI) image in devWorkspaceTemplates
+			devfileContext.devWorkspaceTemplates.forEach((template): void => {
+				template.spec?.components?.forEach((component): void => {
+					if (component.name === 'che-code-runtime-description' && component.container?.image) {
+						component.container.image = devSpacesUdiImage;
 					}
 				});
 			});
