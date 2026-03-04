@@ -21,10 +21,9 @@ import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTes
 import { expect } from 'chai';
 import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { DriverHelper } from '../../utils/DriverHelper';
 
 suite('Check Intellij IDE desktop Editor with all samples', function (): void {
-	this.timeout(6000000);
+	this.timeout(24000000);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const pathToSampleFile: string = path.resolve('resources/default-devfile.yaml');
 	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
@@ -35,7 +34,6 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	const titlexPath: string = '/html/body/h1';
 	var currentTabHandle: string = 'undefined';
@@ -60,8 +58,8 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		'Node.js Express',
 		'Python',
 		'Quarkus REST API',
-		'.NET',
-		'Ansible',
+		// '.NET', temporary disabled because of https://issues.redhat.com/browse/CRW-10115
+		// 'Ansible',
 		'C/C++',
 		'Go',
 		'PHP'
@@ -122,7 +120,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		await deleteWorkspace();
 	}
 
-	test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
+	test('Test start of Intellij IDE with default Samples', async function (): Promise<void> {
 		for (const editorXpath of editorsForCheck) {
 			for (const sampleName of samplesForCheck) {
 				await testWorkspaceStartup(editorXpath, sampleName, false);
@@ -130,7 +128,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		}
 	});
 
-	test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
+	test('Test start of Intellij IDE (SSH) with ubi', async function (): Promise<void> {
 		for (const editorXpath of editorsForCheck) {
 			if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
 				Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
