@@ -38,12 +38,12 @@ export class UserPreferences {
 	private static readonly GIT_CONFIG_SAVE_BUTTON: By = By.css('[data-testid="button-save"]');
 
 	private static readonly SSH_KEY_TAB: By = By.xpath('//button[text()="SSH Keys"]');
-	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.xpath('//button[text()="Add SSH Key"]');
+	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.css('button[aria-label="Add SSH Key"]');
 	private static readonly ADD_SSH_KEYS_POPUP: By = By.xpath('//span[text()="Add SSH Keys"]');
-	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-private-key"]');
-	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.css('textarea[name="ssh-public-key"]');
-	private static readonly PASTE_SSH_KEY_PASSPHRASE_FIELD: By = By.xpath('//input[@placeholder="Enter passphrase (optional)"]');
-	private static readonly ADD_SSH_KEYS_BUTTON: By = By.css('button[aria-label="Add SSH Key"]');
+	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.id("ssh-private-key");
+	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.id("ssh-public-key");
+	private static readonly PASTE_SSH_KEY_PASSPHRASE_FIELD: By = By.css('input[placeholder="Enter passphrase (optional)"]');
+	private static readonly ADD_SSH_KEYS_BUTTON: By = By.xpath('//span[text()="Add"]');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');
 	private static readonly GIT_SSH_KEY_ACTIONS_BUTTON: By = By.css('section[id*="SshKeys-user-preferences"] button[aria-label="Actions"]');
 	private static readonly DELETE_BUTTON: By = By.xpath('//span[text()="Delete"]');

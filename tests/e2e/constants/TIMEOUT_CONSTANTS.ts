@@ -95,9 +95,9 @@ export const TIMEOUT_CONSTANTS: {
 	// -------------------------------------------- PROJECT TREE --------------------------------------------
 
 	/**
-	 * expand item in project tree, "8 000" by default.
+	 * expand item in project tree, "10 000" by default.
 	 */
-	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 8_000,
+	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 10_000,
 
 	// -------------------------------------------- EDITOR --------------------------------------------
 
