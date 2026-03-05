@@ -36,7 +36,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 	const titlexPath: string = '/html/body/h1';
-	var currentTabHandle: string = 'undefined';
+	let currentTabHandle: string = 'undefined';
 
 	const pollingForCheckTitle: number = 500;
 
@@ -75,7 +75,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
-	async function clearCurrentTabHandle() {
+	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
 	}
 
