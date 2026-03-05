@@ -22,7 +22,7 @@ export enum WorkspaceStatusUI {
 
 @injectable()
 export class Workspaces {
-	private static readonly ADD_WORKSPACE_BUTTON: By = By.css('button[aria-label="Add a new workspace"]');
+	private static readonly ADD_WORKSPACE_BUTTON: By = By.css('button[aria-label="Add Workspace"]');
 	private static readonly WORKSPACE_ITEM_TABLE_NAME_SECTION: By = By.xpath('//td[@data-label="Name"]/span/a');
 	private static readonly DELETE_WORKSPACE_BUTTON_ENABLED: By = By.xpath(
 		'//button[@data-testid="delete-workspace-button" and not(@disabled)]'
