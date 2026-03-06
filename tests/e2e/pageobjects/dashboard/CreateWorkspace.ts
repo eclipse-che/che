@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -187,6 +187,6 @@ export class CreateWorkspace {
 	private getSampleLocator(sampleName: string): By {
 		Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
-		return By.xpath(`//article[contains(@class, 'sample-card')]//div[text()='${sampleName}']`);
+		return By.xpath(`//div[contains(@id, 'sample-card') and text()='${sampleName}']`);
 	}
 }
