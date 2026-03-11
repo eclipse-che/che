@@ -30,7 +30,7 @@ suite(`The FactoryWithGitRepoOptions userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 
 	const factoryUrl: string =
 		FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_URL || 'https://github.com/testsfactory/quarkus-api-example.git';
-	const expectedBranchName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'main';
+	const expectedBranchName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_FACTORY_GIT_REPO_BRANCH || 'test';
 	let projectSection: ViewSection;
 	suite(`Create workspace from factory:${factoryUrl}`, function (): void {
 		suiteSetup('Login', async function (): Promise<void> {
