@@ -24,7 +24,7 @@ export class CreateWorkspace {
 	private static readonly GIT_BRANCH_NAME: By = By.xpath(
 		'//div[text()="Select the branch of the Git Repository"]/preceding-sibling::div'
 	);
-	private static readonly GIT_BRANCH_SEACH_FIELD: By = By.xpath('//input[@type="search"]');
+	private static readonly GIT_BRANCH_SEACH_FIELD: By = By.css('input[type="search"]');
 	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
 	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
 	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
@@ -197,6 +197,6 @@ export class CreateWorkspace {
 	}
 
 	private getGitBranchListItemLocator(branchName: string): By {
-		return By.xpath(`//li[@id="${branchName}"]`);
+		return By.css(`li[id="${branchName}"]`);
 	}
 }
