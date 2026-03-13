@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,7 @@ export class CreateWorkspace {
 	private static readonly GIT_BRANCH_NAME: By = By.xpath(
 		'//div[text()="Select the branch of the Git Repository"]/preceding-sibling::div'
 	);
-	private static readonly GIT_BRANCH_SEACH_FIELD: By = By.css('input[type="search"]');
+	private static readonly GIT_BRANCH_SEARCH_FIELD: By = By.css('input[type="search"]');
 	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
 	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
 	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
@@ -90,8 +90,8 @@ export class CreateWorkspace {
 
 			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_BRANCH_NAME, timeout);
 
-			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_SEACH_FIELD, timeout);
-			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_SEACH_FIELD, Key.chord(branchName), timeout);
+			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, timeout);
+			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, Key.chord(branchName), timeout);
 			await this.driverHelper.waitAndClick(this.getGitBranchListItemLocator(branchName), timeout);
 		}
 
@@ -197,6 +197,6 @@ export class CreateWorkspace {
 	}
 
 	private getGitBranchListItemLocator(branchName: string): By {
-		return By.css(`li[id="${branchName}"]`);
+		return By.css(`li[id="${branchName}"] button.pf-c-select__menu-item`);
 	}
 }
