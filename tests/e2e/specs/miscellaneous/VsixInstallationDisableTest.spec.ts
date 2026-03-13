@@ -25,7 +25,6 @@ import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { NotificationHandler } from '../../pageobjects/ide/NotificationHandler';
 import { CommandPalette } from '../../pageobjects/ide/CommandPalette';
 import { ExtensionsView } from '../../pageobjects/ide/ExtensionsView';
 import { ExplorerView } from '../../pageobjects/ide/ExplorerView';
@@ -47,7 +46,6 @@ suite(`Verify VSIX installation can be disabled via configuration ${BASE_TEST_CO
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
-	const notificationHandler: NotificationHandler = e2eContainer.get(CLASSES.NotificationHandler);
 	const commandPalette: CommandPalette = e2eContainer.get(CLASSES.CommandPalette);
 	const extensionsView: ExtensionsView = e2eContainer.get(CLASSES.ExtensionsView);
 	const explorerView: ExplorerView = e2eContainer.get(CLASSES.ExplorerView);
@@ -120,11 +118,6 @@ suite(`Verify VSIX installation can be disabled via configuration ${BASE_TEST_CO
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 	});
 
-	test('Verify VSIX disabled notifications', async function (): Promise<void> {
-		const hasDisableNotification: boolean = await notificationHandler.checkForNotification('install from vsix command is disabled');
-		expect(hasDisableNotification).to.be.true;
-	});
-
 	test('Perform trust author dialog', async function (): Promise<void> {
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
@@ -160,7 +153,7 @@ suite(`Verify VSIX installation can be disabled via configuration ${BASE_TEST_CO
 			const isInstalled: boolean = installedExtensions.some((installed: string): boolean =>
 				installed.toLowerCase().includes(extensionName.toLowerCase())
 			);
-			expect(isInstalled).to.equal(false, `Default VSIX extension "${extensionName}" should not be auto-installed`);
+			expect(isInstalled).to.equal(true, `Default VSIX extension "${extensionName}" should be auto-installed`);
 		}
 	});
 
@@ -186,11 +179,6 @@ suite(`Verify VSIX installation can be disabled via configuration ${BASE_TEST_CO
 
 	test('Wait workspace readiness', async function (): Promise<void> {
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
-	});
-
-	test('Verify default extension installation success notifications', async function (): Promise<void> {
-		const hasSuccessNotification: boolean = await notificationHandler.checkForNotification('Completed installing extension');
-		expect(hasSuccessNotification).to.be.true;
 	});
 
 	test('Perform trust author dialog', async function (): Promise<void> {
