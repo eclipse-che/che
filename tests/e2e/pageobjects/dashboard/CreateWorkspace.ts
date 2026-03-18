@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,10 @@ import { TrustAuthorPopup } from './TrustAuthorPopup';
 export class CreateWorkspace {
 	private static readonly FACTORY_URL: By = By.xpath('//input[@id="git-repo-url"]');
 	private static readonly GIT_REPO_OPTIONS: By = By.xpath('//span[text()="Git Repo Options"]');
-	private static readonly GIT_BRANCH_NAME: By = By.xpath('//input[@aria-label="Git Branch"]');
+	private static readonly GIT_BRANCH_NAME: By = By.xpath(
+		'//div[text()="Select the branch of the Git Repository"]/preceding-sibling::div'
+	);
+	private static readonly GIT_BRANCH_SEARCH_FIELD: By = By.css('input[type="search"]');
 	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
 	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
 	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
@@ -75,7 +78,7 @@ export class CreateWorkspace {
 	async importFromGitUsingUI(
 		factoryUrl: string,
 		branchName?: string,
-		timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
 	): Promise<void> {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
 
@@ -85,8 +88,11 @@ export class CreateWorkspace {
 		if (branchName) {
 			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_REPO_OPTIONS, timeout);
 
-			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_NAME, timeout);
-			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_NAME, Key.chord(branchName, Key.ENTER), timeout);
+			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_BRANCH_NAME, timeout);
+
+			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, timeout);
+			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, Key.chord(branchName), timeout);
+			await this.driverHelper.waitAndClick(this.getGitBranchListItemLocator(branchName), timeout);
 		}
 
 		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout);
@@ -134,10 +140,31 @@ export class CreateWorkspace {
 		return await element.isSelected();
 	}
 
+	async waitForCheckboxState(
+		expectedState: boolean,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
+		Logger.debug(`waiting for checkbox to be ${expectedState ? 'checked' : 'unchecked'}`);
+
+		const polling: number = 500;
+		const attempts: number = Math.ceil(timeout / polling);
+
+		for (let i: number = 0; i < attempts; i++) {
+			const currentState: boolean = await this.isCreateNewWorkspaceCheckboxChecked();
+			if (currentState === expectedState) {
+				Logger.debug(`Checkbox reached expected state: ${expectedState}`);
+				return;
+			}
+			await this.driverHelper.wait(polling);
+		}
+
+		throw new Error(`Checkbox did not reach expected state ${expectedState} within ${timeout}ms`);
+	}
+
 	async clickOnCreateNewWorkspaceCheckbox(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL): Promise<void> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
+		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
 	async setCreateNewWorkspaceCheckbox(
@@ -157,8 +184,7 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
-		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
-		await this.driverHelper.wait(1000);
+		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
 	private getEditorsDropdownListLocator(sampleName: string): By {
@@ -188,5 +214,9 @@ export class CreateWorkspace {
 		Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
 		return By.xpath(`//div[contains(@id, 'sample-card') and text()='${sampleName}']`);
+	}
+
+	private getGitBranchListItemLocator(branchName: string): By {
+		return By.css(`li[id="${branchName}"] button.pf-c-select__menu-item`);
 	}
 }
