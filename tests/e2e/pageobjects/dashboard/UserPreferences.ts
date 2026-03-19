@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2025 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,8 +40,8 @@ export class UserPreferences {
 	private static readonly SSH_KEY_TAB: By = By.xpath('//button[text()="SSH Keys"]');
 	private static readonly ADD_NEW_SSH_KEY_BUTTON: By = By.css('button[aria-label="Add SSH Key"]');
 	private static readonly ADD_SSH_KEYS_POPUP: By = By.xpath('//span[text()="Add SSH Keys"]');
-	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.id("ssh-private-key");
-	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.id("ssh-public-key");
+	private static readonly PASTE_PRIVATE_SSH_KEY_FIELD: By = By.id('ssh-private-key');
+	private static readonly PASTE_PUBLIC_SSH_KEY_FIELD: By = By.id('ssh-public-key');
 	private static readonly PASTE_SSH_KEY_PASSPHRASE_FIELD: By = By.css('input[placeholder="Enter passphrase (optional)"]');
 	private static readonly ADD_SSH_KEYS_BUTTON: By = By.xpath('//span[text()="Add"]');
 	private static readonly GIT_SSH_KEY_NAME: By = By.css('[data-testid="title"]');

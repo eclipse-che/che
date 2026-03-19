@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2024 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -239,7 +239,7 @@ export class Dashboard {
 	}
 
 	private getAboutMenuItemButtonLocator(text: string): By {
-		return By.xpath(`//li/button[text()="${text}"]`);
+		return By.xpath(`//li//span[text()="${text}"]`);
 	}
 
 	private getAboutDialogWindowItemLocator(itemDataTestId: string): By {
