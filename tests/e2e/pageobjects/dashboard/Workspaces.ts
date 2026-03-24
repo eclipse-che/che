@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2019-2023 Red Hat, Inc.
+ * copyright (c) 2019-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -242,6 +242,7 @@ export class Workspaces {
 
 	private getOpenButtonLocator(workspaceName: string): By {
 		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//button/span[text()='Open']`);
+
 	}
 
 	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {
