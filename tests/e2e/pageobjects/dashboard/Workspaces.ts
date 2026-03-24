@@ -242,7 +242,6 @@ export class Workspaces {
 
 	private getOpenButtonLocator(workspaceName: string): By {
 		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//button/span[text()='Open']`);
-
 	}
 
 	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {
