@@ -152,6 +152,7 @@ Classes must follow this order:
 ### Test File Conventions
 
 1. **Naming**
+
     - UI tests: `*.spec.ts` (e.g., `Factory.spec.ts`)
     - API-only tests: `*API.spec.ts` (e.g., `EmptyWorkspaceAPI.spec.ts`)
 
@@ -216,10 +217,12 @@ async function doSomething(param, timeout) {
 ```
 
 2. **Naming Conventions**
+
     - Variables: camelCase or UPPER_CASE
     - No leading/trailing underscores
 
 3. **String Quotes**
+
     - Use single quotes for strings
 
 4. **Comments**
