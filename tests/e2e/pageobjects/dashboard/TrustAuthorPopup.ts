@@ -31,7 +31,7 @@ export class TrustAuthorPopup {
 		Logger.debug();
 
 		await this.waitPopupIsOpened();
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM)
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM);
 		await this.driverHelper.waitAndClick(TrustAuthorPopup.CONTINUE_BUTTON, timeout);
 		await this.waitPopupIsClosed();
 	}
