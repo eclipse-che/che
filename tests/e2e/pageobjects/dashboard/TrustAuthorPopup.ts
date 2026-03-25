@@ -31,12 +31,20 @@ export class TrustAuthorPopup {
 		Logger.debug();
 
 		await this.waitPopupIsOpened();
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM)
 		await this.driverHelper.waitAndClick(TrustAuthorPopup.CONTINUE_BUTTON, timeout);
+		await this.waitPopupIsClosed();
 	}
 
 	async waitPopupIsOpened(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		Logger.debug();
 
 		await this.driverHelper.waitVisibility(TrustAuthorPopup.TRUST_AUTHOR_POPUP_PAGE, timeout);
+	}
+
+	async waitPopupIsClosed(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitDisappearance(TrustAuthorPopup.TRUST_AUTHOR_POPUP_PAGE, timeout);
 	}
 }
