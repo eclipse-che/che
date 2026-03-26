@@ -107,27 +107,26 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		// check title
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
-
 	}
 
-	editorsForCheck.forEach((editorXpath) => {
-		samplesForCheck.forEach((sampleName) => {
+	editorsForCheck.forEach((editorXpath): void => {
+		samplesForCheck.forEach((sampleName): void => {
 			test(`Test start of Editor with xPath: ${editorXpath} and with sample name: ${sampleName}`, async function (): Promise<void> {
 				await testWorkspaceStartup(editorXpath, sampleName, false);
 			});
 		});
 	});
 
-	editorsForCheck.forEach((editorXpath) => {
+	editorsForCheck.forEach((editorXpath): void => {
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
 			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
-			gitRepoUrlsToCheckAirgap.forEach((gitUbiUrl) => {
+			gitRepoUrlsToCheckAirgap.forEach((gitUbiUrl): void => {
 				test(`Test start of Editor with xPath: ${editorXpath} and with ubi url: ${gitUbiUrl}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editorXpath, gitUbiUrl, true);
 				});
 			});
 		} else {
-			gitRepoUrlsToCheck.forEach((gitUbiUrl) => {
+			gitRepoUrlsToCheck.forEach((gitUbiUrl): void => {
 				test(`Test start of Editor with xPath: ${editorXpath} and with ubi url: ${gitUbiUrl}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editorXpath, gitUbiUrl, true);
 				});
