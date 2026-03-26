@@ -19,14 +19,14 @@ import { TrustAuthorPopup } from './TrustAuthorPopup';
 
 @injectable()
 export class CreateWorkspace {
-	private static readonly FACTORY_URL: By = By.xpath('//input[@id="git-repo-url"]');
+	private static readonly FACTORY_URL: By = By.id('git-repo-url');
 	private static readonly GIT_REPO_OPTIONS: By = By.xpath('//span[text()="Git Repo Options"]');
 
 	private static readonly GIT_BRANCH_SELECT_FIELD: By = By.xpath('//span[text()="Select the branch of the Git Repository"]');
 	private static readonly GIT_FILTER_BRANCHES: By = By.css('input[placeholder="Filter branches"]');
-	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
-	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
-	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.xpath('//input[@id="create-new-if-exist-switch"]');
+	private static readonly CREATE_AND_OPEN_BUTTON: By = By.id('create-and-open-button');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.css('label[for="create-new-if-exist-switch"]');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.id('create-new-if-exist-switch');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -99,6 +99,9 @@ export class CreateWorkspace {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
 		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
 		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl), timeout);
+
+		const actualFactoryUrl: string = await this.getGitRepositoryUrl(timeout);
+		Logger.info(`[INFO] Git repository URL set to "${actualFactoryUrl}"`);
 	}
 
 	async getGitRepositoryUrl(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<string> {
@@ -179,6 +182,7 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL); // wait for any potential UI updates before clicking
 		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 

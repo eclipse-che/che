@@ -21,6 +21,7 @@ import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { FACTORY_TEST_CONSTANTS } from '../../constants/FACTORY_TEST_CONSTANTS';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
+import { trace } from 'console';
 
 const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || 'python-hello-world';
 
