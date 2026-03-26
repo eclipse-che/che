@@ -35,7 +35,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
-	const titlexPath: string = '/html/body/h1';
+	const titleXpath: string = '/html/body/h1';
 	let currentTabHandle: string = 'undefined';
 
 	const pollingForCheckTitle: number = 500;
@@ -48,7 +48,8 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		'//*[@id="editor-selector-card-che-incubator/che-pycharm-server/latest"]',
 		'//*[@id="editor-selector-card-che-incubator/che-rider-server/latest"]',
 		'//*[@id="editor-selector-card-che-incubator/che-rubymine-server/latest"]',
-		'//*[@id="editor-selector-card-che-incubator/che-webstorm-server/latest"]'
+		'//*[@id="editor-selector-card-che-incubator/che-webstorm-server/latest"]',
+		'//*[@id="editor-selector-card-che-incubator/jetbrains-sshd/latest"]'
 	];
 
 	const samplesForCheck: string[] = [
@@ -79,16 +80,6 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		currentTabHandle = 'undefined';
 	}
 
-	async function deleteWorkspace(): Promise<void> {
-		await browserTabsUtil.switchToWindow(currentTabHandle);
-		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();
-		await dashboard.stopAndRemoveWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
-
-		WorkspaceHandlingTests.clearWorkspaceName();
-		clearCurrentTabHandle();
-	}
-
 	suiteSetup('Login into Che', async function (): Promise<void> {
 		await loginTests.loginIntoChe();
 	});
@@ -101,50 +92,51 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
 				editorXpath,
 				sampleNameOrUrl,
-				titlexPath,
+				titleXpath,
 				pollingForCheckTitle
 			);
 		} else {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
 				editorXpath,
 				sampleNameOrUrl,
-				titlexPath,
+				titleXpath,
 				pollingForCheckTitle
 			);
 		}
 
 		// check title
-		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
+		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
 
-		await deleteWorkspace();
 	}
 
-	test('Test start of Intellij IDE with default Samples', async function (): Promise<void> {
-		for (const editorXpath of editorsForCheck) {
-			for (const sampleName of samplesForCheck) {
+	editorsForCheck.forEach((editorXpath) => {
+		samplesForCheck.forEach((sampleName) => {
+			test(`Test start of Editor with xPath: ${editorXpath} and with sample name: ${sampleName}`, async function (): Promise<void> {
 				await testWorkspaceStartup(editorXpath, sampleName, false);
-			}
+			});
+		});
+	});
+
+	editorsForCheck.forEach((editorXpath) => {
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+			gitRepoUrlsToCheckAirgap.forEach((gitUbiUrl) => {
+				test(`Test start of Editor with xPath: ${editorXpath} and with ubi url: ${gitUbiUrl}`, async function (): Promise<void> {
+					await testWorkspaceStartup(editorXpath, gitUbiUrl, true);
+				});
+			});
+		} else {
+			gitRepoUrlsToCheck.forEach((gitUbiUrl) => {
+				test(`Test start of Editor with xPath: ${editorXpath} and with ubi url: ${gitUbiUrl}`, async function (): Promise<void> {
+					await testWorkspaceStartup(editorXpath, gitUbiUrl, true);
+				});
+			});
 		}
 	});
 
-	test('Test start of Intellij IDE (SSH) with ubi', async function (): Promise<void> {
-		for (const editorXpath of editorsForCheck) {
-			if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-				Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
-				for (const url of gitRepoUrlsToCheckAirgap) {
-					await testWorkspaceStartup(editorXpath, url, true);
-				}
-			} else {
-				for (const url of gitRepoUrlsToCheck) {
-					await testWorkspaceStartup(editorXpath, url, true);
-				}
-			}
-		}
-	});
-
-	suiteTeardown('Delete DevWorkspace', async function (): Promise<void> {
-		Logger.info('Deleting DevWorkspace... After all.');
+	teardown('Delete DevWorkspace', async function (): Promise<void> {
+		Logger.info('Delete DevWorkspace. After each test.');
 		if (currentTabHandle !== 'undefined') {
 			await browserTabsUtil.switchToWindow(currentTabHandle);
 		}
@@ -155,5 +147,8 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
+
+		WorkspaceHandlingTests.clearWorkspaceName();
+		clearCurrentTabHandle();
 	});
 });
