@@ -98,7 +98,7 @@ export class CreateWorkspace {
 	async setGitRepositoryUrl(factoryUrl: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
 		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
-		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl), timeout);
+		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, factoryUrl, timeout);
 
 		const actualFactoryUrl: string = await this.getGitRepositoryUrl(timeout);
 		Logger.info(`[INFO] Git repository URL set to "${actualFactoryUrl}"`);
@@ -182,7 +182,7 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT); // wait for any potential UI updates before clicking
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL); // wait for any potential UI updates before clicking
 		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
