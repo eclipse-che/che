@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2023 Red Hat, Inc.
+ * copyright (c) 2020-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,17 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-
-/**
- * p03 - Test image build with spec.devEnvironments.persistUserHome enabled
- *
- * Prerequisites:
- * - Install Dev Spaces with spec.devEnvironments.persistUserHome: true in devspaces CheCluster
- *
- * Test flow:
- * 1. Go to User Dashboard and create workspace from sample
- * 2. Open workspace and test image build using kubedock and podman
- */
 
 import { ViewSection } from 'monaco-page-objects';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
@@ -152,7 +141,7 @@ suite(`Test image build with persistUserHome enabled (kubedock and podman) ${BAS
 
 	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
 		await dashboard.openDashboard();
-		await browserTabsUtil.closeAllTabsExceptCurrent();		
+		await browserTabsUtil.closeAllTabsExceptCurrent();
 		await testWorkspaceUtil.stopAndDeleteWorkspaceByName(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
