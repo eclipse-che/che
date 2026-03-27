@@ -182,7 +182,7 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT); // wait for any potential UI updates before clicking
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT); // wait for any potential UI updates before clicking
 		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
