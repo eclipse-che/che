@@ -182,15 +182,15 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); //wait for any potential UI updates before clicking
-		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); //TODO: remove after debug of losing text.
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT); // TODO: remove after debug of losing text.
-		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout); //TODO: remove after debug of losing text.
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); //TODO: remove after debug of losing text.
-		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); //TODO: remove after debug of losing text.
-		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); //TODO: replace with scrollToAndClick after debug of losing text.
-		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout); //TODO: remove after debug of losing text.
-		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); //TODO: remove; wait for state change to take effect
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); // wait for any potential UI updates before clicking
+		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); // tODO: remove after debug of losing text.
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT); // tODO: remove after debug of losing text.
+		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout); // tODO: remove after debug of losing text.
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); // tODO: remove after debug of losing text.
+		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); // tODO: remove after debug of losing text.
+		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout); // tODO: replace with scrollToAndClick after debug of losing text.
+		await this.driverHelper.scrollTo(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout); // tODO: remove after debug of losing text.
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT); // tODO: remove; wait for state change to take effect
 	}
 
 	private getEditorsDropdownListLocator(sampleName: string): By {
