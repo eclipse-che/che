@@ -245,6 +245,6 @@ export class Workspaces {
 	}
 
 	private getOpenWorkspaceDetailsLinkLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//a[text()='${workspaceName}']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}//span[text()='${workspaceName}']`);
 	}
 }

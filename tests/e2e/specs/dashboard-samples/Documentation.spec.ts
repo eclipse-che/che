@@ -91,6 +91,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 			expect(link.href, `${link.href} not includes ${currentUrl}`).oneOf([currentUrl, currentUrl + '/']);
 			await browserTabsUtil.switchToWindow(parentGUID);
 			await browserTabsUtil.closeAllTabsExceptCurrent();
+			await dashboard.openAboutMenu();
 		}
 	});
 

@@ -25,7 +25,7 @@ export class WorkspaceDetails {
 	private static readonly SAVE_BUTTON: By = By.css('button[name="save-button"]');
 	private static readonly ENABLED_SAVE_BUTTON: By = By.css('button[name="save-button"][aria-disabled="false"]');
 	private static readonly WORKSPACE_DETAILS_LOADER: By = By.css('workspace-details-overview md-progress-linear');
-	private static readonly STORAGE_TYPE_INFO_BUTTON: By = By.xpath('//label[@for="storage-type"]//following-sibling::button');
+	private static readonly STORAGE_TYPE_INFO_BUTTON: By = By.css('span[aria-label="More info for storage type"]');
 	private static readonly CLOSE_STORAGE_TYPE_INFO_BUTTON: By = By.xpath('//button[@aria-label="Close"]');
 	private static readonly STORAGE_TYPE_DOC_LINK: By = By.xpath('//div/p/a');
 	private static readonly DEVFILE_DOC_LINK: By = By.xpath('//a[text()="Devfile Documentation"]');
