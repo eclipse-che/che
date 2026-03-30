@@ -88,10 +88,11 @@ suite(`Test image build with persistUserHome enabled (kubedock and podman) ${BAS
 		defaultPersistentHomeValue = currentValue === 'true';
 
 		// set spec.devEnvironments.persistUserHome.enabled to true
-		shellExecutor.executeCommand(
+		const patchResult: ShellString = shellExecutor.executeCommand(
 			`oc patch checluster ${cheClusterName} --type=merge ` +
 				'-p \'{"spec":{"devEnvironments":{"persistUserHome":{"enabled": true}}}}\''
 		);
+		expect(patchResult.code).to.equal(0, 'Failed to patch CheCluster to enable persistUserHome');
 	});
 
 	suiteSetup('Login', async function (): Promise<void> {
@@ -133,10 +134,12 @@ suite(`Test image build with persistUserHome enabled (kubedock and podman) ${BAS
 
 	suiteTeardown(function (): void {
 		// restore spec.devEnvironments.persistUserHome.enabled to original value
-		shellExecutor.executeCommand(
+		const restoreResult: ShellString = shellExecutor.executeCommand(
 			`oc patch checluster ${cheClusterName} --type=merge ` +
 				`-p '{"spec":{"devEnvironments":{"persistUserHome":{"enabled": ${defaultPersistentHomeValue}}}}}'`
 		);
+
+		expect(restoreResult.code).to.equal(0, 'Failed to restore CheCluster persistUserHome setting');
 	});
 
 	suiteTeardown('Stop and delete the workspace by API', async function (): Promise<void> {
