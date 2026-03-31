@@ -144,7 +144,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
-			Logger.info('Workspace name is defined. Deleting workspace...')
+			Logger.info('Workspace name is defined. Deleting workspace...');
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
 
