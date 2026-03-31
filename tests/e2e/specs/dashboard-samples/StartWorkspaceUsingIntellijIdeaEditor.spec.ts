@@ -68,15 +68,13 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 
 	const gitRepoUrlsToCheck: string[] = [
 		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
-		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
+		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal' // ubi9-minimal-demo
 	];
 
 	const gitRepoUrlsToCheckAirgap: string[] = [
 		'https://gh.crw-qe.com/test-automation-only/ubi8/tree/ubi8-latest',
 		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
-
-	let workspaceNameCounter: number = 0;
 
 	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
@@ -98,13 +96,11 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 				pollingForCheckTitle
 			);
 		} else {
-			workspaceNameCounter++;
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
 				editorXpath,
 				sampleNameOrUrl,
 				titleXpath,
-				pollingForCheckTitle,
-				`testName${workspaceNameCounter}`
+				pollingForCheckTitle
 			);
 		}
 
@@ -148,7 +144,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
-			Logger.info('Workspace name is defined. Deleting workspace...');
+			Logger.info('Workspace name is defined. Deleting workspace...')
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
 
