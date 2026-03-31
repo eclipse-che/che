@@ -112,7 +112,7 @@ suite(`"Create Empty Workspace sample" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONME
 		} catch (e) {
 			// expected - alert should not appear
 		}
-		// tODO: Remove this workaround after fixing https://github.com/eclipse/che/issues/XXXXX
+		// tODO: Remove this workaround after fixing https://redhat.atlassian.net/browse/CRW-10546
 		// empty Workspace sample should generate unique names and not show duplicate workspace warning
 		if (alertAppeared) {
 			Logger.error(
