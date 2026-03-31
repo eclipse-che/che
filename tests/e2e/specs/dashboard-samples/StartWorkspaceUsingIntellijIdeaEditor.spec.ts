@@ -76,6 +76,8 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
+	let workspaceNameCounter: number = 0;
+
 	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
 	}
@@ -96,11 +98,13 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 				pollingForCheckTitle
 			);
 		} else {
+			workspaceNameCounter++;
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
 				editorXpath,
 				sampleNameOrUrl,
 				titleXpath,
-				pollingForCheckTitle
+				pollingForCheckTitle,
+				`testName${workspaceNameCounter}`
 			);
 		}
 
@@ -144,6 +148,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
+			Logger.info('Workspace name is defined. Deleting workspace...');
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
 

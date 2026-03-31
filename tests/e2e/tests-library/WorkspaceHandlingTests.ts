@@ -154,10 +154,15 @@ export class WorkspaceHandlingTests {
 		editor: string,
 		sampleName: string,
 		xPath: string,
-		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING,
+		customWorkspaceName: string = ''
 	): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and Sample. Sample ' + editor);
 		await this.selectEditor(editor);
+		if (customWorkspaceName !== '') {
+			await this.createWorkspace.setWorkspaceName(customWorkspaceName);
+			WorkspaceHandlingTests.workspaceName = customWorkspaceName;
+		}
 		await this.createWorkspace.clickOnSampleNoEditorSelection(sampleName);
 		await this.waitForControlXpath(xPath, polling);
 	}
@@ -166,7 +171,7 @@ export class WorkspaceHandlingTests {
 		editor: string,
 		sampleUrl: string,
 		xPath: string,
-		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_START_WORKSPACE_TIMEOUT
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
 	): Promise<void> {
 		Logger.debug('Create and open workspace with specific Editor and URL. Sample ' + editor);
 		await this.selectEditor(editor);
