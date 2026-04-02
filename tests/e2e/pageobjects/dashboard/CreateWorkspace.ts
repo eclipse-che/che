@@ -19,16 +19,14 @@ import { TrustAuthorPopup } from './TrustAuthorPopup';
 
 @injectable()
 export class CreateWorkspace {
-	private static readonly FACTORY_URL: By = By.xpath('//input[@id="git-repo-url"]');
+	private static readonly FACTORY_URL: By = By.id('git-repo-url');
 	private static readonly GIT_REPO_OPTIONS: By = By.xpath('//span[text()="Git Repo Options"]');
-	private static readonly GIT_BRANCH_NAME: By = By.xpath(
-		'//div[text()="Select the branch of the Git Repository"]/preceding-sibling::div'
-	);
-	private static readonly GIT_BRANCH_SEARCH_FIELD: By = By.css('input[type="search"]');
-	private static readonly PATH_TO_DEVFILE: By = By.xpath('//input[@aria-label="Path to Devfile"]');
-	private static readonly CREATE_AND_OPEN_BUTTON: By = By.xpath('//button[@id="create-and-open-button"]');
-	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.xpath('//label[@for="create-new-if-exist-switch"]');
-	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.xpath('//input[@id="create-new-if-exist-switch"]');
+
+	private static readonly GIT_BRANCH_SELECT_FIELD: By = By.xpath('//span[text()="Select the branch of the Git Repository"]');
+	private static readonly GIT_FILTER_BRANCHES: By = By.css('input[placeholder="Filter branches"]');
+	private static readonly CREATE_AND_OPEN_BUTTON: By = By.id('create-and-open-button');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.css('label[for="create-new-if-exist-switch"]');
+	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.id('create-new-if-exist-switch');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -87,23 +85,23 @@ export class CreateWorkspace {
 
 		if (branchName) {
 			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_REPO_OPTIONS, timeout);
-
-			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_BRANCH_NAME, timeout);
-
-			await this.driverHelper.waitVisibility(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, timeout);
-			await this.driverHelper.type(CreateWorkspace.GIT_BRANCH_SEARCH_FIELD, Key.chord(branchName), timeout);
+			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_BRANCH_SELECT_FIELD, timeout);
+			await this.driverHelper.waitAndClick(CreateWorkspace.GIT_FILTER_BRANCHES, timeout);
+			await this.driverHelper.type(CreateWorkspace.GIT_FILTER_BRANCHES, Key.chord(branchName), timeout);
 			await this.driverHelper.waitAndClick(this.getGitBranchListItemLocator(branchName), timeout);
 		}
 
 		await this.driverHelper.waitAndClick(CreateWorkspace.CREATE_AND_OPEN_BUTTON, timeout);
-
 		await this.performTrustAuthorPopup();
 	}
 
 	async setGitRepositoryUrl(factoryUrl: string, timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<void> {
 		Logger.debug(`factoryUrl: "${factoryUrl}"`);
 		await this.driverHelper.waitVisibility(CreateWorkspace.FACTORY_URL, timeout);
-		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, Key.chord(factoryUrl), timeout);
+		await this.driverHelper.type(CreateWorkspace.FACTORY_URL, factoryUrl, timeout);
+
+		const actualFactoryUrl: string = await this.getGitRepositoryUrl(timeout);
+		Logger.info(`[INFO] Git repository URL set to "${actualFactoryUrl}"`);
 	}
 
 	async getGitRepositoryUrl(timeout: number = TIMEOUT_CONSTANTS.TS_CLICK_DASHBOARD_ITEM_TIMEOUT): Promise<string> {
@@ -184,6 +182,7 @@ export class CreateWorkspace {
 
 		// click to change state
 		Logger.debug(`Checkbox is ${isCurrentlyChecked ? 'set' : 'unset'}, ${checked ? 'setting' : 'unsetting'} it now`);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM); // wait for any potential UI updates before clicking
 		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
@@ -217,6 +216,6 @@ export class CreateWorkspace {
 	}
 
 	private getGitBranchListItemLocator(branchName: string): By {
-		return By.css(`li[id="${branchName}"] button.pf-c-select__menu-item`);
+		return By.xpath(`//ul[@role="listbox"]//span[text()="${branchName}"]`);
 	}
 }

@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2023 Red Hat, Inc.
+ * copyright (c) 2023-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -91,6 +91,7 @@ suite(`Check links to documentation page in Dashboard ${BASE_TEST_CONSTANTS.TEST
 			expect(link.href, `${link.href} not includes ${currentUrl}`).oneOf([currentUrl, currentUrl + '/']);
 			await browserTabsUtil.switchToWindow(parentGUID);
 			await browserTabsUtil.closeAllTabsExceptCurrent();
+			await dashboard.openAboutMenu();
 		}
 	});
 

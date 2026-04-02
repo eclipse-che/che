@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2020-2023 Red Hat, Inc.
+ * copyright (c) 2020-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -95,9 +95,9 @@ export const TIMEOUT_CONSTANTS: {
 	// -------------------------------------------- PROJECT TREE --------------------------------------------
 
 	/**
-	 * expand item in project tree, "8 000" by default.
+	 * expand item in project tree, "10 000" by default.
 	 */
-	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 8_000,
+	TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT: Number(process.env.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT) || 10_000,
 
 	// -------------------------------------------- EDITOR --------------------------------------------
 
