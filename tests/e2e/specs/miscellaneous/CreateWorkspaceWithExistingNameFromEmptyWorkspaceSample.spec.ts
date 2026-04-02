@@ -20,7 +20,6 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { Logger } from '../../utils/Logger';
-import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 suite(`"Create Empty Workspace sample" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
@@ -103,26 +102,6 @@ suite(`"Create Empty Workspace sample" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONME
 		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked(), '"Create New" checkbox should be unchecked').to.be.false;
 
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName, false);
-
-		// verify no duplicate workspace warning appeared (wait a few seconds to be sure)
-		let alertAppeared: boolean = false;
-		try {
-			await dashboard.waitExistingWorkspaceFoundAlert(TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
-			alertAppeared = true;
-		} catch (e) {
-			// expected - alert should not appear
-		}
-		// tODO: Remove this workaround after fixing https://redhat.atlassian.net/browse/CRW-10546
-		// empty Workspace sample should generate unique names and not show duplicate workspace warning
-		if (alertAppeared) {
-			Logger.error(
-				'KNOWN ISSUE: Duplicate workspace warning appeared for Empty Workspace sample. ' +
-					'This should not happen as Empty Workspace generates unique names. ' +
-					'Skipping test - no workspace will be created.'
-			);
-			this.skip();
-		}
-
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		thirdWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		expect(thirdWorkspaceName, 'Third workspace name should not be empty').not.empty;
