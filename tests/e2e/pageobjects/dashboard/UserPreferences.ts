@@ -26,8 +26,8 @@ export class UserPreferences {
 
 	private static readonly CONTAINER_REGISTRIES_TAB: By = By.xpath('//button[text()="Container Registries"]');
 
-	private static readonly GIT_SERVICES_TAB: By = By.css('button[id*="GitServices"]');
-	private static readonly GIT_SERVICES_REVOKE_BUTTON: By = By.css('button[data-testid*="revoke-button"]');
+	private static readonly GIT_SERVICES_TAB: By = By.id('pf-tab-GitServices-user-preferences-tabs');
+	private static readonly GIT_SERVICES_REVOKE_BUTTON: By = By.css('button[data-testid="bulk-revoke-button"]');
 
 	private static readonly PAT_TAB: By = By.xpath('//button[text()="Personal Access Tokens"]');
 	private static readonly ADD_NEW_PAT_BUTTON: By = By.xpath('//button[text()="Add Personal Access Token"]');
