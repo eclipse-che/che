@@ -33,19 +33,19 @@ suite(`"Create Empty Workspace sample" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONME
 
 	let firstWorkspaceName: string;
 	let secondWorkspaceName: string;
+	let thirdWorkspaceName: string;
 
 	suiteSetup('Login', async function (): Promise<void> {
 		await loginTests.loginIntoChe();
 	});
 
-	async function waitDashboardPage(): Promise<void> {
+	async function openCreateWorkspacePage(): Promise<void> {
 		await dashboard.openDashboard();
 		await dashboard.waitPage();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		await dashboard.clickCreateWorkspaceButton();
 		await createWorkspace.waitPage();
-		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked()).to.be.true;
 	}
 
 	async function waitWorkspaceReadiness(): Promise<void> {
@@ -60,37 +60,70 @@ suite(`"Create Empty Workspace sample" test ${BASE_TEST_CONSTANTS.TEST_ENVIRONME
 		}
 	}
 
-	test('Verify "Create New" is on and a new workspace is created without warnings', async function (): Promise<void> {
-		await waitDashboardPage();
+	test('Step 1-2: Verify "Create New" is ON by default and create first Empty Workspace', async function (): Promise<void> {
+		await openCreateWorkspacePage();
 
 		// verify "Create New" checkbox is checked by default
-		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked()).to.be.true;
+		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked(), '"Create New" checkbox should be checked by default').to.be
+			.true;
+
 		await workspaceHandlingTests.createAndOpenWorkspace(stackName, true);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
-		await waitWorkspaceReadiness();
-
 		firstWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
+		expect(firstWorkspaceName, 'First workspace name should not be empty').not.empty;
+		registerRunningWorkspace(firstWorkspaceName);
+
+		await waitWorkspaceReadiness();
 	});
 
-	test('Verify "Create New" is off and a new workspace is created', async function (): Promise<void> {
-		await waitDashboardPage();
+	test('Step 3: Create second Empty Workspace with "Create New" ON - should succeed without warnings', async function (): Promise<void> {
+		await openCreateWorkspacePage();
 
-		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked()).to.be.true;
-		await workspaceHandlingTests.createAndOpenWorkspace(stackName, false);
+		// verify "Create New" checkbox is still checked
+		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked(), '"Create New" checkbox should be checked').to.be.true;
+
+		await workspaceHandlingTests.createAndOpenWorkspace(stackName, true);
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
-		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+		secondWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
+		expect(secondWorkspaceName, 'Second workspace name should not be empty').not.empty;
+		registerRunningWorkspace(secondWorkspaceName);
+
 		await waitWorkspaceReadiness();
 
-		secondWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
-
 		// empty Workspace sample generates unique names, so workspaces should have different names
-		expect(WorkspaceHandlingTests.getWorkspaceName()).not.to.be.equal(firstWorkspaceName);
+		expect(secondWorkspaceName, 'Second workspace should have a different name than the first one').not.to.be.equal(firstWorkspaceName);
+	});
+
+	test('Step 4-5: Turn OFF "Create New" and create third Empty Workspace - should succeed without warnings', async function (): Promise<void> {
+		await openCreateWorkspacePage();
+
+		// turn off "Create New" checkbox
+		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
+		expect(await createWorkspace.isCreateNewWorkspaceCheckboxChecked(), '"Create New" checkbox should be unchecked').to.be.false;
+
+		await workspaceHandlingTests.createAndOpenWorkspace(stackName, false);
+		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+		thirdWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
+		expect(thirdWorkspaceName, 'Third workspace name should not be empty').not.empty;
+		registerRunningWorkspace(thirdWorkspaceName);
+
+		await waitWorkspaceReadiness();
+
+		// empty Workspace sample generates unique names, so all workspaces should have different names
+		expect(thirdWorkspaceName, 'Third workspace should have a different name than the first one').not.to.be.equal(firstWorkspaceName);
+		expect(thirdWorkspaceName, 'Third workspace should have a different name than the second one').not.to.be.equal(secondWorkspaceName);
 	});
 
 	suiteTeardown('Stop and delete all created workspaces', async function (): Promise<void> {
-		await workspaceHandlingTests.stopAndRemoveWorkspace(firstWorkspaceName);
-		await workspaceHandlingTests.stopAndRemoveWorkspace(secondWorkspaceName);
+		if (firstWorkspaceName) {
+			await workspaceHandlingTests.stopAndRemoveWorkspace(firstWorkspaceName);
+		}
+		if (secondWorkspaceName) {
+			await workspaceHandlingTests.stopAndRemoveWorkspace(secondWorkspaceName);
+		}
+		if (thirdWorkspaceName) {
+			await workspaceHandlingTests.stopAndRemoveWorkspace(thirdWorkspaceName);
+		}
 	});
 
 	suiteTeardown('Unregister running workspace', function (): void {
