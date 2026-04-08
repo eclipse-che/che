@@ -92,8 +92,11 @@ export class DriverHelper {
 		return false;
 	}
 
-	async waitVisibility(elementLocator: By, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<WebElement> {
-		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
+	async waitVisibility(
+		elementLocator: By,
+		timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+	): Promise<WebElement> {
 		const attempts: number = Math.ceil(timeout / polling);
 		Logger.trace(`${elementLocator}`);
 
