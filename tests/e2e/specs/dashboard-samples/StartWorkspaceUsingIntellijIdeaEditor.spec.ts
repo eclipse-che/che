@@ -68,7 +68,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 
 	const gitRepoUrlsToCheck: string[] = [
 		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
-		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal' // ubi9-minimal-demo
+		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
 	];
 
 	const gitRepoUrlsToCheckAirgap: string[] = [
