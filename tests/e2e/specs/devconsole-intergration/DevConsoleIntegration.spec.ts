@@ -53,6 +53,11 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	const gitImportReference: string = 'pipeline';
 	const projectLabel: string = 'app.openshift.io/runtime=spring';
 	const projectName: string = 'devconsole-integration-test';
+	const openshiftConsoleUrl: string = BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace(
+		BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME(),
+		'console-openshift-console'
+	);
+	const importProjectUrl: string = `${openshiftConsoleUrl}/import/ns/${projectName}`;
 
 	suiteSetup('Create new empty project using ocp', function (): void {
 		kubernetesCommandLineToolsExecutor.loginToOcp();
@@ -101,7 +106,7 @@ suite(`DevConsole Integration ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	});
 
 	test('Open import from git project page', async function (): Promise<void> {
-		ocpImportPage = await ocpMainPage.openImportFromGitPage();
+		ocpImportPage = await ocpMainPage.openImportFromGitPageWithFallback(importProjectUrl);
 	});
 
 	test('Fill and submit import data', async function (): Promise<void> {

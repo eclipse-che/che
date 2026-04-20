@@ -72,7 +72,7 @@ export class OcpMainPage {
 	async selectImportFromGitMethod(): Promise<OcpImportFromGitPage> {
 		Logger.debug();
 
-		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		await this.driverHelper.waitAndClick(OcpMainPage.IMPORT_FROM_GIT_ITEM, TIMEOUT_CONSTANTS.TS_SELENIUM_WAIT_FOR_URL);
 		return e2eContainer.get(CLASSES.OcpImportFromGitPage);
 	}
 
@@ -81,6 +81,21 @@ export class OcpMainPage {
 
 		await this.clickAddToProjectButton();
 		return await this.selectImportFromGitMethod();
+	}
+
+	/**
+	 * prefer Dev Console Add → Import from Git; if that fails , open the import route directly.
+	 */
+	async openImportFromGitPageWithFallback(importProjectUrl: string): Promise<OcpImportFromGitPage> {
+		Logger.debug();
+
+		try {
+			return await this.openImportFromGitPage();
+		} catch (err) {
+			Logger.warn(`Import from git via UI failed, navigating to ${importProjectUrl}: ${err}`);
+			await this.browserTabsUtil.navigateTo(importProjectUrl);
+			return e2eContainer.get(CLASSES.OcpImportFromGitPage);
+		}
 	}
 
 	async selectProject(projectName: string): Promise<void> {
