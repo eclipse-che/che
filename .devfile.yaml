@@ -78,3 +78,9 @@ commands:
     commandLine: >-
       echo "TODO: Start pod in dogfooding user namespace and collect logs"
     component: devtools
+- id: install-claude-code
+  exec:
+    label: "Install Claude Code"
+    component: devtools
+    workingDir: ${PROJECT_SOURCE}
+    commandLine: "npm install -g @anthropic-ai/claude-code"
