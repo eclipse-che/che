@@ -3,6 +3,9 @@
 	"version": "7.117.0-next",
 	"description": "",
 	"main": "dist/index.js",
+	"engines": {
+	    "node": ">=18"
+	  },
 	"scripts": {
 		"lint": "eslint --fix .",
 		"prettier": "prettier --config .prettierrc.json . --write",
