@@ -227,12 +227,12 @@ export class Workspaces {
 	}
 
 	private getActionsLocator(workspaceName: string): By {
-		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}/td/button[@aria-label='Actions']`);
+		return By.xpath(`${this.getWorkspaceListItemLocator(workspaceName).value}/td/button[@aria-label='Actions for ${workspaceName}']`);
 	}
 
 	/* private getExpandedActionsLocator(workspaceName: string): By {
 		return By.xpath(
-			`${this.getWorkspaceListItemLocator(workspaceName).value}//button[@aria-label='Actions' and @aria-expanded='true']`
+			`${this.getWorkspaceListItemLocator(workspaceName).value}//button[@aria-label='Actions for ${workspaceName}' and @aria-expanded='true']`
 		);
 	}*/
 
