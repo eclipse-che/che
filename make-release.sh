@@ -16,10 +16,27 @@ MAIN_BRANCH="main"
 TMP=""
 ISSUE_TEMPLATE_FILE=".github/ISSUE_TEMPLATE/bug_report.yml"
 
+# Parameters
+SET_RELEASE_VERSION=0
+SET_NEXT_VERSION=0
+
+UPDATE_ISSUE_TEMPLATE=0
+
+BUILD_E2E_IMAGES=0
+PUSH_E2E_IMAGE=0
+
+BUILD_E2E_NPM=0
+PUSH_E2E_NPM=0
+
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     '-v'|'--version') VERSION="$2"; shift 1;;
     '-tmp'|'--use-tmp-dir') TMP=$(mktemp -d); shift 0;;
+    '--build-image') BUILD_E2E_ARTIFACTS=1; shift 0;;
+    '--push-image') PUSH_E2E_IMAGE=1; shift 0;;
+    '--build-npm') BUILD_E2E_NPM=1; shift 0;;
+    '--publish-npm') PUSH_E2E_NPM=1; shift 0;;
+    '--update-issue-template') UPDATE_ISSUE_TEMPLATE=1; shift 0;;
   esac
   shift 1
 done
@@ -31,6 +48,23 @@ sed_in_place() {
   elif [ "${SHORT_UNAME:0:5}" == "Linux" ]; then
     sed -i "$@"
   fi
+}
+
+usage ()
+{
+  echo "Usage: $0 --version [VERSION TO RELEASE]"
+  echo -e "Example: $0 --version v0.1.0\n";
+}
+
+resetChanges() {
+  local branch="$1"
+
+  echo "[INFO] Reset changes in ${branch} branch"
+
+  git reset --hard
+  git checkout "${branch}"
+  git fetch origin --prune
+  git pull origin "${branch}"
 }
 
 # Update the issue template with released version and add current latest as previous item
@@ -98,17 +132,24 @@ bump_version () {
     git checkout "${PR_BRANCH}"
     git pull origin "${PR_BRANCH}"
     git push origin "${PR_BRANCH}"
-    lastCommitComment="$(git log -1 --pretty=%B)"
     gh pr create -f -B "${BUMP_BRANCH}" -H "${PR_BRANCH}"
   fi
   set -e
   git checkout "${CURRENT_BRANCH}"
 }
 
-usage ()
-{
-  echo "Usage: $0 --version [VERSION TO RELEASE]"
-  echo -e "Example: $0 --version v0.1.0\n";
+bump_next_versions () {
+  # change VERSION file + commit change into ${BASEBRANCH} branch
+  if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
+    # bump the y digit, if it is a major release
+    [[ $BRANCH =~ ^([0-9]+)\.([0-9]+)\.x ]] && BASE=${BASH_REMATCH[1]}; NEXT=${BASH_REMATCH[2]}; (( NEXT=NEXT+1 )) # for BRANCH=0.1.x, get BASE=0, NEXT=2
+    NEXT_VERSION_Y="${BASE}.${NEXT}.0-next"
+    bump_version "${NEXT_VERSION_Y}" "${BASEBRANCH}"
+  fi
+  # bump the z digit
+  [[ ${VERSION#v} =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"; NEXT="${BASH_REMATCH[3]}"; (( NEXT=NEXT+1 )) # for VERSION=0.1.2, get BASE=0.1, NEXT=3
+  NEXT_VERSION_Z="${BASE}.${NEXT}-next"
+  bump_version "${NEXT_VERSION_Z}" "${BRANCH}"
 }
 
 if [[ ! ${VERSION} ]]; then
@@ -116,6 +157,9 @@ if [[ ! ${VERSION} ]]; then
   exit 1
 fi
 
+set_release_version () {
+
+}
 
 # derive bugfix branch from version
 BRANCH=${VERSION#v}
@@ -136,8 +180,6 @@ if [[ $TMP ]] && [[ -d $TMP ]]; then
   git clone "${REPO}" -q
   cd "${REPO##*/}" || exit 1
 fi
-
-git remote show origin
 
 # get sources from ${BASEBRANCH} branch
 git fetch origin "${BASEBRANCH}":"${BASEBRANCH}" || true
@@ -167,10 +209,17 @@ npm --no-git-tag-version version --allow-same-version "${VERSION}"
 npm run prettier
 popd >/dev/null || exit
 
-docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
-docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
-docker push quay.io/eclipse/che-e2e:${VERSION}
-docker push quay.io/eclipse/che-e2e:latest
+build_e2e_image () 
+{
+  docker build -t quay.io/eclipse/che-e2e:${VERSION} -f tests/e2e/build/dockerfiles/Dockerfile tests/e2e
+  docker tag quay.io/eclipse/che-e2e:${VERSION} quay.io/eclipse/che-e2e:latest
+}
+
+push_e2e_image ()
+{
+  docker push quay.io/eclipse/che-e2e:${VERSION}
+  docker push quay.io/eclipse/che-e2e:latest
+}
 
 # update template in the release tag
 update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
@@ -186,22 +235,27 @@ git push origin "${VERSION}"
 git checkout "${BASEBRANCH}"
 
 # update template in the branch
-update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
-
-# change VERSION file + commit change into ${BASEBRANCH} branch
-if [[ "${BASEBRANCH}" != "${BRANCH}" ]]; then
-  # bump the y digit, if it is a major release
-  [[ $BRANCH =~ ^([0-9]+)\.([0-9]+)\.x ]] && BASE=${BASH_REMATCH[1]}; NEXT=${BASH_REMATCH[2]}; (( NEXT=NEXT+1 )) # for BRANCH=0.1.x, get BASE=0, NEXT=2
-  NEXT_VERSION_Y="${BASE}.${NEXT}.0-next"
-  bump_version "${NEXT_VERSION_Y}" "${BASEBRANCH}"
+if [[ ${UPDATE_ISSUE_TEMPLATE} -eq 1 ]]; then
+  update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 fi
-# bump the z digit
-[[ ${VERSION#v} =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]] && BASE="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"; NEXT="${BASH_REMATCH[3]}"; (( NEXT=NEXT+1 )) # for VERSION=0.1.2, get BASE=0.1, NEXT=3
-NEXT_VERSION_Z="${BASE}.${NEXT}-next"
-bump_version "${NEXT_VERSION_Z}" "${BRANCH}"
 
-# cleanup tmp dir
-if [[ $TMP ]] && [[ -d $TMP ]]; then
-  popd > /dev/null || exit
-  rm -fr "$TMP"
+if [[ ${BUMP_NEXT_VERSION} -eq 1 ]]; then
+  bump_next_versions
 fi
+
+cleanup_tmp_dir () 
+{
+  # cleanup tmp dir
+  if [[ $TMP ]] && [[ -d $TMP ]]; then
+    popd > /dev/null || exit
+    rm -fr "$TMP"
+  fi
+}
+
+set_release_branch
+set_release_version
+build_e2e_artifacts
+push_e2e_artifacts
+build_npm_artifacts
+bump_next_versions
+cleanup_tmp_dir
