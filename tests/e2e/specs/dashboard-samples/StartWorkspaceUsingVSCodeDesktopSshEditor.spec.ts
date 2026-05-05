@@ -36,7 +36,9 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 
 	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
-	const titlexPath: string = '/html/body/h1';
+	const useExtensionSwitcher: string = '//div[@class="toggle-input"]';
+
+	const titlexPath: string = `//div[@class="header-title"]`;
 	const ocPortForwardxPath: string = '//*[@id="port-forward"]';
 	const sshKeyxPath: string = '//*[@id="key"]';
 	const sshKonfigxPath: string = '//*[@id="config"]';
@@ -92,6 +94,8 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			);
 		}
 
+		// toggle UseExtension switcher
+		await workspaceHandlingTests.clickOnElementByXpath(useExtensionSwitcher);
 		// check title
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
