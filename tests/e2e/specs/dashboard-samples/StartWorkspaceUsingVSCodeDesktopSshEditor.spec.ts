@@ -8,10 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
-import fs from 'fs';
-import path from 'path';
-import YAML from 'yaml';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 import { LoginTests } from '../../tests-library/LoginTests';
@@ -25,12 +21,6 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
 	this.timeout(6000000);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
-	const pathToSampleFile: string = path.resolve('resources/default-devfile.yaml');
-	const workspaceName: string = YAML.parse(fs.readFileSync(pathToSampleFile, 'utf8')).metadata.name;
-	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
-		CLASSES.KubernetesCommandLineToolsExecutor
-	);
-	kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
