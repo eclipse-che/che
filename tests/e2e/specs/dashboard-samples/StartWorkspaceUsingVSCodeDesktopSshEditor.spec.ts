@@ -38,7 +38,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 	const useExtensionSwitcher: string = '//div[@class="toggle-input"]';
 
-	const titlexPath: string = `//div[@class="header-title"]`;
+	const titlexPath: string = '//div[@class="header-title"]';
 	const ocPortForwardxPath: string = '//*[@id="port-forward"]';
 	const sshKeyxPath: string = '//*[@id="key"]';
 	const sshKonfigxPath: string = '//*[@id="config"]';
@@ -95,7 +95,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		}
 
 		// toggle UseExtension switcher if needed
-		if (!await workspaceHandlingTests.checkElementExistsByXpath(ocPortForwardxPath)){
+		if (!(await workspaceHandlingTests.checkElementExistsByXpath(ocPortForwardxPath))) {
 			await workspaceHandlingTests.clickOnElementByXpath(useExtensionSwitcher);
 		}
 		// check title
