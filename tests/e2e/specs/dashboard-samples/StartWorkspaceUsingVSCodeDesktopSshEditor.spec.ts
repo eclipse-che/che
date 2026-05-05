@@ -94,8 +94,10 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			);
 		}
 
-		// toggle UseExtension switcher
-		await workspaceHandlingTests.clickOnElementByXpath(useExtensionSwitcher);
+		// toggle UseExtension switcher if needed
+		if (!await workspaceHandlingTests.checkElementExistsByXpath(ocPortForwardxPath)){
+			await workspaceHandlingTests.clickOnElementByXpath(useExtensionSwitcher);
+		}
 		// check title
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
 		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
