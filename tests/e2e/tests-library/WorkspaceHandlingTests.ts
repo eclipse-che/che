@@ -185,6 +185,21 @@ export class WorkspaceHandlingTests {
 		return await this.driverHelper.getDriver().findElement(By.xpath(xpath)).getText();
 	}
 
+	async clickOnElementByXpath(xpath: string): Promise<void> {
+		Logger.debug('Click on xPath: ' + xpath);
+		await this.driverHelper.waitAndClick(By.xpath(xpath));
+	}
+
+	async checkElementExistsByXpath(xpath: string): Promise<boolean> {
+		Logger.debug('Check if element exists');
+		try {
+			await this.driverHelper.waitVisibility(By.xpath(xpath));
+		} catch (error) {
+			return false;
+		}
+		return true;
+	}
+
 	private async waitForControlXpath(xPathToWait: string, polling: number): Promise<void> {
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 		await this.obtainWorkspaceNameFromStartingPage();
