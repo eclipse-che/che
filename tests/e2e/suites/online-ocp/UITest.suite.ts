@@ -15,5 +15,6 @@ import '../../specs/dashboard-samples/Documentation.spec';
 import '../../specs/devconsole-intergration/DevConsoleIntegration.spec';
 import '../../specs/miscellaneous/CreateWorkspaceWithExistingNameFromGitUrl.spec';
 import '../../specs/miscellaneous/KubedockPodmanTest.spec';
+import '../../specs/miscellaneous/RenameWorkspace.spec';
 import '../../specs/miscellaneous/WorkspaceWithParent.spec';
 import '../../specs/miscellaneous/PredefinedNamespace.spec';
