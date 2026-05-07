@@ -19,6 +19,7 @@ import { ApiUrlResolver } from '../utils/workspace/ApiUrlResolver';
 import { TIMEOUT_CONSTANTS } from '../constants/TIMEOUT_CONSTANTS';
 import { DriverHelper } from '../utils/DriverHelper';
 import { By, error } from 'selenium-webdriver';
+import { Workspaces } from '../pageobjects/dashboard/Workspaces';
 
 @injectable()
 export class WorkspaceHandlingTests {
@@ -38,7 +39,9 @@ export class WorkspaceHandlingTests {
 		@inject(CLASSES.ApiUrlResolver)
 		private readonly apiUrlResolver: ApiUrlResolver,
 		@inject(CLASSES.DriverHelper)
-		private readonly driverHelper: DriverHelper
+		private readonly driverHelper: DriverHelper,
+		@inject(CLASSES.Workspaces)
+		private readonly workspaces: Workspaces
 	) {}
 
 	static getWorkspaceName(): string {
@@ -59,6 +62,13 @@ export class WorkspaceHandlingTests {
 		await this.createWorkspace.setCreateNewWorkspaceCheckbox(createNewWorkspace);
 		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
 		await this.createWorkspace.clickOnSampleNoEditorSelection(stack);
+		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
+	}
+
+	async openWorkspace(workspaceName: string): Promise<void> {
+		await this.workspaces.clickOpenButton(workspaceName);
+		await this.apiUrlResolver.getWorkspacesApiUrl();
+		WorkspaceHandlingTests.parentGUID = await this.browserTabsUtil.getCurrentWindowHandle();
 		await this.browserTabsUtil.waitAndSwitchToAnotherWindow(WorkspaceHandlingTests.parentGUID, TIMEOUT_CONSTANTS.TS_IDE_LOAD_TIMEOUT);
 	}
 
