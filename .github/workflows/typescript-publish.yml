@@ -11,6 +11,11 @@ name: Publish Next Che E2E Tests to npmjs
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'set to true if publishing release build (as opposed to dev/next build)'
+        type: boolean
+        default: false
   push:
     branches: 
       - main
@@ -31,25 +36,39 @@ jobs:
     - name: Clone source code
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0
-    - name: publish
-      env:
-        NODE_AUTH_TOKEN: ${{secrets.CHE_NPM_AUTH_TOKEN}}
+        fetch-depth: 0       
+    - name: Evaluate version of published artifacts
       run: |
-        if [[ ${GITHUB_REF##*/} == "7."**".x" ]]; then
-          echo "[INFO] using ${GITHUB_REF##*/} tag"
-          DIST_TAG=next-${GITHUB_REF##*/}
+        if [[ github.event.inputs.release == 'true' ]]; then
+          echo "[INFO] Publishing release build
+          DIST_TAG=latest
         else
-          echo "[INFO] using "next" tag"
-          DIST_TAG=next
+          "[INFO] Publishing next build:"
+          if [[ ${GITHUB_REF##*/} == "7."**".x" ]]; then
+            echo "[INFO] using ${GITHUB_REF##*/} tag"
+            DIST_TAG=next-${GITHUB_REF##*/}
+          else
+            echo "[INFO] using "next" tag"
+            DIST_TAG=next
+          fi
         fi
 
+        if [[ github.event.inputs.release == 'true' ]]; then
+          VERSION=$(cat VERSION)
+        else
+          CURRENT_VERSION=$(sed -r 's/(.*)-next/\1/' ../../VERSION)
+          SHORT_SHA1=$(git rev-parse --short=7 HEAD)
+          NEW_VERSION="${VERSION}-next-${SHORT_SHA1}"
+          sed -i -r -e "s/(\"version\": )(\".*\")/\1\"$NEW_VERSION\"/" package.json
+          VERSION=$NEW_VERSION
+        fi
+
+        echo "Dist tag: $DIST_TAG, version - $VERSION"
+
+
+    - name: publish
+      run: |
         cd tests/e2e
         npm ci && npm run tsc
-
-        SHORT_SHA1=$(git rev-parse --short=7 HEAD)
-        CURRENT_VERSION=$(sed -r 's/(.*)-next/\1/' ../../VERSION)
-        NEW_VERSION="${CURRENT_VERSION}-next-${SHORT_SHA1}"
-        sed -i -r -e "s/(\"version\": )(\".*\")/\1\"$NEW_VERSION\"/" package.json
 
         npm publish --tag $DIST_TAG
