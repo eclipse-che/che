@@ -31,7 +31,7 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const useExtensionPageId: string = '//div[@id=docs-parent]';
+	const useExtensionPageId: string = '//div[@id="docs-parent"]';
 
 	const titlexPath: string = '//div[@class="header-title"]';
 	const ocPortForwardxPath: string = '//*[@id="port-forward"]';
