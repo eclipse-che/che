@@ -112,24 +112,26 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			.and.contains('UserKnownHostsFile');
 	}
 
-	test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
-		for (const sampleName of samplesForCheck) {
+	samplesForCheck.forEach((sampleName): void => {
+		test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
 			await testWorkspaceStartup(sampleName, false);
-		}
+		});
 	});
 
-	test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
-		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
-			for (const url of gitRepoUrlsToCheckAirgap) {
+	if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+		Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+		gitRepoUrlsToCheckAirgap.forEach((url): void => {
+			test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
 				await testWorkspaceStartup(url, true);
-			}
-		} else {
-			for (const url of gitRepoUrlsToCheck) {
+			});
+		});
+	} else {
+		gitRepoUrlsToCheck.forEach((url): void => {
+			test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
 				await testWorkspaceStartup(url, true);
-			}
-		}
-	});
+			});
+		});
+	}
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
 		Logger.info('Delete DevWorkspace. After each test.');
