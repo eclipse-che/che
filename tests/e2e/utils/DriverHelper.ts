@@ -419,6 +419,24 @@ export class DriverHelper {
 		);
 	}
 
+	/**
+	 * waits until the attribute is present on the element (e.g. boolean HTML `disabled`),
+	 * without requiring a specific attribute value.
+	 */
+	async waitAttributePresent(elementLocator: By, attribute: string, timeout: number): Promise<void> {
+		Logger.trace(`${elementLocator}`);
+
+		await this.driver.wait(
+			async (): Promise<boolean> => {
+				const attributeValue: string | null = await this.waitAndGetElementAttribute(elementLocator, attribute, timeout);
+
+				return attributeValue != null;
+			},
+			timeout,
+			`The '${attribute}' attribute is not present on '${elementLocator}'`
+		);
+	}
+
 	async type(elementLocator: By, text: string, timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
 		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
 		const attempts: number = Math.ceil(timeout / polling);
