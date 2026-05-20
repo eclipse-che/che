@@ -151,38 +151,45 @@ export class WorkspaceDetails {
 	/**
 	 * devSpaces Dashboard does not allow editing the workspace display name while the workspace is running.
 	 */
-	async waitRenameWorkspaceNotPossibleWhileWorkspaceRunning(): Promise<void> {
+	async checkRenameButtonIsAbsent(): Promise<void> {
 		Logger.debug();
 
 		await this.driverHelper.waitDisappearance(WorkspaceDetails.RENAME_WORKSPACE_BUTTON);
 	}
 
-	/**
-	 * rename a stopped workspace from the Overview tab (fill name + save).
-	 */
-	async renameStoppedWorkspaceTo(newDisplayName: string): Promise<void> {
-		Logger.debug(`newDisplayName: "${newDisplayName}"`);
+	async openRenameWorkspaceForm(): Promise<void> {
+		Logger.debug();
 		await this.driverHelper.waitAndClick(WorkspaceDetails.RENAME_WORKSPACE_BUTTON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-		await this.driverHelper.type(WorkspaceDetails.RENAME_WORKSPACE_INPUT, newDisplayName);
-		await this.driverHelper.waitAndClick(WorkspaceDetails.RENAME_SAVE_BUTTON);
-		await this.waitWorkspaceTitle(newDisplayName);
 	}
 
-	async attemptRenameWorkspaceName(desiredName: string): Promise<void> {
-		Logger.debug(`desiredName: "${desiredName}"`);
+	async typeWorkspaceName(name: string): Promise<void> {
+		Logger.debug(`name: "${name}"`);
+		await this.driverHelper.type(WorkspaceDetails.RENAME_WORKSPACE_INPUT, name);
+	}
 
-		await this.driverHelper.waitAndClick(WorkspaceDetails.RENAME_WORKSPACE_BUTTON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-		await this.driverHelper.type(WorkspaceDetails.RENAME_WORKSPACE_INPUT, desiredName);
+	async waitSaveButtonIsDisabled(): Promise<void> {
+		Logger.debug();
 		await this.driverHelper.waitAttributePresent(
 			WorkspaceDetails.RENAME_SAVE_BUTTON,
 			'disabled',
 			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
 		);
-		await this.closeRenameWorkspaceForm();
 	}
 
-	async closeRenameWorkspaceForm(): Promise<void> {
+	async cancelRenameWorkspace(): Promise<void> {
+		Logger.debug();
 		await this.driverHelper.waitAndClick(WorkspaceDetails.RENAME_CANCEL_BUTTON, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+	}
+
+	/**
+	 * rename a workspace from the Overview tab (fill name + save).
+	 */
+	async renameWorkspace(newDisplayName: string): Promise<void> {
+		Logger.debug(`newDisplayName: "${newDisplayName}"`);
+		await this.openRenameWorkspaceForm();
+		await this.typeWorkspaceName(newDisplayName);
+		await this.driverHelper.waitAndClick(WorkspaceDetails.RENAME_SAVE_BUTTON);
+		await this.waitWorkspaceTitle(newDisplayName);
 	}
 
 	private getWorkspaceTitleLocator(workspaceName: string): By {

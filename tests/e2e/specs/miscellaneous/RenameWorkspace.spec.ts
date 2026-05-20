@@ -64,7 +64,7 @@ suite(`Rename workspace ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): v
 
 	test('Workspace details: rename must not be available while the workspace is running', async function (): Promise<void> {
 		await openWorkspaceDetailsOverview(firstWorkspaceName);
-		await workspaceDetails.waitRenameWorkspaceNotPossibleWhileWorkspaceRunning();
+		await workspaceDetails.checkRenameButtonIsAbsent();
 	});
 
 	test('Stop the first workspace from the dashboard', async function (): Promise<void> {
@@ -74,7 +74,7 @@ suite(`Rename workspace ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): v
 
 	test(`Rename stopped workspace to "${RENAMED_WORKSPACE_NAME}" from workspace details`, async function (): Promise<void> {
 		await openWorkspaceDetailsOverview(firstWorkspaceName);
-		await workspaceDetails.renameStoppedWorkspaceTo(RENAMED_WORKSPACE_NAME);
+		await workspaceDetails.renameWorkspace(RENAMED_WORKSPACE_NAME);
 		firstWorkspaceName = RENAMED_WORKSPACE_NAME;
 	});
 
@@ -103,7 +103,10 @@ suite(`Rename workspace ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): v
 
 	test(`Workspace details: setting name to "${RENAMED_WORKSPACE_NAME}" when it is already the current name is rejected`, async function (): Promise<void> {
 		await openWorkspaceDetailsOverview(RENAMED_WORKSPACE_NAME);
-		await workspaceDetails.attemptRenameWorkspaceName(RENAMED_WORKSPACE_NAME);
+		await workspaceDetails.openRenameWorkspaceForm();
+		await workspaceDetails.typeWorkspaceName(RENAMED_WORKSPACE_NAME);
+		await workspaceDetails.waitSaveButtonIsDisabled();
+		await workspaceDetails.cancelRenameWorkspace();
 	});
 
 	test(`Create a second workspace from sample (${stackName})`, async function (): Promise<void> {
@@ -119,7 +122,10 @@ suite(`Rename workspace ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): v
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		await openWorkspaceDetailsOverview(secondWorkspaceName);
-		await workspaceDetails.attemptRenameWorkspaceName(RENAMED_WORKSPACE_NAME);
+		await workspaceDetails.openRenameWorkspaceForm();
+		await workspaceDetails.typeWorkspaceName(RENAMED_WORKSPACE_NAME);
+		await workspaceDetails.waitSaveButtonIsDisabled();
+		await workspaceDetails.cancelRenameWorkspace();
 	});
 
 	suiteTeardown('Stop and delete workspaces created in this suite', async function (): Promise<void> {
