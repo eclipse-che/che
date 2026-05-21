@@ -62,7 +62,7 @@ suite(`"Create workspace from sample with existing name" test ${BASE_TEST_CONSTA
 		).not.undefined;
 	}
 
-	test('Step 1-2: Verify "Create New" is on by default and create first workspace from sample', async function (): Promise<void> {
+	test('Verify "Create New" is on by default and create first workspace from sample', async function (): Promise<void> {
 		await openCreateWorkspacePage();
 
 		// verify "Create New" checkbox is checked by default
@@ -79,7 +79,7 @@ suite(`"Create workspace from sample with existing name" test ${BASE_TEST_CONSTA
 		expect(firstWorkspaceName, 'First workspace name should not be empty').not.empty;
 	});
 
-	test('Step 3: Turn off "Create New" and verify existing workspace opens', async function (): Promise<void> {
+	test('Turn off "Create New" and verify existing workspace opens', async function (): Promise<void> {
 		await openCreateWorkspacePage();
 
 		// turn off "Create New" checkbox
@@ -97,7 +97,7 @@ suite(`"Create workspace from sample with existing name" test ${BASE_TEST_CONSTA
 		expect(WorkspaceHandlingTests.getWorkspaceName(), 'The existing workspace should be opened').to.be.equal(firstWorkspaceName);
 	});
 
-	test('Step 4-5: Turn on "Create New" and verify new workspace is created without warnings', async function (): Promise<void> {
+	test('Turn on "Create New" and verify new workspace is created without warnings', async function (): Promise<void> {
 		await openCreateWorkspacePage();
 
 		// turn on "Create New" checkbox
@@ -116,7 +116,7 @@ suite(`"Create workspace from sample with existing name" test ${BASE_TEST_CONSTA
 		expect(secondWorkspaceName, 'A new workspace with different name should be created').not.to.be.equal(firstWorkspaceName);
 	});
 
-	test('Step 6-9: Turn off "Create New", verify warning with workspace list, and select second workspace', async function (): Promise<void> {
+	test('Turn off "Create New", verify warning with workspace list, and select second workspace', async function (): Promise<void> {
 		await openCreateWorkspacePage();
 
 		// turn off "Create New" checkbox
