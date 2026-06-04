@@ -28,10 +28,11 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
-
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-
 	const titlexPath: string = '//div[@class="header-title"]';
+
+	let currentTabHandle: string = 'undefined';
+	const pollingForCheckTitle: number = 100;
 
 	const samplesForCheck: string[] = [
 		'Empty Workspace',
@@ -70,21 +71,28 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			);
 	}
 
+	function clearCurrentTabHandle(): void {
+		currentTabHandle = 'undefined';
+	}
+
 	async function testWorkspaceStartup(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
 		await dashboard.openDashboard();
+		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
 		await dashboard.clickCreateWorkspaceButton();
 
 		if (isUrl) {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
 				vsCodeDesktopSshEditor,
 				sampleNameOrUrl,
-				titlexPath
+				titlexPath,
+				pollingForCheckTitle
 			);
 		} else {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
 				vsCodeDesktopSshEditor,
 				sampleNameOrUrl,
-				titlexPath
+				titlexPath,
+				pollingForCheckTitle
 			);
 		}
 
@@ -154,6 +162,9 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
 		Logger.info('Delete DevWorkspace. After each test.');
+		if (currentTabHandle !== 'undefined') {
+			await browserTabsUtil.switchToWindow(currentTabHandle);
+		}
 
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
@@ -164,5 +175,6 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		}
 
 		WorkspaceHandlingTests.clearWorkspaceName();
+		clearCurrentTabHandle();
 	});
 });
