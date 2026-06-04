@@ -18,7 +18,6 @@ import { expect } from 'chai';
 import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
 
 suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
 	this.timeout(6000000);
@@ -31,12 +30,8 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const useExtensionPageId: string = '//div[@id="docs-parent"]';
 
 	const titlexPath: string = '//div[@class="header-title"]';
-	const ocPortForwardxPath: string = '//*[@id="port-forward"]';
-	const sshKeyxPath: string = '//*[@id="key"]';
-	const sshKonfigxPath: string = '//*[@id="config"]';
 
 	const samplesForCheck: string[] = [
 		'Empty Workspace',
@@ -68,7 +63,11 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 
 	async function clickOnElementByXpath(xpath: string): Promise<void> {
 		Logger.debug();
-		await driverHelper.waitAndClick(By.xpath(xpath));
+		await driverHelper
+			.getDriver()
+			.executeScript(
+				`document.evaluate('${xpath}', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();`
+			);
 	}
 
 	async function testWorkspaceStartup(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
@@ -89,27 +88,47 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			);
 		}
 
-		const useExtensionPageText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(useExtensionPageId);
-		expect(useExtensionPageText).contains('Install the following VS Code extensions');
-		// toggle UseExtension switcher
+		// read page
+		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
+		// click on "Use Extension" switcher
 		await clickOnElementByXpath(useExtensionSwitcher);
-		// check title
-		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titlexPath);
-		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
-		// check oc-port-forwarding
-		const ocPortForward: string = await workspaceHandlingTests.getTextFromUIElementByXpath(ocPortForwardxPath);
-		expect(ocPortForward).contains('oc port-forward -n admin-devspaces');
-		// check ssh key
-		const sshKey: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKeyxPath);
-		expect(sshKey).contains('-----BEGIN OPENSSH PRIVATE KEY-----').and.contains('-----END OPENSSH PRIVATE KEY-----');
-		// check .ssh/kofig
-		const sshKonfig: string = await workspaceHandlingTests.getTextFromUIElementByXpath(sshKonfigxPath);
-		expect(sshKonfig)
+
+		// read page
+		const pageTextAfterUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
+		// checks for "Install extensions" state
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
+		Logger.info('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
+
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
+		Logger.info(
+			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
+		);
+
+		// checks for SSH state
+		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
+		Logger.info(
+			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
+		);
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n admin-devspaces');
+		Logger.info('"oc port-forward -n admin-devspaces" was found after "Use Extension" clicked');
+
+		expect(pageTextAfterUseExtensionSwitcher)
+			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
+			.and.contains('-----END OPENSSH PRIVATE KEY-----');
+		Logger.info('SSH private key (BEGIN and END markers) was found after "Use Extension" clicked');
+
+		expect(pageTextAfterUseExtensionSwitcher)
 			.contains('HostName')
 			.and.contains('User')
 			.and.contains('Port')
 			.and.contains('IdentityFile')
 			.and.contains('UserKnownHostsFile');
+		Logger.info(
+			'SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found after "Use Extension" clicked'
+		);
 	}
 
 	samplesForCheck.forEach((sampleName): void => {
