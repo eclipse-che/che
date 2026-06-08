@@ -120,7 +120,7 @@ suite('Check Intellij IDE desktop Editor with all samples', function (): void {
 
 	editorsForCheck.forEach((editorXpath): void => {
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			// Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
 			gitRepoUrlsToCheckAirgap.forEach((gitUbiUrl): void => {
 				test(`Test start of Editor with xPath: ${editorXpath} and with ubi url: ${gitUbiUrl}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editorXpath, gitUbiUrl, true);
