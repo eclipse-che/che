@@ -27,7 +27,6 @@ suite('Check all editors with all samples', function (): void {
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
-	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
 	const titleXpath: string = '//div[@class="header-title"]';
 
@@ -35,43 +34,37 @@ suite('Check all editors with all samples', function (): void {
 	const pollingForCheckTitleVSCode: number = 100;
 	const pollingForCheckTitleIntelliJ: number = 500;
 
-	const allEditors: Array<{ xpath: string; name: string; type: 'vscode' | 'intellij' }> = [
-		{ xpath: vsCodeDesktopSshEditor, name: 'VSCode Desktop SSH', type: 'vscode' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-clion-server/latest"]', name: 'CLion', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-goland-server/latest"]', name: 'GoLand', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-idea-server/latest"]', name: 'IntelliJ IDEA', type: 'intellij' },
-		{
-			xpath: '//*[@id="editor-selector-card-che-incubator/che-phpstorm-server/latest"]',
-			name: 'PhpStorm',
-			type: 'intellij'
-		},
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-pycharm-server/latest"]', name: 'PyCharm', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-rider-server/latest"]', name: 'Rider', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-rubymine-server/latest"]', name: 'RubyMine', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-webstorm-server/latest"]', name: 'WebStorm', type: 'intellij' },
-		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-code-sshd-kiro/latest"]', name: 'Kiro', type: 'vscode' },
-		{
-			xpath: '//*[@id="editor-selector-card-che-incubator/jetbrains-sshd/latest"]',
-			name: 'JetBrains SSH',
-			type: 'intellij'
-		}
+	const allEditors: Array<{ xpath: string; name: string; type: 'vscode' | 'intellij'; environmentId: string }> = [
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]', name: 'VSCode Desktop SSH', type: 'vscode', environmentId: 'VSCODE_DESKTOP_SSH' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-clion-server/latest"]', name: 'CLion', type: 'intellij', environmentId: 'CLION' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-goland-server/latest"]', name: 'GoLand', type: 'intellij', environmentId: 'GOLAND' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-idea-server/latest"]', name: 'IntelliJ IDEA', type: 'intellij', environmentId: 'INTELLIJ_IDEA' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-phpstorm-server/latest"]', name: 'PhpStorm', type: 'intellij', environmentId: 'PHPSTORM' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-pycharm-server/latest"]', name: 'PyCharm', type: 'intellij', environmentId: 'PYCHARM' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-rider-server/latest"]', name: 'Rider', type: 'intellij', environmentId: 'RIDER' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-rubymine-server/latest"]', name: 'RubyMine', type: 'intellij', environmentId: 'RUBYMINE' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-webstorm-server/latest"]', name: 'WebStorm', type: 'intellij', environmentId: 'WEBSTORM' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/che-code-sshd-kiro/latest"]', name: 'Kiro', type: 'vscode', environmentId: 'KIRO' },
+		{ xpath: '//*[@id="editor-selector-card-che-incubator/jetbrains-sshd/latest"]', name: 'JetBrains SSH', type: 'intellij', environmentId: 'JETBRAINS_SSH' }
 	];
 
-	// filter editors based on environment variable
-	const selectedEditorsEnv: string = process.env.TS_SELECTED_EDITORS || 'All';
+	// filter editors based on environment variables
+	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
 	let editorsForCheck: Array<{ xpath: string; name: string; type: 'vscode' | 'intellij' }>;
 
-	if (selectedEditorsEnv === 'All') {
+	if (selectAllEditors) {
 		editorsForCheck = allEditors;
-		Logger.info('Running tests for all editors');
+		Logger.info('SELECT_ALL_EDITORS is true - running tests for all editors');
 	} else {
-		const selectedEditorNames: string[] = selectedEditorsEnv.split(',').map((name: string): string => name.trim());
-		editorsForCheck = allEditors.filter((editor): boolean => selectedEditorNames.includes(editor.name));
+		editorsForCheck = allEditors.filter((editor): boolean => {
+			const envValue: string | undefined = process.env[editor.environmentId];
+			return envValue === 'true';
+		});
 		Logger.info(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
 
 		if (editorsForCheck.length === 0) {
-			Logger.warn(`No editors matched the selection: ${selectedEditorsEnv}`);
-			Logger.warn(`Available editors: ${allEditors.map((e): string => e.name).join(', ')}`);
+			Logger.warn('No editors selected via environment variables');
+			Logger.warn(`Available environment variables: ${allEditors.map((e): string => e.environmentId).join(', ')}`);
 		}
 	}
 
