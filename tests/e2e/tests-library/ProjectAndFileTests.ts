@@ -223,4 +223,14 @@ export class ProjectAndFileTests {
 
 		throw new Error(`File "${fileName}" was not opened in the editor after ${maxAttempts} attempts`);
 	}
+
+	async expandProjectTreeItem(projectSection: ViewSection, projectName: string): Promise<void> {
+		Logger.debug(`${projectName}`);
+		const projectTreeItem: ViewItem | undefined = await projectSection.findItem(projectName, 2);
+		if (!projectTreeItem) {
+			throw new Error(`Project tree item "${projectName}" not found`);
+		}
+		await projectTreeItem.click();
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
+	}
 }

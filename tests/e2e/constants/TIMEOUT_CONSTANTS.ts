@@ -27,6 +27,7 @@ export const TIMEOUT_CONSTANTS: {
 	TS_SELENIUM_WAIT_FOR_URL: number;
 	TS_WAIT_LOADER_ABSENCE_TIMEOUT: number;
 	TS_WAIT_LOADER_PRESENCE_TIMEOUT: number;
+	TS_WAIT_BACKUP_STATUS_TIMEOUT: number;
 } = {
 	/**
 	 * default amount of tries, "5" by default.
@@ -88,9 +89,14 @@ export const TIMEOUT_CONSTANTS: {
 	TS_CLICK_DASHBOARD_ITEM_TIMEOUT: Number(process.env.TS_CLICK_DASHBOARD_ITEM_TIMEOUT) || 2_000,
 
 	/**
-	 * timeout for workspace stopped status, "30 000" by default
+	 * timeout for workspace stopped status, "60 000" by default
 	 */
 	TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT: Number(process.env.TS_DASHBOARD_WORKSPACE_STOP_TIMEOUT) || 60_000,
+
+	/**
+	 * timeout for waiting for backup status, "360 000" by default
+	 */
+	TS_WAIT_BACKUP_STATUS_TIMEOUT: Number(process.env.TS_WAIT_BACKUP_STATUS_TIMEOUT) || 360_000,
 
 	// -------------------------------------------- PROJECT TREE --------------------------------------------
 
@@ -102,7 +108,7 @@ export const TIMEOUT_CONSTANTS: {
 	// -------------------------------------------- EDITOR --------------------------------------------
 
 	/**
-	 * timeout for interactions with editor tab - wait, click, select, "8 000" by default.
+	 * timeout for interactions with editor tab - wait, click, select, "20 000" by default.
 	 */
 	TS_EDITOR_TAB_INTERACTION_TIMEOUT: Number(process.env.TS_OPEN_PROJECT_TREE_TIMEOUT) || 20_000,
 
