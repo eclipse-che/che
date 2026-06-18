@@ -101,16 +101,12 @@ suite('Check all editors with all samples', function (): void {
 	async function verifyVSCodeEditor(): Promise<void> {
 		Logger.debug();
 
-		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper
-			.getDriver()
-			.executeScript('return document.body.innerText;');
+		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
 
 		await clickOnElementByXpath(useExtensionSwitcher);
 
-		const pageTextAfterUseExtensionSwitcher: string = await driverHelper
-			.getDriver()
-			.executeScript('return document.body.innerText;');
-		
+		const pageTextAfterUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
 		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
 
