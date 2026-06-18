@@ -113,7 +113,7 @@ export const ALL_EDITORS: Map<string, EditorConfig> = new Map([
 		{
 			environmentId: 'JETBRAINS_SSH_EDITOR',
 			xpath: '//*[@id="editor-selector-card-che-incubator/jetbrains-sshd/latest"]',
-			name: 'JetBrains SSH',
+			name: 'JetBrains Toolbox App',
 			type: 'intellij'
 		}
 	]

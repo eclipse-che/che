@@ -98,6 +98,57 @@ suite('Check all editors with all samples', function (): void {
 		currentTabHandle = 'undefined';
 	}
 
+	async function verifyVSCodeEditor(): Promise<void> {
+		Logger.debug();
+
+		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper
+			.getDriver()
+			.executeScript('return document.body.innerText;');
+
+		await clickOnElementByXpath(useExtensionSwitcher);
+
+		const pageTextAfterUseExtensionSwitcher: string = await driverHelper
+			.getDriver()
+			.executeScript('return document.body.innerText;');
+		
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
+		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
+
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
+		Logger.debug(
+			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
+		);
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
+		Logger.debug(
+			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
+		);
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n admin-devspaces');
+		Logger.debug('"oc port-forward -n admin-devspaces" was found');
+
+		expect(pageTextAfterUseExtensionSwitcher)
+			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
+			.and.contains('-----END OPENSSH PRIVATE KEY-----');
+		Logger.debug('SSH private key (BEGIN and END markers) was found');
+
+		expect(pageTextAfterUseExtensionSwitcher)
+			.contains('HostName')
+			.and.contains('User')
+			.and.contains('Port')
+			.and.contains('IdentityFile')
+			.and.contains('UserKnownHostsFile');
+		Logger.debug('SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found');
+	}
+
+	async function verifyIntelliJEditor(titleXpath: string): Promise<void> {
+		Logger.debug();
+
+		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
+		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+		Logger.debug('Workspace title verified for IntelliJ editor: ' + headerText);
+	}
+
 	async function testWorkspaceStartup(
 		editorXpath: string,
 		editorType: 'vscode' | 'intellij',
@@ -128,54 +179,9 @@ suite('Check all editors with all samples', function (): void {
 		}
 
 		if (editorType === 'vscode') {
-			// read page
-			const pageTextBeforeUseExtensionSwitcher: string = await driverHelper
-				.getDriver()
-				.executeScript('return document.body.innerText;');
-
-			// click on "Use Extension" switcher
-			await clickOnElementByXpath(useExtensionSwitcher);
-
-			// read page
-			const pageTextAfterUseExtensionSwitcher: string = await driverHelper
-				.getDriver()
-				.executeScript('return document.body.innerText;');
-
-			// checks for "Install extensions" state
-			expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
-			Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
-
-			expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-			Logger.debug(
-				'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
-			);
-
-			// checks for SSH state
-			expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-			Logger.debug(
-				'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
-			);
-
-			expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n admin-devspaces');
-			Logger.debug('"oc port-forward -n admin-devspaces" was found');
-
-			expect(pageTextAfterUseExtensionSwitcher)
-				.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
-				.and.contains('-----END OPENSSH PRIVATE KEY-----');
-			Logger.debug('SSH private key (BEGIN and END markers) was found');
-
-			expect(pageTextAfterUseExtensionSwitcher)
-				.contains('HostName')
-				.and.contains('User')
-				.and.contains('Port')
-				.and.contains('IdentityFile')
-				.and.contains('UserKnownHostsFile');
-			Logger.debug('SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found');
+			await verifyVSCodeEditor();
 		} else {
-			// check title for IntelliJ editors
-			const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
-			expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
-			Logger.debug('Workspace title verified for IntelliJ editor: ' + headerText);
+			await verifyIntelliJEditor(titleXpath);
 		}
 	}
 
