@@ -28,7 +28,8 @@ suite('Check all editors with all samples', function (): void {
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const titleXpath: string = '//div[@class="header-title"]';
+	const intellijTitleXpath: string = '/html/body/h1';
+	const vsCodeTitleXpath: string = '//div[@class="header-title"]';
 
 	let currentTabHandle: string = 'undefined';
 	const pollingForCheckTitleVSCode: number = 100;
@@ -84,12 +85,14 @@ suite('Check all editors with all samples', function (): void {
 
 	const gitRepoUrlsToCheck: string[] = [
 		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
-		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
+		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal',
+		'https://github.com/crw-qe/ubi10-based-sample-public/tree/main'
 	];
 
 	const gitRepoUrlsToCheckAirgap: string[] = [
 		'https://gh.crw-qe.com/test-automation-only/ubi8/tree/ubi8-latest',
-		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
+		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal',
+		'https://gh.crw-qe.com/test-automation-only/ubi10-based-sample-public/tree/main'
 	];
 
 	suiteSetup('Login into Che', async function (): Promise<void> {
@@ -120,6 +123,7 @@ suite('Check all editors with all samples', function (): void {
 		await dashboard.clickCreateWorkspaceButton();
 
 		const pollingForCheckTitle: number = editorType === 'vscode' ? pollingForCheckTitleVSCode : pollingForCheckTitleIntelliJ;
+		const titleXpath: string = editorType === 'vscode' ? vsCodeTitleXpath : intellijTitleXpath;
 
 		if (isUrl) {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
