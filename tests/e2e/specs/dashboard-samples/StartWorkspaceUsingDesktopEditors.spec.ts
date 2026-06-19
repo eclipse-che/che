@@ -14,25 +14,46 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
+import { EditorConfig, ALL_EDITORS } from '../../constants/EDITOR_CONSTANTS';
 
-suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): void {
-	this.timeout(6000000);
+suite('Check all editors with all samples', function (): void {
+	this.timeout(24000000);
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
-	const vsCodeDesktopSshEditor: string = '//*[@id="editor-selector-card-che-incubator/che-code-sshd/latest"]';
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const titlexPath: string = '//div[@class="header-title"]';
+	const intellijTitleXpath: string = '/html/body/h1';
+	const vsCodeTitleXpath: string = '//div[@class="header-title"]';
 
 	let currentTabHandle: string = 'undefined';
-	const pollingForCheckTitle: number = 100;
+	const pollingForCheckTitleVSCode: number = 100;
+	const pollingForCheckTitleIntelliJ: number = 500;
+
+	// filter editors based on environment variables
+	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
+	let editorsForCheck: EditorConfig[];
+
+	if (selectAllEditors) {
+		editorsForCheck = Array.from(ALL_EDITORS.values());
+		Logger.info('SELECT_ALL_EDITORS is true - running tests for all editors');
+	} else {
+		editorsForCheck = Array.from(ALL_EDITORS.values()).filter((editor): boolean => {
+			const envValue: string | undefined = process.env[editor.environmentId];
+			return envValue === 'true';
+		});
+		Logger.info(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
+
+		if (editorsForCheck.length === 0) {
+			assert.fail('No editors selected via environment variables');
+		}
+	}
 
 	const samplesForCheck: string[] = [
 		'Empty Workspace',
@@ -50,12 +71,14 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 
 	const gitRepoUrlsToCheck: string[] = [
 		'https://github.com/crw-qe/quarkus-api-example-public/tree/ubi8-latest',
-		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal'
+		'https://github.com/crw-qe/ubi9-based-sample-public/tree/ubi9-minimal',
+		'https://github.com/crw-qe/ubi10-based-sample-public/tree/main'
 	];
 
 	const gitRepoUrlsToCheckAirgap: string[] = [
 		'https://gh.crw-qe.com/test-automation-only/ubi8/tree/ubi8-latest',
-		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal'
+		'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public/tree/ubi9-minimal',
+		'https://gh.crw-qe.com/test-automation-only/ubi10-based-sample-public/tree/main'
 	];
 
 	suiteSetup('Login into Che', async function (): Promise<void> {
@@ -75,58 +98,35 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 		currentTabHandle = 'undefined';
 	}
 
-	async function testWorkspaceStartup(sampleNameOrUrl: string, isUrl: boolean): Promise<void> {
-		await dashboard.openDashboard();
-		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
-		await dashboard.clickCreateWorkspaceButton();
+	async function verifyVSCodeEditor(): Promise<void> {
+		Logger.debug();
 
-		if (isUrl) {
-			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
-				vsCodeDesktopSshEditor,
-				sampleNameOrUrl,
-				titlexPath,
-				pollingForCheckTitle
-			);
-		} else {
-			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
-				vsCodeDesktopSshEditor,
-				sampleNameOrUrl,
-				titlexPath,
-				pollingForCheckTitle
-			);
-		}
-
-		// read page
 		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
 
-		// click on "Use Extension" switcher
 		await clickOnElementByXpath(useExtensionSwitcher);
 
-		// read page
 		const pageTextAfterUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
 
-		// checks for "Install extensions" state
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
-		Logger.info('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
+		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
 
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.info(
+		Logger.debug(
 			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
 		);
 
-		// checks for SSH state
 		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.info(
+		Logger.debug(
 			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
 		);
 
 		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n admin-devspaces');
-		Logger.info('"oc port-forward -n admin-devspaces" was found after "Use Extension" clicked');
+		Logger.debug('"oc port-forward -n admin-devspaces" was found');
 
 		expect(pageTextAfterUseExtensionSwitcher)
 			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
 			.and.contains('-----END OPENSSH PRIVATE KEY-----');
-		Logger.info('SSH private key (BEGIN and END markers) was found after "Use Extension" clicked');
+		Logger.debug('SSH private key (BEGIN and END markers) was found');
 
 		expect(pageTextAfterUseExtensionSwitcher)
 			.contains('HostName')
@@ -134,31 +134,77 @@ suite('Check Visual Studio Code (desktop) (SSH) with all samples', function (): 
 			.and.contains('Port')
 			.and.contains('IdentityFile')
 			.and.contains('UserKnownHostsFile');
-		Logger.info(
-			'SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found after "Use Extension" clicked'
-		);
+		Logger.debug('SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found');
 	}
 
-	samplesForCheck.forEach((sampleName): void => {
-		test('Test start of VSCode (desktop) (SSH) with default Samples', async function (): Promise<void> {
-			await testWorkspaceStartup(sampleName, false);
+	async function verifyIntelliJEditor(titleXpath: string): Promise<void> {
+		Logger.debug();
+
+		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
+		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+		Logger.debug('Workspace title verified for IntelliJ editor: ' + headerText);
+	}
+
+	async function testWorkspaceStartup(
+		editorXpath: string,
+		editorType: 'vscode' | 'intellij',
+		sampleNameOrUrl: string,
+		isUrl: boolean
+	): Promise<void> {
+		await dashboard.openDashboard();
+		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
+		await dashboard.clickCreateWorkspaceButton();
+
+		const pollingForCheckTitle: number = editorType === 'vscode' ? pollingForCheckTitleVSCode : pollingForCheckTitleIntelliJ;
+		const titleXpath: string = editorType === 'vscode' ? vsCodeTitleXpath : intellijTitleXpath;
+
+		if (isUrl) {
+			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
+				editorXpath,
+				sampleNameOrUrl,
+				titleXpath,
+				pollingForCheckTitle
+			);
+		} else {
+			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(
+				editorXpath,
+				sampleNameOrUrl,
+				titleXpath,
+				pollingForCheckTitle
+			);
+		}
+
+		if (editorType === 'vscode') {
+			await verifyVSCodeEditor();
+		} else {
+			await verifyIntelliJEditor(titleXpath);
+		}
+	}
+
+	editorsForCheck.forEach((editor): void => {
+		samplesForCheck.forEach((sampleName): void => {
+			test(`Test start of ${editor.name} with sample: ${sampleName}`, async function (): Promise<void> {
+				await testWorkspaceStartup(editor.xpath, editor.type, sampleName, false);
+			});
 		});
 	});
 
-	if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-		Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
-		gitRepoUrlsToCheckAirgap.forEach((url): void => {
-			test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
-				await testWorkspaceStartup(url, true);
+	editorsForCheck.forEach((editor): void => {
+		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
+			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+			gitRepoUrlsToCheckAirgap.forEach((url): void => {
+				test(`Test start of ${editor.name} with ubi url: ${url}`, async function (): Promise<void> {
+					await testWorkspaceStartup(editor.xpath, editor.type, url, true);
+				});
 			});
-		});
-	} else {
-		gitRepoUrlsToCheck.forEach((url): void => {
-			test('Test start of VSCode (desktop) (SSH) with ubi', async function (): Promise<void> {
-				await testWorkspaceStartup(url, true);
+		} else {
+			gitRepoUrlsToCheck.forEach((url): void => {
+				test(`Test start of ${editor.name} with ubi url: ${url}`, async function (): Promise<void> {
+					await testWorkspaceStartup(editor.xpath, editor.type, url, true);
+				});
 			});
-		});
-	}
+		}
+	});
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
 		Logger.info('Delete DevWorkspace. After each test.');
