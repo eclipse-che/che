@@ -29,6 +29,7 @@ export * from './pageobjects/dashboard/UserPreferences';
 export * from './pageobjects/dashboard/workspace-details/WorkspaceDetails';
 export * from './pageobjects/dashboard/Workspaces';
 export * from './pageobjects/git-providers/OauthPage';
+export * from './pageobjects/ide/AiCodeSignInDialog';
 export * from './pageobjects/ide/CheCodeLocatorLoader';
 export * from './pageobjects/ide/CommandPalette';
 export * from './pageobjects/ide/ExplorerView';

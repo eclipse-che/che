@@ -59,7 +59,8 @@ const CLASSES: any = {
 	ExplorerView: 'ExplorerView',
 	NotificationHandler: 'NotificationHandler',
 	SourceControlView: 'SourceControlView',
-	GitHubExtensionDialog: 'GitHubExtensionDialog'
+	GitHubExtensionDialog: 'GitHubExtensionDialog',
+	AiCodeSignInDialog: 'AiCodeSignInDialog'
 };
 
 const EXTERNAL_CLASSES: any = {
