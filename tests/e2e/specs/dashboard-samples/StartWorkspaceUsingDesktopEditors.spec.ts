@@ -191,7 +191,7 @@ suite('Check all editors with all samples', function (): void {
 
 	editorsForCheck.forEach((editor): void => {
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			Logger.debug('Test cluster is disconnected. Using url for airgap cluster.');
+			// Logger.debug('Test cluster is disconnected. Using url for airgap cluster.');
 			gitRepoUrlsToCheckAirgap.forEach((url): void => {
 				test(`Test start of ${editor.name} with ubi url: ${url}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editor.xpath, editor.type, url, true);
