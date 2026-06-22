@@ -42,13 +42,13 @@ suite('Check all editors with all samples', function (): void {
 
 	if (selectAllEditors) {
 		editorsForCheck = Array.from(ALL_EDITORS.values());
-		Logger.info('SELECT_ALL_EDITORS is true - running tests for all editors');
+		Logger.debug('SELECT_ALL_EDITORS is true - running tests for all editors');
 	} else {
 		editorsForCheck = Array.from(ALL_EDITORS.values()).filter((editor): boolean => {
 			const envValue: string | undefined = process.env[editor.environmentId];
 			return envValue === 'true';
 		});
-		Logger.info(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
+		Logger.debug(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
 
 		if (editorsForCheck.length === 0) {
 			assert.fail('No editors selected via environment variables');
@@ -191,7 +191,7 @@ suite('Check all editors with all samples', function (): void {
 
 	editorsForCheck.forEach((editor): void => {
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			Logger.info('Test cluster is disconnected. Using url for airgap cluster.');
+			Logger.debug('Test cluster is disconnected. Using url for airgap cluster.');
 			gitRepoUrlsToCheckAirgap.forEach((url): void => {
 				test(`Test start of ${editor.name} with ubi url: ${url}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editor.xpath, editor.type, url, true);
@@ -207,7 +207,7 @@ suite('Check all editors with all samples', function (): void {
 	});
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
-		Logger.info('Delete DevWorkspace. After each test.');
+		Logger.debug('Delete DevWorkspace. After each test.');
 		if (currentTabHandle !== 'undefined') {
 			await browserTabsUtil.switchToWindow(currentTabHandle);
 		}
@@ -216,7 +216,7 @@ suite('Check all editors with all samples', function (): void {
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
 		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
-			Logger.info('Workspace name is defined. Deleting workspace...');
+			Logger.debug('Workspace name is defined. Deleting workspace...');
 			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
 		}
 
