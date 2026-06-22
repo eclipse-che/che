@@ -42,13 +42,13 @@ suite('Check all editors with all samples', function (): void {
 
 	if (selectAllEditors) {
 		editorsForCheck = Array.from(ALL_EDITORS.values());
-		Logger.debug('SELECT_ALL_EDITORS is true - running tests for all editors');
+		// Logger.debug('SELECT_ALL_EDITORS is true - running tests for all editors');
 	} else {
 		editorsForCheck = Array.from(ALL_EDITORS.values()).filter((editor): boolean => {
 			const envValue: string | undefined = process.env[editor.environmentId];
 			return envValue === 'true';
 		});
-		Logger.debug(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
+		// Logger.debug(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
 
 		if (editorsForCheck.length === 0) {
 			assert.fail('No editors selected via environment variables');
