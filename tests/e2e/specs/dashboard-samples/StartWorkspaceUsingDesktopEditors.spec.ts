@@ -42,13 +42,11 @@ suite('Check all editors with all samples', function (): void {
 
 	if (selectAllEditors) {
 		editorsForCheck = Array.from(ALL_EDITORS.values());
-		// Logger.debug('SELECT_ALL_EDITORS is true - running tests for all editors');
 	} else {
 		editorsForCheck = Array.from(ALL_EDITORS.values()).filter((editor): boolean => {
 			const envValue: string | undefined = process.env[editor.environmentId];
 			return envValue === 'true';
 		});
-		// Logger.debug(`Running tests for selected editors: ${editorsForCheck.map((e): string => e.name).join(', ')}`);
 
 		if (editorsForCheck.length === 0) {
 			assert.fail('No editors selected via environment variables');
@@ -191,7 +189,6 @@ suite('Check all editors with all samples', function (): void {
 
 	editorsForCheck.forEach((editor): void => {
 		if (BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()) {
-			// Logger.debug('Test cluster is disconnected. Using url for airgap cluster.');
 			gitRepoUrlsToCheckAirgap.forEach((url): void => {
 				test(`Test start of ${editor.name} with ubi url: ${url}`, async function (): Promise<void> {
 					await testWorkspaceStartup(editor.xpath, editor.type, url, true);
