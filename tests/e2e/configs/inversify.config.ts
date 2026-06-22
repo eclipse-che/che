@@ -62,6 +62,7 @@ import { ExplorerView } from '../pageobjects/ide/ExplorerView';
 import { NotificationHandler } from '../pageobjects/ide/NotificationHandler';
 import { SourceControlView } from '../pageobjects/ide/SourceControlView';
 import { GitHubExtensionDialog } from '../pageobjects/ide/GitHubExtensionDialog';
+import { AiCodeSignInDialog } from '../pageobjects/ide/AiCodeSignInDialog';
 
 const e2eContainer: Container = new Container({ defaultScope: 'Transient', skipBaseClassChecks: true });
 
@@ -109,6 +110,7 @@ e2eContainer.bind<ExplorerView>(CLASSES.ExplorerView).to(ExplorerView);
 e2eContainer.bind<NotificationHandler>(CLASSES.NotificationHandler).to(NotificationHandler);
 e2eContainer.bind<SourceControlView>(CLASSES.SourceControlView).to(SourceControlView);
 e2eContainer.bind<GitHubExtensionDialog>(CLASSES.GitHubExtensionDialog).to(GitHubExtensionDialog);
+e2eContainer.bind<AiCodeSignInDialog>(CLASSES.AiCodeSignInDialog).to(AiCodeSignInDialog);
 
 if (BASE_TEST_CONSTANTS.TS_PLATFORM === Platform.OPENSHIFT) {
 	if (OAUTH_CONSTANTS.TS_SELENIUM_VALUE_OPENSHIFT_OAUTH) {

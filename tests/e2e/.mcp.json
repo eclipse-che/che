@@ -1,0 +1,10 @@
+{
+	"mcpServers": {
+		"playwright": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["@playwright/mcp@latest", "--ignore-https-errors", "--browser-args=--ignore-certificate-errors"],
+			"env": {}
+		}
+	}
+}

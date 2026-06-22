@@ -7,7 +7,10 @@
 			"Bash(node:*)",
 			"Bash(npm run lint:*)",
 			"Bash(npm run tsc:*)",
-			"Bash(export:*)"
+			"Bash(export:*)",
+			"Bash(gdbus call *)",
+			"Bash(python3 -c ' *)"
 		]
-	}
+	},
+	"enabledMcpjsonServers": ["playwright"]
 }

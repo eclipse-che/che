@@ -18,6 +18,7 @@ import { CheCodeLocatorLoader } from '../pageobjects/ide/CheCodeLocatorLoader';
 import { By, EditorView, SideBarView, ViewContent, ViewItem, ViewSection, Workbench } from 'monaco-page-objects';
 import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests';
 import { RestrictedModeButton } from '../pageobjects/ide/RestrictedModeButton';
+import { AiCodeSignInDialog } from '../pageobjects/ide/AiCodeSignInDialog';
 
 @injectable()
 export class ProjectAndFileTests {
@@ -32,7 +33,9 @@ export class ProjectAndFileTests {
 		@inject(CLASSES.WorkspaceHandlingTests)
 		private readonly workspaceHandlingTests: WorkspaceHandlingTests,
 		@inject(CLASSES.RestrictedModeButton)
-		private readonly restrictedModeButton: RestrictedModeButton
+		private readonly restrictedModeButton: RestrictedModeButton,
+		@inject(CLASSES.AiCodeSignInDialog)
+		private readonly aiCodeSignInDialog: AiCodeSignInDialog
 	) {}
 
 	async waitWorkspaceReadinessForCheCodeEditor(): Promise<void> {
@@ -45,6 +48,7 @@ export class ProjectAndFileTests {
 			);
 			const end: number = new Date().getTime();
 			Logger.debug(`editor was opened in ${end - start} seconds.`);
+			await this.dismissAiCodeSignInDialog();
 		} catch (err) {
 			Logger.error(`waiting for workspace readiness failed: ${err}`);
 
@@ -113,6 +117,21 @@ export class ProjectAndFileTests {
 			);
 		} catch (e) {
 			Logger.info('"Do you trust the publisher?" dialog box was not shown');
+		}
+	}
+
+	/**
+	 * dismiss 'Sign in to continue with AI-powered development' dialog, when it appears
+	 */
+	async dismissAiCodeSignInDialog(): Promise<void> {
+		Logger.debug();
+
+		try {
+			if (await this.aiCodeSignInDialog.isDialogVisible()) {
+				await this.aiCodeSignInDialog.closeDialog();
+			}
+		} catch (e) {
+			Logger.info('"Sign in to continue with AI-powered development" dialog was not shown');
 		}
 	}
 
