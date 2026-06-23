@@ -116,9 +116,7 @@ export class OcpMainPage {
 
 	private getRoleLocator(role: string): By {
 		if (BASE_TEST_CONSTANTS.OCP_VERSION && satisfies(BASE_TEST_CONSTANTS.OCP_VERSION, '>=4.18')) {
-			return By.xpath(
-				`//button[@role='option'][.//h2[@data-test-id='perspective-switcher-menu-option' and contains(text(), '${role}')]]`
-			);
+			return By.xpath(`//button[@role='option'][.//h2[contains(text(), '${role}')]]`);
 		}
 		return By.xpath(`//a//*[text()="${role}"]`);
 	}
