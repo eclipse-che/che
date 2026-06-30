@@ -28,6 +28,11 @@ on:
     - 'tests/e2e/**'
     - '.github/workflows/typescript-publish.yml'
 
+permissions:
+  id-token: write  # Required for publishing to npmjs
+  contents: write  # Required for performing release/publishing to npmjs
+  pull-requests: write # Required for post-release PRs
+
 jobs:
   publish:
     runs-on: ubuntu-22.04
