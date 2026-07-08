@@ -57,7 +57,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 	let scmContextMenu: ContextMenu;
 	let viewsActionsButton: boolean;
 	// test specific data
-	const timeToRefresh: number = 1500;
+	const timeToRefresh: number = 2500;
 	const changesToCommit: string = 'Commit ' + new Date().getTime().toString();
 	const fileToChange: string = 'Date.txt';
 	const refreshButtonLabel: string = 'Refresh';
@@ -139,6 +139,7 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 			await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
 			await driverHelper.wait(1000);
 			Logger.debug(`Entering text: "${changesToCommit}"`);
+			await driverHelper.wait(2000);
 			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();
 		});
 
