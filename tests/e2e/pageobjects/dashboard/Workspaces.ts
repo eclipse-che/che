@@ -36,7 +36,10 @@ export class Workspaces {
 	private static readonly BACKUP_IMAGE: By = By.css('input[aria-label="Copyable input"]');
 	private static readonly CREATE_FROM_BACKUP_BUTTON: By = By.xpath('//span[text()="Create from Backup"]');
 	private static readonly RESTORE_WORKSPACE_BUTTON: By = By.xpath('//span[text()="Restore Workspace"]');
-	private static readonly RESTORE_CONFIRM__BUTTON: By = By.xpath('//span[text()="Restore"]');
+	private static readonly RESTORE_CONFIRM_BUTTON: By = By.xpath('//span[text()="Restore"]');
+	private static readonly EXTERNAL_REGISTRY_MODE_BUTTON: By = By.xpath('//span[text()="External registry"]');
+	private static readonly BACKUP_IMAGE_URL_INPUT: By = By.css('input[aria-label="Backup image URL"]');
+	private static readonly WORKSPACE_NAME_INPUT: By = By.css('input[aria-label="Workspace name"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -236,7 +239,7 @@ export class Workspaces {
 		await this.driverHelper.waitAndClick(Workspaces.BACKUPS_BUTTON, timeout);
 	}
 
-	async createWorkspaceFromBackupButton(
+	async clickCreateFromBackupButton(
 		workspaceName: string,
 		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
 	): Promise<void> {
@@ -250,7 +253,36 @@ export class Workspaces {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(Workspaces.RESTORE_WORKSPACE_BUTTON);
-		await this.driverHelper.waitAndClick(Workspaces.RESTORE_CONFIRM__BUTTON);
+		await this.driverHelper.waitAndClick(Workspaces.RESTORE_CONFIRM_BUTTON);
+	}
+
+	async restoreWorkspaceFromExternalRegistry(backupImageUrl: string, workspaceName: string): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(Workspaces.EXTERNAL_REGISTRY_MODE_BUTTON);
+		await this.setBackupImageUrlValue(backupImageUrl);
+		await this.setWorkspaceNameValue(workspaceName);
+		await this.driverHelper.waitAndClick(Workspaces.RESTORE_WORKSPACE_BUTTON);
+	}
+
+	async getBackupImageUrlValue(): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetValue(Workspaces.BACKUP_IMAGE, TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
+	}
+
+	async setBackupImageUrlValue(backupImageUrl: string): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.clear(Workspaces.BACKUP_IMAGE_URL_INPUT);
+		await this.driverHelper.type(Workspaces.BACKUP_IMAGE_URL_INPUT, backupImageUrl);
+	}
+
+	async setWorkspaceNameValue(workspaceName: string): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.clear(Workspaces.WORKSPACE_NAME_INPUT);
+		await this.driverHelper.type(Workspaces.WORKSPACE_NAME_INPUT, workspaceName);
 	}
 
 	private getWorkspaceListItemLocator(workspaceName: string): By {

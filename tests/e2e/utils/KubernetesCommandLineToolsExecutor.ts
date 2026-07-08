@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2023-2025 Red Hat, Inc.
+ * copyright (c) 2023-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -78,21 +78,68 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 
 	getContainerName(): string {
 		Logger.debug(`${this.kubernetesCommandLineTool} - get container name.`);
+		Logger.debug(`Getting container name for pod: '${KubernetesCommandLineToolsExecutor.pod}' in namespace: ${this.namespace}`);
 
 		const output: ShellString = this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} get ${KubernetesCommandLineToolsExecutor.pod} -o jsonpath='{.spec.containers[*].name}' -n ${this.namespace}`
+			`${this.kubernetesCommandLineTool} get pod ${KubernetesCommandLineToolsExecutor.pod} -o jsonpath='{.spec.containers[*].name}' -n ${this.namespace}`
 		);
 		echo('\n');
-		return output.stderr ? output.stderr : output.stdout;
+		const containerName: string = output.stderr ? output.stderr : output.stdout;
+		Logger.debug(`Found container name: '${containerName}'`);
+		return containerName;
 	}
 
 	getWorkspacePodName(): string {
 		Logger.debug(`${this.kubernetesCommandLineTool} - get workspace pod name.`);
+		Logger.debug(
+			`Looking for pod with label: controller.devfile.io/devworkspace_name=${this.workspaceName} in namespace: ${this.namespace}`
+		);
 
 		const output: ShellString = this.shellExecutor.executeCommand(
 			`${this.kubernetesCommandLineTool} get pod -l controller.devfile.io/devworkspace_name=${this.workspaceName} -n ${this.namespace} -o name`
 		);
-		return output.stderr ? output.stderr : output.stdout.replace('\n', '');
+		let podName: string = output.stderr ? output.stderr : output.stdout.replace('\n', '');
+		Logger.debug(`Found pod name (before removing prefix): '${podName}'`);
+
+		// if pod not found, try to find by workspace name prefix (for restored workspaces with suffix)
+		if (!podName || podName.trim() === '') {
+			Logger.warn(`No pod found with exact label controller.devfile.io/devworkspace_name=${this.workspaceName}`);
+			Logger.debug(`Trying to find pod with workspace name starting with: ${this.workspaceName}`);
+
+			// get all pods and filter by label prefix
+			const allPodsOutput: ShellString = this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} get pods -n ${this.namespace} -o jsonpath='{range .items[*]}{.metadata.name}{"\\t"}{.metadata.labels.controller\\.devfile\\.io/devworkspace_name}{"\\n"}{end}'`
+			);
+
+			if (allPodsOutput.stdout && this.workspaceName) {
+				const lines: string[] = allPodsOutput.stdout.split('\n').filter((line: string): boolean => line.trim() !== '');
+				for (const line of lines) {
+					const [name, label] = line.split('\t');
+					if (label && this.workspaceName && label.startsWith(this.workspaceName)) {
+						Logger.info(`Found pod by prefix match: ${name} with label ${label}`);
+						podName = name;
+						// update workspace name to the actual one with suffix
+						this._workspaceName = label;
+						Logger.info(`Updated workspace name to: ${this._workspaceName}`);
+						break;
+					}
+				}
+			}
+
+			// if still not found, list all pods for debugging
+			if (!podName || podName.trim() === '') {
+				Logger.warn('Listing all pods in namespace for debugging:');
+				const debugPods: ShellString = this.shellExecutor.executeCommand(
+					`${this.kubernetesCommandLineTool} get pods -n ${this.namespace} --show-labels`
+				);
+				Logger.warn(`All pods:\n${debugPods.stdout}`);
+			}
+		}
+
+		// remove 'pod/' prefix if present (oc get -o name returns 'pod/podname')
+		const cleanPodName: string = podName.replace(/^pod\//, '');
+		Logger.debug(`Clean pod name (after removing prefix): '${cleanPodName}'`);
+		return cleanPodName;
 	}
 
 	deleteDevWorkspace(devfileName?: string): void {
