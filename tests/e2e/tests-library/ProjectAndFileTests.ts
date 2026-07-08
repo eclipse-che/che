@@ -92,6 +92,7 @@ export class ProjectAndFileTests {
 					(this.cheCodeLocatorLoader.webCheCodeLocators.Workbench as any).workspaceTrustButton,
 					TIMEOUT_CONSTANTS.TS_DIALOG_WINDOW_DEFAULT_TIMEOUT
 				);
+				await this.restrictedModeButton.closeRestrictedModeWindow();
 			} catch (e) {
 				Logger.info('Restricted Mode button or Trusted Workspace box was not shown');
 			}

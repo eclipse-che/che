@@ -17,6 +17,7 @@ import { Logger } from '../../utils/Logger';
 @injectable()
 export class RestrictedModeButton {
 	private static readonly RESTRICTED_MODE_BUTTON: By = By.id('status.workspaceTrust');
+	private static readonly CLOSE_RESTRICTED_MODE_WINDOW: By = By.css('a[aria-label="Close Modal Editor (Escape)"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -27,6 +28,12 @@ export class RestrictedModeButton {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(RestrictedModeButton.RESTRICTED_MODE_BUTTON);
+	}
+
+	async closeRestrictedModeWindow(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(RestrictedModeButton.CLOSE_RESTRICTED_MODE_WINDOW);
 	}
 
 	async isRestrictedModeButtonDisappearance(): Promise<void> {
