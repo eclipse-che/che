@@ -30,8 +30,13 @@ export class ApiUrlResolver {
 		return `${await this.getWorkspacesApiUrl()}/${actualWorkspaceName}`;
 	}
 
+	async getWorkspacesApiUrl(): Promise<string> {
+		const namespace: string = await this.obtainUserNamespace();
+		return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
+	}
+
 	/**
-	 * Resolves the actual DevWorkspace name from the API.
+	 * resolves the actual DevWorkspace name from the API.
 	 * If the exact workspace name exists, returns it as is.
 	 * If not found, searches for a workspace whose name matches the pattern: workspaceName + '-' + random suffix
 	 * (to handle cases where DevWorkspace has a random suffix like '-4fnq' after backup/restore).
@@ -43,7 +48,7 @@ export class ApiUrlResolver {
 		Logger.debug(`Resolving workspace name: ${workspaceName}`);
 
 		try {
-			// First, try to get the workspace directly by the provided name
+			// first, try to get the workspace directly by the provided name
 			const directUrl: string = `${await this.getWorkspacesApiUrl()}/${workspaceName}`;
 			const directResponse: AxiosResponse = await this.processRequestHandler.get(directUrl);
 			if (directResponse.status === 200) {
@@ -51,27 +56,25 @@ export class ApiUrlResolver {
 				return workspaceName;
 			}
 		} catch (error) {
-			// Workspace not found by exact name, will search by prefix with suffix pattern
+			// workspace not found by exact name, will search by prefix with suffix pattern
 			Logger.debug(`Exact match not found for ${workspaceName}, searching by prefix with suffix`);
 		}
 
-		// If exact match not found, get all workspaces and search by prefix + dash + suffix pattern
+		// if exact match not found, get all workspaces and search by prefix + dash + suffix pattern
 		const allWorkspacesResponse: AxiosResponse = await this.processRequestHandler.get(await this.getWorkspacesApiUrl());
 		if (allWorkspacesResponse.status !== 200) {
-			throw new Error(
-				`Cannot get workspaces list. Code: ${allWorkspacesResponse.status} Data: ${allWorkspacesResponse.data}`
-			);
+			throw new Error(`Cannot get workspaces list. Code: ${allWorkspacesResponse.status} Data: ${allWorkspacesResponse.data}`);
 		}
 
 		const workspaces: Array<{ metadata: { name: string } }> = allWorkspacesResponse.data.items || [];
-		// Look for workspace with pattern: workspaceName + '-' + suffix (e.g., 'test-workspace-2-4fnq')
-		// This ensures we don't match 'test-workspace-20' when looking for 'test-workspace-2'
-		const matchingWorkspaces = workspaces.filter((ws) => {
-			const dwName = ws.metadata.name;
-			// Check if name starts with workspaceName followed by a dash
+		// look for workspace with pattern: workspaceName + '-' + suffix (e.g., 'test-workspace-2-4fnq')
+		// this ensures we don't match 'test-workspace-20' when looking for 'test-workspace-2'
+		const matchingWorkspaces: Array<{ metadata: { name: string } }> = workspaces.filter((ws): boolean => {
+			const dwName: string = ws.metadata.name;
+			// check if name starts with workspaceName followed by a dash
 			if (dwName.startsWith(workspaceName + '-')) {
-				// Verify that what follows the dash looks like a random suffix (lowercase letters/numbers)
-				const suffix = dwName.substring(workspaceName.length + 1);
+				// verify that what follows the dash looks like a random suffix (lowercase letters/numbers)
+				const suffix: string = dwName.substring(workspaceName.length + 1);
 				return suffix.length > 0 && /^[a-z0-9]+$/.test(suffix);
 			}
 			return false;
@@ -83,18 +86,13 @@ export class ApiUrlResolver {
 		}
 
 		if (matchingWorkspaces.length > 1) {
-			const names = matchingWorkspaces.map((ws) => ws.metadata.name).join(', ');
+			const names: string = matchingWorkspaces.map((ws): string => ws.metadata.name).join(', ');
 			throw new Error(
 				`Multiple workspaces found matching '${workspaceName}': ${names}. Please use exact DevWorkspace name or delete duplicates.`
 			);
 		}
 
 		throw new Error(`Workspace not found: ${workspaceName} (tried exact match and prefix search)`);
-	}
-
-	async getWorkspacesApiUrl(): Promise<string> {
-		const namespace: string = await this.obtainUserNamespace();
-		return `${ApiUrlResolver.DASHBOARD_API_URL}/${namespace}/devworkspaces`;
 	}
 
 	private async obtainUserNamespace(): Promise<string> {
