@@ -134,6 +134,7 @@ oc logs test-hello-pod
 			await projectAndFileTests.getProjectTreeItem(projectSection, 'Dockerfile.x86_64'),
 			'Dockerfile not found in the project tree'
 		).not.undefined;
+		await projectAndFileTests.performTrustDialogs();
 	});
 
 	test('Build and push container image from workspace', function (): void {
