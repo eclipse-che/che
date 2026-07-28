@@ -38,6 +38,7 @@ suite('Check all editors with all samples', function (): void {
 
 	// filter editors based on environment variables
 	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
+	const actualUser: string = process.env.TS_SELENIUM_OCP_USERNAME || '';
 	let editorsForCheck: EditorConfig[];
 
 	if (selectAllEditors) {
@@ -118,8 +119,8 @@ suite('Check all editors with all samples', function (): void {
 			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
 		);
 
-		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n admin-devspaces');
-		Logger.debug('"oc port-forward -n admin-devspaces" was found');
+		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n ' + actualUser + '-devspaces');
+		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces" was found');
 
 		expect(pageTextAfterUseExtensionSwitcher)
 			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
