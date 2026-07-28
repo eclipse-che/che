@@ -38,7 +38,7 @@ suite('Check all editors with all samples', function (): void {
 
 	// filter editors based on environment variables
 	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
-	const actualUser: string = process.env.TS_SELENIUM_OCP_USERNAME;
+	const actualUser: string = process.env.TS_SELENIUM_OCP_USERNAME || '';
 	let editorsForCheck: EditorConfig[];
 
 	if (selectAllEditors) {
