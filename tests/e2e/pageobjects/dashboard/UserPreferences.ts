@@ -225,7 +225,7 @@ export class UserPreferences {
 		Logger.info('Private SSH key verified successfully');
 
 		Logger.info('Pasting public SSH key');
-		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
 		await this.driverHelper.type(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD, publicSshKey);
 
 		// verify public SSH key was correctly set
