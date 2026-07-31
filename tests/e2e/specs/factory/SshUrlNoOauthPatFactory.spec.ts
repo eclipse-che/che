@@ -134,10 +134,10 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 
 			Logger.debug('Clearing the editor with Ctrl+A');
 			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
-			await driverHelper.wait(1000);
+			await driverHelper.wait(2000);
 			Logger.debug('Deleting selected text');
 			await driverHelper.getDriver().actions().sendKeys(Key.DELETE).perform();
-			await driverHelper.wait(1000);
+			await driverHelper.wait(2000);
 			Logger.debug(`Entering text: "${changesToCommit}"`);
 			await driverHelper.wait(2000);
 			await driverHelper.getDriver().actions().sendKeys(changesToCommit).perform();

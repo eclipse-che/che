@@ -212,7 +212,7 @@ export class UserPreferences {
 
 		Logger.info('Pasting private SSH key');
 		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
-		await this.driverHelper.getAction().sendKeys(privateSshKey).perform();
+		await this.driverHelper.type(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD, privateSshKey);
 
 		// verify private SSH key was correctly set
 		const enteredPrivateKey: string = await this.driverHelper.waitAndGetValue(
@@ -225,8 +225,8 @@ export class UserPreferences {
 		Logger.info('Private SSH key verified successfully');
 
 		Logger.info('Pasting public SSH key');
-		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD);
-		await this.driverHelper.getAction().sendKeys(publicSshKey).perform();
+		await this.driverHelper.waitAndClick(UserPreferences.PASTE_PRIVATE_SSH_KEY_FIELD);
+		await this.driverHelper.type(UserPreferences.PASTE_PUBLIC_SSH_KEY_FIELD, publicSshKey);
 
 		// verify public SSH key was correctly set
 		const enteredPublicKey: string = await this.driverHelper.waitAndGetValue(
