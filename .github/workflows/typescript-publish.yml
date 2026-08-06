@@ -96,29 +96,29 @@ jobs:
           echo "[INFO] No existing tags detected for ${VERSION}"
         fi
     - name: "Set up QEMU"
-      if: github.event.inputs.release-version == 'true'
+      if: github.event_name == 'workflow_dispatch'
       uses: docker/setup-qemu-action@v2
     - name: "Docker quay.io Login"
-      if: github.event.inputs.release-version == 'true'
+      if: github.event_name == 'workflow_dispatch'
       uses: docker/login-action@v2
       with:
         registry: quay.io
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
     - name: Login to docker.io
-      if: github.event.inputs.release-version == 'true'
+      if: github.event_name == 'workflow_dispatch'
       uses: docker/login-action@v2
       with:
         registry: docker.io
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
     - name: Set up yq
-      if: github.event.inputs.release-version == 'true'
+      if: github.event_name == 'workflow_dispatch'
       run: |
         sudo wget https://github.com/mikefarah/yq/releases/download/v4.7.0/yq_linux_amd64 -O /usr/bin/yq
         sudo chmod +x /usr/bin/yq
     - name: Perform a release
-      if: github.event.inputs.release-version == 'true'
+      if: github.event_name == 'workflow_dispatch'
       run: |
         git config --global user.name "Mykhailo Kuznietsov"
         git config --global user.email "mkuznets@redhat.com"
