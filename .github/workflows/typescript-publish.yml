@@ -125,7 +125,7 @@ jobs:
         git config --global pull.rebase true
 
         export GITHUB_TOKEN=${{ secrets.CHE_BOT_GITHUB_TOKEN }}
-        ./make-release.sh --version ${{ github.event.inputs.version}}
+        ./make-release.sh --version ${{ github.event.inputs.release-version }}
     - name: Build and publish next version
       if: github.event_name == 'push'
       run: |
