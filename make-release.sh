@@ -84,7 +84,7 @@ bump_version () {
   npm run prettier
   popd  >/dev/null || exit
 
-  COMMIT_MSG="chore: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
+  COMMIT_MSG="release: Bump to ${NEXT_VERSION} in ${BUMP_BRANCH}"
   git commit -asm "${COMMIT_MSG}"
   git pull origin "${BUMP_BRANCH}"
 
@@ -175,7 +175,7 @@ docker push quay.io/eclipse/che-e2e:latest
 # update template in the release tag
 update_issue_template "${VERSION}" "${ISSUE_TEMPLATE_FILE}"
 
-COMMIT_MSG="chore: Release ${VERSION}"
+COMMIT_MSG="release: Release ${VERSION}"
 git commit -asm "${COMMIT_MSG}"
 
 # tag the release
