@@ -176,7 +176,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
 		return this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} exec -i -t ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
+			`${this.kubernetesCommandLineTool} exec -i ${KubernetesCommandLineToolsExecutor.pod} -n ${this.namespace} -c ${container} -- sh -c '${commandToExecute}'`
 		);
 	}
 
