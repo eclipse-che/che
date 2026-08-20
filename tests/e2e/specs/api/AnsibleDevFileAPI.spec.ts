@@ -91,14 +91,16 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout (CRW-12595)
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('was installed successfully');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('was installed successfully');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-list" command', function (): void {
