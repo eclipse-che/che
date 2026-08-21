@@ -91,14 +91,16 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout (CRW-12595)
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('was installed successfully');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('was installed successfully');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-list" command', function (): void {
@@ -123,7 +125,8 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const outputText: string = output.stdout.trim();
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout
+		const outputText: string = (output.stdout + output.stderr).trim();
 		expect(outputText).to.include('molecule');
 		expect(outputText).to.include('ansible');
 		expect(outputText).to.include('default');
@@ -152,14 +155,16 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('PLAY [Converge]');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('PLAY [Converge]');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-verify" command', function (): void {
@@ -184,14 +189,16 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('PLAY [Verify]');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('PLAY [Verify]');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-destroy" command', function (): void {
@@ -216,14 +223,16 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('PLAY [Destroy]');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('PLAY [Destroy]');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "molecule-test" command', function (): void {
@@ -248,16 +257,18 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const recapBlocks: string[] = output.stdout.split(/PLAY RECAP/g).slice(1);
+		// molecule may write its rich formatted output (box-drawing, ANSI codes) to stderr rather than stdout
+		const combinedOutput: string = (output.stdout + output.stderr).trim();
+
+		const recapBlocks: string[] = combinedOutput.split(/PLAY RECAP/g).slice(1);
 		recapBlocks.forEach((block): void => {
 			expect(block).match(/failed\s*=\s*0/);
 		});
 
-		const outputText: string = output.stdout.trim();
-		expect(outputText).to.include('PLAY [Create]');
-		expect(outputText).to.include('PLAY [Converge]');
-		expect(outputText).to.include('PLAY [Verify]');
-		expect(outputText).to.not.match(/failed\s*=\s*[1-9]\d*/);
+		expect(combinedOutput).to.include('PLAY [Create]');
+		expect(combinedOutput).to.include('PLAY [Converge]');
+		expect(combinedOutput).to.include('PLAY [Verify]');
+		expect(combinedOutput).to.not.match(/failed\s*=\s*[1-9]\d*/);
 	});
 
 	test('Check "ansible-navigator" command', function (): void {
@@ -298,7 +309,8 @@ suite('Ansible devfile API test', function (): void {
 		const output: ShellString = containerTerminal.execInContainerCommand(runCommandInBash, containerName);
 		expect(output.code).eqls(0);
 
-		const outputText: string = output.stdout.trim();
+		// ansible-navigator may write output to stderr depending on terminal detection
+		const outputText: string = (output.stdout + output.stderr).trim();
 		expect(outputText).to.include('ansible-navigator');
 		expect(outputText).to.include('collections');
 		expect(outputText).to.include('config');
