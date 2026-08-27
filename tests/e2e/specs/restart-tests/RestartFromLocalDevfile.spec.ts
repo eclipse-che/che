@@ -12,6 +12,7 @@ import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../../uti
 import { expect } from 'chai';
 import { ShellString } from 'shelljs';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 import { e2eContainer } from '../../configs/inversify.config';
 import { CLASSES } from '../../configs/inversify.types';
 import { ShellExecutor } from '../../utils/ShellExecutor';
@@ -22,27 +23,11 @@ import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { Workspaces } from '../../pageobjects/dashboard/Workspaces';
 import { WorkspaceDetails } from '../../pageobjects/dashboard/workspace-details/WorkspaceDetails';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
-import { Key, WebElement } from 'monaco-page-objects';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
+import { RestartWorkspaceDialog } from '../../pageobjects/ide/RestartWorkspaceDialog';
 import { By } from 'selenium-webdriver';
-
-async function restartFromLocalDevfile(driverHelper: DriverHelper, projectName: string): Promise<void> {
-	await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('p').keyUp(Key.CONTROL).perform();
-	await driverHelper.wait(1000);
-
-	await driverHelper.getDriver().actions().sendKeys('>Dev Spaces: Restart Workspace from Local Devfile').perform();
-	await driverHelper.wait(1000);
-	await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-	await driverHelper.wait(1000);
-
-	await driverHelper.getDriver().actions().sendKeys(`/projects/${projectName}/devfile.yaml`).perform();
-	await driverHelper.wait(1000);
-	await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-	await driverHelper.wait(1000);
-
-	await driverHelper.waitAndClick(By.xpath('//div[@class="dialog-buttons"]//a[text()="Restart"]'));
-}
+import { registerRunningWorkspace } from '../MochaHooks';
 
 suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -56,6 +41,7 @@ suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.T
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const restartWorkspaceDialog: RestartWorkspaceDialog = e2eContainer.get(CLASSES.RestartWorkspaceDialog);
 	const testFileName: string = 'test-new-file.txt';
 	const testFileContent: string = 'test file content for restart verification';
 	const gitRepository: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
@@ -96,6 +82,7 @@ suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.T
 		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
 		await dashboard.clickCreateWorkspaceButton();
 		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(editorXpath, 'Empty Workspace', xPathToWaitFor);
+		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	test('Setup workspace context for API operations', function (): void {
@@ -124,15 +111,15 @@ suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.T
 	});
 
 	test('Restart workspace from local devfile with bad image', async function (): Promise<void> {
-		await restartFromLocalDevfile(driverHelper, projectName);
+		await restartWorkspaceDialog.restartFromLocalDevfile(projectName);
 		Logger.info('Waiting for "Restart Workspace" confirmation popup');
-		await driverHelper.waitAndClick(By.xpath('//div[@class="dialog-buttons"]//a[text()="Restart your workspace"]'), 30000);
+		await restartWorkspaceDialog.confirmRestartWorkspace();
 	});
 
 	test('Wait for workspace start failure and restart', async function (): Promise<void> {
 		Logger.info('Waiting for workspace to enter Failed phase and restart with default devfile');
-		await driverHelper.waitAndClick(By.xpath('//span[text()="Restart with default devfile"]'), 120000);
-		await driverHelper.waitVisibility(By.xpath(xPathToWaitFor), 180000);
+		await restartWorkspaceDialog.clickRestartWithDefaultDevfile();
+		await driverHelper.waitVisibility(By.xpath(xPathToWaitFor), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
 	});
 
 	test('Re-initialize workspace context after restart', function (): void {
@@ -150,67 +137,22 @@ suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.T
 	});
 
 	test('Verify devfile schema validation error on invalid env declaration', async function (): Promise<void> {
-		Logger.info('Opening devfile.yaml via Quick Open (Ctrl+P)');
-		const devfileTab: By = By.xpath('//div[contains(@class, "tab") and contains(., "devfile.yaml")]');
-		const maxAttempts: number = 3;
-		for (let attempt: number = 1; attempt <= maxAttempts; attempt++) {
-			Logger.info(`Attempt ${attempt}/${maxAttempts} to open devfile.yaml`);
-			await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('p').keyUp(Key.CONTROL).perform();
-			await driverHelper.wait(1000);
-			await driverHelper.getDriver().actions().sendKeys(`/projects/${projectName}/devfile.yaml`).perform();
-			await driverHelper.wait(1000);
-			await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-
-			if (await driverHelper.waitVisibilityBoolean(devfileTab, 5, 2000)) {
-				Logger.info('devfile.yaml tab opened successfully');
-				break;
-			}
-
-			if (attempt === maxAttempts) {
-				throw new Error('Failed to open devfile.yaml in editor after multiple attempts');
-			}
-
-			Logger.warn('devfile.yaml tab did not appear, pressing Escape and retrying');
-			await driverHelper.getDriver().actions().sendKeys(Key.ESCAPE).perform();
-			await driverHelper.wait(1000);
-		}
-
-		// go to line 9999 to jump to the end of the file
-		Logger.info('Navigating to end of file and appending invalid env content');
-		await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('g').keyUp(Key.CONTROL).perform();
-		await driverHelper.wait(1000);
-		await driverHelper.getDriver().actions().sendKeys('9999').perform();
-		await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-		await driverHelper.wait(500);
-		await driverHelper.getDriver().actions().sendKeys(Key.END).perform();
-		await driverHelper.getDriver().actions().sendKeys('    env:').perform();
-		await driverHelper.getDriver().actions().sendKeys(Key.ESCAPE).perform();
-		await driverHelper.wait(300);
-		await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-		await driverHelper.getDriver().actions().sendKeys(Key.HOME).sendKeys(Key.HOME).perform();
-		await driverHelper.getDriver().actions().sendKeys('      - name: test-env').perform();
-		await driverHelper.getDriver().actions().sendKeys(Key.ESCAPE).perform();
-		await driverHelper.wait(300);
-		await driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-		await driverHelper.getDriver().actions().sendKeys(Key.HOME).sendKeys(Key.HOME).perform();
-		await driverHelper.getDriver().actions().sendKeys('        value: true').perform();
-
-		Logger.info('Saving file with Ctrl+S');
-		await driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('s').keyUp(Key.CONTROL).perform();
-		await driverHelper.wait(1000);
+		Logger.info('Appending invalid env declaration to devfile.yaml');
+		const appendOutput: ShellString = containerTerminal.execInContainerCommand(
+			`echo "    env:" >> /projects/${projectName}/devfile.yaml && ` +
+				`echo "      - name: test-env" >> /projects/${projectName}/devfile.yaml && ` +
+				`echo "        value: true" >> /projects/${projectName}/devfile.yaml`
+		);
+		expect(appendOutput.code).to.equal(0, 'Failed to append invalid env content to devfile.yaml');
 
 		Logger.info('Restart from local devfile');
-		await restartFromLocalDevfile(driverHelper, projectName);
+		await restartWorkspaceDialog.restartFromLocalDevfile(projectName);
 
 		Logger.info('Check error popup');
-		const errorDialog: By = By.xpath('//*[@class="dialog-message-text"]');
-		const dialogElement: WebElement = await driverHelper.waitVisibility(errorDialog, 40000);
-		const dialogText: string = await dialogElement.getText();
+		const dialogText: string = await restartWorkspaceDialog.getErrorDialogText();
 		Logger.info(`Error dialog title text: ${dialogText}`);
 
-		const errorDetailDialog: By = By.xpath('//*[@class="dialog-message-detail"]');
-		const detailElement: WebElement = await driverHelper.waitVisibility(errorDetailDialog, 40000);
-		const detailText: string = await detailElement.getText();
+		const detailText: string = await restartWorkspaceDialog.getErrorDetailText();
 		Logger.info(`Error dialog detail text: ${detailText}`);
 
 		expect(detailText).to.equal(
@@ -234,6 +176,7 @@ suite(`Test case with empty workspace (per-user storage) ${BASE_TEST_CONSTANTS.T
 
 		WorkspaceHandlingTests.clearWorkspaceName();
 		clearCurrentTabHandle();
+		registerRunningWorkspace('');
 
 		if (originalStorageStrategy !== '' && originalStorageStrategy !== 'per-user') {
 			const restoreResult: ShellString = shellExecutor.executeCommand(
@@ -259,6 +202,7 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 	);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const shellExecutor: ShellExecutor = e2eContainer.get(CLASSES.ShellExecutor);
+	const restartWorkspaceDialog: RestartWorkspaceDialog = e2eContainer.get(CLASSES.RestartWorkspaceDialog);
 	const testFileName: string = 'test-new-file.txt';
 	const testFileContent: string = 'test file content for pvc-fail restart verification';
 	const gitRepository: string = 'https://github.com/cgruver/test-workspace/tree/pvc-fail';
@@ -304,6 +248,7 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
 		await dashboard.clickCreateWorkspaceButton();
 		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(editorXpath, gitRepository, xPathToWaitFor);
+		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
 	});
 
 	test('Accept the project as a trusted one', async function (): Promise<void> {
@@ -335,15 +280,15 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 	});
 
 	test('Restart workspace from local devfile with bad image', async function (): Promise<void> {
-		await restartFromLocalDevfile(driverHelper, projectName);
+		await restartWorkspaceDialog.restartFromLocalDevfile(projectName);
 		Logger.info('Waiting for "Restart Workspace" confirmation popup');
-		await driverHelper.waitAndClick(By.xpath('//div[@class="dialog-buttons"]//a[text()="Restart your workspace"]'), 30000);
+		await restartWorkspaceDialog.confirmRestartWorkspace();
 	});
 
 	test('Wait for workspace start failure and restart with default devfile', async function (): Promise<void> {
 		Logger.info('Waiting for workspace to enter Failed phase and restart with default devfile');
-		await driverHelper.waitAndClick(By.xpath('//span[text()="Restart with default devfile"]'), 120000);
-		await driverHelper.waitVisibility(By.xpath(xPathToWaitFor), 120000);
+		await restartWorkspaceDialog.clickRestartWithDefaultDevfile();
+		await driverHelper.waitVisibility(By.xpath(xPathToWaitFor), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
 	});
 
 	test('Re-initialize workspace context after restart', function (): void {
@@ -373,11 +318,7 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 		await workspaceDetails.waitWorkspaceTitle(workspaceName);
 
 		Logger.info('Verifying storage type is per-workspace on Overview tab');
-		const storageTypeLocator: By = By.xpath(
-			'//span[@aria-label="More info for storage type"]/ancestor::div[contains(@class, "pf-v6-c-form__group")]' +
-				'//div[contains(@class, "pf-v6-c-form__group-control")]/span'
-		);
-		const storageTypeValue: string = await driverHelper.waitAndGetText(storageTypeLocator);
+		const storageTypeValue: string = await workspaceDetails.getStorageTypeValue();
 		expect(storageTypeValue).to.equal('per-workspace');
 	});
 
@@ -397,6 +338,7 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 
 		WorkspaceHandlingTests.clearWorkspaceName();
 		clearCurrentTabHandle();
+		registerRunningWorkspace('');
 
 		if (originalStorageStrategy !== '' && originalStorageStrategy !== 'per-workspace') {
 			const restoreResult: ShellString = shellExecutor.executeCommand(

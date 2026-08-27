@@ -36,6 +36,7 @@ export * from './pageobjects/ide/ExplorerView';
 export * from './pageobjects/ide/ExtensionsView';
 export * from './pageobjects/ide/GitHubExtensionDialog';
 export * from './pageobjects/ide/NotificationHandler';
+export * from './pageobjects/ide/RestartWorkspaceDialog';
 export * from './pageobjects/ide/RestrictedModeButton';
 export * from './pageobjects/ide/SourceControlView';
 export * from './pageobjects/ide/ViewsMoreActionsButton';
