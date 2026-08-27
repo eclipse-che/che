@@ -26,6 +26,10 @@ export class WorkspaceDetails {
 	private static readonly ENABLED_SAVE_BUTTON: By = By.css('button[name="save-button"][aria-disabled="false"]');
 	private static readonly WORKSPACE_DETAILS_LOADER: By = By.css('workspace-details-overview md-progress-linear');
 	private static readonly STORAGE_TYPE_INFO_BUTTON: By = By.css('span[aria-label="More info for storage type"]');
+	private static readonly STORAGE_TYPE_VALUE: By = By.xpath(
+		'//span[@aria-label="More info for storage type"]/ancestor::div[contains(@class, "pf-v6-c-form__group")]' +
+			'//div[contains(@class, "pf-v6-c-form__group-control")]/span'
+	);
 	private static readonly CLOSE_STORAGE_TYPE_INFO_BUTTON: By = By.xpath('//button[@aria-label="Close"]');
 	private static readonly STORAGE_TYPE_DOC_LINK: By = By.xpath('//div/p/a');
 	private static readonly DEVFILE_DOC_LINK: By = By.xpath('//a[text()="Devfile Documentation"]');
@@ -124,6 +128,12 @@ export class WorkspaceDetails {
 		Logger.debug(`${tabTitle}`);
 
 		await this.clickOnTab(tabTitle, timeout);
+	}
+
+	async getStorageTypeValue(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<string> {
+		Logger.debug();
+
+		return await this.driverHelper.waitAndGetText(WorkspaceDetails.STORAGE_TYPE_VALUE, timeout);
 	}
 
 	async clickStorageTypeInfo(): Promise<void> {

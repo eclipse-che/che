@@ -60,7 +60,8 @@ const CLASSES: any = {
 	NotificationHandler: 'NotificationHandler',
 	SourceControlView: 'SourceControlView',
 	GitHubExtensionDialog: 'GitHubExtensionDialog',
-	AiCodeSignInDialog: 'AiCodeSignInDialog'
+	AiCodeSignInDialog: 'AiCodeSignInDialog',
+	RestartWorkspaceDialog: 'RestartWorkspaceDialog'
 };
 
 const EXTERNAL_CLASSES: any = {
