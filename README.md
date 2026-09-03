@@ -75,13 +75,13 @@ chectl workspace:stop <workspace-id>
 Add a `devfile.yaml` to your repository root to define your development environment:
 
 ```yaml
-schemaVersion: 2.2.2
+schemaVersion: 2.3.0
 metadata:
   name: my-project
 components:
   - name: devtools
     container:
-      image: quay.io/devfile/universal-developer-image:ubi8-latest
+      image: quay.io/devfile/universal-developer-image:ubi9-latest
       memoryLimit: 4G
       mountSources: true
 commands:
