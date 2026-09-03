@@ -38,13 +38,69 @@ Here you can find links on how to get started with Eclipse Che:
 
 
 ### Using Eclipse Che
-Here you can find references to useful documentation and hands-on guides to learn how to get the most of Eclipse Che:
+
+#### Start a workspace from a Git repository
+
+Open any Git repository as a Cloud Development Environment by navigating to your Che instance with a factory URL:
+
+```
+https://<your-che-host>/#https://github.com/<owner>/<repo>
+```
+
+For example, to open this repository:
+```
+https://<your-che-host>/#https://github.com/eclipse-che/che
+```
+
+#### Start a workspace using chectl
+
+Use the [chectl](https://github.com/che-incubator/chectl) CLI to create and manage workspaces:
+
+```bash
+# Start a workspace from a devfile
+chectl workspace:start -f devfile.yaml
+
+# Start a workspace from a remote devfile
+chectl workspace:start -f https://raw.githubusercontent.com/eclipse/che/main/.devfile.yaml
+
+# List running workspaces
+chectl workspace:list
+
+# Stop a running workspace
+chectl workspace:stop <workspace-id>
+```
+
+#### Define a workspace with a devfile
+
+Add a `devfile.yaml` to your repository root to define your development environment:
+
+```yaml
+schemaVersion: 2.3.0
+metadata:
+  name: my-project
+components:
+  - name: devtools
+    container:
+      image: quay.io/devfile/universal-developer-image:ubi9-latest
+      memoryLimit: 4G
+      mountSources: true
+commands:
+  - id: build
+    exec:
+      commandLine: 'mvn clean install'
+      component: devtools
+```
+
+When a `devfile.yaml` is present, Che automatically configures the workspace with the specified tools, runtimes, and commands.
+
+#### Learn more
+
 - [Customize Che workspaces for your projects](https://eclipse.dev/che/docs/stable/end-user-guide/customizing-workspace-components/)
 - [Automatically run VSCode Extensions in Che workspaces](https://eclipse.dev/che/docs/stable/end-user-guide/microsoft-visual-studio-code-open-source-ide/#automating-installation-of-microsoft-visual-studio-code-extensions-at-workspace-startup)
 - [Starting a workspace from a Git repository URL](https://eclipse.dev/che/docs/stable/end-user-guide/starting-a-workspace-from-a-git-repository-url/)
 - [Making a workspace portable using a devfile](https://eclipse.dev/che/docs/stable/end-user-guide/devfile-introduction/)
 - [Configure your instance of Che](https://eclipse.dev/che/docs/stable/administration-guide/checluster-custom-resource-fields-reference/) using the [CheCluster Kubernetes Custom Resource](https://doc.crds.dev/github.com/eclipse-che/che-operator)
-- [Use and customize the embedded VSCode extensions registry.](https://eclipse.dev/che/docs/stable/administration-guide/extensions-for-microsoft-visual-studio-code-open-source/#adding-or-removing-extensions-in-the-embedded-open-vsx-registry-instance)
+- [Use and customize the embedded VSCode extensions registry](https://eclipse.dev/che/docs/stable/administration-guide/extensions-for-microsoft-visual-studio-code-open-source/#adding-or-removing-extensions-in-the-embedded-open-vsx-registry-instance)
 
 ### Feedback and Community
 We love to hear from users and developers. Here are the various ways to get in touch with us:
