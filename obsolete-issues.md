@@ -18,11 +18,11 @@ Almost all of these are already labeled `lifecycle/frozen` (173 of 212 open issu
 
 > ⚠️ These are recommendations for maintainer review, not an automated close list. A small "borderline" section flags items whose underlying concern may still apply to the current Che-Code editor and should be re-triaged rather than closed blindly.
 
-> **Review status (2026-09-04):** Group 1 (Che-Theia) has been actioned — **28 of 30 issues are now closed**. Two remain open ([#18302](https://github.com/eclipse-che/che/issues/18302), [#17196](https://github.com/eclipse-che/che/issues/17196)). Groups 2–5 and the borderline set are still open and awaiting maintainer review.
+> **Review status (2026-09-04):** Group 1 (Che-Theia) is fully actioned — **all 30 issues are now closed** (the last two, [#18302](https://github.com/eclipse-che/che/issues/18302) and [#17196](https://github.com/eclipse-che/che/issues/17196), have since been closed). Groups 2–5 and the borderline set are still open and awaiting maintainer review.
 
 ---
 
-## 1. Che-Theia editor (removed) — 30 issues — ✅ 28 closed (reviewed 2026-09-04), 2 still open
+## 1. Che-Theia editor (removed) — 30 issues — ✅ all 30 closed (reviewed 2026-09-04)
 
 The Che-Theia editor no longer exists; the default editor is Che-Code. Issues describing Che-Theia behavior, its build/self-hosting, or its plugin/webview/welcome UI cannot be reproduced or actioned.
 
@@ -39,8 +39,8 @@ The Che-Theia editor no longer exists; the default editor is Che-Code. Issues de
 | [#18937](https://github.com/eclipse-che/che/issues/18937) | 2021-08 | Yarn-Linked Packages may not work in Che-Theia | ✅ Closed |
 | [#20477](https://github.com/eclipse-che/che/issues/20477) | 2022-09 | Folder preference settings are ignored | ✅ Closed |
 | [#16085](https://github.com/eclipse-che/che/issues/16085) | 2022-12 | LSP features does not work in another directory | ✅ Closed |
-| [#18302](https://github.com/eclipse-che/che/issues/18302) | 2022-12 | Che-theia should notify/disable actions + inform user how to restart | 🔲 **Still open** |
-| [#17196](https://github.com/eclipse-che/che/issues/17196) | 2022-12 | Plugins view eats characters in Filter Field when under load | 🔲 **Still open** |
+| [#18302](https://github.com/eclipse-che/che/issues/18302) | 2022-12 | Che-theia should notify/disable actions + inform user how to restart | ✅ Closed |
+| [#17196](https://github.com/eclipse-che/che/issues/17196) | 2022-12 | Plugins view eats characters in Filter Field when under load | ✅ Closed |
 | [#15808](https://github.com/eclipse-che/che/issues/15808) | 2022-12 | Command palette skips steps upon focus loss | ✅ Closed |
 | [#15160](https://github.com/eclipse-che/che/issues/15160) | 2022-12 | Inconvenient self-hosting for external contributors | ✅ Closed |
 | [#15007](https://github.com/eclipse-che/che/issues/15007) | 2022-12 | Git support cannot handle che-theia self-hosting structure | ✅ Closed |
@@ -149,10 +149,10 @@ These are labeled/worded around Che-Theia but describe behavior that **may still
 
 | Group | Count | Status | Confidence |
 |---|---|---|---|
-| 1. Che-Theia editor (removed) | 30 | ✅ 28 closed, 2 still open | High |
+| 1. Che-Theia editor (removed) | 30 | ✅ all 30 closed | High |
 | 2. Plugin Registry / meta.yaml model (deprecated) | 20 | Open — awaiting review | High |
 | 3. Devfile Registry v1 / stacks (superseded) | 8 | Open — awaiting review | High |
 | 4. Projector editors (discontinued) | 3 | Open — awaiting review | High |
 | 5. Pre-DevWorkspace engine | 4 | Open — awaiting review | High |
-| **Total candidates** | **65** | **28 closed / 37 open** | |
+| **Total candidates** | **65** | **30 closed / 35 open** | |
 | Borderline (re-triage) | 5 | Open | Medium |
