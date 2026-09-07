@@ -1,6 +1,6 @@
 # Eclipse Che — Candidate Issues to Close as Obsolete
 
-_Generated 2026-09-04 against the [eclipse-che/che](https://github.com/eclipse-che/che/issues) open issue tracker (212 open issues, excluding PRs)._
+_Generated 2026-09-04, last refreshed 2026-09-07 against the [eclipse-che/che](https://github.com/eclipse-che/che/issues) open issue tracker (173 open issues, excluding PRs — down from 212 at generation time)._
 
 ## How this list was built
 
@@ -14,11 +14,11 @@ The recommendations below are anchored to Eclipse Che components that have since
 | **Projector**-based JetBrains/Android Studio editors | Projector discontinued by JetBrains | title mention |
 | Pre-DevWorkspace engine (`wsmaster` / workspace-controller CRDs) | Replaced by the **DevWorkspace Operator** | title mention |
 
-Almost all of these are already labeled `lifecycle/frozen` (173 of 212 open issues carry it) and have had **no activity since 2020–2023**.
+Almost all of these are already labeled `lifecycle/frozen` (133 of the 173 currently open issues carry it) and have had **no activity since 2020–2023**.
 
 > ⚠️ These are recommendations for maintainer review, not an automated close list. A small "borderline" section flags items whose underlying concern may still apply to the current Che-Code editor and should be re-triaged rather than closed blindly.
 
-> **Review status (2026-09-04):** Group 1 (Che-Theia) is fully actioned — **all 30 issues are now closed** (the last two, [#18302](https://github.com/eclipse-che/che/issues/18302) and [#17196](https://github.com/eclipse-che/che/issues/17196), have since been closed). Groups 2–5 and the borderline set are still open and awaiting maintainer review.
+> **Review status (2026-09-07):** Group 1 (Che-Theia, 30 issues) and Group 3 (Devfile Registry v1, 8 issues) are **fully actioned — all closed**. Group 4 (Projector) is **2 of 3 closed**; only [#20007](https://github.com/eclipse-che/che/issues/20007) remains open. Group 2 (20), the rest of Group 5 (4) and the borderline set (5) are still open and awaiting maintainer review. All closures were made with state reason `completed`.
 
 ---
 
@@ -90,34 +90,34 @@ The `meta.yaml` plugin format, plugin broker, and per-plugin sidecar images are 
 
 ---
 
-## 3. Che Devfile Registry (v1) + built-in "stacks" (superseded by Devfile 2.x / DevWorkspaces) — 8 issues — all still open
+## 3. Che Devfile Registry (v1) + built-in "stacks" (superseded by Devfile 2.x / DevWorkspaces) — 8 issues — ✅ all 8 closed (reviewed 2026-09-07)
 
 The v1 devfile registry and curated "stacks" model has been replaced by Devfile 2.x, DevWorkspaces, and user-supplied samples.
 
-| # | Last activity | Title |
-|---|---|---|
-| [#15898](https://github.com/eclipse-che/che/issues/15898) | 2020-10 | Consider pinning non che-sample projects in devfile registry to a commit |
-| [#14691](https://github.com/eclipse-che/che/issues/14691) | 2020-10 | Adding a devfile to devfile registry at runtime doesn't work |
-| [#14596](https://github.com/eclipse-che/che/issues/14596) | 2021-02 | Create a devfile registry for all che-in-che flow |
-| [#18145](https://github.com/eclipse-che/che/issues/18145) | 2021-05 | quarkus endpoints should use different port |
-| [#17924](https://github.com/eclipse-che/che/issues/17924) | 2021-05 | Provide experimental "portable JDK" devfile |
-| [#18587](https://github.com/eclipse-che/che/issues/18587) | 2022-02 | Get-started samples: add Quarkus-hibernate + postgres stack |
-| [#17334](https://github.com/eclipse-che/che/issues/17334) | 2022-12 | More strict PR status checks on che-devfile-registry repository |
-| [#15053](https://github.com/eclipse-che/che/issues/15053) | 2022-12 | Preview is not shown in default project for Python Django stack |
+| # | Last activity | Title | Status |
+|---|---|---|---|
+| [#15898](https://github.com/eclipse-che/che/issues/15898) | 2020-10 | Consider pinning non che-sample projects in devfile registry to a commit | ✅ Closed |
+| [#14691](https://github.com/eclipse-che/che/issues/14691) | 2020-10 | Adding a devfile to devfile registry at runtime doesn't work | ✅ Closed |
+| [#14596](https://github.com/eclipse-che/che/issues/14596) | 2021-02 | Create a devfile registry for all che-in-che flow | ✅ Closed |
+| [#18145](https://github.com/eclipse-che/che/issues/18145) | 2021-05 | quarkus endpoints should use different port | ✅ Closed |
+| [#17924](https://github.com/eclipse-che/che/issues/17924) | 2021-05 | Provide experimental "portable JDK" devfile | ✅ Closed |
+| [#18587](https://github.com/eclipse-che/che/issues/18587) | 2022-02 | Get-started samples: add Quarkus-hibernate + postgres stack | ✅ Closed |
+| [#17334](https://github.com/eclipse-che/che/issues/17334) | 2022-12 | More strict PR status checks on che-devfile-registry repository | ✅ Closed |
+| [#15053](https://github.com/eclipse-che/che/issues/15053) | 2022-12 | Preview is not shown in default project for Python Django stack | ✅ Closed |
 
 ---
 
-## 4. Projector-based editors (Projector discontinued by JetBrains) — 3 issues
+## 4. Projector-based editors (Projector discontinued by JetBrains) — 3 issues — 2 closed, 1 open
 
-| # | Last activity | Title |
-|---|---|---|
-| [#20007](https://github.com/eclipse-che/che/issues/20007) | 2022-12 | Provide Android Studio as a Che editor on DevSandbox (Projector) |
-| [#19575](https://github.com/eclipse-che/che/issues/19575) | 2022-12 | Android Studio as Che editor using Projector |
-| [#20242](https://github.com/eclipse-che/che/issues/20242) | 2023-03 | Enable multiarch support for building jetbrains-editor-images (Projector) |
+| # | Last activity | Title | Status |
+|---|---|---|---|
+| [#20007](https://github.com/eclipse-che/che/issues/20007) | 2022-12 | Provide Android Studio as a Che editor on DevSandbox (Projector) | Open — awaiting review |
+| [#19575](https://github.com/eclipse-che/che/issues/19575) | 2022-12 | Android Studio as Che editor using Projector | ✅ Closed |
+| [#20242](https://github.com/eclipse-che/che/issues/20242) | 2023-03 | Enable multiarch support for building jetbrains-editor-images (Projector) | ✅ Closed |
 
 ---
 
-## 5. Pre-DevWorkspace engine (`wsmaster` / old CRDs, replaced by DevWorkspace Operator) — 4 issues
+## 5. Pre-DevWorkspace engine (`wsmaster` / old CRDs, replaced by DevWorkspace Operator) — 4 issues — all still open
 
 | # | Last activity | Title |
 |---|---|---|
@@ -151,8 +151,10 @@ These are labeled/worded around Che-Theia but describe behavior that **may still
 |---|---|---|---|
 | 1. Che-Theia editor (removed) | 30 | ✅ all 30 closed | High |
 | 2. Plugin Registry / meta.yaml model (deprecated) | 20 | Open — awaiting review | High |
-| 3. Devfile Registry v1 / stacks (superseded) | 8 | Open — awaiting review | High |
-| 4. Projector editors (discontinued) | 3 | Open — awaiting review | High |
+| 3. Devfile Registry v1 / stacks (superseded) | 8 | ✅ all 8 closed | High |
+| 4. Projector editors (discontinued) | 3 | 2 closed / 1 open | High |
 | 5. Pre-DevWorkspace engine | 4 | Open — awaiting review | High |
-| **Total candidates** | **65** | **30 closed / 35 open** | |
+| **Total candidates** | **65** | **40 closed / 25 open** | |
 | Borderline (re-triage) | 5 | Open | Medium |
+
+Remaining work: 25 candidate issues (group 2 ×20, group 4 ×1, group 5 ×4) plus the 5 borderline items.
