@@ -75,7 +75,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
-		await createWorkspace.waitForCheckboxState(false);
+		await createWorkspace.waitForCheckboxState(true);
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
@@ -89,6 +89,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
+		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
@@ -102,11 +103,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
-		await createWorkspace.waitForCheckboxState(false);
-		await createWorkspace.setCreateNewWorkspaceCheckbox(true);
 		await createWorkspace.waitForCheckboxState(true);
-
-		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl + '?new');
+		await createWorkspace.setCreateNewWorkspaceCheckbox(true);
 
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
@@ -122,6 +120,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
+		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
 		const originalWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
