@@ -28,6 +28,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CheCodeLocatorLoader } from '../../pageobjects/ide/CheCodeLocatorLoader';
 import { ViewsMoreActionsButton } from '../../pageobjects/ide/ViewsMoreActionsButton';
 import { SourceControlView } from '../../pageobjects/ide/SourceControlView';
+import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
@@ -109,8 +110,14 @@ suite(`The SshUrlNoOauthPatFactory userstory ${BASE_TEST_CONSTANTS.TEST_ENVIRONM
 		test('Check a project folder has been created', async function (): Promise<void> {
 			const projectName: string = FACTORY_TEST_CONSTANTS.TS_SELENIUM_PROJECT_NAME || StringUtil.getProjectNameFromGitUrl(factoryUrl);
 			projectSection = await projectAndFileTests.getProjectViewSession();
-			expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not
-				.undefined;
+			expect(
+				await projectAndFileTests.waitForProjectTreeItem(
+					projectSection,
+					projectName,
+					TIMEOUT_CONSTANTS.TS_WAIT_LOADER_ABSENCE_TIMEOUT
+				),
+				'Project folder was not imported'
+			).not.undefined;
 		});
 		test('Accept the project as a trusted one', async function (): Promise<void> {
 			await projectAndFileTests.performTrustDialogs();
