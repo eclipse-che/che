@@ -81,7 +81,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		Logger.debug(`Getting container name for pod: '${KubernetesCommandLineToolsExecutor.pod}' in namespace: ${this.namespace}`);
 
 		const output: ShellString = this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} get pod ${KubernetesCommandLineToolsExecutor.pod} -o jsonpath='{.spec.containers[*].name}' -n ${this.namespace}`
+			`${this.kubernetesCommandLineTool} get pod ${KubernetesCommandLineToolsExecutor.pod} -o jsonpath='{.spec.containers[0].name}' -n ${this.namespace}`
 		);
 		echo('\n');
 		const containerName: string = output.stderr ? output.stderr : output.stdout;
