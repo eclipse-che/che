@@ -244,6 +244,41 @@ export class ProjectAndFileTests {
 		throw new Error(`File "${fileName}" was not opened in the editor after ${maxAttempts} attempts`);
 	}
 
+	/**
+	 * wait for a project tree item to appear with polling and retry.
+	 * useful for slower git providers (e.g. Bitbucket SSH) where cloning
+	 * and indexing may take longer than the default tree item timeout.
+	 * @param projectSection ViewSection with project tree files.
+	 * @param label Label of the item to search for.
+	 * @param timeout Maximum time in ms to wait for the item to appear.
+	 * @param polling Interval in ms between retry attempts.
+	 * @param itemLevel Depth level for findItem lookup, default 2.
+	 * @returns Promise resolving to ViewItem object if found.
+	 * @throws Error if the item is not found within the timeout.
+	 */
+	async waitForProjectTreeItem(
+		projectSection: ViewSection,
+		label: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING,
+		itemLevel: number = 2
+	): Promise<ViewItem> {
+		Logger.debug(`waiting for project tree item "${label}" with timeout ${timeout}ms`);
+
+		const attempts: number = Math.ceil(timeout / polling);
+		for (let i: number = 0; i < attempts; i++) {
+			const item: ViewItem | undefined = await this.getProjectTreeItem(projectSection, label, itemLevel);
+			if (item) {
+				Logger.debug(`project tree item "${label}" found after ${(i + 1) * polling}ms`);
+				return item;
+			}
+			Logger.trace(`project tree item "${label}" not found, attempt ${i + 1}/${attempts}`);
+			await this.driverHelper.wait(polling);
+		}
+
+		throw new Error(`Project tree item "${label}" was not found within ${timeout}ms`);
+	}
+
 	async expandProjectTreeItem(projectSection: ViewSection, projectName: string): Promise<void> {
 		Logger.debug(`${projectName}`);
 		const projectTreeItem: ViewItem | undefined = await projectSection.findItem(projectName, 2);
