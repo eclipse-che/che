@@ -27,3 +27,7 @@ The project maintains the source code repositories that belong to the following 
 ## Third-party Content
 
 This project leverages third-party content. For more information regarding third-party dependencies, please consult the respective build files or dependency tracking documents within the source code repositories.
+
+## Cryptography
+
+Content may contain encryption software. The country in which you are currently may have restrictions on the import, possession, and use, and/or re-export to another country, of encryption software. BEFORE using any encryption software, please check the country's laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted.
