@@ -38,7 +38,7 @@
 		"allure-js-commons": "^2.4.0",
 		"allure-mocha": "^2.4.0",
 		"axios": "^0.25.0",
-		"chai": "^4.3.4",
+		"chai": "^6.2.2",
 		"chrome-har": "^0.13.2",
 		"chromedriver": "^125.0.0",
 		"clone-deep": "^4.0.1",
