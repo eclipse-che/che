@@ -54,6 +54,16 @@ export class UserPreferences {
 	private static readonly DELETE_CONFIRMATION_CHECKBOX: By = By.id('revoke-warning-info-check');
 	private static readonly DELETE_ITEM_BUTTON_ENABLED: By = By.css('button[data-testid="revoke-button"]:not([disabled])');
 
+	private static readonly AI_PROVIDER_KEYS_TAB: By = By.xpath('//button[text()="AI Providers Keys"]');
+	private static readonly AI_ADD_KEY_EMPTY_STATE_BUTTON: By = By.css('button[aria-label="Add AI Provider Key"]');
+	private static readonly AI_ADD_EDIT_MODAL: By = By.css('div[aria-label="add-edit-ai-provider-key"]');
+	private static readonly AI_PROVIDER_SELECT_TOGGLE: By = By.css('div[aria-label="add-edit-ai-provider-key"] button.pf-v6-c-menu-toggle');
+	private static readonly AI_API_KEY_INPUT: By = By.id('ai-provider-api-key');
+	private static readonly AI_SAVE_BUTTON: By = By.css('button[data-testid="save-button"]');
+	private static readonly AI_BULK_DELETE_BUTTON: By = By.css('button[data-testid="bulk-delete-ai-key-button"]');
+	private static readonly AI_PROVIDER_TABLE: By = By.css('table[aria-label="AI Provider Keys"]');
+	private static readonly AI_DELETE_CONFIRM_CHECKBOX: By = By.id('delete-ai-key-warning-checkbox');
+
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		readonly driverHelper: DriverHelper
@@ -286,6 +296,87 @@ export class UserPreferences {
 		Logger.info('SSH keys have been deleted');
 	}
 
+	async openAiProviderKeysTab(): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitAndClick(UserPreferences.AI_PROVIDER_KEYS_TAB);
+	}
+
+	async waitAiProviderKeysTab(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(UserPreferences.AI_PROVIDER_KEYS_TAB, timeout);
+	}
+
+	async isAiProviderKeyPresent(providerId: string): Promise<boolean> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		return await this.driverHelper.isVisible(this.getAiProviderRowLocator(providerId));
+	}
+
+	async waitAiProviderKeyPresent(
+		providerId: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		await this.driverHelper.waitVisibility(this.getAiProviderRowLocator(providerId), timeout);
+	}
+
+	async addAiProviderKey(providerName: string, apiKey: string): Promise<void> {
+		Logger.debug(`providerName: "${providerName}"`);
+
+		await this.driverHelper.waitAndClick(UserPreferences.AI_ADD_KEY_EMPTY_STATE_BUTTON);
+		await this.driverHelper.waitVisibility(UserPreferences.AI_ADD_EDIT_MODAL);
+		await this.selectAiProvider(providerName);
+		await this.driverHelper.waitVisibility(UserPreferences.AI_API_KEY_INPUT);
+		await this.driverHelper.enterValue(UserPreferences.AI_API_KEY_INPUT, apiKey);
+		await this.driverHelper.waitAndClick(UserPreferences.AI_SAVE_BUTTON);
+
+		const attempts: number = Math.ceil(
+			TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT / TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+		);
+		await this.driverHelper.waitDisappearance(
+			UserPreferences.AI_ADD_EDIT_MODAL,
+			attempts,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+		);
+	}
+
+	async selectAiProvider(providerName: string): Promise<void> {
+		Logger.debug(`providerName: "${providerName}"`);
+
+		await this.driverHelper.waitAndClick(UserPreferences.AI_PROVIDER_SELECT_TOGGLE);
+		await this.driverHelper.waitAndClick(this.getAiProviderSelectOptionLocator(providerName));
+	}
+
+	async getAiProviderEnvVarName(providerId: string): Promise<string> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		return await this.driverHelper.waitAndGetText(this.getAiProviderEnvVarLocator(providerId));
+	}
+
+	async deleteAiProviderKeys(providerName: string): Promise<void> {
+		Logger.debug(`providerName: "${providerName}"`);
+
+		Logger.info('Deleting AI Provider keys');
+		const rows: By = By.css('table[aria-label="AI Provider Keys"] tbody tr input[type="checkbox"]');
+		const hasRows: boolean = await this.driverHelper.isVisible(rows);
+
+		if (!hasRows) {
+			Logger.info('No AI Provider keys to delete');
+			return;
+		}
+
+		const selectAllCheckbox: By = By.css('table[aria-label="AI Provider Keys"] thead input[type="checkbox"]');
+		await this.driverHelper.waitAndClick(selectAllCheckbox);
+		await this.driverHelper.waitAndClick(UserPreferences.AI_BULK_DELETE_BUTTON);
+		await this.driverHelper.waitAndClick(UserPreferences.AI_DELETE_CONFIRM_CHECKBOX);
+		await this.driverHelper.waitAndClick(this.getAiDeleteConfirmButtonLocator(providerName));
+		await this.driverHelper.waitDisappearance(rows);
+		Logger.info('AI Provider keys have been deleted');
+	}
+
 	getServiceConfig(service: string): string {
 		const gitService: { [key: string]: string } = {
 			[GitProviderType.GITHUB]: 'GitHub',
@@ -301,5 +392,21 @@ export class UserPreferences {
 
 	private getServicesListItemLocator(servicesName: string): By {
 		return By.xpath(`//tr[td[text()='${servicesName}']]//input`);
+	}
+
+	private getAiProviderRowLocator(providerId: string): By {
+		return By.css(`tr[data-testid="${providerId}"]`);
+	}
+
+	private getAiProviderSelectOptionLocator(providerName: string): By {
+		return By.xpath(`//button[@role="option"]//span[text()="${providerName}"]`);
+	}
+
+	private getAiProviderEnvVarLocator(providerId: string): By {
+		return By.xpath(`//tr[@data-testid="${providerId}"]//td[@data-label="Environment Variable"]//code`);
+	}
+
+	private getAiDeleteConfirmButtonLocator(providerName: string): By {
+		return By.xpath(`//div[@aria-label="Delete ${providerName} API Key"]//span[text()="Delete"]`);
 	}
 }
