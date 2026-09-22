@@ -32,7 +32,7 @@ npm run test
 export USERSTORY=Factory && npm run test
 
 # driver-less tests (no browser, API-only)
-npm run driver-less-test
+USERSTORY=EmptyWorkspaceAPI npm run driver-less-test
 ```
 
 ## Single-File Verification
@@ -102,3 +102,18 @@ Use these real files as examples when making common changes:
 | `TS_SELENIUM_OCP_PASSWORD` | OpenShift password |
 | `USERSTORY` | Test file to run (without `.spec.ts`) |
 | `TS_PLATFORM` | `openshift` or `kubernetes` |
+
+## Working on E2E tests
+
+Before modifying `tests/e2e/`, read:
+- `tests/e2e/CLAUDE.md` for detailed development guidance.
+- `tests/e2e/CODE_STYLE.md` for required coding standards.
+- `tests/e2e/README.md` for setup and execution prerequisites.
+
+Existing agent workflows:
+- `tests/e2e/.claude/skills/e2e-test-developer/SKILL.md`
+- `tests/e2e/.claude/commands/run-e2e-test.md`
+
+When adding a page object, register its identifier and binding in
+`tests/e2e/configs/inversify.types.ts` and
+`tests/e2e/configs/inversify.config.ts`
