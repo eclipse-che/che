@@ -140,6 +140,19 @@ suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 			expect(output.stdout, 'opencode should return version info').to.not.be.empty;
 			expect(output.stdout.toLowerCase(), 'opencode --version should not contain errors').to.not.contain('error');
 		});
+
+		test('Send a prompt to OpenCode and verify insufficient_quota response', function (): void {
+			const output: ShellString = containerTerminal.execInContainerCommandWithTimeout(
+				'timeout 45 opencode run --print-logs -m openai/gpt-4o-mini "Say hello" 2>&1 || true',
+				undefined,
+				'120'
+			);
+			const combinedOutput: string = output.stdout + output.stderr;
+			Logger.info(`OpenCode prompt response (first 1000 chars): ${combinedOutput.substring(0, 1000)}`);
+			expect(combinedOutput, 'OpenCode should report insufficient_quota error when using API key without credits').to.contain(
+				'insufficient_quota'
+			);
+		});
 	});
 
 	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {
