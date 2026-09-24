@@ -205,8 +205,16 @@ async function getVisibleFilteredItemsAndCompareWithRecommended(recommendations:
 		Logger.debug(`Found authors: ${allFoundRecommendedAuthors.join(', ')}`);
 		Logger.debug(`Expected authors: ${recommendations.join(', ')}`);
 
-		const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
-		const allPublisherNamesAsSortedString: string = recommendations.sort().toString();
+		// normalize authors for comparison: UI shows display names (e.g. "Red Hat"),
+		// while extensions.json contains publisher IDs (e.g. "redhat")
+		const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors
+			.map((author: string): string => author.toLowerCase().replace(/\s+/g, ''))
+			.sort()
+			.toString();
+		const allPublisherNamesAsSortedString: string = recommendations
+			.map((name: string): string => name.toLowerCase().replace(/\s+/g, ''))
+			.sort()
+			.toString();
 
 		Logger.debug(`Sorted found authors: ${allFoundAuthorsAsSortedString}`);
 		Logger.debug(`Sorted expected authors: ${allPublisherNamesAsSortedString}`);
@@ -322,12 +330,18 @@ for (const sample of samples) {
 				await projectAndFileTests.getProjectTreeItem(projectSection, pathToExtensionsListFileName, vsCodeFolderItemLevel)
 			)?.select();
 
+			// wait for the folder to expand and the file to appear in the project tree
+			await projectAndFileTests.waitProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1);
+
 			await (
 				await projectAndFileTests.getProjectTreeItem(projectSection, extensionsListFileName, vsCodeFolderItemLevel + 1)
 			)?.select();
 			Logger.debug(`EditorView().openEditor(${extensionsListFileName})`);
 			await new EditorView().openEditor(extensionsListFileName);
 			await driverHelper.waitVisibility(webCheCodeLocators.Editor.inputArea);
+
+			// click on the editor input area to ensure it has focus before copying text
+			await driverHelper.waitAndClick(webCheCodeLocators.Editor.inputArea);
 
 			Logger.debug('Select and copy all text in the editor');
 			const text: string = await getText();

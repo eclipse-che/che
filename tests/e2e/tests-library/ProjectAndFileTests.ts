@@ -199,6 +199,32 @@ export class ProjectAndFileTests {
 	}
 
 	/**
+	 * wait for a specific item to appear in the project tree by polling.
+	 * useful after expanding a folder to wait until its children are rendered.
+	 * @param projectSection ViewSection with project tree files.
+	 * @param label Label of the item to wait for.
+	 * @param itemLevel Depth level of the item in the tree.
+	 */
+	async waitProjectTreeItem(projectSection: ViewSection, label: string, itemLevel: number = 2): Promise<void> {
+		Logger.debug(`waiting for "${label}" at level ${itemLevel}`);
+
+		const timeout: number = TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT;
+		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
+		const attempts: number = Math.ceil(timeout / polling);
+
+		for (let i: number = 0; i < attempts; i++) {
+			const item: ViewItem | undefined = await projectSection.findItem(label, itemLevel);
+			if (item) {
+				Logger.debug(`"${label}" found after ${i + 1} attempt(s)`);
+				return;
+			}
+			await this.driverHelper.wait(polling);
+		}
+
+		throw new Error(`Item "${label}" not found in the project tree at level ${itemLevel} after ${timeout}ms`);
+	}
+
+	/**
 	 * @returns {string} Branch name of cloned repository
 	 */
 
