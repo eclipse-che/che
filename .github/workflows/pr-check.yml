@@ -91,7 +91,7 @@ jobs:
           minikube-version: v1.23.2
 
       - name: Install chectl
-        run: bash <(curl -sL https://che-incubator.github.io/chectl/install.sh) --channel=next
+        run: bash <(curl -sL https://che-incubator.github.io/chectl/install.sh) --channel=stable
 
       - name: Deploy Che
         run: |
