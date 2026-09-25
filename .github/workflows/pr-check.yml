@@ -90,8 +90,13 @@ jobs:
         with:
           minikube-version: v1.23.2
 
+      - name: Configure nodejs 22.x for chectl
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
       - name: Install chectl
-        run: bash <(curl -sL https://che-incubator.github.io/chectl/install.sh) --channel=stable
+        run: bash <(curl -sL https://che-incubator.github.io/chectl/install.sh) --channel=next
 
       - name: Deploy Che
         run: |
@@ -121,6 +126,11 @@ jobs:
             -n eclipse-che devworkspace-config \
             --patch '{"config": {"workspace": {"imagePullPolicy": "IfNotPresent"}}}' \
             --type merge
+
+      - name: Restore nodejs 18.x version
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
       - name: Pull Universal Base Image
         run: |
