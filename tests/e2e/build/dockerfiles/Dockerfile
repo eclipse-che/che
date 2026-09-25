@@ -6,7 +6,7 @@ USER root
 
 RUN apt-get update && apt-get install && \
     apt-get install -y ftp x11vnc ffmpeg libvpx7 && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && \
     apt-get install -y nodejs && \
     npm install -g typescript && \
     node -v
