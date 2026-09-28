@@ -242,16 +242,13 @@ async function getVisibleFilteredItemsAndCompareWithInstalled(recommendations: s
 
 	// normalize authors for comparison: UI shows display names (e.g. "Red Hat"),
 	// while extensions.json contains publisher IDs (e.g. "redhat")
-	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors
+	const normalizedAuthors: string[] = allFoundRecommendedAuthors
 		.map((author: string): string => author.toLowerCase().replace(/\s+/g, ''))
-		.sort()
-		.toString();
-	const allPublisherNamesAsSortString: string = recommendations
-		.map((name: string): string => name.toLowerCase().replace(/\s+/g, ''))
-		.sort()
-		.toString();
+		.sort();
+	const normalizedPublishers: string[] = recommendations.map((name: string): string => name.toLowerCase().replace(/\s+/g, '')).sort();
+
 	// in some cases we can have installed not only recommended extensions with some samples (for example .Net)
-	return allFoundAuthorsAsSortedString.includes(allPublisherNamesAsSortString);
+	return normalizedPublishers.every((publisher: string): boolean => normalizedAuthors.includes(publisher));
 }
 
 for (const sample of samples) {
@@ -446,6 +443,10 @@ for (const sample of samples) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
 				await findItem(extensionSection, '@installed ');
 			}
+			await driverHelper.waitVisibility(
+				webCheCodeLocators.ExtensionsViewSection.itemTitle,
+				TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT
+			);
 			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
 			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
 		});
