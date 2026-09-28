@@ -443,10 +443,7 @@ for (const sample of samples) {
 				await driverHelper.wait(TIMEOUT_CONSTANTS.TS_EXPAND_PROJECT_TREE_ITEM_TIMEOUT);
 				await findItem(extensionSection, '@installed ');
 			}
-			await driverHelper.waitVisibility(
-				webCheCodeLocators.ExtensionsViewSection.itemTitle,
-				TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT
-			);
+
 			expect(await getVisibleFilteredItemsAndCompareWithInstalled(publisherNames)).to.be.true;
 			Logger.debug(`All recommended extensions were found by  @installed filter: ---- ${publisherNames} ----`);
 		});
