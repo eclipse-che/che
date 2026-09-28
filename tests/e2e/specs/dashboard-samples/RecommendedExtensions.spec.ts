@@ -240,8 +240,16 @@ async function getVisibleFilteredItemsAndCompareWithInstalled(recommendations: s
 		allFoundRecommendedItems.map(async (item: ExtensionsViewItem): Promise<string> => await item.getAuthor())
 	);
 
-	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors.sort().toString();
-	const allPublisherNamesAsSortString: string = recommendations.sort().toString();
+	// normalize authors for comparison: UI shows display names (e.g. "Red Hat"),
+	// while extensions.json contains publisher IDs (e.g. "redhat")
+	const allFoundAuthorsAsSortedString: string = allFoundRecommendedAuthors
+		.map((author: string): string => author.toLowerCase().replace(/\s+/g, ''))
+		.sort()
+		.toString();
+	const allPublisherNamesAsSortString: string = recommendations
+		.map((name: string): string => name.toLowerCase().replace(/\s+/g, ''))
+		.sort()
+		.toString();
 	// in some cases we can have installed not only recommended extensions with some samples (for example .Net)
 	return allFoundAuthorsAsSortedString.includes(allPublisherNamesAsSortString);
 }
