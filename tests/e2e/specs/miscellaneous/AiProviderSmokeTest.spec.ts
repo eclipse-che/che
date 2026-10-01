@@ -141,23 +141,20 @@ suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 			expect(output.stdout.toLowerCase(), 'opencode --version should not contain errors').to.not.contain('error');
 		});
 
-		test('Send a prompt to OpenCode and verify insufficient_quota response', function (): void {
-			// "opencode run" is a non-interactive mode: OpenCode is a TUI app (like vim) and cannot be
-			// driven via oc exec without a real terminal. "run" sends a prompt and streams the response.
-			// --print-logs: required because API errors only appear in logs, not in user-facing output.
-			// -m openai/gpt-4o-mini: the default model in the container image hangs on API errors;
-			//   gpt-4o-mini returns the insufficient_quota error within seconds.
-			// timeout 45: opencode retries failed API calls indefinitely, so we kill it after 45s.
-			const output: ShellString = containerTerminal.execInContainerCommandWithTimeout(
-				'timeout 45 opencode run --print-logs -m openai/gpt-4o-mini "Say hello" 2>&1 || true',
-				undefined,
-				'120'
-			);
-			const combinedOutput: string = output.stdout + output.stderr;
-			Logger.info(`OpenCode prompt response (first 1000 chars): ${combinedOutput.substring(0, 1000)}`);
-			expect(combinedOutput, 'OpenCode should report insufficient_quota error when using API key without credits').to.contain(
-				'insufficient_quota'
-			);
+		test('Verify API key reaches OpenAI and returns insufficient_quota', function (): void {
+			// call OpenAI API directly via curl to verify the injected API key works end-to-end.
+			// the key is valid but has no credits, so OpenAI returns "insufficient_quota" error.
+			// we use curl instead of "opencode run" because opencode's plugin initialization
+			// hangs in workspace containers that cannot reach the npm registry.
+			const curlCommand: string =
+				'curl -s -m 15 https://api.openai.com/v1/chat/completions ' +
+				'-H "Authorization: Bearer $OPENAI_API_KEY" ' +
+				'-H "Content-Type: application/json" ' +
+				'-d \'{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Say hello"}]}\'';
+			const output: ShellString = containerTerminal.execInContainerCommand(curlCommand);
+			const response: string = output.stdout + output.stderr;
+			Logger.info(`OpenAI API response: ${response}`);
+			expect(response, 'OpenAI API should return insufficient_quota for a key with no credits').to.contain('insufficient_quota');
 		});
 	});
 
