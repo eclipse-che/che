@@ -38,12 +38,19 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
 	async waitWorkspaceStatus(workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus): Promise<void> {
 		Logger.debug();
 
+		const workspaceApiUrl: string = await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName);
 		let workspaceStatus: string = '';
 		let expectedStatus: boolean = false;
 		for (let i: number = 0; i < this.attempts; i++) {
-			const response: AxiosResponse = await this.processRequestHandler.get(
-				await this.apiUrlResolver.getWorkspaceApiUrl(workspaceName)
-			);
+			let response: AxiosResponse;
+			try {
+				response = await this.processRequestHandler.get(workspaceApiUrl);
+			} catch (err) {
+				// handle transient network errors (e.g. socket hang up) by retrying
+				Logger.warn(`waitWorkspaceStatus: transient error polling workspace status, retrying (attempt ${i + 1}): ${err}`);
+				await this.driverHelper.wait(this.polling);
+				continue;
+			}
 
 			if (response.status !== 200) {
 				throw new Error(`Can not get status of a workspace. Code: ${response.status} Data: ${response.data}`);
