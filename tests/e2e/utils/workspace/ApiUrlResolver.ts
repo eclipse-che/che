@@ -60,13 +60,23 @@ export class ApiUrlResolver {
 			Logger.debug(`Exact match not found for ${workspaceName}, searching by prefix with suffix`);
 		}
 
-		// if exact match not found, get all workspaces and search by prefix + dash + suffix pattern
+		// if exact match not found, get all workspaces and search in the list
 		const allWorkspacesResponse: AxiosResponse = await this.processRequestHandler.get(await this.getWorkspacesApiUrl());
 		if (allWorkspacesResponse.status !== 200) {
 			throw new Error(`Cannot get workspaces list. Code: ${allWorkspacesResponse.status} Data: ${allWorkspacesResponse.data}`);
 		}
 
 		const workspaces: Array<{ metadata: { name: string } }> = allWorkspacesResponse.data.items || [];
+
+		// check for exact match in the list (handles transient failures from the direct GET above)
+		const exactMatchInList: { metadata: { name: string } } | undefined = workspaces.find(
+			(ws): boolean => ws.metadata.name === workspaceName
+		);
+		if (exactMatchInList) {
+			Logger.debug(`Found exact match in workspace list: ${workspaceName}`);
+			return workspaceName;
+		}
+
 		// look for workspace with pattern: workspaceName + '-' + suffix (e.g., 'test-workspace-2-4fnq')
 		// this ensures we don't match 'test-workspace-20' when looking for 'test-workspace-2'
 		const matchingWorkspaces: Array<{ metadata: { name: string } }> = workspaces.filter((ws): boolean => {
