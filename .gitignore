@@ -96,3 +96,16 @@ tests/devworkspace-happy-path/workdir
 */.grunt
 */.lock-wscript
 */cypress-tests/dist
+
+# TypeScript build info #
+#########################
+*.tsbuildinfo
+
+# Editor swap files #
+#####################
+*.swp
+*.swo
+
+# npm cache #
+#############
+.npm/

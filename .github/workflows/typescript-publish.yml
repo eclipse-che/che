@@ -68,7 +68,7 @@ jobs:
         echo "npm_dist_tag=$DIST_TAG" >> $GITHUB_OUTPUT
     - uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '22'
         registry-url: 'https://registry.npmjs.org'
         scope: '@eclipse-che'
     - name: Clone source code

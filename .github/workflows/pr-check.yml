@@ -45,10 +45,10 @@ jobs:
           # remove build-in images from the VM because it is not used
           docker rmi -f $(docker images -aq) || true
 
-      - name: Configuring nodejs 18.x version
+      - name: Configuring nodejs 22.x version
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "22"
 
       - name: Check prettier rules
         run: |
