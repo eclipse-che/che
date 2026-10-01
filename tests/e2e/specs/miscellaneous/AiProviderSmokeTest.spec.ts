@@ -142,6 +142,12 @@ suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 		});
 
 		test('Send a prompt to OpenCode and verify insufficient_quota response', function (): void {
+			// "opencode run" is a non-interactive mode: OpenCode is a TUI app (like vim) and cannot be
+			// driven via oc exec without a real terminal. "run" sends a prompt and streams the response.
+			// --print-logs: required because API errors only appear in logs, not in user-facing output.
+			// -m openai/gpt-4o-mini: the default model in the container image hangs on API errors;
+			//   gpt-4o-mini returns the insufficient_quota error within seconds.
+			// timeout 45: opencode retries failed API calls indefinitely, so we kill it after 45s.
 			const output: ShellString = containerTerminal.execInContainerCommandWithTimeout(
 				'timeout 45 opencode run --print-logs -m openai/gpt-4o-mini "Say hello" 2>&1 || true',
 				undefined,

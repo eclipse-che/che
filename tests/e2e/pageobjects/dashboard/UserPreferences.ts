@@ -61,7 +61,6 @@ export class UserPreferences {
 	private static readonly AI_API_KEY_INPUT: By = By.id('ai-provider-api-key');
 	private static readonly AI_SAVE_BUTTON: By = By.css('button[data-testid="save-button"]');
 	private static readonly AI_BULK_DELETE_BUTTON: By = By.css('button[data-testid="bulk-delete-ai-key-button"]');
-	private static readonly AI_PROVIDER_TABLE: By = By.css('table[aria-label="AI Provider Keys"]');
 	private static readonly AI_DELETE_CONFIRM_CHECKBOX: By = By.id('delete-ai-key-warning-checkbox');
 
 	constructor(
