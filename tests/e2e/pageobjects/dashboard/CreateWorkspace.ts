@@ -28,6 +28,10 @@ export class CreateWorkspace {
 	private static readonly CREATE_NEW_WORKPACE_CHECKBOX: By = By.css('label[for="create-new-if-exist-switch"]');
 	private static readonly CREATE_NEW_WORKPACE_CHECKBOX_VALUE: By = By.id('create-new-if-exist-switch');
 
+	private static readonly AI_PROVIDER_SELECTOR_HEADING: By = By.xpath('//h3[text()="AI Provider Selector"]');
+	private static readonly AI_PROVIDER_CHOOSE_TOGGLE: By = By.id('accordion-item-ai-selector');
+	private static readonly AI_PROVIDER_KEY_CONFIGURED_BADGE: By = By.xpath('//span[text()=" Key configured"]');
+
 	constructor(
 		@inject(CLASSES.DriverHelper)
 		private readonly driverHelper: DriverHelper,
@@ -186,6 +190,47 @@ export class CreateWorkspace {
 		await this.driverHelper.scrollToAndClick(CreateWorkspace.CREATE_NEW_WORKPACE_CHECKBOX, timeout);
 	}
 
+	async waitAiProviderSectionVisible(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitVisibility(CreateWorkspace.AI_PROVIDER_SELECTOR_HEADING, timeout);
+	}
+
+	async expandChooseAiProviderSection(): Promise<void> {
+		Logger.debug();
+
+		const toggle: By = CreateWorkspace.AI_PROVIDER_CHOOSE_TOGGLE;
+		await this.driverHelper.waitAndClick(toggle);
+		await this.driverHelper.waitAttributeValue(toggle, 'aria-expanded', 'true', TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
+	}
+
+	async isAiProviderSectionVisible(): Promise<boolean> {
+		Logger.debug();
+
+		return await this.driverHelper.isVisible(CreateWorkspace.AI_PROVIDER_SELECTOR_HEADING);
+	}
+
+	async isAiProviderCardVisible(providerId: string): Promise<boolean> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		return await this.driverHelper.isVisible(this.getAiProviderCardLocator(providerId));
+	}
+
+	async waitAiProviderCardVisible(
+		providerId: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		await this.driverHelper.waitVisibility(this.getAiProviderCardLocator(providerId), timeout);
+	}
+
+	async isAiProviderKeyConfiguredBadgeVisible(): Promise<boolean> {
+		Logger.debug();
+
+		return await this.driverHelper.isVisible(CreateWorkspace.AI_PROVIDER_KEY_CONFIGURED_BADGE);
+	}
+
 	private getEditorsDropdownListLocator(sampleName: string): By {
 		return By.xpath(`//div[text()=\'${sampleName}\']//parent::article//button`);
 	}
@@ -213,6 +258,11 @@ export class CreateWorkspace {
 		Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
 		return By.xpath(`//div[contains(@id, 'sample-card') and text()='${sampleName}']`);
+	}
+
+	private getAiProviderCardLocator(providerId: string): By {
+		const cardId: string = providerId.replace(/\//g, '-');
+		return By.id(`ai-provider-card-${cardId}`);
 	}
 
 	private getGitBranchListItemLocator(branchName: string): By {
