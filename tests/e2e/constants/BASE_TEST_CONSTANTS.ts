@@ -40,9 +40,9 @@ export const BASE_TEST_CONSTANTS: {
 	TS_SELENIUM_BASE_URL: !process.env.TS_SELENIUM_BASE_URL ? 'http://sample-url' : process.env.TS_SELENIUM_BASE_URL.replace(/\/$/, ''),
 
 	/**
-	 * ocp infra type, possible values "PSI", "AWS", "IBM Z", "IBM Power"
+	 * ocp infra type, possible values "AWS", "IBM Z", "IBM Power"
 	 */
-	OCP_INFRA: process.env.OCP_INFRA || '',
+	OCP_INFRA: process.env.OCP_INFRA || 'AWS',
 
 	/**
 	 * openShift version

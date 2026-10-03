@@ -49,6 +49,11 @@ export class ChromeDriver implements IDriver {
 
 		if (CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER !== '') {
 			options = options.addArguments('--proxy-server=' + CHROME_DRIVER_CONSTANTS.TS_SELENIUM_PROXY_SERVER);
+			// reuse the same bypass list as oc and other clients in the test container.
+			const noProxy: string = [process.env.no_proxy, process.env.NO_PROXY].filter(Boolean).join(',');
+			if (noProxy !== '') {
+				options = options.addArguments('--proxy-bypass-list=' + noProxy);
+			}
 		}
 
 		return options;

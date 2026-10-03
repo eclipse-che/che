@@ -18,12 +18,15 @@ import { IKubernetesCommandLineToolsExecutor } from './IKubernetesCommandLineToo
 import { inject, injectable } from 'inversify';
 import { CLASSES } from '../configs/inversify.types';
 import * as fs from 'fs';
+import { spawnSync, SpawnSyncReturns } from 'child_process';
+import { getOpenShiftApiUrl, resolveOpenShiftApiUrl } from './OpenShiftApiEndpoint';
 
 @injectable()
 export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLineToolsExecutor {
 	private static container: string;
 	private static pod: string;
 	private readonly kubernetesCommandLineTool: string;
+	private apiServerUrl: string | undefined;
 	protected _namespace: string | undefined;
 	protected _workspaceName: string | undefined;
 
@@ -69,7 +72,21 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 				Logger.debug(`${this.kubernetesCommandLineTool} - user already logged`);
 			} else {
 				Logger.debug(`${this.kubernetesCommandLineTool} - login ${url}, ${user}`);
-				exec(`oc login --server=${url} -u=${user} -p=${password} --insecure-skip-tls-verify`);
+				const result: SpawnSyncReturns<string> = spawnSync(
+					'oc',
+					[
+						'login',
+						`--server=${url}`,
+						`--username=${user}`,
+						`--password=${password}`,
+						'--insecure-skip-tls-verify',
+						'--request-timeout=20s'
+					],
+					{ encoding: 'utf8', timeout: 60000 }
+				);
+				if (result.status !== 0) {
+					throw new Error(`OpenShift login failed for ${user} at ${url}; check credentials and cluster availability.`);
+				}
 			}
 		} else {
 			Logger.debug(`${this.kubernetesCommandLineTool} - doesn't support login command`);
@@ -268,15 +285,25 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	isUserLoggedIn(userName: string): boolean {
 		Logger.debug(`${this.kubernetesCommandLineTool}`);
 
-		const whoamiCommandOutput: ShellString = this.shellExecutor.executeCommand('oc whoami && oc whoami --show-server=true');
+		const whoamiCommandOutput: ShellString = this.shellExecutor.executeCommand(
+			'oc whoami --request-timeout=10s && oc whoami --show-server=true --request-timeout=10s'
+		);
 
-		return whoamiCommandOutput.stdout.includes(userName) && whoamiCommandOutput.stdout.includes(this.getServerUrl());
+		const lines: string[] = whoamiCommandOutput.stdout.trim().split(/\r?\n/);
+		if (whoamiCommandOutput.code !== 0 || lines.length !== 2 || lines[0] !== userName) {
+			return false;
+		}
+		return new URL(lines[1]).origin === new URL(this.getServerUrl()).origin;
 	}
 
 	getServerUrl(): string {
 		Logger.debug(`${this.kubernetesCommandLineTool} - get server api url.`);
 
-		return BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL.replace('devspaces.apps', 'api') + ':6443';
+		if (!this.apiServerUrl) {
+			const primary: string = process.env.OCP_API_URL || getOpenShiftApiUrl(BASE_TEST_CONSTANTS.TS_SELENIUM_BASE_URL);
+			this.apiServerUrl = resolveOpenShiftApiUrl(primary);
+		}
+		return this.apiServerUrl;
 	}
 
 	getDevWorkspaceId(): string {
