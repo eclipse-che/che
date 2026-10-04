@@ -88,7 +88,11 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
-		kubernetesCommandLineToolsExecutor.applyWithoutNamespace(devWorkspaceConfigurationYamlString);
+		// apply with an explicit namespace: "oc login" leaves the current project up to the kubeconfig,
+		// so an ambient-namespace apply can silently land the DevWorkspace outside the predefined namespace.
+		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
+		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
+		kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsStringOutput(devWorkspaceConfigurationYamlString);
 	});
 
 	// verify that just created workspace is available for the dedicated user
@@ -99,8 +103,6 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 
 	// ensure the generated DevSpace is created within the predefined namespace
 	test('Create test DevWorkspace and verify its creation within the predefined namespace', function (): void {
-		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
-		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 		// relogin under the admin user (because regular user does not have permissions for getting pod states)
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
 		expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
