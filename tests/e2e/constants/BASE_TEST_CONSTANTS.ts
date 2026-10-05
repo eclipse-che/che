@@ -21,6 +21,7 @@ export const BASE_TEST_CONSTANTS: {
 	OCP_VERSION: string;
 	TESTING_APPLICATION_VERSION: string;
 	TEST_ENVIRONMENT: string;
+	TS_AI_PROVIDER_API_KEY: string;
 	TS_DEBUG_MODE: boolean;
 	TS_LOAD_TESTS: string;
 	TS_PLATFORM: string;
@@ -136,6 +137,11 @@ export const BASE_TEST_CONSTANTS: {
 	 * true by default.
 	 */
 	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: process.env.DELETE_WORKSPACE_ON_SUCCESSFUL_TEST !== 'false',
+
+	/**
+	 * API key for AI Provider smoke test (e.g. OpenAI API key)
+	 */
+	TS_AI_PROVIDER_API_KEY: process.env.TS_AI_PROVIDER_API_KEY || '',
 
 	/**
 	 * constant, which prolong timeout constants for local debug.
