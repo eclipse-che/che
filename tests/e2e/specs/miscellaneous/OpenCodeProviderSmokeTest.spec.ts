@@ -15,7 +15,7 @@ import { LoginTests } from '../../tests-library/LoginTests';
 import { registerRunningWorkspace } from '../MochaHooks';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
-import { AI_PROVIDER_TEST_CONSTANTS } from '../../constants/AI_PROVIDER_TEST_CONSTANTS';
+
 import { UserPreferences } from '../../pageobjects/dashboard/UserPreferences';
 import { CreateWorkspace } from '../../pageobjects/dashboard/CreateWorkspace';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
@@ -27,7 +27,7 @@ import { Logger } from '../../utils/Logger';
 
 const stackName: string = 'Empty Workspace';
 
-suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+suite(`OpenCode Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
@@ -41,10 +41,11 @@ suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 	);
 	const containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 
-	const providerName: string = AI_PROVIDER_TEST_CONSTANTS.TS_AI_PROVIDER_NAME;
-	const providerId: string = AI_PROVIDER_TEST_CONSTANTS.TS_AI_PROVIDER_ID;
-	const apiKey: string = AI_PROVIDER_TEST_CONSTANTS.TS_AI_PROVIDER_API_KEY;
-	const envVarName: string = AI_PROVIDER_TEST_CONSTANTS.TS_AI_PROVIDER_ENV_VAR_NAME;
+	const providerName: string = 'OpenCode';
+	const providerId: string = 'opencodeai/opencode';
+	const apiKey: string = BASE_TEST_CONSTANTS.TS_AI_PROVIDER_API_KEY;
+	const envVarName: string = 'OPENAI_API_KEY';
+	const openAiModel: string = 'gpt-4o-mini';
 
 	async function deleteAiProviderKeys(): Promise<void> {
 		Logger.debug('Deleting AI Provider keys if they are present');
@@ -150,7 +151,8 @@ suite(`AI Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function
 				'curl -s -m 15 https://api.openai.com/v1/chat/completions ' +
 				'-H "Authorization: Bearer $OPENAI_API_KEY" ' +
 				'-H "Content-Type: application/json" ' +
-				'-d "{\\"model\\":\\"gpt-4o-mini\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"Say hello\\"}]}"';
+				`-d "{\\"model\\":\\"${openAiModel}\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"Say hello\\"}]}"`;
+
 			const output: ShellString = containerTerminal.execInContainerCommand(curlCommand);
 			const response: string = output.stdout + output.stderr;
 			Logger.info(`OpenAI API response: ${response}`);
