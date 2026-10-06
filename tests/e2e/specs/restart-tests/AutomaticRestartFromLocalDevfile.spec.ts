@@ -107,6 +107,12 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 			const isRestartDialogVisible: boolean = await driverHelper.isVisible(restartDialogLocator);
 			expect(isRestartDialogVisible, 'Restart dialog should not appear for workspace started with default devfile').to.be.false;
 
+			// stop polling as soon as the workspace has started
+			const isWorkspacePartVisible: boolean = await driverHelper.isVisible(By.xpath(xPathWorkspacePart));
+			if (isWorkspacePartVisible) {
+				break;
+			}
+
 			await driverHelper.wait(polling);
 		}
 
