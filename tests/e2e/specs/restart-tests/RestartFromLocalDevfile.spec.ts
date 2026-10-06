@@ -370,6 +370,7 @@ suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_
 	const projectName: string = 'ubi9-based-sample-public';
 	const branchName: string = 'ubi9-init';
 	let currentTabHandle: string = 'undefined';
+	let originalWorkspaceName: string = 'undefined';
 	const editorXpath: string = '//*[@id="editor-selector-card-che-incubator/che-code/latest"]';
 	const xPathToWaitFor: string = '//*[@id="workbench.parts.sidebar"]';
 
@@ -423,8 +424,9 @@ suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_
 	});
 
 	test('Verify workspace name is preserved after restart', async function (): Promise<void> {
-		const originalWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+		originalWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
 		Logger.info(`Original workspace name before restart: ${originalWorkspaceName}`);
+		WorkspaceHandlingTests.clearWorkspaceName();
 		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
 		const restartedWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
 		Logger.info(`Workspace name from starting page after restart: ${restartedWorkspaceName}`);
@@ -458,9 +460,13 @@ suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_
 		await dashboard.openDashboard();
 		await browserTabsUtil.closeAllTabsExceptCurrent();
 
-		if (WorkspaceHandlingTests.getWorkspaceName() !== 'undefined') {
-			Logger.debug('Workspace name is defined. Deleting workspace...');
-			await dashboard.deleteStoppedWorkspaceByUI(WorkspaceHandlingTests.getWorkspaceName());
+		// the restart flow may clear the current workspace name, so fall back to the name captured before the restart
+		const currentWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+		const workspaceNameToDelete: string = currentWorkspaceName !== 'undefined' ? currentWorkspaceName : originalWorkspaceName;
+
+		if (workspaceNameToDelete !== 'undefined' && workspaceNameToDelete !== '') {
+			Logger.debug(`Workspace name is defined. Deleting workspace: ${workspaceNameToDelete}`);
+			await dashboard.deleteStoppedWorkspaceByUI(workspaceNameToDelete);
 		}
 
 		WorkspaceHandlingTests.clearWorkspaceName();
