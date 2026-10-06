@@ -32,21 +32,15 @@ export class RestartWorkspaceDialog {
 		Logger.debug();
 
 		await this.driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('p').keyUp(Key.CONTROL).perform();
-		// await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-		await this.driverHelper.wait(5000);
-
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys('>Dev Spaces: Restart Workspace from Local Devfile').perform();
-		// await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-		await this.driverHelper.wait(5000);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-		// await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-		await this.driverHelper.wait(5000);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys(`/projects/${projectName}/devfile.yaml`).perform();
-		// await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-		await this.driverHelper.wait(5000);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
-		// await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-		await this.driverHelper.wait(5000);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 
 		await this.driverHelper.waitAndClick(RestartWorkspaceDialog.RESTART_BUTTON);
 	}
