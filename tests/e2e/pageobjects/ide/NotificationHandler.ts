@@ -74,7 +74,9 @@ export class NotificationHandler {
 			const errorIcons: WebElement[] = await this.driverHelper.getDriver().findElements(NotificationHandler.ERROR_NOTIFICATION);
 			for (const icon of errorIcons) {
 				try {
-					const listItem: WebElement = await icon.findElement(By.xpath('ancestor::div[contains(@class, "notification-list-item")]'));
+					const listItem: WebElement = await icon.findElement(
+						By.xpath('ancestor::div[contains(@class, "notification-list-item")]')
+					);
 					const messageElement: WebElement = await listItem.findElement(NotificationHandler.NOTIFICATION_MESSAGE);
 					messages.push(await messageElement.getText());
 				} catch (err) {
