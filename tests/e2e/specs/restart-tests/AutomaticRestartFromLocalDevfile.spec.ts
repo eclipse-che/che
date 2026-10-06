@@ -98,15 +98,25 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 	test('Wait for workspace to start successfully without restart dialog', async function (): Promise<void> {
 		Logger.info('Waiting for IDE to load — workspace should start with default devfile, no restart dialog expected');
 
-		const isRestartDialogVisible: boolean = await driverHelper.isVisible(
-			By.xpath('//span[text()="Restart with default devfile"]')
-		);
-		expect(isRestartDialogVisible, 'Restart dialog should not appear for workspace started with default devfile').to.be.false;
+		const restartDialogLocator: By = By.xpath('//span[text()="Restart with default devfile"]');
+		const polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING;
+		const attempts: number = Math.ceil(TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT / polling);
+
+		// verify the restart dialog never appears during the whole workspace start window
+		for (let i: number = 0; i < attempts; i++) {
+			const isRestartDialogVisible: boolean = await driverHelper.isVisible(restartDialogLocator);
+			expect(isRestartDialogVisible, 'Restart dialog should not appear for workspace started with default devfile').to.be
+				.false;
+
+			await driverHelper.wait(polling);
+		}
+
+		// wait for workspace to start
+		await driverHelper.waitVisibility(By.xpath(xPathWorkspacePart), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
 	});
 
 	test('Verify no errors or alerts after workspace start', async function (): Promise<void> {
 		Logger.info('Verifying no error dialogs or alerts are present after workspace start');
-		await driverHelper.waitVisibility(By.xpath(xPathWorkspacePart), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
 
 		const isErrorDialogVisible: boolean = await driverHelper.isVisible(
 			By.xpath('//*[@class="dialog-message-text"]')
