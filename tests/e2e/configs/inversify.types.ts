@@ -61,7 +61,8 @@ const CLASSES: any = {
 	SourceControlView: 'SourceControlView',
 	GitHubExtensionDialog: 'GitHubExtensionDialog',
 	AiCodeSignInDialog: 'AiCodeSignInDialog',
-	RestartWorkspaceDialog: 'RestartWorkspaceDialog'
+	RestartWorkspaceDialog: 'RestartWorkspaceDialog',
+	StatusBarProblems: 'StatusBarProblems'
 };
 
 const EXTERNAL_CLASSES: any = {

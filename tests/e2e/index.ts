@@ -39,6 +39,7 @@ export * from './pageobjects/ide/NotificationHandler';
 export * from './pageobjects/ide/RestartWorkspaceDialog';
 export * from './pageobjects/ide/RestrictedModeButton';
 export * from './pageobjects/ide/SourceControlView';
+export * from './pageobjects/ide/StatusBarProblems';
 export * from './pageobjects/ide/ViewsMoreActionsButton';
 export * from './pageobjects/login/interfaces/ICheLoginPage';
 export * from './pageobjects/login/interfaces/IOcpLoginPage';

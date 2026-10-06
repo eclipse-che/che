@@ -18,6 +18,9 @@ import { WebElement } from 'monaco-page-objects';
 @injectable()
 export class NotificationHandler {
 	private static readonly NOTIFICATION_MESSAGE: By = By.css('.notification-list-item-message');
+	private static readonly ERROR_NOTIFICATION: By = By.xpath(
+		'//div[contains(@class, "notification-list-item")]//span[contains(@class, "codicon-error")]'
+	);
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -45,6 +48,43 @@ export class NotificationHandler {
 
 		Logger.debug(`Notification containing "${expectedText}" not found after ${timeoutMs}ms`);
 		return false;
+	}
+
+	async waitErrorNotificationNotPresent(
+		attempts: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+	): Promise<void> {
+		Logger.debug();
+
+		const errorVisible: boolean = await this.driverHelper.waitVisibilityBoolean(
+			NotificationHandler.ERROR_NOTIFICATION,
+			attempts,
+			polling
+		);
+
+		if (errorVisible) {
+			const messages: string[] = await this.getErrorNotificationMessages();
+			throw new Error(`Unexpected error notification appeared: ${messages.join('; ')}`);
+		}
+	}
+
+	private async getErrorNotificationMessages(): Promise<string[]> {
+		const messages: string[] = [];
+		try {
+			const errorIcons: WebElement[] = await this.driverHelper.getDriver().findElements(NotificationHandler.ERROR_NOTIFICATION);
+			for (const icon of errorIcons) {
+				try {
+					const listItem: WebElement = await icon.findElement(By.xpath('ancestor::div[contains(@class, "notification-list-item")]'));
+					const messageElement: WebElement = await listItem.findElement(NotificationHandler.NOTIFICATION_MESSAGE);
+					messages.push(await messageElement.getText());
+				} catch (err) {
+					// notification may auto-dismiss mid-read, skip to next
+				}
+			}
+		} catch (err) {
+			// notification container was removed, no error notifications exist
+		}
+		return messages;
 	}
 
 	private async findInExistingNotifications(expectedText: string): Promise<boolean> {
