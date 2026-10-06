@@ -105,8 +105,7 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 		// verify the restart dialog never appears during the whole workspace start window
 		for (let i: number = 0; i < attempts; i++) {
 			const isRestartDialogVisible: boolean = await driverHelper.isVisible(restartDialogLocator);
-			expect(isRestartDialogVisible, 'Restart dialog should not appear for workspace started with default devfile').to.be
-				.false;
+			expect(isRestartDialogVisible, 'Restart dialog should not appear for workspace started with default devfile').to.be.false;
 
 			await driverHelper.wait(polling);
 		}
@@ -118,9 +117,7 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 	test('Verify no errors or alerts after workspace start', async function (): Promise<void> {
 		Logger.info('Verifying no error dialogs or alerts are present after workspace start');
 
-		const isErrorDialogVisible: boolean = await driverHelper.isVisible(
-			By.xpath('//*[@class="dialog-message-text"]')
-		);
+		const isErrorDialogVisible: boolean = await driverHelper.isVisible(By.xpath('//*[@class="dialog-message-text"]'));
 		expect(isErrorDialogVisible, 'Error dialog should not be present').to.be.false;
 
 		const isAlertVisible: boolean = await driverHelper.isVisible(By.css('h4[class*="alert__title"]'));
@@ -131,8 +128,7 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 		const projectName: string = StringUtil.getProjectNameFromGitUrl(gitSshUrl);
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not
-			.undefined;
+		expect(await projectAndFileTests.getProjectTreeItem(projectSection, projectName), 'Project folder was not imported').not.undefined;
 	});
 
 	test('Navigate to workspace Devfile tab and verify devfile content is not available', async function (): Promise<void> {
