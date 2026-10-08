@@ -15,7 +15,7 @@ import { Logger } from '../../utils/Logger';
 import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
-export class StatusBarProblems {
+export class StatusBarProblemsView {
 	private static readonly PROBLEMS_STATUS_BAR_ITEM: By = By.id('status.problems');
 	private static readonly PROBLEMS_PANEL: By = By.id('workbench.parts.panel');
 	private static readonly PROBLEMS_PANEL_BODY: By = By.xpath('//div[@id="workbench.parts.panel"]/div[contains(@class, "content")]');
@@ -30,8 +30,8 @@ export class StatusBarProblems {
 
 		// the status bar item may still be re-created while the IDE loads after a restart;
 		// waitAndClick re-finds the element on every attempt within the timeout, handling that race
-		await this.driverHelper.waitAndClick(StatusBarProblems.PROBLEMS_STATUS_BAR_ITEM, timeout);
-		await this.driverHelper.waitVisibility(StatusBarProblems.PROBLEMS_PANEL, timeout);
+		await this.driverHelper.waitAndClick(StatusBarProblemsView.PROBLEMS_STATUS_BAR_ITEM, timeout);
+		await this.driverHelper.waitVisibility(StatusBarProblemsView.PROBLEMS_PANEL, timeout);
 	}
 
 	/**
@@ -43,6 +43,6 @@ export class StatusBarProblems {
 
 		await this.openProblemsView(timeout);
 
-		return this.driverHelper.waitAndGetText(StatusBarProblems.PROBLEMS_PANEL_BODY, timeout);
+		return this.driverHelper.waitAndGetText(StatusBarProblemsView.PROBLEMS_PANEL_BODY, timeout);
 	}
 }

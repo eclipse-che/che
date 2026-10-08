@@ -22,6 +22,8 @@ export class RestartWorkspaceDialog {
 	private static readonly ERROR_DIALOG_ICON: By = By.xpath('//div[contains(@class, "codicon-dialog-error")]');
 	private static readonly ERROR_DIALOG_TEXT: By = By.xpath('//*[@class="dialog-message-text"]');
 	private static readonly ERROR_DIALOG_DETAIL: By = By.xpath('//*[@class="dialog-message-detail"]');
+	// wait at least 15 seconds (15 attempts * default 1000ms polling) for the error dialog to appear before concluding it is absent
+	private static readonly ERROR_DIALOG_ATTEMPTS: number = 15;
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -58,7 +60,7 @@ export class RestartWorkspaceDialog {
 	}
 
 	async waitErrorDialogNotPresent(
-		attempts: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS,
+		attempts: number = RestartWorkspaceDialog.ERROR_DIALOG_ATTEMPTS,
 		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
 	): Promise<void> {
 		Logger.debug();

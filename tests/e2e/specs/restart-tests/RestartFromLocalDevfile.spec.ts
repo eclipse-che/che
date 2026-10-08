@@ -26,7 +26,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { RestartWorkspaceDialog } from '../../pageobjects/ide/RestartWorkspaceDialog';
-import { StatusBarProblems } from '../../pageobjects/ide/StatusBarProblems';
+import { StatusBarProblemsView } from '../../pageobjects/ide/StatusBarProblemsView';
 import { By } from 'selenium-webdriver';
 import { registerRunningWorkspace } from '../MochaHooks';
 
@@ -363,7 +363,7 @@ suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
 	const restartWorkspaceDialog: RestartWorkspaceDialog = e2eContainer.get(CLASSES.RestartWorkspaceDialog);
-	const statusBarProblems: StatusBarProblems = e2eContainer.get(CLASSES.StatusBarProblems);
+	const statusBarProblemsView: StatusBarProblemsView = e2eContainer.get(CLASSES.StatusBarProblemsView);
 	const gitRepository: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
 		? 'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public'
 		: 'https://github.com/crw-qe/ubi9-based-sample-public.git';
@@ -446,7 +446,7 @@ suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_
 		expect(containerTerminal.ls('/projects').stdout).includes(projectName);
 		expect(containerTerminal.ls(`/projects/${projectName}`).stdout).includes('devfile.yaml');
 		await restartWorkspaceDialog.waitErrorDialogNotPresent();
-		const problemsViewText: string = await statusBarProblems.openProblemsViewAndGetText();
+		const problemsViewText: string = await statusBarProblemsView.openProblemsViewAndGetText();
 		Logger.info(`Problems view text after restart: ${problemsViewText}`);
 		expect(problemsViewText).includes('No problems have been detected in the workspace');
 	});
