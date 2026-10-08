@@ -30,7 +30,6 @@ import { WorkspaceHandlingTests } from '../tests-library/WorkspaceHandlingTests'
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 let latestWorkspace: string = '';
-export let rpApi: any = undefined;
 
 export function registerRunningWorkspace(workspaceName: string): void {
 	workspaceName !== ''
@@ -45,10 +44,6 @@ export function registerRunningWorkspace(workspaceName: string): void {
 
 exports.mochaHooks = {
 	beforeAll: [
-		function initRPApi(): any {
-			rpApi = require('@reportportal/agent-js-mocha/lib/publicReportingAPI.js');
-		},
-
 		function decorateExternalClasses(): void {
 			decorate(injectable(), Main);
 			decorate(injectable(), LocatorLoader);
@@ -95,21 +90,6 @@ exports.mochaHooks = {
 					allure.attachment('Screenshot', Buffer.from(screenshot, 'base64'), 'image/png');
 				} catch (e) {
 					allure.attachment('No screenshot', 'Could not take a screenshot', 'text/plain');
-				}
-			}
-		},
-		async function saveReportportalAttachments(this: Mocha.Context): Promise<void> {
-			if (REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && this.currentTest?.state === 'failed') {
-				try {
-					const screenshot: string = await driverHelper.getDriver().takeScreenshot();
-					const attachment: { name: string; type: string; content: string } = {
-						name: 'screenshot.png',
-						type: 'image/png',
-						content: screenshot
-					};
-					rpApi.error('Screenshot on fail: ', attachment);
-				} catch (e) {
-					rpApi.error('Could not attach the screenshot');
 				}
 			}
 		},
