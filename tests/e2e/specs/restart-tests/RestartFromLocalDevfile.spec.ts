@@ -26,6 +26,7 @@ import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { RestartWorkspaceDialog } from '../../pageobjects/ide/RestartWorkspaceDialog';
+import { StatusBarProblemsView } from '../../pageobjects/ide/StatusBarProblemsView';
 import { By } from 'selenium-webdriver';
 import { registerRunningWorkspace } from '../MochaHooks';
 
@@ -347,5 +348,129 @@ suite(`Test case with pvc-fail workspace (bad image restart) ${BASE_TEST_CONSTAN
 			);
 			expect(restoreResult.code).to.equal(0, 'Failed to restore CheCluster storage strategy');
 		}
+	});
+});
+
+suite(`Test case with empty workspace and ubi9-init devfile restart ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
+	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
+	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
+	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
+	const containerTerminal: ContainerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
+	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
+		CLASSES.KubernetesCommandLineToolsExecutor
+	);
+	const restartWorkspaceDialog: RestartWorkspaceDialog = e2eContainer.get(CLASSES.RestartWorkspaceDialog);
+	const statusBarProblemsView: StatusBarProblemsView = e2eContainer.get(CLASSES.StatusBarProblemsView);
+	const gitRepository: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
+		? 'https://gh.crw-qe.com/test-automation-only/ubi9-based-sample-public'
+		: 'https://github.com/crw-qe/ubi9-based-sample-public.git';
+	const projectName: string = 'ubi9-based-sample-public';
+	const branchName: string = 'ubi9-init';
+	let currentTabHandle: string = 'undefined';
+	let originalWorkspaceName: string = 'undefined';
+	const editorXpath: string = '//*[@id="editor-selector-card-che-incubator/che-code/latest"]';
+	const xPathToWaitFor: string = '//*[@id="workbench.parts.sidebar"]';
+
+	suiteSetup('Login into Che', async function (): Promise<void> {
+		kubernetesCommandLineToolsExecutor.loginToOcp();
+		await loginTests.loginIntoChe();
+	});
+
+	function clearCurrentTabHandle(): void {
+		currentTabHandle = 'undefined';
+	}
+
+	test('Create Empty workspace', async function (): Promise<void> {
+		await dashboard.openDashboard();
+		currentTabHandle = await browserTabsUtil.getCurrentWindowHandle();
+		await dashboard.clickCreateWorkspaceButton();
+		await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndSample(editorXpath, 'Empty Workspace', xPathToWaitFor);
+		registerRunningWorkspace(WorkspaceHandlingTests.getWorkspaceName());
+	});
+
+	test('Setup workspace context for API operations', function (): void {
+		kubernetesCommandLineToolsExecutor.workspaceName = WorkspaceHandlingTests.getWorkspaceName();
+		kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
+	});
+
+	test('Clone ubi9-based-sample-public repository', function (): void {
+		const cloneOutput: ShellString = containerTerminal.gitClone(gitRepository);
+		expect(cloneOutput.stdout + cloneOutput.stderr).includes('Cloning');
+	});
+
+	test('Accept the project as a trusted one', async function (): Promise<void> {
+		await projectAndFileTests.performTrustAuthorDialog();
+	});
+
+	test('Verify cloned project exists', function (): void {
+		expect(containerTerminal.ls().stdout).includes(projectName);
+	});
+
+	test('Checkout to ubi9-init branch', function (): void {
+		const checkoutOutput: ShellString = containerTerminal.execInContainerCommand(
+			`cd /projects/${projectName} && git checkout ${branchName}`
+		);
+		expect(checkoutOutput.code).to.equal(0, `Failed to checkout branch ${branchName}`);
+	});
+
+	test('Restart workspace from local devfile', async function (): Promise<void> {
+		await restartWorkspaceDialog.restartFromLocalDevfile(projectName);
+		Logger.info('Waiting for "Restart Workspace" confirmation popup');
+		await restartWorkspaceDialog.confirmRestartWorkspace();
+		await restartWorkspaceDialog.waitErrorDialogNotPresent();
+	});
+
+	test('Verify workspace name is preserved after restart', async function (): Promise<void> {
+		originalWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
+		Logger.info(`Original workspace name before restart: ${originalWorkspaceName}`);
+		WorkspaceHandlingTests.clearWorkspaceName();
+		await workspaceHandlingTests.obtainWorkspaceNameFromStartingPage();
+		const restartedWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+		Logger.info(`Workspace name from starting page after restart: ${restartedWorkspaceName}`);
+		expect(restartedWorkspaceName).to.equal(originalWorkspaceName, 'Workspace name must be the same after restart');
+	});
+
+	test('Wait for workspace to restart successfully', async function (): Promise<void> {
+		Logger.info('Waiting for workspace to restart with local devfile from ubi9-init branch');
+		await driverHelper.waitVisibility(By.xpath(xPathToWaitFor), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
+	});
+
+	test('Re-initialize workspace context after restart', function (): void {
+		kubernetesCommandLineToolsExecutor.getPodAndContainerNames();
+	});
+
+	test('Verify project exists after restart', async function (): Promise<void> {
+		expect(containerTerminal.ls('/projects').stdout).includes(projectName);
+		expect(containerTerminal.ls(`/projects/${projectName}`).stdout).includes('devfile.yaml');
+		await restartWorkspaceDialog.waitErrorDialogNotPresent();
+		const problemsViewText: string = await statusBarProblemsView.openProblemsViewAndGetText();
+		Logger.info(`Problems view text after restart: ${problemsViewText}`);
+		expect(problemsViewText).includes('No problems have been detected in the workspace');
+	});
+
+	suiteTeardown('Delete DevWorkspace', async function (): Promise<void> {
+		Logger.debug('Delete DevWorkspace. After each test.');
+		if (currentTabHandle !== 'undefined') {
+			await browserTabsUtil.switchToWindow(currentTabHandle);
+		}
+
+		await dashboard.openDashboard();
+		await browserTabsUtil.closeAllTabsExceptCurrent();
+
+		// the restart flow may clear the current workspace name, so fall back to the name captured before the restart
+		const currentWorkspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+		const workspaceNameToDelete: string = currentWorkspaceName !== 'undefined' ? currentWorkspaceName : originalWorkspaceName;
+
+		if (workspaceNameToDelete !== 'undefined' && workspaceNameToDelete !== '') {
+			Logger.debug(`Workspace name is defined. Deleting workspace: ${workspaceNameToDelete}`);
+			await dashboard.deleteStoppedWorkspaceByUI(workspaceNameToDelete);
+		}
+
+		WorkspaceHandlingTests.clearWorkspaceName();
+		clearCurrentTabHandle();
+		registerRunningWorkspace('');
 	});
 });

@@ -19,8 +19,11 @@ export class RestartWorkspaceDialog {
 	private static readonly RESTART_BUTTON: By = By.xpath('//div[@class="dialog-buttons"]//a[text()="Restart"]');
 	private static readonly RESTART_WORKSPACE_BUTTON: By = By.xpath('//div[@class="dialog-buttons"]//a[text()="Restart your workspace"]');
 	private static readonly RESTART_WITH_DEFAULT_DEVFILE_BUTTON: By = By.xpath('//span[text()="Restart with default devfile"]');
+	private static readonly ERROR_DIALOG_ICON: By = By.xpath('//div[contains(@class, "codicon-dialog-error")]');
 	private static readonly ERROR_DIALOG_TEXT: By = By.xpath('//*[@class="dialog-message-text"]');
 	private static readonly ERROR_DIALOG_DETAIL: By = By.xpath('//*[@class="dialog-message-detail"]');
+	// wait at least 15 seconds (15 attempts * default 1000ms polling) for the error dialog to appear before concluding it is absent
+	private static readonly ERROR_DIALOG_ATTEMPTS: number = 15;
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -32,12 +35,10 @@ export class RestartWorkspaceDialog {
 
 		await this.driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('p').keyUp(Key.CONTROL).perform();
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-
 		await this.driverHelper.getDriver().actions().sendKeys('>Dev Spaces: Restart Workspace from Local Devfile').perform();
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
-
 		await this.driverHelper.getDriver().actions().sendKeys(`/projects/${projectName}/devfile.yaml`).perform();
 		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
 		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
@@ -56,6 +57,24 @@ export class RestartWorkspaceDialog {
 		Logger.debug();
 
 		await this.driverHelper.waitAndClick(RestartWorkspaceDialog.RESTART_WITH_DEFAULT_DEVFILE_BUTTON, timeout);
+	}
+
+	async waitErrorDialogNotPresent(
+		attempts: number = RestartWorkspaceDialog.ERROR_DIALOG_ATTEMPTS,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+	): Promise<void> {
+		Logger.debug();
+
+		const errorIconVisible: boolean = await this.driverHelper.waitVisibilityBoolean(
+			RestartWorkspaceDialog.ERROR_DIALOG_ICON,
+			attempts,
+			polling
+		);
+
+		if (errorIconVisible) {
+			const errorDetail: string = await this.getErrorDetailText();
+			throw new Error(`Unexpected error dialog appeared: ${errorDetail}`);
+		}
 	}
 
 	async getErrorDialogText(timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT): Promise<string> {
