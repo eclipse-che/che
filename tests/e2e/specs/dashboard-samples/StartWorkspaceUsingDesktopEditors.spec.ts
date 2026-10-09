@@ -29,8 +29,11 @@ suite('Check all editors with all samples', function (): void {
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const intellijTitleXpath: string = '/html/body/h1';
+	const intellijTitleXpath: string = '//main[@class="page-container"]/h1';
 	const vsCodeTitleXpath: string = '//div[@class="header-title"]';
+	const gatewayButtonXpath: string = '//a[@class="gateway-button"]';
+	const openInIdeTitleXpath: string = '(//div[@class="connection-option"]/h3)[2]';
+	const dashboardLinkXpath: string = '//p[@class="dashboard-link"]/a';
 
 	let currentTabHandle: string = 'undefined';
 	const pollingForCheckTitleVSCode: number = 100;
@@ -139,9 +142,46 @@ suite('Check all editors with all samples', function (): void {
 	async function verifyIntelliJEditor(titleXpath: string): Promise<void> {
 		Logger.debug();
 
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
-		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+		expect(headerText).equal('Workspace ' + workspaceName + ' is running');
 		Logger.debug('Workspace title verified for IntelliJ editor: ' + headerText);
+
+		const pageText: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
+		// "Get started" section with the connection method options
+		expect(pageText).contains('Get started').and.contains('Select your preferred connection method.');
+		Logger.debug('"Get started" section was found');
+
+		expect(pageText).contains('JetBrains Gateway').and.contains('Connect using the standalone JetBrains Gateway application.');
+		Logger.debug('"JetBrains Gateway" connection option was found');
+
+		const openInIdeTitle: string = await workspaceHandlingTests.getTextFromUIElementByXpath(openInIdeTitleXpath);
+		expect(openInIdeTitle).contains('Open in JetBrains');
+		Logger.debug('"' + openInIdeTitle + '" connection option was found');
+
+		expect(pageText).contains('File > Remote Development >').and.contains('connection wizard');
+		Logger.debug('IDE connection wizard instructions were found');
+
+		// the "Open Gateway" button has to point to the current workspace via a jetbrains-gateway deep link
+		const gatewayButtonText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(gatewayButtonXpath);
+		expect(gatewayButtonText).equal('Open Gateway');
+		Logger.debug('"Open Gateway" button was found');
+
+		const pageHtml: string = await driverHelper.getDriver().executeScript('return document.body.innerHTML;');
+		expect(pageHtml)
+			.contains('jetbrains-gateway://connect')
+			.and.contains('dwName=' + workspaceName);
+		Logger.debug('Gateway deep link for workspace "' + workspaceName + '" was found');
+
+		// help section and the link back to the dashboard
+		expect(pageText).contains('open the workspace?').and.contains('the documentation');
+		Logger.debug('Help section was found');
+
+		const dashboardLinkText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(dashboardLinkXpath);
+		expect(dashboardLinkText).equal('Open Dashboard');
+		Logger.debug('"Open Dashboard" link was found');
 	}
 
 	async function testWorkspaceStartup(
