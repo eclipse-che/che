@@ -96,6 +96,23 @@ suite('Check all editors with all samples', function (): void {
 			);
 	}
 
+	async function getPageTextWhenContains(marker: string, timeout: number = 30000): Promise<string> {
+		Logger.debug(`marker: "${marker}"`);
+
+		let pageText: string = '';
+		await driverHelper
+			.getDriver()
+			.wait(async (): Promise<boolean> => {
+				pageText = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+				return pageText.includes(marker);
+			}, timeout)
+			.catch((): void => {
+				Logger.debug(`Timed out waiting for "${marker}"; asserting on last snapshot`);
+			});
+
+		return pageText;
+	}
+
 	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
 	}
@@ -107,7 +124,7 @@ suite('Check all editors with all samples', function (): void {
 
 		await clickOnElementByXpath(useExtensionSwitcher);
 
-		const pageTextAfterUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+		const pageTextAfterUseExtensionSwitcher: string = await getPageTextWhenContains('-----END OPENSSH PRIVATE KEY-----');
 
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
 		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
@@ -125,7 +142,7 @@ suite('Check all editors with all samples', function (): void {
 		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n ' + actualUser + '-devspaces');
 		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces" was found');
 
-		expect(pageTextAfterUseExtensionSwitcher)
+		expect(pageTextAfterUseExtensionSwitcher, `Actual page text:\n${pageTextAfterUseExtensionSwitcher}`)
 			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
 			.and.contains('-----END OPENSSH PRIVATE KEY-----');
 		Logger.debug('SSH private key (BEGIN and END markers) was found');
