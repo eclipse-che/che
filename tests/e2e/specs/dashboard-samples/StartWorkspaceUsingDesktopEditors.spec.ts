@@ -120,40 +120,51 @@ suite('Check all editors with all samples', function (): void {
 	async function verifyVSCodeEditor(): Promise<void> {
 		Logger.debug();
 
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+
+		// the "Use Extension" view is rendered by default
 		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+		const pageHtmlBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerHTML;');
 
-		await clickOnElementByXpath(useExtensionSwitcher);
-
-		const pageTextAfterUseExtensionSwitcher: string = await getPageTextWhenContains('-----END OPENSSH PRIVATE KEY-----');
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + workspaceName + ' is running');
+		Logger.debug('Workspace name "' + workspaceName + ' is running" was found before "Use Extension" clicked');
 
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
 		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
 
-		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.debug(
-			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
-		);
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Dev Spaces Remote SSH').and.contains('Remote - SSH');
+		Logger.debug('Required extension names were found');
 
-		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.debug(
-			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
-		);
+		// the connection URI has to point to the current workspace, its scheme depends on the editor (vscode, kiro)
+		expect(pageHtmlBeforeUseExtensionSwitcher, 'Connection URI was not found')
+			.contains('://redhat.devspaces-remote-ssh?')
+			.and.contains('dwName=' + workspaceName);
+		Logger.debug('Connection URI for workspace "' + workspaceName + '" was found');
 
-		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n ' + actualUser + '-devspaces');
-		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces" was found');
+		// switching the toggle off replaces the content with the manual "oc port-forward" instructions
+		await clickOnElementByXpath(useExtensionSwitcher);
+
+		const pageTextAfterUseExtensionSwitcher: string = await getPageTextWhenContains('StrictHostKeyChecking');
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + workspaceName + ' is running');
+		Logger.debug('Workspace name "' + workspaceName + ' is running" was found after "Use Extension" clicked');
 
 		expect(pageTextAfterUseExtensionSwitcher, `Actual page text:\n${pageTextAfterUseExtensionSwitcher}`)
-			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
-			.and.contains('-----END OPENSSH PRIVATE KEY-----');
-		Logger.debug('SSH private key (BEGIN and END markers) was found');
+			.contains('oc port-forward -n ' + actualUser + '-devspaces')
+			.and.contains('2022:2022');
+		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces ... 2022:2022" was found');
 
-		expect(pageTextAfterUseExtensionSwitcher)
-			.contains('HostName')
-			.and.contains('User')
-			.and.contains('Port')
-			.and.contains('IdentityFile')
-			.and.contains('UserKnownHostsFile');
-		Logger.debug('SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found');
+		// ssh config suggested for ${HOME}/.ssh/config, the page serves no private key since it relies on port forwarding
+		expect(pageTextAfterUseExtensionSwitcher, `Actual page text:\n${pageTextAfterUseExtensionSwitcher}`)
+			.contains('Host localhost')
+			.and.contains('HostName 127.0.0.1')
+			.and.contains('Port 2022')
+			.and.contains('UserKnownHostsFile')
+			.and.contains('StrictHostKeyChecking no');
+		Logger.debug('SSH config parameters (Host, HostName, Port, UserKnownHostsFile, StrictHostKeyChecking) were found');
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('Troubleshooting');
+		Logger.debug('"Troubleshooting" section was found');
 	}
 
 	async function verifyIntelliJEditor(titleXpath: string): Promise<void> {
