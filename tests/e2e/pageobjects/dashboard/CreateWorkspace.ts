@@ -30,7 +30,6 @@ export class CreateWorkspace {
 
 	private static readonly AI_PROVIDER_SELECTOR_HEADING: By = By.xpath('//h3[text()="AI Provider Selector"]');
 	private static readonly AI_PROVIDER_CHOOSE_TOGGLE: By = By.id('accordion-item-ai-selector');
-	private static readonly AI_PROVIDER_KEY_CONFIGURED_BADGE: By = By.xpath('//span[text()=" Key configured"]');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -225,10 +224,18 @@ export class CreateWorkspace {
 		await this.driverHelper.waitVisibility(this.getAiProviderCardLocator(providerId), timeout);
 	}
 
-	async isAiProviderKeyConfiguredBadgeVisible(): Promise<boolean> {
-		Logger.debug();
+	/**
+	 * waits for the configured-key badge within the selected provider card.
+	 * @param providerId registry provider identifier
+	 * @param timeout maximum wait time in milliseconds
+	 */
+	async waitAiProviderKeyConfiguredBadgeVisible(
+		providerId: string,
+		timeout: number = TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT
+	): Promise<void> {
+		Logger.debug(`providerId: "${providerId}"`);
 
-		return await this.driverHelper.isVisible(CreateWorkspace.AI_PROVIDER_KEY_CONFIGURED_BADGE);
+		await this.driverHelper.waitVisibility(this.getAiProviderKeyConfiguredBadgeLocator(providerId), timeout);
 	}
 
 	private getEditorsDropdownListLocator(sampleName: string): By {
@@ -263,6 +270,16 @@ export class CreateWorkspace {
 	private getAiProviderCardLocator(providerId: string): By {
 		const cardId: string = providerId.replace(/\//g, '-');
 		return By.id(`ai-provider-card-${cardId}`);
+	}
+
+	/**
+	 * locates the selected provider's configured-key badge independently of surrounding whitespace.
+	 * @param providerId registry provider identifier
+	 * @returns provider-scoped badge locator
+	 */
+	private getAiProviderKeyConfiguredBadgeLocator(providerId: string): By {
+		const cardId: string = providerId.replace(/\//g, '-');
+		return By.xpath(`//*[@id="ai-provider-card-${cardId}"]//span[normalize-space(.)="Key configured"]`);
 	}
 
 	private getGitBranchListItemLocator(branchName: string): By {

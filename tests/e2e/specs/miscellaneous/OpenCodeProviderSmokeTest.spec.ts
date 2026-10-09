@@ -97,8 +97,7 @@ suite(`OpenCode Provider Smoke Test ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, fu
 		});
 
 		test('Verify "Key configured" badge is displayed', async function (): Promise<void> {
-			const isBadgeVisible: boolean = await createWorkspace.isAiProviderKeyConfiguredBadgeVisible();
-			expect(isBadgeVisible, '"Key configured" badge should be visible').to.be.true;
+			await createWorkspace.waitAiProviderKeyConfiguredBadgeVisible(providerId);
 		});
 	});
 
