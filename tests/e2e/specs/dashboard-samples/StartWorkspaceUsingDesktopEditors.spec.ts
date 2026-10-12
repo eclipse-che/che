@@ -19,6 +19,11 @@ import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { EditorConfig, ALL_EDITORS } from '../../constants/EDITOR_CONSTANTS';
+import { ScreenCatcher } from '../../utils/ScreenCatcher';
+import { StringUtil } from '../../utils/StringUtil';
+import { REPORTER_CONSTANTS } from '../../constants/REPORTER_CONSTANTS';
+import * as fs from 'fs';
+import * as mocha from 'mocha';
 
 suite('Check all editors with all samples', function (): void {
 	this.timeout(24000000);
@@ -27,6 +32,7 @@ suite('Check all editors with all samples', function (): void {
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
 	const intellijTitleXpath: string = '//main[@class="page-container"]/h1';
@@ -36,8 +42,9 @@ suite('Check all editors with all samples', function (): void {
 	const dashboardLinkXpath: string = '//p[@class="dashboard-link"]/a';
 
 	let currentTabHandle: string = 'undefined';
-	const pollingForCheckTitleVSCode: number = 100;
-	const pollingForCheckTitleIntelliJ: number = 500;
+	// polling below the webdriver roundtrip cost (~300ms) gives no real pause between checks and breaks the timeout arithmetic
+	const pollingForCheckTitleVSCode: number = 1000;
+	const pollingForCheckTitleIntelliJ: number = 1000;
 
 	// filter editors based on environment variables
 	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
@@ -115,6 +122,25 @@ suite('Check all editors with all samples', function (): void {
 
 	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
+	}
+
+	// the CheReporter 'fail' handler is not awaited by mocha, so it races with the teardown and catches the dashboard
+	// instead of the editor tab. the teardown captures the editor tab itself before switching tabs and navigating away
+	async function saveFailedTestArtifacts(test: mocha.Test): Promise<void> {
+		Logger.debug();
+
+		const reportDirPath: string = `${REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER}/${StringUtil.sanitizeTitle(test.fullTitle())}`;
+		const testTitle: string = StringUtil.sanitizeTitle(test.title);
+
+		try {
+			fs.mkdirSync(reportDirPath, { recursive: true });
+
+			await screenCatcher.catchScreen(`${reportDirPath}/failure-screenshot-${testTitle}.png`);
+			fs.writeFileSync(`${reportDirPath}/failure-pagesource-${testTitle}.html`, await driverHelper.getDriver().getPageSource());
+			await workspaceHandlingTests.logStartWorkspaceInfo();
+		} catch (err) {
+			Logger.error(`failed to capture artifacts of the failed test - ${err}`);
+		}
 	}
 
 	async function verifyVSCodeEditor(): Promise<void> {
@@ -274,6 +300,11 @@ suite('Check all editors with all samples', function (): void {
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
 		Logger.debug('Delete DevWorkspace. After each test.');
+
+		if (this.currentTest?.state === 'failed') {
+			await saveFailedTestArtifacts(this.currentTest);
+		}
+
 		if (currentTabHandle !== 'undefined') {
 			await browserTabsUtil.switchToWindow(currentTabHandle);
 		}

@@ -98,17 +98,19 @@ export class DriverHelper {
 		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
 	): Promise<WebElement> {
 		const attempts: number = Math.ceil(timeout / polling);
+		const startTime: number = Date.now();
+		let performedAttempts: number = 0;
+		let lastError: unknown;
 		Logger.trace(`${elementLocator}`);
 
-		for (let i: number = 0; i < attempts; i++) {
+		// the loop is limited by the elapsed time too, a polling attempt can take longer than the polling value itself
+		for (let i: number = 0; i < attempts && Date.now() - startTime < timeout; i++) {
+			performedAttempts = i + 1;
 			let element: WebElement;
 			try {
 				element = await this.driver.wait(until.elementLocated(elementLocator), polling);
 			} catch (err) {
-				if (i >= attempts - 1) {
-					Logger.error(`failed with exception, out of attempts - ${err}`);
-					throw err;
-				}
+				lastError = err;
 
 				if (err instanceof error.TimeoutError) {
 					if (attempts !== 1) {
@@ -133,6 +135,8 @@ export class DriverHelper {
 				Logger.trace('element is located and is visible.');
 				return visibleWebElement;
 			} catch (err) {
+				lastError = err;
+
 				if (err instanceof error.TimeoutError) {
 					if (attempts !== 1) {
 						// waitVisibility was spamming other methods when the number of attempts was 1 - only show message if attempts > 1
@@ -153,7 +157,8 @@ export class DriverHelper {
 		}
 
 		throw new error.TimeoutError(
-			`Exceeded maximum visibility checking attempts for '${elementLocator}' element, timeouted after ${timeout}`
+			`element '${elementLocator}' is not visible - gave up after ${performedAttempts} attempts ` +
+				`(${timeout}ms timeout, ${polling}ms polling, ${Date.now() - startTime}ms elapsed), last error: ${lastError}`
 		);
 	}
 
