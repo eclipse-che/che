@@ -103,8 +103,7 @@ export class DriverHelper {
 		let lastError: unknown;
 		Logger.trace(`${elementLocator}`);
 
-		// the loop is limited by the elapsed time too, a polling attempt can take longer than the polling value itself
-		for (let i: number = 0; i < attempts && Date.now() - startTime < timeout; i++) {
+		for (let i: number = 0; i < attempts; i++) {
 			performedAttempts = i + 1;
 			let element: WebElement;
 			try {
@@ -158,7 +157,7 @@ export class DriverHelper {
 
 		throw new error.TimeoutError(
 			`element '${elementLocator}' is not visible - gave up after ${performedAttempts} attempts ` +
-				`(${timeout}ms timeout, ${polling}ms polling, ${Date.now() - startTime}ms elapsed), last error: ${lastError}`
+				`(${timeout}ms timeout, ${polling}ms polling, ${Date.now() - startTime}ms really elapsed), last error: ${lastError}`
 		);
 	}
 
