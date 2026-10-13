@@ -19,6 +19,11 @@ import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { EditorConfig, ALL_EDITORS } from '../../constants/EDITOR_CONSTANTS';
+import { ScreenCatcher } from '../../utils/ScreenCatcher';
+import { StringUtil } from '../../utils/StringUtil';
+import { REPORTER_CONSTANTS } from '../../constants/REPORTER_CONSTANTS';
+import * as fs from 'fs';
+import * as mocha from 'mocha';
 
 suite('Check all editors with all samples', function (): void {
 	this.timeout(24000000);
@@ -27,14 +32,19 @@ suite('Check all editors with all samples', function (): void {
 	const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 	const browserTabsUtil: BrowserTabsUtil = e2eContainer.get(CLASSES.BrowserTabsUtil);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+	const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
-	const intellijTitleXpath: string = '/html/body/h1';
+	const intellijTitleXpath: string = '//main[@class="page-container"]/h1';
 	const vsCodeTitleXpath: string = '//div[@class="header-title"]';
+	const gatewayButtonXpath: string = '//a[@class="gateway-button"]';
+	const openInIdeTitleXpath: string = '(//div[@class="connection-option"]/h3)[2]';
+	const dashboardLinkXpath: string = '//p[@class="dashboard-link"]/a';
 
 	let currentTabHandle: string = 'undefined';
-	const pollingForCheckTitleVSCode: number = 100;
-	const pollingForCheckTitleIntelliJ: number = 500;
+	// polling below the webdriver roundtrip cost (~300ms) gives no real pause between checks and breaks the timeout arithmetic
+	const pollingForCheckTitleVSCode: number = 1000;
+	const pollingForCheckTitleIntelliJ: number = 1000;
 
 	// filter editors based on environment variables
 	const selectAllEditors: boolean = process.env.SELECT_ALL_EDITORS === 'true';
@@ -93,55 +103,139 @@ suite('Check all editors with all samples', function (): void {
 			);
 	}
 
+	async function getPageTextWhenContains(marker: string, timeout: number = 30000): Promise<string> {
+		Logger.debug(`marker: "${marker}"`);
+
+		let pageText: string = '';
+		await driverHelper
+			.getDriver()
+			.wait(async (): Promise<boolean> => {
+				pageText = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+				return pageText.includes(marker);
+			}, timeout)
+			.catch((): void => {
+				Logger.debug(`Timed out waiting for "${marker}"; asserting on last snapshot`);
+			});
+
+		return pageText;
+	}
+
 	function clearCurrentTabHandle(): void {
 		currentTabHandle = 'undefined';
+	}
+
+	// the CheReporter 'fail' handler is not awaited by mocha, so it races with the teardown and catches the dashboard
+	// instead of the editor tab. the teardown captures the editor tab itself before switching tabs and navigating away
+	async function saveFailedTestArtifacts(test: mocha.Test): Promise<void> {
+		Logger.debug();
+
+		const reportDirPath: string = `${REPORTER_CONSTANTS.TS_SELENIUM_REPORT_FOLDER}/${StringUtil.sanitizeTitle(test.fullTitle())}`;
+		const testTitle: string = StringUtil.sanitizeTitle(test.title);
+
+		try {
+			fs.mkdirSync(reportDirPath, { recursive: true });
+
+			await screenCatcher.catchScreen(`${reportDirPath}/failure-screenshot-${testTitle}.png`);
+			fs.writeFileSync(`${reportDirPath}/failure-pagesource-${testTitle}.html`, await driverHelper.getDriver().getPageSource());
+			await workspaceHandlingTests.logStartWorkspaceInfo();
+		} catch (err) {
+			Logger.error(`failed to capture artifacts of the failed test - ${err}`);
+		}
 	}
 
 	async function verifyVSCodeEditor(): Promise<void> {
 		Logger.debug();
 
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+
+		// the "Use Extension" view is rendered by default
 		const pageTextBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+		const pageHtmlBeforeUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerHTML;');
 
-		await clickOnElementByXpath(useExtensionSwitcher);
-
-		const pageTextAfterUseExtensionSwitcher: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + workspaceName + ' is running');
+		Logger.debug('Workspace name "' + workspaceName + ' is running" was found before "Use Extension" clicked');
 
 		expect(pageTextBeforeUseExtensionSwitcher).contains('Install the following VS Code extensions');
 		Logger.debug('"Install the following VS Code extensions" was found in page before "Use Extension" clicked');
 
-		expect(pageTextBeforeUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.debug(
-			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found before "Use Extension" clicked'
-		);
+		expect(pageTextBeforeUseExtensionSwitcher).contains('Dev Spaces Remote SSH').and.contains('Remote - SSH');
+		Logger.debug('Required extension names were found');
 
-		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running');
-		Logger.debug(
-			'Workspace name "' + WorkspaceHandlingTests.getWorkspaceName() + ' is running" was found after "Use Extension" clicked'
-		);
+		// the connection URI has to point to the current workspace, its scheme depends on the editor (vscode, kiro)
+		expect(pageHtmlBeforeUseExtensionSwitcher, 'Connection URI was not found')
+			.contains('://redhat.devspaces-remote-ssh?')
+			.and.contains('dwName=' + workspaceName);
+		Logger.debug('Connection URI for workspace "' + workspaceName + '" was found');
 
-		expect(pageTextAfterUseExtensionSwitcher).contains('oc port-forward -n ' + actualUser + '-devspaces');
-		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces" was found');
+		// switching the toggle off replaces the content with the manual "oc port-forward" instructions
+		await clickOnElementByXpath(useExtensionSwitcher);
 
-		expect(pageTextAfterUseExtensionSwitcher)
-			.contains('-----BEGIN OPENSSH PRIVATE KEY-----')
-			.and.contains('-----END OPENSSH PRIVATE KEY-----');
-		Logger.debug('SSH private key (BEGIN and END markers) was found');
+		const pageTextAfterUseExtensionSwitcher: string = await getPageTextWhenContains('StrictHostKeyChecking');
 
-		expect(pageTextAfterUseExtensionSwitcher)
-			.contains('HostName')
-			.and.contains('User')
-			.and.contains('Port')
-			.and.contains('IdentityFile')
-			.and.contains('UserKnownHostsFile');
-		Logger.debug('SSH config parameters (HostName, User, Port, IdentityFile, UserKnownHostsFile) were found');
+		expect(pageTextAfterUseExtensionSwitcher).contains('Workspace ' + workspaceName + ' is running');
+		Logger.debug('Workspace name "' + workspaceName + ' is running" was found after "Use Extension" clicked');
+
+		expect(pageTextAfterUseExtensionSwitcher, `Actual page text:\n${pageTextAfterUseExtensionSwitcher}`)
+			.contains('oc port-forward -n ' + actualUser + '-devspaces')
+			.and.contains('2022:2022');
+		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces ... 2022:2022" was found');
+
+		// ssh config suggested for ${HOME}/.ssh/config, the page serves no private key since it relies on port forwarding
+		expect(pageTextAfterUseExtensionSwitcher, `Actual page text:\n${pageTextAfterUseExtensionSwitcher}`)
+			.contains('Host localhost')
+			.and.contains('HostName 127.0.0.1')
+			.and.contains('Port 2022')
+			.and.contains('UserKnownHostsFile')
+			.and.contains('StrictHostKeyChecking no');
+		Logger.debug('SSH config parameters (Host, HostName, Port, UserKnownHostsFile, StrictHostKeyChecking) were found');
+
+		expect(pageTextAfterUseExtensionSwitcher).contains('Troubleshooting');
+		Logger.debug('"Troubleshooting" section was found');
 	}
 
 	async function verifyIntelliJEditor(titleXpath: string): Promise<void> {
 		Logger.debug();
 
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+
 		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
-		expect('Workspace ' + WorkspaceHandlingTests.getWorkspaceName() + ' is running').equal(headerText);
+		expect(headerText).equal('Workspace ' + workspaceName + ' is running');
 		Logger.debug('Workspace title verified for IntelliJ editor: ' + headerText);
+
+		const pageText: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
+		// "Get started" section with the connection method options
+		expect(pageText).contains('Get started').and.contains('Select your preferred connection method.');
+		Logger.debug('"Get started" section was found');
+
+		expect(pageText).contains('JetBrains Gateway').and.contains('Connect using the standalone JetBrains Gateway application.');
+		Logger.debug('"JetBrains Gateway" connection option was found');
+
+		const openInIdeTitle: string = await workspaceHandlingTests.getTextFromUIElementByXpath(openInIdeTitleXpath);
+		expect(openInIdeTitle).contains('Open in JetBrains');
+		Logger.debug('"' + openInIdeTitle + '" connection option was found');
+
+		expect(pageText).contains('File > Remote Development >').and.contains('connection wizard');
+		Logger.debug('IDE connection wizard instructions were found');
+
+		// the "Open Gateway" button has to point to the current workspace via a jetbrains-gateway deep link
+		const gatewayButtonText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(gatewayButtonXpath);
+		expect(gatewayButtonText).equal('Open Gateway');
+		Logger.debug('"Open Gateway" button was found');
+
+		const pageHtml: string = await driverHelper.getDriver().executeScript('return document.body.innerHTML;');
+		expect(pageHtml)
+			.contains('jetbrains-gateway://connect')
+			.and.contains('dwName=' + workspaceName);
+		Logger.debug('Gateway deep link for workspace "' + workspaceName + '" was found');
+
+		// help section and the link back to the dashboard
+		expect(pageText).contains('open the workspace?').and.contains('the documentation');
+		Logger.debug('Help section was found');
+
+		const dashboardLinkText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(dashboardLinkXpath);
+		expect(dashboardLinkText).equal('Open Dashboard');
+		Logger.debug('"Open Dashboard" link was found');
 	}
 
 	async function testWorkspaceStartup(
@@ -206,6 +300,11 @@ suite('Check all editors with all samples', function (): void {
 
 	teardown('Delete DevWorkspace', async function (): Promise<void> {
 		Logger.debug('Delete DevWorkspace. After each test.');
+
+		if (this.currentTest?.state === 'failed') {
+			await saveFailedTestArtifacts(this.currentTest);
+		}
+
 		if (currentTabHandle !== 'undefined') {
 			await browserTabsUtil.switchToWindow(currentTabHandle);
 		}
