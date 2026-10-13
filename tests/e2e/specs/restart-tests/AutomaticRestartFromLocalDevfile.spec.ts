@@ -54,6 +54,8 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 			this.skip();
 		}
 
+		expect(gitSshUrl, 'TS_SELENIUM_GIT_SSH_REPO_URL environment variable must be set to a private SSH repo URL').to.not.be.empty;
+
 		await loginTests.loginIntoChe();
 	});
 
@@ -117,7 +119,7 @@ suite(`Create workspace from private SSH repo with default devfile ${BASE_TEST_C
 		}
 
 		// wait for workspace to start
-		await driverHelper.waitVisibility(By.xpath(xPathWorkspacePart), TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
+		await driverHelper.waitVisibility(By.xpath(xPathWorkspacePart), polling);
 	});
 
 	test('Verify no errors or alerts after workspace start', async function (): Promise<void> {
