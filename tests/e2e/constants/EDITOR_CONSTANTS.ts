@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-export type EditorType = 'vscode' | 'intellij';
+export type EditorType = 'vscode' | 'intellij' | 'intellij-toolbox';
 
 export interface EditorConfig {
 	readonly environmentId: string;
@@ -114,7 +114,7 @@ export const ALL_EDITORS: Map<string, EditorConfig> = new Map([
 			environmentId: 'JETBRAINS_SSH_EDITOR',
 			xpath: '//*[@id="editor-selector-card-che-incubator/jetbrains-sshd/latest"]',
 			name: 'JetBrains Toolbox App',
-			type: 'intellij'
+			type: 'intellij-toolbox'
 		}
 	]
 ]);
