@@ -38,6 +38,12 @@ export class OcpImportFromGitPage {
 		Logger.debug();
 
 		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_URL_INPUT, gitRepoUrl, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		// wait for the form to finish processing the git URL before interacting with other fields;
+		// the "Edit Import Strategy" link appears once validation is complete
+		await this.driverHelper.waitVisibility(
+			OcpImportFromGitPage.EDIT_IMPORT_STRATEGY_LINK,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+		);
 	}
 
 	async clickOnAdvancedOptionsButton(): Promise<void> {
@@ -52,6 +58,10 @@ export class OcpImportFromGitPage {
 		Logger.debug(`"${gitReference}"`);
 
 		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
+		// allow the form to settle after entering the git reference;
+		// the OCP React form auto-populates other fields (e.g. Application name) from the
+		// reference and a late re-render can corrupt those values if we proceed too quickly
+		await this.driverHelper.wait(1000);
 	}
 
 	async selectBuilderImageImportStrategy(): Promise<void> {
