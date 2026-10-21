@@ -18,7 +18,7 @@ import { assert, expect } from 'chai';
 import { Logger } from '../../utils/Logger';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { EditorConfig, ALL_EDITORS } from '../../constants/EDITOR_CONSTANTS';
+import { EditorConfig, EditorType, ALL_EDITORS } from '../../constants/EDITOR_CONSTANTS';
 import { ScreenCatcher } from '../../utils/ScreenCatcher';
 import { StringUtil } from '../../utils/StringUtil';
 import { REPORTER_CONSTANTS } from '../../constants/REPORTER_CONSTANTS';
@@ -36,10 +36,18 @@ suite('Check all editors with all samples', function (): void {
 
 	const useExtensionSwitcher: string = '//label[@class="switch"]';
 	const intellijTitleXpath: string = '//main[@class="page-container"]/h1';
+	// the Toolbox landing page has no "page-container" wrapper like the Gateway page, so the heading is narrowed by its sibling
+	const toolboxTitleXpath: string = '//h1[following-sibling::div[@class="border"]]';
 	const vsCodeTitleXpath: string = '//div[@class="header-title"]';
 	const gatewayButtonXpath: string = '//a[@class="gateway-button"]';
 	const openInIdeTitleXpath: string = '(//div[@class="connection-option"]/h3)[2]';
 	const dashboardLinkXpath: string = '//p[@class="dashboard-link"]/a';
+
+	const titleXpathByEditorType: Record<EditorType, string> = {
+		vscode: vsCodeTitleXpath,
+		intellij: intellijTitleXpath,
+		'intellij-toolbox': toolboxTitleXpath
+	};
 
 	let currentTabHandle: string = 'undefined';
 	// polling below the webdriver roundtrip cost (~300ms) gives no real pause between checks and breaks the timeout arithmetic
@@ -238,9 +246,32 @@ suite('Check all editors with all samples', function (): void {
 		Logger.debug('"Open Dashboard" link was found');
 	}
 
+	async function verifyJetBrainsToolboxEditor(titleXpath: string): Promise<void> {
+		Logger.debug();
+
+		const workspaceName: string = WorkspaceHandlingTests.getWorkspaceName();
+
+		const headerText: string = await workspaceHandlingTests.getTextFromUIElementByXpath(titleXpath);
+		expect(headerText).equal('Workspace ' + workspaceName + ' is running');
+		Logger.debug('Workspace title verified for JetBrains Toolbox editor: ' + headerText);
+
+		// the page builds the deep link in an inline script and opens it via onclick, so there is no href to inspect
+		const pageHtml: string = await driverHelper.getDriver().executeScript('return document.body.innerHTML;');
+		expect(pageHtml, 'Toolbox deep link was not found')
+			.contains('jetbrains://gateway/com.redhat.devtools.toolbox')
+			.and.contains('dwName=' + workspaceName);
+		Logger.debug('Toolbox deep link for workspace "' + workspaceName + '" was found');
+
+		const pageText: string = await driverHelper.getDriver().executeScript('return document.body.innerText;');
+
+		// connecting to the workspace relies on port forwarding, so the page serves no private key
+		expect(pageText, `Actual page text:\n${pageText}`).contains('oc port-forward -n ' + actualUser + '-devspaces');
+		Logger.debug('"oc port-forward -n ' + actualUser + '-devspaces" was found');
+	}
+
 	async function testWorkspaceStartup(
 		editorXpath: string,
-		editorType: 'vscode' | 'intellij',
+		editorType: EditorType,
 		sampleNameOrUrl: string,
 		isUrl: boolean
 	): Promise<void> {
@@ -249,7 +280,7 @@ suite('Check all editors with all samples', function (): void {
 		await dashboard.clickCreateWorkspaceButton();
 
 		const pollingForCheckTitle: number = editorType === 'vscode' ? pollingForCheckTitleVSCode : pollingForCheckTitleIntelliJ;
-		const titleXpath: string = editorType === 'vscode' ? vsCodeTitleXpath : intellijTitleXpath;
+		const titleXpath: string = titleXpathByEditorType[editorType];
 
 		if (isUrl) {
 			await workspaceHandlingTests.createAndOpenWorkspaceWithSpecificEditorAndGitUrl(
@@ -269,6 +300,8 @@ suite('Check all editors with all samples', function (): void {
 
 		if (editorType === 'vscode') {
 			await verifyVSCodeEditor();
+		} else if (editorType === 'intellij-toolbox') {
+			await verifyJetBrainsToolboxEditor(titleXpath);
 		} else {
 			await verifyIntelliJEditor(titleXpath);
 		}
