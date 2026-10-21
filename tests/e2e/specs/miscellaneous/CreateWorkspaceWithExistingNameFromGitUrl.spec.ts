@@ -78,7 +78,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
-		
+
 		await waitWorkspaceReadiness();
 
 		firstWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
@@ -87,7 +87,7 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	test('Verify existing workspace opens instead of creating a duplicate', async function (): Promise<void> {
 		await waitDashboardPage();
 
-		await createWorkspace.setCreateNewWorkspaceCheckbox(false);		
+		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
