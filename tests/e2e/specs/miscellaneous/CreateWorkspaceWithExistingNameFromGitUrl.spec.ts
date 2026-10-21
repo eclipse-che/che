@@ -75,11 +75,10 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		await waitDashboardPage();
 
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
-		await createWorkspace.waitForCheckboxState(true);
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
-
+		
 		await waitWorkspaceReadiness();
 
 		firstWorkspaceName = WorkspaceHandlingTests.getWorkspaceName();
@@ -88,8 +87,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	test('Verify existing workspace opens instead of creating a duplicate', async function (): Promise<void> {
 		await waitDashboardPage();
 
+		await createWorkspace.setCreateNewWorkspaceCheckbox(false);		
 		await createWorkspace.setGitRepositoryUrl(factoryUrl);
-		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
 		expect(await createWorkspace.getGitRepositoryUrl()).to.be.equal(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
@@ -99,13 +98,11 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 		expect(WorkspaceHandlingTests.getWorkspaceName()).to.be.equal(firstWorkspaceName);
 	});
 
-	test('Ensure `new` is appended and a new workspace is created without warnings', async function (): Promise<void> {
+	test('Ensure a new workspace is created when "Create New" is enabled', async function (): Promise<void> {
 		await waitDashboardPage();
 
-		await createWorkspace.setGitRepositoryUrl(factoryUrl);
-		await createWorkspace.waitForCheckboxState(true);
 		await createWorkspace.setCreateNewWorkspaceCheckbox(true);
-
+		await createWorkspace.setGitRepositoryUrl(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
 
@@ -119,8 +116,8 @@ suite(`"Start workspace with existed workspace name" test ${BASE_TEST_CONSTANTS.
 	test('Verify warning appears with list of existing workspaces and open the first created workspace', async function (): Promise<void> {
 		await waitDashboardPage();
 
-		await createWorkspace.setGitRepositoryUrl(factoryUrl);
 		await createWorkspace.setCreateNewWorkspaceCheckbox(false);
+		await createWorkspace.setGitRepositoryUrl(factoryUrl);
 		await createWorkspace.clickOnCreateAndOpenButton();
 		await createWorkspace.performTrustAuthorPopup();
 		const originalWindowHandle: string = await browserTabsUtil.getCurrentWindowHandle();
