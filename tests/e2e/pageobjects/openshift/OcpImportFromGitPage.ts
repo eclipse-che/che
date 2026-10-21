@@ -57,18 +57,13 @@ export class OcpImportFromGitPage {
 	async enterGitReference(gitReference: string): Promise<void> {
 		Logger.debug(`"${gitReference}"`);
 
-		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
-		// a React re-render triggered by the async URL validation can corrupt the value
-		// after enterValue returns; re-verify and re-enter if the first character was lost
+		// a React re-render triggered by async URL validation can corrupt the value during or
+		// after typing; enterValue's own waitAttributeValue will fail if that happens, so wrap
+		// in try-catch to allow re-entry
 		try {
-			await this.driverHelper.waitAttributeValue(
-				OcpImportFromGitPage.GIT_REFERENCE_INPUT,
-				'value',
-				gitReference,
-				TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
-			);
+			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
 		} catch {
-			Logger.warn(`git reference value was corrupted after entry, re-entering "${gitReference}"`);
+			Logger.warn(`git reference value was corrupted during entry, re-entering "${gitReference}"`);
 			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
 		}
 	}
