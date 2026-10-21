@@ -58,10 +58,19 @@ export class OcpImportFromGitPage {
 		Logger.debug(`"${gitReference}"`);
 
 		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
-		// allow the form to settle after entering the git reference;
-		// the OCP React form auto-populates other fields (e.g. Application name) from the
-		// reference and a late re-render can corrupt those values if we proceed too quickly
-		await this.driverHelper.wait(1000);
+		// a React re-render triggered by the async URL validation can corrupt the value
+		// after enterValue returns; re-verify and re-enter if the first character was lost
+		try {
+			await this.driverHelper.waitAttributeValue(
+				OcpImportFromGitPage.GIT_REFERENCE_INPUT,
+				'value',
+				gitReference,
+				TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+			);
+		} catch {
+			Logger.warn(`git reference value was corrupted after entry, re-entering "${gitReference}"`);
+			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
+		}
 	}
 
 	async selectBuilderImageImportStrategy(): Promise<void> {
