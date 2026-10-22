@@ -38,6 +38,12 @@ export class OcpImportFromGitPage {
 		Logger.debug();
 
 		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_URL_INPUT, gitRepoUrl, TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+		// wait for the form to finish processing the git URL before interacting with other fields;
+		// the "Edit Import Strategy" link appears once validation is complete
+		await this.driverHelper.waitVisibility(
+			OcpImportFromGitPage.EDIT_IMPORT_STRATEGY_LINK,
+			TIMEOUT_CONSTANTS.TS_SELENIUM_LOAD_PAGE_TIMEOUT
+		);
 	}
 
 	async clickOnAdvancedOptionsButton(): Promise<void> {
@@ -51,7 +57,15 @@ export class OcpImportFromGitPage {
 	async enterGitReference(gitReference: string): Promise<void> {
 		Logger.debug(`"${gitReference}"`);
 
-		await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
+		// a React re-render triggered by async URL validation can corrupt the value during or
+		// after typing; enterValue's own waitAttributeValue will fail if that happens, so wrap
+		// in try-catch to allow re-entry
+		try {
+			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
+		} catch (err) {
+			Logger.warn(`git reference value was corrupted during entry, re-entering "${gitReference}": ${err}`);
+			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
+		}
 	}
 
 	async selectBuilderImageImportStrategy(): Promise<void> {
