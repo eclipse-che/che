@@ -62,8 +62,8 @@ export class OcpImportFromGitPage {
 		// in try-catch to allow re-entry
 		try {
 			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
-		} catch {
-			Logger.warn(`git reference value was corrupted during entry, re-entering "${gitReference}"`);
+		} catch (err) {
+			Logger.warn(`git reference value was corrupted during entry, re-entering "${gitReference}": ${err}`);
 			await this.driverHelper.enterValue(OcpImportFromGitPage.GIT_REFERENCE_INPUT, gitReference);
 		}
 	}
