@@ -28,7 +28,7 @@ spec:
           workingDir: ${PROJECT_SOURCE}/app
   contributions:
     - name: che-code
-      uri: http://plugin-registry.openshift-devspaces.svc.cluster.local:8080/v3/plugins/che-incubator/che-code/latest/devfile.yaml
+      uri: https://raw.gh.crw-qe.com/test-org/public/main/pod-overrides-airgap-devfile.yaml
       components:
         - name: che-code-runtime-description
           container:
