@@ -116,5 +116,14 @@ export const ALL_EDITORS: Map<string, EditorConfig> = new Map([
 			name: 'JetBrains Toolbox App',
 			type: 'intellij-toolbox'
 		}
+	],
+	[
+		'IBM_BOB_EDITOR',
+		{
+			environmentId: 'IBM_BOB_EDITOR',
+			xpath: '//*[@id="editor-selector-card-che-incubator/che-code-sshd-bob/latest"]',
+			name: 'IBM Bob',
+			type: 'vscode'
+		}
 	]
 ]);
