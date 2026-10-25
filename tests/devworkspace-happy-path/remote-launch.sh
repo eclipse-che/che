@@ -19,7 +19,7 @@ prepareAndCloneCodebase() {
   if [ -n "${CODE_BASE_DIR}" ]; then
     # custom dir is specified. Cleaning up that before using
     echo "Found custom CODE_BASE_DIR. Cleaning up $CODE_BASE_DIR/*"
-    rm -rf "$CODE_BASE_DIR/*"
+    rm -rf "${CODE_BASE_DIR:?}"/*
   else
     # custom dir is not specified. Preparing the default location
     export CODE_BASE_DIR="/tmp/che-devworkspace-happy-path"
