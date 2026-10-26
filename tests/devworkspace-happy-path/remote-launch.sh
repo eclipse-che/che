@@ -41,8 +41,8 @@ prepareAndCloneCodebase() {
   fi
 
   echo "Downloading $CHE_REPO_ARCHIVE into $CODE_BASE_DIR"
-  cd $CODE_BASE_DIR
-  curl -f -L -sS ${CHE_REPO_ARCHIVE} > "${CODE_BASE_DIR}/archive.zip"
+  cd "${CODE_BASE_DIR}"
+  curl -f -L -sS "${CHE_REPO_ARCHIVE}" > "${CODE_BASE_DIR}/archive.zip"
   unzip "${CODE_BASE_DIR}/archive.zip"
   rm archive.zip
   cd ./*
