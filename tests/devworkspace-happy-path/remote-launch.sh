@@ -17,7 +17,19 @@ CHE_REPO_ARCHIVE="${CHE_REPO_ARCHIVE:-https://github.com/eclipse/che/archive/ref
 
 prepareAndCloneCodebase() {
   if [ -n "${CODE_BASE_DIR}" ]; then
-    # custom dir is specified. Cleaning up that before using
+    # custom dir is specified. Sanity-check it before wiping: it must be an
+    # absolute path to a dedicated directory, not a filesystem root or a
+    # top-level system directory
+    if [[ "${CODE_BASE_DIR}" != /* ]]; then
+      echo "[ERROR] CODE_BASE_DIR '${CODE_BASE_DIR}' must be an absolute path to a dedicated directory, e.g. /tmp/che-devworkspace-happy-path"
+      exit 1
+    fi
+    # normalize '..' and symlinks, then reject filesystem roots and top-level directories
+    CODE_BASE_DIR=$(realpath -m "${CODE_BASE_DIR}")
+    if [[ "${CODE_BASE_DIR}" =~ ^/([^/]+)?$ ]]; then
+      echo "[ERROR] CODE_BASE_DIR '${CODE_BASE_DIR}' resolves to a top-level directory; it must point to a dedicated directory, e.g. /tmp/che-devworkspace-happy-path"
+      exit 1
+    fi
     echo "Found custom CODE_BASE_DIR. Cleaning up $CODE_BASE_DIR/*"
     rm -rf "${CODE_BASE_DIR:?}"/*
   else

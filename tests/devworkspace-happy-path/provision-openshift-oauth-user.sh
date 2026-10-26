@@ -56,23 +56,53 @@ function provisionHtpasswdIdentityProviderHyperShift() {
     --from-file=htpasswd="${SCRIPT_DIR}/resources/users.htpasswd" -n "${HYPERSHIFT_NS}" \
     --dry-run=client -o yaml | KUBECONFIG="${MGMT_KUBECONFIG}" oc apply -f -
 
-  KUBECONFIG="${MGMT_KUBECONFIG}" oc patch hostedcluster "${CLUSTER_NAME}" \
-    -n "${HYPERSHIFT_NS}" --type=merge -p '{
-      "spec": {
-        "configuration": {
-          "oauth": {
-            "identityProviders": [{
-              "name": "dev-htpasswd",
-              "mappingMethod": "add",
-              "type": "HTPasswd",
-              "htpasswd": {
-                "fileData": {"name": "dev-htpasswd-secret"}
-              }
-            }]
+  # Like on standalone clusters, preserve identity providers that are already
+  # configured on the HostedCluster: a JSON merge patch replaces the whole
+  # identityProviders list instead of merging its entries, so it may only
+  # be used when the list is empty.
+  local CURRENT_IDPS
+  CURRENT_IDPS=$(KUBECONFIG="${MGMT_KUBECONFIG}" oc get hostedcluster "${CLUSTER_NAME}" \
+    -n "${HYPERSHIFT_NS}" -o json | jq -c '.spec.configuration.oauth.identityProviders // []')
+
+  if [[ $(echo "${CURRENT_IDPS}" | jq 'length') -eq 0 ]]; then
+    # there are no identity providers. We can do merge and set the whole .spec.identityProviders field
+    echo "[INFO] No identity providers found, provisioning Che one."
+    KUBECONFIG="${MGMT_KUBECONFIG}" oc patch hostedcluster "${CLUSTER_NAME}" \
+      -n "${HYPERSHIFT_NS}" --type=merge -p '{
+        "spec": {
+          "configuration": {
+            "oauth": {
+              "identityProviders": [{
+                "name": "dev-htpasswd",
+                "mappingMethod": "add",
+                "type": "HTPasswd",
+                "htpasswd": {
+                  "fileData": {"name": "dev-htpasswd-secret"}
+                }
+              }]
+            }
           }
         }
-      }
-    }'
+      }'
+  elif ! echo "${CURRENT_IDPS}" | jq -e '.[]? | select(.name == "dev-htpasswd")' > /dev/null; then
+    # there are some identity providers. We should do add patch not to override existing identity providers
+    echo "[INFO] HostedCluster is found but dev-htpasswd provider missing. Provisioning it."
+    KUBECONFIG="${MGMT_KUBECONFIG}" oc patch hostedcluster "${CLUSTER_NAME}" \
+      -n "${HYPERSHIFT_NS}" --type=json -p '[{
+        "op": "add",
+        "path": "/spec/configuration/oauth/identityProviders/-",
+        "value": {
+          "name": "dev-htpasswd",
+          "mappingMethod": "add",
+          "type": "HTPasswd",
+          "htpasswd": {
+            "fileData": {"name": "dev-htpasswd-secret"}
+          }
+        }
+      }]'
+  else
+    echo "[INFO] dev-htpasswd oauth provider is found on the HostedCluster. Using it"
+  fi
 
   echo "[INFO] HostedCluster OAuth configuration is applied"
 }
