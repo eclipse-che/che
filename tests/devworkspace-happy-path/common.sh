@@ -18,7 +18,11 @@ mkdir -p "${ARTIFACT_DIR}"
 function collectLogs() {
     bumpPodsInfo "devworkspace-controller"
     bumpPodsInfo "eclipse-che"
-    USERS_CHE_NS="che-user-che"
+    # The e2e pod logs into OpenShift as the 'happypath-dev' htpasswd user
+    # (see resources/users.htpasswd and resources/pod-che-happy-path.yaml),
+    # and Che provisions user workspaces in the '<username>-che' namespace
+    # (the CheCluster 'workspaceNamespaceDefault' setting).
+    USERS_CHE_NS="happypath-dev-che"
     bumpPodsInfo $USERS_CHE_NS
     # Fetch DW related CRs but do not fail when CRDs are not installed yet
     oc get devworkspace -n $USERS_CHE_NS -o=yaml > ${ARTIFACT_DIR}/devworkspaces.yaml || true
