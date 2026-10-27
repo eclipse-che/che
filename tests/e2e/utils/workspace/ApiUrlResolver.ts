@@ -13,6 +13,8 @@ import { Logger } from '../Logger';
 import { CheApiRequestHandler } from '../request-handlers/CheApiRequestHandler';
 import { AxiosResponse } from 'axios';
 
+type DevWorkspaceItem = { metadata: { name: string; labels?: Record<string, string> } };
+
 @injectable()
 export class ApiUrlResolver {
 	private static readonly DASHBOARD_API_URL: string = 'dashboard/api/namespace';
@@ -38,7 +40,7 @@ export class ApiUrlResolver {
 	/**
 	 * resolves the actual DevWorkspace name from the API.
 	 * If the exact workspace name exists, returns it as is.
-	 * If not found, searches for a workspace whose name matches the pattern: workspaceName + '-' + random suffix
+	 * If not found, searches for a workspace with a matching display-name label and a generated name
 	 * (to handle cases where DevWorkspace has a random suffix like '-4fnq' after backup/restore).
 	 * @param workspaceName - The workspace name to search for
 	 * @returns The actual DevWorkspace name from the API
@@ -56,8 +58,8 @@ export class ApiUrlResolver {
 				return workspaceName;
 			}
 		} catch (error) {
-			// workspace not found by exact name, will search by prefix with suffix pattern
-			Logger.debug(`Exact match not found for ${workspaceName}, searching by prefix with suffix`);
+			// workspace not found by exact name, will search by display name and generated suffix
+			Logger.debug(`Exact match not found for ${workspaceName}, searching by display name and suffix`);
 		}
 
 		// if exact match not found, get all workspaces and search in the list
@@ -66,12 +68,10 @@ export class ApiUrlResolver {
 			throw new Error(`Cannot get workspaces list. Code: ${allWorkspacesResponse.status} Data: ${allWorkspacesResponse.data}`);
 		}
 
-		const workspaces: Array<{ metadata: { name: string } }> = allWorkspacesResponse.data.items || [];
+		const workspaces: DevWorkspaceItem[] = allWorkspacesResponse.data.items || [];
 
 		// check for exact match in the list (handles transient failures from the direct GET above)
-		const exactMatchInList: { metadata: { name: string } } | undefined = workspaces.find(
-			(ws): boolean => ws.metadata.name === workspaceName
-		);
+		const exactMatchInList: DevWorkspaceItem | undefined = workspaces.find((ws): boolean => ws.metadata.name === workspaceName);
 		if (exactMatchInList) {
 			Logger.debug(`Found exact match in workspace list: ${workspaceName}`);
 			return workspaceName;
@@ -79,7 +79,10 @@ export class ApiUrlResolver {
 
 		// look for workspace with pattern: workspaceName + '-' + suffix (e.g., 'test-workspace-2-4fnq')
 		// this ensures we don't match 'test-workspace-20' when looking for 'test-workspace-2'
-		const matchingWorkspaces: Array<{ metadata: { name: string } }> = workspaces.filter((ws): boolean => {
+		const matchingWorkspaces: DevWorkspaceItem[] = workspaces.filter((ws): boolean => {
+			if (ws.metadata.labels?.['kubernetes.io/metadata.name'] !== workspaceName) {
+				return false;
+			}
 			const dwName: string = ws.metadata.name;
 			// check if name starts with workspaceName followed by a dash
 			if (dwName.startsWith(workspaceName + '-')) {
@@ -91,7 +94,7 @@ export class ApiUrlResolver {
 		});
 
 		if (matchingWorkspaces.length === 1) {
-			Logger.debug(`Found workspace by prefix: ${matchingWorkspaces[0].metadata.name} (requested: ${workspaceName})`);
+			Logger.debug(`Found workspace by display name: ${matchingWorkspaces[0].metadata.name} (requested: ${workspaceName})`);
 			return matchingWorkspaces[0].metadata.name;
 		}
 
@@ -102,7 +105,7 @@ export class ApiUrlResolver {
 			);
 		}
 
-		throw new Error(`Workspace not found: ${workspaceName} (tried exact match and prefix search)`);
+		throw new Error(`Workspace not found: ${workspaceName} (tried exact match and display-name search)`);
 	}
 
 	private async obtainUserNamespace(): Promise<string> {
