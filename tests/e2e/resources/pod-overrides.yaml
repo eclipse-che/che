@@ -28,7 +28,8 @@ spec:
           workingDir: ${PROJECT_SOURCE}/app
   contributions:
     - name: che-code
-      uri: https://eclipse-che.github.io/che-plugin-registry/main/v3/plugins/che-incubator/che-code/latest/devfile.yaml
+      kubernetes:
+        name: che-code-code-latest-pod-overrides
       components:
         - name: che-code-runtime-description
           container:
