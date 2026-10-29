@@ -109,11 +109,11 @@ podman run --rm "$IMG"
 			.stdout.trim();
 		expect(cheClusterName, 'CheCluster name was not found').not.empty;
 
-		originalContainerRunCapabilitiesSetting = shellExecutor
-			.executeCommand(
-				`oc get checluster/${cheClusterName} -n ${devSpacesNamespace} -o jsonpath='{.spec.devEnvironments.disableContainerRunCapabilities}'`
-			)
-			.stdout.trim();
+		const getContainerRunCapabilitiesResult: ShellString = shellExecutor.executeCommand(
+			`oc get checluster/${cheClusterName} -n ${devSpacesNamespace} -o jsonpath='{.spec.devEnvironments.disableContainerRunCapabilities}'`
+		);
+		expect(getContainerRunCapabilitiesResult.code, 'Failed to read CheCluster container run capabilities setting').to.equal(0);
+		originalContainerRunCapabilitiesSetting = getContainerRunCapabilitiesResult.stdout.trim();
 
 		const patchResult: ShellString = shellExecutor.executeCommand(
 			`oc patch checluster/${cheClusterName} -n ${devSpacesNamespace} --type=merge ` +
