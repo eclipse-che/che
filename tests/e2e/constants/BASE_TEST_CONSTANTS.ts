@@ -139,7 +139,7 @@ export const BASE_TEST_CONSTANTS: {
 	DELETE_WORKSPACE_ON_SUCCESSFUL_TEST: process.env.DELETE_WORKSPACE_ON_SUCCESSFUL_TEST !== 'false',
 
 	/**
-	 * API key for AI Provider smoke test (e.g. OpenAI API key)
+	 * aPI key for AI Provider smoke test (e.g. OpenAI API key)
 	 */
 	TS_AI_PROVIDER_API_KEY: process.env.TS_AI_PROVIDER_API_KEY || '',
 

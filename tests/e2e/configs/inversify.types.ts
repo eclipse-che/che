@@ -49,6 +49,7 @@ const CLASSES: any = {
 	ShellExecutor: 'ShellExecutor',
 	ContainerTerminal: 'ContainerTerminal',
 	UserPreferences: 'UserPreferences',
+	ContainerRegistries: 'ContainerRegistries',
 	WebTerminalPage: 'WebTerminalPage',
 	RevokeOauthPage: 'RevokeOauthPage',
 	TrustAuthorPopup: 'TrustAuthorPopup',
