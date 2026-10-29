@@ -53,6 +53,7 @@ suite(`Test private quay.io images using credentials from User Preferences ${BAS
 	let devSpacesNamespace: string = '';
 	let originalContainerRunCapabilitiesSetting: string = '';
 	let containerRunCapabilitiesConfigured: boolean = false;
+	let containerRegistryAdded: boolean = false;
 
 	const buildPushAndRunImageScript: string = `
 set -e
@@ -128,6 +129,7 @@ podman run --rm "$IMG"
 
 	test('Add quay.io credentials in User Preferences', async function (): Promise<void> {
 		await containerRegistries.addContainerRegistry(registryUrl, registryUsername, registryPassword);
+		containerRegistryAdded = true;
 	});
 
 	test(`Create and open new workspace from factory: ${factoryUrl}`, async function (): Promise<void> {
@@ -165,7 +167,11 @@ podman run --rm "$IMG"
 		expect(output.stdout, 'Expected output from the private image was not found').to.contain('Hello from Kubedock!');
 	});
 
-	test('Delete quay.io credentials from User Preferences', async function (): Promise<void> {
+	suiteTeardown('Delete quay.io credentials from User Preferences', async function (): Promise<void> {
+		if (!containerRegistryAdded) {
+			return;
+		}
+
 		await containerRegistries.deleteContainerRegistry(registryUrl);
 	});
 
