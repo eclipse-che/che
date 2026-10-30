@@ -1,5 +1,5 @@
 /** *******************************************************************
- * copyright (c) 2025 Red Hat, Inc.
+ * copyright (c) 2025-2026 Red Hat, Inc.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,12 @@ import { TIMEOUT_CONSTANTS } from '../../constants/TIMEOUT_CONSTANTS';
 
 @injectable()
 export class ExplorerView {
+	private static readonly CLONE_REPOSITORY_BUTTON: By = By.xpath('//span[text()="Clone Repository"]');
 	private static readonly CONTEXT_MENU_CONTAINER: By = By.css('.monaco-menu-container');
 	private static readonly CONTEXT_MENU_ITEMS: By = By.css('.monaco-menu-container .action-item');
+	private static readonly EMPTY_EXPLORER: By = By.xpath('//*[contains(@aria-label, "No Folder Opened Section")]');
+	private static readonly OPEN_REPOSITORY_BUTTON: By = By.xpath('//div[@class="dialog-buttons"]//a[text()="Open"]');
+	private static readonly WORKBENCH_SIDE_BAR: By = By.id('workbench.parts.sidebar');
 
 	constructor(
 		@inject(CLASSES.DriverHelper)
@@ -33,6 +37,49 @@ export class ExplorerView {
 
 		const explorerCtrl: ViewControl | undefined = await new ActivityBar().getViewControl('Explorer');
 		await explorerCtrl?.openView();
+	}
+
+	/**
+	 * clone a Git repository from the Explorer welcome view and open it in the current window
+	 *
+	 * @param repositoryUrl Git repository URL to clone
+	 * @param destinationDirectory Parent directory where the repository should be cloned
+	 */
+	async cloneAndOpenRepository(repositoryUrl: string, destinationDirectory: string = '/projects'): Promise<void> {
+		Logger.debug(`repositoryUrl: "${repositoryUrl}", destinationDirectory: "${destinationDirectory}"`);
+
+		await this.openExplorerView();
+		await this.driverHelper.waitAndClick(ExplorerView.CLONE_REPOSITORY_BUTTON);
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+
+		await this.driverHelper.getDriver().actions().sendKeys(repositoryUrl).perform();
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+
+		await this.driverHelper.getDriver().actions().keyDown(Key.CONTROL).sendKeys('a').keyUp(Key.CONTROL).perform();
+		await this.driverHelper.getDriver().actions().sendKeys(destinationDirectory).perform();
+		await this.driverHelper.wait(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING);
+		await this.driverHelper.getDriver().actions().sendKeys(Key.ENTER).perform();
+
+		await this.driverHelper.waitAndClick(ExplorerView.OPEN_REPOSITORY_BUTTON, TIMEOUT_CONSTANTS.TS_COMMON_PLUGIN_TEST_TIMEOUT);
+		await this.driverHelper.waitVisibility(ExplorerView.WORKBENCH_SIDE_BAR, TIMEOUT_CONSTANTS.TS_IDE_START_TIMEOUT);
+	}
+
+	async waitEmptyExplorer(timeout: number = TIMEOUT_CONSTANTS.TS_SELENIUM_CLICK_ON_VISIBLE_ITEM): Promise<void> {
+		Logger.debug();
+
+		await this.openExplorerView();
+		await this.driverHelper.waitVisibility(ExplorerView.EMPTY_EXPLORER, timeout);
+	}
+
+	async waitWorkbenchSideBarDisappearance(
+		attempts: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS,
+		polling: number = TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_POLLING
+	): Promise<void> {
+		Logger.debug();
+
+		await this.driverHelper.waitDisappearance(ExplorerView.WORKBENCH_SIDE_BAR, attempts, polling);
 	}
 
 	/**
