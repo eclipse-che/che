@@ -52,6 +52,7 @@ import { Main as Generator } from '@eclipse-che/che-devworkspace-generator/lib/m
 import { ContainerTerminal, KubernetesCommandLineToolsExecutor } from '../utils/KubernetesCommandLineToolsExecutor';
 import { ShellExecutor } from '../utils/ShellExecutor';
 import { UserPreferences } from '../pageobjects/dashboard/UserPreferences';
+import { ContainerRegistries } from '../pageobjects/dashboard/ContainerRegistries';
 import { WebTerminalPage } from '../pageobjects/webterminal/WebTerminalPage';
 import { TrustAuthorPopup } from '../pageobjects/dashboard/TrustAuthorPopup';
 import { ViewsMoreActionsButton } from '../pageobjects/ide/ViewsMoreActionsButton';
@@ -100,6 +101,7 @@ e2eContainer.bind<ShellExecutor>(CLASSES.ShellExecutor).to(ShellExecutor);
 e2eContainer.bind<ContainerTerminal>(CLASSES.ContainerTerminal).to(ContainerTerminal);
 e2eContainer.bind<WebTerminalPage>(CLASSES.WebTerminalPage).to(WebTerminalPage);
 e2eContainer.bind<UserPreferences>(CLASSES.UserPreferences).to(UserPreferences);
+e2eContainer.bind<ContainerRegistries>(CLASSES.ContainerRegistries).to(ContainerRegistries);
 e2eContainer.bind<Generator>(EXTERNAL_CLASSES.Generator).to(Generator);
 e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
 e2eContainer.bind<LocatorLoader>(EXTERNAL_CLASSES.LocatorLoader).to(LocatorLoader);
