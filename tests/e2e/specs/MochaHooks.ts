@@ -57,6 +57,9 @@ exports.mochaHooks = {
 			decorate(unmanaged(), LocatorLoader, 2);
 		},
 
+		function configureApiRequestProxy(): void {
+			CheApiRequestHandler.configureProxy();
+		},
 		function enableRequestInterceptor(): void {
 			if (BASE_TEST_CONSTANTS.TS_SELENIUM_REQUEST_INTERCEPTOR) {
 				CheApiRequestHandler.enableRequestInterceptor();

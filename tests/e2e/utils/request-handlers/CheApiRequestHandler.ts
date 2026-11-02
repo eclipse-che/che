@@ -9,6 +9,7 @@
  **********************************************************************/
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ProxyAgent } from 'proxy-agent';
 import { TYPES } from '../../configs/inversify.types';
 import { inject, injectable } from 'inversify';
 import { IAuthorizationHeaderHandler } from './headers/IAuthorizationHeaderHandler';
@@ -21,6 +22,24 @@ export class CheApiRequestHandler {
 		@inject(TYPES.IAuthorizationHeaderHandler)
 		private readonly headerHandler: IAuthorizationHeaderHandler
 	) {}
+
+	/**
+	 * axios 0.x does not tunnel HTTPS through an HTTP proxy: it sends the absolute URL to the proxy in plain text,
+	 * so the proxy itself performs the TLS handshake and rejects self-signed cluster certificates (ERR_SECURE_CONNECT_FAIL).
+	 * Route axios through ProxyAgent instead, which uses CONNECT tunnelling and honors HTTP(S)_PROXY / NO_PROXY.
+	 */
+	static configureProxy(): void {
+		const proxyUrl: string | undefined =
+			process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
+		if (!proxyUrl) {
+			return;
+		}
+		Logger.debug(`tunnelling API requests through proxy ${proxyUrl.replace(/\/\/[^/@]*@/, '//***@')}`);
+		const proxyAgent: ProxyAgent = new ProxyAgent();
+		axios.defaults.proxy = false;
+		axios.defaults.httpAgent = proxyAgent;
+		axios.defaults.httpsAgent = proxyAgent;
+	}
 
 	/**
 	 * this method adds a request interceptor into axios request interceptors list and returns an ID of the interceptor
