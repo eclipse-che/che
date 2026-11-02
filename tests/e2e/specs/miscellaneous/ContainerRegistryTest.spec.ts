@@ -55,6 +55,7 @@ suite(`Test private quay.io images using credentials from User Preferences ${BAS
 	let originalContainerRunCapabilitiesSetting: string = '';
 	let containerRunCapabilitiesConfigured: boolean = false;
 	let containerRegistryAddAttempted: boolean = false;
+	let containerRegistryDeletionError: Error | undefined;
 
 	const buildPushAndRunImageScript: string = `
 set -e
@@ -176,7 +177,8 @@ podman run --rm "$IMG"
 		try {
 			await containerRegistries.deleteContainerRegistry(registryUrl);
 		} catch (e) {
-			Logger.error(`Failed to delete container registry "${registryUrl}": ${e}`);
+			containerRegistryDeletionError = e instanceof Error ? e : new Error(String(e));
+			Logger.error(`Failed to delete container registry "${registryUrl}": ${containerRegistryDeletionError}`);
 		}
 	});
 
@@ -212,5 +214,11 @@ podman run --rm "$IMG"
 		const restoreResult: ShellString = shellExecutor.executeCommand(restoreCommand);
 
 		expect(restoreResult.code).to.equal(0, 'Failed to restore CheCluster container run capabilities setting');
+	});
+
+	suiteTeardown('Report container registry deletion failure', function (): void {
+		if (containerRegistryDeletionError) {
+			throw containerRegistryDeletionError;
+		}
 	});
 });
