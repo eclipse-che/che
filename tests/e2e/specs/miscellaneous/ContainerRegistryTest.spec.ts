@@ -23,6 +23,7 @@ import { ProjectAndFileTests } from '../../tests-library/ProjectAndFileTests';
 import { WorkspaceHandlingTests } from '../../tests-library/WorkspaceHandlingTests';
 import { BrowserTabsUtil } from '../../utils/BrowserTabsUtil';
 import { KubernetesCommandLineToolsExecutor } from '../../utils/KubernetesCommandLineToolsExecutor';
+import { Logger } from '../../utils/Logger';
 import { ShellExecutor } from '../../utils/ShellExecutor';
 import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
 import { registerRunningWorkspace } from '../MochaHooks';
@@ -53,7 +54,7 @@ suite(`Test private quay.io images using credentials from User Preferences ${BAS
 	let devSpacesNamespace: string = '';
 	let originalContainerRunCapabilitiesSetting: string = '';
 	let containerRunCapabilitiesConfigured: boolean = false;
-	let containerRegistryAdded: boolean = false;
+	let containerRegistryAddAttempted: boolean = false;
 
 	const buildPushAndRunImageScript: string = `
 set -e
@@ -128,8 +129,8 @@ podman run --rm "$IMG"
 	});
 
 	test('Add quay.io credentials in User Preferences', async function (): Promise<void> {
+		containerRegistryAddAttempted = true;
 		await containerRegistries.addContainerRegistry(registryUrl, registryUsername, registryPassword);
-		containerRegistryAdded = true;
 	});
 
 	test(`Create and open new workspace from factory: ${factoryUrl}`, async function (): Promise<void> {
@@ -168,11 +169,15 @@ podman run --rm "$IMG"
 	});
 
 	suiteTeardown('Delete quay.io credentials from User Preferences', async function (): Promise<void> {
-		if (!containerRegistryAdded) {
+		if (!containerRegistryAddAttempted) {
 			return;
 		}
 
-		await containerRegistries.deleteContainerRegistry(registryUrl);
+		try {
+			await containerRegistries.deleteContainerRegistry(registryUrl);
+		} catch (e) {
+			Logger.error(`Failed to delete container registry "${registryUrl}": ${e}`);
+		}
 	});
 
 	suiteTeardown('Open dashboard and close all other tabs', async function (): Promise<void> {

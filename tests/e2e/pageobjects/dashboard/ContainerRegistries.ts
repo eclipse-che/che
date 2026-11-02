@@ -20,7 +20,7 @@ import { UserPreferences } from './UserPreferences';
 
 @injectable()
 export class ContainerRegistries {
-	private static readonly OPEN_ADD_REGISTRY_DIALOG_BUTTON: By = By.xpath('//button[@aria-label="add-registry"]');
+	private static readonly OPEN_ADD_REGISTRY_DIALOG_BUTTON: By = By.xpath('//button//span[text()="Add Container Registry"]');
 	private static readonly ADD_REGISTRY_DIALOG: By = By.xpath('//div[@aria-label="edit-registry-info"]');
 	private static readonly REGISTRY_URL_INPUT: By = By.xpath('//input[@aria-label="Url input"]');
 	private static readonly USERNAME_INPUT: By = By.xpath('//input[@aria-label="Username input"]');
@@ -133,8 +133,7 @@ export class ContainerRegistries {
 		await this.browserTabsUtil.closeAllTabsExceptCurrent();
 		await this.userPreferences.openUserPreferencesPage();
 		await this.userPreferences.openContainerRegistriesTab();
-		await this.deleteContainerRegistryByActionsButton(registryUrl);
-		await this.waitContainerRegistryListItemAbsence(registryUrl);
+		await this.deleteContainerRegistryIfExists(registryUrl);
 	}
 
 	async deleteContainerRegistryIfExists(
