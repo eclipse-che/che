@@ -82,7 +82,7 @@ suite(`Create and Start ${stackName} ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, f
 	test('Verify the cloned repository is visible in Explorer', async function (): Promise<void> {
 		await explorerView.openExplorerView();
 		const projectSection: ViewSection = await projectAndFileTests.getProjectViewSession();
-		const devfileItem: ViewItem | undefined = await projectAndFileTests.getProjectTreeItem(projectSection, 'devfile.yaml', 1);;
+		const devfileItem: ViewItem | undefined = await projectAndFileTests.getProjectTreeItem(projectSection, 'devfile.yaml', 1);
 		expect(devfileItem, 'The cloned devfile.yaml is not visible in Explorer').not.undefined;
 	});
 
