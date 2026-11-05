@@ -148,7 +148,9 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		this.shellExecutor.executeCommand(
 			`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`
 		);
-		this.shellExecutor.executeCommand(`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} || true`);
+		this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} --timeout=2m || true`
+		);
 
 		let dwtName: string;
 		if (devfileName === undefined) {
