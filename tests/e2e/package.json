@@ -22,7 +22,6 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@eclipse-che/che-devworkspace-generator": "next",
-		"@reportportal/agent-js-mocha": "^5.0.3",
 		"@types/chai": "^4.3.4",
 		"@types/clone-deep": "^4.0.1",
 		"@types/mocha": "5.2.6",

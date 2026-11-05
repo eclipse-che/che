@@ -16,7 +16,6 @@ validateParameters(){
 
 launchDynamicallyGeneratingAPITests() {
   export MOCHA_SUITE="DynamicallyGeneratingAPITest"
-  export RP_LAUNCH_NAME="Devfile Acceptance tests suite"
   echo "MOCHA_SUITE = ${MOCHA_SUITE}"
   echo "suites/$MOCHA_DIRECTORY/$MOCHA_SUITE"
   npm run delayed-test

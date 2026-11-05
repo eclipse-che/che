@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import { REPORTER_CONSTANTS } from '../constants/REPORTER_CONSTANTS';
-import { rpApi } from '../specs/MochaHooks';
 
 export class Logger {
 	/**
@@ -22,9 +21,6 @@ export class Logger {
 		const logLevelSymbol: string = '[ERROR] ';
 		const message: string = this.getFullMessage(callerInfo, text);
 		this.logText(indentLevel, logLevelSymbol, message);
-		if (this.sendLogMessageIntoReportPortal()) {
-			rpApi.error(message);
-		}
 	}
 
 	/**
@@ -40,9 +36,6 @@ export class Logger {
 		const logLevelSymbol: string = '[WARN] ';
 		const message: string = this.getFullMessage(callerInfo, text);
 		this.logText(indentLevel, logLevelSymbol, message);
-		if (this.sendLogMessageIntoReportPortal()) {
-			rpApi.warn(message);
-		}
 	}
 
 	/**
@@ -58,9 +51,6 @@ export class Logger {
 		const logLevelSymbol: string = '• ';
 		const message: string = this.getFullMessage(callerInfo, text);
 		this.logText(indentLevel, logLevelSymbol, message);
-		if (this.sendLogMessageIntoReportPortal()) {
-			rpApi.info(message);
-		}
 	}
 
 	/**
@@ -80,9 +70,6 @@ export class Logger {
 		const logLevelSymbol: string = '▼ ';
 		const message: string = this.getFullMessage(callerInfo, text);
 		this.logText(indentLevel, logLevelSymbol, message);
-		if (this.sendLogMessageIntoReportPortal()) {
-			rpApi.debug(message);
-		}
 	}
 
 	/**
@@ -104,9 +91,6 @@ export class Logger {
 		const logLevelSymbol: string = '‣ ';
 		const message: string = this.getFullMessage(callerInfo, text);
 		this.logText(indentLevel, logLevelSymbol, message);
-		if (this.sendLogMessageIntoReportPortal()) {
-			rpApi.trace(message);
-		}
 	}
 
 	private static getFullMessage(callerInfo: string, text: string): string {
@@ -142,17 +126,5 @@ export class Logger {
 	private static getCallStackArray(): string[] {
 		const e: Error = new Error();
 		return e.stack ? e.stack.split('\n') : [];
-	}
-
-	private static sendLogMessageIntoReportPortal(): boolean {
-		return REPORTER_CONSTANTS.SAVE_RP_REPORT_DATA && !this.isRootCaller();
-	}
-
-	private static isRootCaller(traceLevel: number = 6): boolean {
-		return this.getCallStackArray()
-			.slice(traceLevel, traceLevel + 4)
-			.reduce((acc, e): boolean => {
-				return acc || /MochaHooks|CheReporter/.test(e);
-			}, false);
 	}
 }
