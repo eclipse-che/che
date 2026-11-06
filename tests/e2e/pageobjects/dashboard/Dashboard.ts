@@ -19,8 +19,8 @@ import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 
 @injectable()
 export class Dashboard {
-	private static readonly WORKSPACES_BUTTON: By = By.xpath('//div[@id="page-sidebar"]//a[contains(text(), "Workspaces (")]');
-	private static readonly CREATE_WORKSPACE_BUTTON: By = By.xpath('//div[@id="page-sidebar"]//a[text()="Create Workspace"]');
+	private static readonly WORKSPACES_BUTTON: By = By.css('nav a[href="#/workspaces"]');
+	private static readonly CREATE_WORKSPACE_BUTTON: By = By.css('nav a[href="#/create-workspace"]');
 	private static readonly LOADER_PAGE_STEP_TITLES: By = By.xpath('//*[@data-testid="step-title"]');
 	private static readonly STARTING_PAGE_LOADER: By = By.css('.main-page-loader');
 	private static readonly LOADER_ALERT: By = By.xpath('//*[@data-testid="loader-alert"]');
