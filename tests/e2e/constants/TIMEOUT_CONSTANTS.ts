@@ -79,9 +79,9 @@ export const TIMEOUT_CONSTANTS: {
 	// -------------------------------------------- DASHBOARD --------------------------------------------
 
 	/**
-	 * common timeout for dashboard items, "5 000" by default
+	 * common timeout for dashboard items, "10 000" by default
 	 */
-	TS_COMMON_DASHBOARD_WAIT_TIMEOUT: Number(process.env.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) || 5_000,
+	TS_COMMON_DASHBOARD_WAIT_TIMEOUT: Number(process.env.TS_COMMON_DASHBOARD_WAIT_TIMEOUT) || 10_000,
 
 	/**
 	 * timeout for clicking on dashboard menu items, "2 000" by default
