@@ -145,12 +145,15 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	deleteDevWorkspace(devfileName?: string): void {
 		Logger.debug(`${this.kubernetesCommandLineTool} - delete '${this.workspaceName}' devWorkspace`);
 
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`
+		const deleteDevWorkspaceOutput: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} --timeout=2m --ignore-not-found=true`
 		);
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} --timeout=2m || true`
-		);
+		if (deleteDevWorkspaceOutput.code !== 0) {
+			Logger.warn(
+				`Could not confirm deletion of DevWorkspace '${this.workspaceName}' within the timeout. Its DevWorkspaceTemplate will be preserved.`
+			);
+			return;
+		}
 
 		let dwtName: string;
 		if (devfileName === undefined) {
