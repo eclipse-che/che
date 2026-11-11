@@ -150,9 +150,18 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 		);
 		if (deleteDevWorkspaceOutput.code !== 0) {
 			Logger.warn(
-				`Could not confirm deletion of DevWorkspace '${this.workspaceName}' within the timeout. Its DevWorkspaceTemplate will be preserved.`
+				`Could not confirm deletion of DevWorkspace '${this.workspaceName}' within the timeout. Trying forced finalizer removal.`
 			);
-			return;
+
+			// as a cleanup fallback, remove finalizers that prevent the timed-out DevWorkspace deletion.
+			this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge`
+			);
+
+			// give the forced deletion a bounded time to complete before deleting the associated template.
+			this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete dw ${this.workspaceName} --timeout=30s`
+			);
 		}
 
 		let dwtName: string;
