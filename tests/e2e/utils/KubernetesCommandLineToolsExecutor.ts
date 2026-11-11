@@ -159,9 +159,15 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 			);
 
 			// give the forced deletion a bounded time to complete before deleting the associated template.
-			this.shellExecutor.executeCommand(
+			const waitForForcedDeletionOutput: ShellString = this.shellExecutor.executeCommand(
 				`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete dw ${this.workspaceName} --timeout=30s`
 			);
+			if (waitForForcedDeletionOutput.code !== 0) {
+				Logger.warn(
+					`Could not confirm forced deletion of DevWorkspace '${this.workspaceName}'. Its DevWorkspaceTemplate will be preserved.`
+				);
+				return;
+			}
 		}
 
 		let dwtName: string;
