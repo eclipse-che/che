@@ -203,6 +203,15 @@ export class CreateWorkspace {
 		await this.driverHelper.waitAttributeValue(toggle, 'aria-expanded', 'true', TIMEOUT_CONSTANTS.TS_COMMON_DASHBOARD_WAIT_TIMEOUT);
 	}
 
+	async selectAiProvider(providerId: string): Promise<void> {
+		Logger.debug(`providerId: "${providerId}"`);
+
+		const checkbox: By = this.getAiProviderCheckboxLocator(providerId);
+		if (!(await this.driverHelper.getDriver().findElement(checkbox).isSelected())) {
+			await this.driverHelper.waitAndClick(this.getAiProviderCardLocator(providerId));
+		}
+	}
+
 	async isAiProviderSectionVisible(): Promise<boolean> {
 		Logger.debug();
 
@@ -265,6 +274,11 @@ export class CreateWorkspace {
 		Logger.trace(`sampleName: ${sampleName}, used default editor`);
 
 		return By.xpath(`//div[contains(@id, 'sample-card') and text()='${sampleName}']`);
+	}
+
+	private getAiProviderCheckboxLocator(providerId: string): By {
+		const cardId: string = providerId.replace(/\//g, '-');
+		return By.css(`#ai-provider-card-${cardId} input[type="checkbox"]`);
 	}
 
 	private getAiProviderCardLocator(providerId: string): By {
