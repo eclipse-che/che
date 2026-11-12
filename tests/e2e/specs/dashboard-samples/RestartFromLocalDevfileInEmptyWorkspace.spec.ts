@@ -38,6 +38,26 @@ suite(`Restart ${stackName} from local devfile ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 	const explorerView: ExplorerView = e2eContainer.get(CLASSES.ExplorerView);
 	const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 	const commandPalette: CommandPalette = e2eContainer.get(CLASSES.CommandPalette);
+	/*
+	 * minimum devfile.yaml required by this test:
+	 *
+	 * schemaVersion: 2.1.0
+	 * metadata:
+	 *   name: public-repo-check
+	 * projects:
+	 *   - name: python-hello-check
+	 *     git:
+	 *       remotes:
+	 *         origin: 'https://github.com/crw-qe/public-repo-check.git'
+	 * commands:
+	 *   - id: file-list
+	 *     exec:
+	 *       label: "File list"
+	 *       component: tools
+	 *       workingDir: ${PROJECTS_ROOT}
+	 *       commandLine: "ls -la"
+	 *       group:
+	 */
 	const gitCloneUrl: string = BASE_TEST_CONSTANTS.IS_CLUSTER_DISCONNECTED()
 		? 'https://gh.crw-qe.com/test-automation-only/ubi8/tree/ubi8-latest'
 		: 'https://github.com/crw-qe/public-repo-check';
@@ -83,7 +103,7 @@ suite(`Restart ${stackName} from local devfile ${BASE_TEST_CONSTANTS.TEST_ENVIRO
 	});
 
 	test('Wait for workspace to restart and open IDE', async function (): Promise<void> {
-		await explorerView.waitWorkbenchSideBarDisappearance(120);
+		await explorerView.waitWorkbenchSideBarDisappearance(TIMEOUT_CONSTANTS.TS_SELENIUM_DEFAULT_ATTEMPTS);
 		await projectAndFileTests.waitWorkspaceReadinessForCheCodeEditor();
 		await projectAndFileTests.performTrustAuthorDialog();
 	});
