@@ -145,12 +145,30 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	deleteDevWorkspace(devfileName?: string): void {
 		Logger.debug(`${this.kubernetesCommandLineTool} - delete '${this.workspaceName}' devWorkspace`);
 
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge || true`
+		const deleteDevWorkspaceOutput: ShellString = this.shellExecutor.executeCommand(
+			`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} --timeout=2m --ignore-not-found=true`
 		);
-		this.shellExecutor.executeCommand(
-			`${this.kubernetesCommandLineTool} delete dw ${this.workspaceName} -n ${this.namespace} --timeout=2m || true`
-		);
+		if (deleteDevWorkspaceOutput.code !== 0) {
+			Logger.warn(
+				`Could not confirm deletion of DevWorkspace '${this.workspaceName}' within the timeout. Trying forced finalizer removal.`
+			);
+
+			// as a cleanup fallback, remove finalizers that prevent the timed-out DevWorkspace deletion.
+			this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} patch dw ${this.workspaceName} -n ${this.namespace} -p '{ "metadata": { "finalizers": null }}' --type merge`
+			);
+
+			// give the forced deletion a bounded time to complete before deleting the associated template.
+			const waitForForcedDeletionOutput: ShellString = this.shellExecutor.executeCommand(
+				`${this.kubernetesCommandLineTool} wait -n ${this.namespace} --for=delete dw ${this.workspaceName} --timeout=30s`
+			);
+			if (waitForForcedDeletionOutput.code !== 0) {
+				Logger.warn(
+					`Could not confirm forced deletion of DevWorkspace '${this.workspaceName}'. Its DevWorkspaceTemplate will be preserved.`
+				);
+				return;
+			}
+		}
 
 		let dwtName: string;
 		if (devfileName === undefined) {
