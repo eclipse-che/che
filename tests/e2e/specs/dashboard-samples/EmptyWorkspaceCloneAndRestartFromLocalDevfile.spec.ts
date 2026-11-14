@@ -27,7 +27,7 @@ import { CommandPalette } from '../../pageobjects/ide/CommandPalette';
 
 const stackName: string = 'Empty Workspace';
 
-suite(`Restart ${stackName} from local devfile ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+suite(`Clone a project in ${stackName} and restart from local devfile ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 	const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 	const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
