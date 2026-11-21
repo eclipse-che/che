@@ -84,3 +84,20 @@ The `'quay.io/eclipse/che-e2e'` docker image has VNC server installed inside. Fo
 **Execute the npm command:**
 
 - perform command `export USERSTORY=$TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME && npm run test-all-devfiles`
+
+## IBM Bob provider smoke test
+
+Deploy the Bob injector image and register `ibm/bob` in the AI tool registry
+before running this test. Configure the cluster login variables above, then run:
+
+```sh
+export TS_AI_PROVIDER_API_KEY='<bob-inference-api-key>'
+export USERSTORY=BobProviderSmokeTest
+npm run test
+```
+
+The test skips when `TS_AI_PROVIDER_API_KEY` is unset. It preserves an existing
+Bob key and removes only a key it created. It creates a workspace with a `4Gi`
+development-container memory limit, accepts Bob's license for the test session,
+and makes authenticated inference and shell-tool requests before deleting the
+workspace. Use a dedicated test account with access to Bob inference.
