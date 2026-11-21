@@ -15,6 +15,11 @@ jobs:
     - name: Add Label "status/need-triage" if no label starting with "severity" exists
       env:
         GITHUB_TOKEN: ${{ secrets.CHE_BOT_GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.CHE_ISSUE_TRIAGE_WEBHOOK }}
+        GH_URL: ${{ github.event.issue.html_url }}
+        GH_AUTHOR: ${{ github.event.issue.user.login }}
+        GH_TITLE: ${{ github.event.issue.title }}
+        GH_LABELS: ${{ join(github.event.issue.labels.*.name, ', ') || 'None' }}
       run: |
         ISSUE_NUMBER=${{ github.event.issue.number }}
         REPO=${{ github.repository }}
@@ -27,6 +32,10 @@ jobs:
           echo "A label starting with '$LABEL_PREFIX' exists. No action needed."
         else
           echo "No label starting with '$LABEL_PREFIX' found. Adding '$LABEL_TO_ADD'."
+          # Send the issue information to the triage Slack channel
+          JSON=$(jq -n --arg url "$GH_URL" --arg author "$GH_AUTHOR" --arg title "$GH_TITLE" --arg labels "$GH_LABELS" \
+            '{url: $url, author: $author, title: $title, labels: $labels}')
+          curl -H "Content-Type: application/json" -d "$JSON" $SLACK_WEBHOOK_URL
           # Add the label to the issue
           gh issue edit $ISSUE_NUMBER --add-label "$LABEL_TO_ADD"
         fi
