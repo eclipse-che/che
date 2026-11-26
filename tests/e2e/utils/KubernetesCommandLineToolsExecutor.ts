@@ -47,7 +47,7 @@ export class KubernetesCommandLineToolsExecutor implements IKubernetesCommandLin
 	}
 
 	get namespace(): string | undefined {
-		if (BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
+		if (!this._namespace && BASE_TEST_CONSTANTS.TEST_NAMESPACE.length > 0) {
 			this._namespace = BASE_TEST_CONSTANTS.TEST_NAMESPACE;
 		} else if (!this._namespace) {
 			const applicationName: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_NAME();

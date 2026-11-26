@@ -29,6 +29,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+	kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
+	kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 
 	// dev Spaces specific images
 	const majorMinorVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.');
@@ -61,8 +63,6 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	suiteSetup('Login', async function (): Promise<void> {
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
 		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
-		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
-		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			devfileContent
 		});
