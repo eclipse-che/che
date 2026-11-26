@@ -17,6 +17,7 @@ import { ShellExecutor } from '../../utils/ShellExecutor';
 import { BASE_TEST_CONSTANTS } from '../../constants/BASE_TEST_CONSTANTS';
 import { DevWorkspaceConfigurationHelper } from '../../utils/DevWorkspaceConfigurationHelper';
 import { DevfileContext } from '@eclipse-che/che-devworkspace-generator/lib/api/devfile-context';
+import { ShellString } from 'shelljs';
 
 suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
 	const predefinedNamespaceName: string = 'predefined-ns';
@@ -28,6 +29,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	const kubernetesCommandLineToolsExecutor: KubernetesCommandLineToolsExecutor = e2eContainer.get(
 		CLASSES.KubernetesCommandLineToolsExecutor
 	);
+	kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
+	kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 
 	// dev Spaces specific images
 	const majorMinorVersion: string = BASE_TEST_CONSTANTS.TESTING_APPLICATION_VERSION.split('.').slice(0, 2).join('.');
@@ -88,7 +91,10 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
-		kubernetesCommandLineToolsExecutor.applyWithoutNamespace(devWorkspaceConfigurationYamlString);
+		// use the predefined namespace explicitly instead of the current user's oc project.
+		const applyOutput: ShellString =
+			kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsStringOutput(devWorkspaceConfigurationYamlString);
+		expect(applyOutput.code, applyOutput.stderr).to.equal(0);
 	});
 
 	// verify that just created workspace is available for the dedicated user
@@ -99,8 +105,6 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 
 	// ensure the generated DevSpace is created within the predefined namespace
 	test('Create test DevWorkspace and verify its creation within the predefined namespace', function (): void {
-		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
-		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 		// relogin under the admin user (because regular user does not have permissions for getting pod states)
 		kubernetesCommandLineToolsExecutor.loginToOcp('admin');
 		expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
