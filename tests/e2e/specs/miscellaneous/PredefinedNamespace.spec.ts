@@ -62,7 +62,6 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	// generate empty workspace DevFile and create it through oc client under a regular user
 	suiteSetup('Login', async function (): Promise<void> {
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
-		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
 		devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 			devfileContent
 		});
@@ -91,6 +90,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
+		// read installation settings as admin, then create the workspace as the regular user.
+		kubernetesCommandLineToolsExecutor.loginToOcp(userName);
 		// use the predefined namespace explicitly instead of the current user's oc project.
 		const applyOutput: ShellString =
 			kubernetesCommandLineToolsExecutor.applyYamlConfigurationAsStringOutput(devWorkspaceConfigurationYamlString);

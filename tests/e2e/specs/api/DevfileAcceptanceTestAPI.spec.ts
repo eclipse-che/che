@@ -49,15 +49,15 @@ void (async function (): Promise<void> {
 			const devfilesBuildCommands: any[] = [];
 
 			test('Get DevWorkspace configuration', async function (): Promise<void> {
+				kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
+				kubernetesCommandLineToolsExecutor.loginToOcp();
 				devWorkspaceConfigurationHelper = new DevWorkspaceConfigurationHelper({
 					devfileUrl: devfileSample.link
 				});
 				devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 				devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
-				kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 				kubernetesCommandLineToolsExecutor.workspaceName = devWorkspaceName;
 				containerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
-				kubernetesCommandLineToolsExecutor.loginToOcp();
 			});
 
 			test('Collect build commands from the devfile', function (): void {

@@ -32,6 +32,8 @@ suite('Empty workspace API test', function (): void {
 	const gitRepository: string = 'https://github.com/crw-qe/web-nodejs-sample';
 
 	suiteSetup(`Create empty workspace with OC client ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, async function (): Promise<void> {
+		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
+		kubernetesCommandLineToolsExecutor.loginToOcp();
 		const workspaceName: string = 'empty-' + Math.floor(Math.random() * 1000);
 		const devfileContent: string = 'schemaVersion: 2.2.0\n' + 'metadata:\n' + `  name: ${workspaceName}\n`;
 		const editorContent: string = '';
@@ -42,14 +44,12 @@ suite('Empty workspace API test', function (): void {
 		});
 		devfileContext = await devWorkspaceConfigurationHelper.generateDevfileContext();
 		devWorkspaceName = devfileContext?.devWorkspace?.metadata?.name;
-		kubernetesCommandLineToolsExecutor = e2eContainer.get(CLASSES.KubernetesCommandLineToolsExecutor);
 		kubernetesCommandLineToolsExecutor.workspaceName = devWorkspaceName;
 		kubernetesCommandLineToolsExecutor.namespace = namespace;
 		containerTerminal = e2eContainer.get(CLASSES.ContainerTerminal);
 	});
 
 	test('Create empty workspace', function (): void {
-		kubernetesCommandLineToolsExecutor.loginToOcp();
 		const devWorkspaceConfigurationYamlString: string =
 			devWorkspaceConfigurationHelper.getDevWorkspaceConfigurationYamlAsString(devfileContext);
 		const output: ShellString = kubernetesCommandLineToolsExecutor.applyAndWaitDevWorkspace(devWorkspaceConfigurationYamlString);
