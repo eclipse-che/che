@@ -108,19 +108,48 @@ export class DevWorkspaceConfigurationHelper {
 	}
 
 	/**
-	 * add missed attributes to fix issues CRW-8922, CRW-9187.
+	 * add Dev Spaces attributes and match the SCC to the configured container capabilities.
 	 */
 	addMissedDevWorkspaceConfigAttributes(
 		devfileContextDevWorkspace: DevfileContext,
 		storageType: string | undefined = API_TEST_CONSTANTS.TS_API_TEST_STORAGE_TYPE
 	): void {
 		Logger.debug();
-		devfileContextDevWorkspace.devWorkspace?.spec?.template &&
-			(devfileContextDevWorkspace.devWorkspace.spec.template.attributes = YAML.parse(`
-                    controller.devfile.io/devworkspace-config:
-                      name: devworkspace-config
-                      namespace: openshift-devspaces
-                    controller.devfile.io/scc: container-build
-                    controller.devfile.io/storage-type: ${storageType}`));
+		const template: V1alpha2DevWorkspaceTemplate['spec'] = devfileContextDevWorkspace.devWorkspace?.spec?.template;
+		if (!template) {
+			return;
+		}
+
+		const devSpacesNamespace: string = 'openshift-devspaces';
+		const devEnvironments: {
+			disableContainerRunCapabilities?: boolean;
+			disableContainerBuildCapabilities?: boolean;
+			containerRunConfiguration?: { openShiftSecurityContextConstraint?: string };
+			containerBuildConfiguration?: { openShiftSecurityContextConstraint?: string };
+		} = JSON.parse(
+			this.shellExecutor.executeArbitraryShellScript(
+				`oc get checluster -n ${devSpacesNamespace} -o jsonpath='{.items[0].spec.devEnvironments}'`
+			)
+		);
+
+		template.attributes = {
+			...template.attributes,
+			'controller.devfile.io/devworkspace-config': {
+				name: 'devworkspace-config',
+				namespace: devSpacesNamespace
+			},
+			'controller.devfile.io/storage-type': storageType
+		};
+
+		// container run takes precedence when both run and build capabilities are enabled.
+		if (devEnvironments.disableContainerRunCapabilities === false) {
+			template.attributes['controller.devfile.io/scc'] =
+				devEnvironments.containerRunConfiguration?.openShiftSecurityContextConstraint || 'container-run';
+		} else if (devEnvironments.disableContainerBuildCapabilities !== true) {
+			template.attributes['controller.devfile.io/scc'] =
+				devEnvironments.containerBuildConfiguration?.openShiftSecurityContextConstraint || 'container-build';
+		} else {
+			delete template.attributes['controller.devfile.io/scc'];
+		}
 	}
 }
